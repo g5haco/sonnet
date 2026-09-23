@@ -13,7 +13,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
   if (!exam) {
     return (
       <Block title="Next exam" className={className}>
-        <p className="m-auto text-center text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
+        <p className="text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
       </Block>
     );
   }
@@ -27,7 +27,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
 
   return (
     <Block title="Next exam" aside={days <= 3 ? "crunch time" : "plenty of runway"} className={className}>
-      <div className="relative mx-auto aspect-square w-full max-w-56">
+      <div className="relative mx-auto aspect-square w-full max-w-44">
         <svg viewBox="0 0 200 200" className="size-full -rotate-90" aria-hidden="true">
           {Array.from({ length: TICKS }, (_, i) => {
             const a = (i / TICKS) * 2 * Math.PI;
@@ -50,10 +50,10 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
           })}
         </svg>
         <p className="absolute inset-0 flex items-center justify-center font-mono tabular-nums">
-          <span className="text-5xl font-medium tracking-tighter">{days}</span>
-          <span className="mr-2 text-xl text-muted-foreground">d</span>
-          <span className="text-5xl font-medium tracking-tighter">{hours}</span>
-          <span className="text-xl text-muted-foreground">h</span>
+          <span className="text-4xl font-medium tracking-tighter">{days}</span>
+          <span className="mr-1.5 text-lg text-muted-foreground">d</span>
+          <span className="text-4xl font-medium tracking-tighter">{hours}</span>
+          <span className="text-lg text-muted-foreground">h</span>
         </p>
       </div>
       <p className="mt-4 flex items-center gap-2 text-sm">
