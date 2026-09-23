@@ -277,10 +277,27 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
   const { today } = localNow(now, timeZone);
   const sunday = today + (6 - ((new Date(today).getUTCDay() + 6) % 7)) * 864e5;
   const open = (items.data ?? []).filter((i) => !i.done_at);
-  const overdue = open.filter((i) => Date.parse(i.due) < now).map((i) => i.id.slice(0, 6));
+  const task = (i: { id: string; title: string; due: string }): Task => {
+    const days = Math.round((today - localNow(Date.parse(i.due), timeZone).today) / 864e5); // >0 = past
+    const time = fmt(i.due, { hour: "numeric", minute: "2-digit" });
+    const when =
+      days > 1
+        ? `was due ${days} days ago`
+        : days === 1
+          ? "was due yesterday"
+          : Date.parse(i.due) < now
+            ? "was due earlier today"
+            : days === 0
+              ? `is due today at ${time}`
+              : days === -1
+                ? `is due tomorrow at ${time}`
+                : `is due ${fmt(i.due, { weekday: "long" })} at ${time}`;
+    return { ref: i.id.slice(0, 6), title: i.title, when };
+  };
+  const overdue = open.filter((i) => Date.parse(i.due) < now).map(task);
   const thisWeek = open
     .filter((i) => Date.parse(i.due) >= now && localNow(Date.parse(i.due), timeZone).today <= sunday)
-    .map((i) => i.id.slice(0, 6));
+    .map(task);
 
   const term = settings.data;
   const week = term && Math.floor((now - Date.parse(`${term.term_start}T00:00:00`)) / (7 * 864e5)) + 1;
@@ -306,8 +323,8 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
       : []),
     "Work (due dates in the student's local time; each is open, OVERDUE or done):",
     work.join("\n") || "- nothing added yet",
-    `Overdue and still open, oldest first: ${overdue.join(" ") || "none"}.`,
-    `Still open and due the rest of this week (through Sunday), soonest first: ${thisWeek.join(" ") || "none"}.`,
+    `Overdue and still open, oldest first: ${overdue.map((t) => t.ref).join(" ") || "none"}.`,
+    `Still open and due the rest of this week (through Sunday), soonest first: ${thisWeek.map((t) => t.ref).join(" ") || "none"}.`,
     "Course materials the student uploaded:",
     materialList.join("\n") || "- none yet",
     ...(readings.length
@@ -354,27 +371,49 @@ export const needsThinking = (question: string) =>
 
 // Planner tools only go to the model when the student asks for a change. Free models otherwise
 // "helpfully" propose adding work in answer to plain questions like "what's due this week?".
+// "I have a quiz Friday" is a change; "what do I have due?" is a question.
+const QUESTION = /^\s*(what|which|when|where|who|how|do|does|did|is|are|am|any|show|list|tell)\b|\?\s*$/i;
 export const wantsChange = (question: string) =>
-  /\b(add|put|move|change|mark|rename|reschedule|schedule|remind|delete|remove|set|create|update|edit|drop|cancel|check off|push|shift|i have|there'?s a)\b|^\s*(yes|yep|yeah|sure|ok(ay)?|do it|go ahead|confirm)\b/i.test(
+  /\b(add|put|move|change|mark|rename|reschedule|schedule|remind|delete|remove|create|update|edit|drop|cancel|check off|push|shift)\b|\bset (my|the|a|an|it|this|that)\b|^\s*(yes|yep|yeah|sure|ok(ay)?|do it|go ahead|confirm)\b/i.test(
     question,
-  );
+  ) ||
+  (!QUESTION.test(question) && /\b(i have|there'?s a)\b/i.test(question));
 // Same for the deck: a model offered make_flashcards as its only tool calls it for anything, even
 // "what's due this week?". It only gets the tool when the student asks for cards.
 export const wantsCards = (question: string) => /\b(flash ?cards?|study cards?|deck|cards? (for|on|about|from))\b/i.test(question);
-// "What's due / overdue / what should I work on first": the task lists are built here, not by the model
-// (free models drop the fences or merge the blocks), and the model only writes a one-line lead.
-export const asksTasks = (question: string) =>
-  !wantsCards(question) &&
-  !wantsChange(question) &&
-  /\b(due|overdue|late|behind|work on|to-?do|urgen\w*|priorit\w*|deadlines?|what'?s next)\b/i.test(question);
 
-export function taskBlocks(question: string, tasks: { overdue: string[]; thisWeek: string[] }) {
-  const block = (title: string, refs: string[]) => (refs.length ? `\n\n\`\`\`work\ntitle: ${title}\n${refs.join("\n")}\n\`\`\`` : "");
-  const overdueOnly = /\b(overdue|late|behind)\b/i.test(question) && !/\b(this week|due)\b/i.test(question);
-  return (
-    block("Overdue", tasks.overdue) +
-    (overdueOnly ? "" : block(/\b(first|next)\b/i.test(question) ? "Next up" : "Due this week", tasks.thisWeek))
-  );
+// "What's due this week / what's overdue / what should I work on first" is answered here, not by the model:
+// free models cut the lead off, duplicate the lists and miscount days. Other time frames ("tomorrow",
+// "next week", "Friday") and questions about one thing ("when is my essay due?") still go to the model.
+export type Task = { ref: string; title: string; when: string };
+const TASKS =
+  /\b(what'?s|what|which|show|list|any|anything)\b.*\b(due|overdue|late|behind|assignments?|homework|deadlines?|tasks?|to-?dos?)\b|\bwhat should i (work on|do|start)\b|\b(order of urgency|urgent|priorit\w*|i'?m behind)\b/i;
+const OTHER =
+  /\b(policy|policies|explain|why|how|when is|when'?s|grades?|next week|tomorrow|today|tonight|weekend|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i;
+export function asksTasks(question: string): "overdue" | "week" | null {
+  if (wantsCards(question) || wantsChange(question) || !TASKS.test(question) || OTHER.test(question)) return null;
+  const onlyOverdue = /\b(overdue|late|behind)\b/i.test(question) && !/\b(this week|due|work on|first|next|do)\b/i.test(question);
+  return onlyOverdue ? "overdue" : "week";
+}
+
+export function taskAnswer(question: string, tasks: { overdue: Task[]; thisWeek: Task[] }) {
+  const scope = asksTasks(question) ?? "week";
+  const week = scope === "week" ? tasks.thisWeek : [];
+  const link = (t: Task) => `[${t.title.replace(/[[\]]/g, "")}](item:${t.ref})`;
+  const block = (title: string, list: Task[]) =>
+    list.length ? `\n\n\`\`\`work\ntitle: ${title}\n${list.map((t) => t.ref).join("\n")}\n\`\`\`` : "";
+  const first = tasks.overdue[0] ?? week[0];
+  const counts = [
+    tasks.overdue.length && `${tasks.overdue.length} overdue`,
+    week.length && `${week.length} due the rest of this week`,
+  ].filter(Boolean);
+  const lead = !first
+    ? scope === "overdue"
+      ? "**Nothing overdue.** Enjoy it while it lasts."
+      : "**Nothing overdue and nothing left this week.** Suspiciously calm."
+    : `**Start with ${link(first)}**: it ${first.when}.${counts.length > 1 || tasks.overdue.length + week.length > 1 ? ` ${counts.join(", ")}.` : ""}`;
+  const next = /\b(first|next|work on|should i)\b/i.test(question) ? "Next up" : "Due this week";
+  return lead + block("Overdue", tasks.overdue) + block(next, week);
 }
 
 export const toolsFor = (question: string) =>
@@ -383,24 +422,23 @@ export const toolsFor = (question: string) =>
 // Streams the reply as newline-delimited JSON events the chat panel understands:
 // {"t":"think"} while the model reasons, {"t":"text","v":"..."} for answer text, {"t":"error","v":"..."}.
 export async function streamReply(
-  { text: context, refs, tasks }: { text: string; refs: Refs; tasks?: { overdue: string[]; thisWeek: string[] } },
+  { text: context, refs, tasks }: { text: string; refs: Refs; tasks?: { overdue: Task[]; thisWeek: Task[] } },
   turns: Turn[],
   think = false,
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
   const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
+  const question = turns.at(-1)?.content ?? "";
+  if (tasks && asksTasks(question))
+    return new Response(encode({ t: "text", v: taskAnswer(question, tasks) }), {
+      headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
+    });
   if (!key) return fail("The assistant isn't set up yet: AI_API_KEY is missing.");
 
-  const question = turns.at(-1)?.content ?? "";
   const tools = toolsFor(question);
-  const taskQuestion = !!tasks && asksTasks(question);
-  const lists = taskQuestion ? taskBlocks(question, tasks) : "";
-  const hint = !taskQuestion
-    ? ""
-    : lists
-      ? "\n\nThe matching work appears as list cards right after your reply. Write one or two short sentences: the single most urgent thing and why. Don't list the items and don't write work blocks."
-      : "\n\nNothing matching is open. Say so plainly in one line.";
+  // Asked for cards: make sure it makes them (free models otherwise stop to ask "which course?").
+  const forceCards = tools.length === 1 && tools[0].function.name === "make_flashcards";
   // One upstream call. The timeout covers the whole answer, so a stalled free model can't hang the chat.
   const open = () =>
     fetch(`${BASE}/chat/completions`, {
@@ -411,10 +449,10 @@ export async function streamReply(
         ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }), // `models` = OpenRouter fallbacks
         reasoning: think ? { effort: "low" } : { enabled: false },
         stream: true,
-        // reasoning tokens count against the budget; decks need room; a task lead is one or two sentences
-        max_tokens: think ? 2500 : lists ? 160 : 1500,
+        max_tokens: think ? 2500 : 1500, // reasoning tokens count against the budget; decks need room
         ...(tools.length ? { tools } : {}),
-        messages: [{ role: "system", content: `${RULES}\n\n${context}${hint}` }, ...turns],
+        ...(forceCards ? { tool_choice: { type: "function", function: { name: "make_flashcards" } } } : {}),
+        messages: [{ role: "system", content: `${RULES}\n\n${context}` }, ...turns],
       }),
     }).catch(() => null);
 
@@ -441,7 +479,6 @@ export async function streamReply(
         let thinking = false;
         let sent = false; // any answer text yet?
         let retried = false;
-        let wroteWork = false; // the model wrote its own work block despite the hint
         const calls: { name: string; args: string }[] = []; // tool calls arrive in pieces
         try {
           for (;;) {
@@ -486,9 +523,7 @@ export async function streamReply(
                 out.enqueue(encode({ t: "think" }));
               }
               if (delta.content) {
-                sent = true;
-                wroteWork ||= delta.content.includes("```work");
-                out.enqueue(encode({ t: "text", v: delta.content }));
+                sent = true;                out.enqueue(encode({ t: "text", v: delta.content }));
               }
               for (const tc of delta.tool_calls ?? []) {
                 const call = (calls[tc.index ?? 0] ??= { name: "", args: "" });
@@ -501,10 +536,6 @@ export async function streamReply(
           if (proposals.length) out.enqueue(encode({ t: "propose", v: proposals }));
           const deck = calls.map(toDeck).find((d) => d !== null);
           if (deck) out.enqueue(encode({ t: "cards", v: deck }));
-          if (lists && !wroteWork) {
-            sent = true;
-            out.enqueue(encode({ t: "text", v: lists }));
-          }
           if (!sent && !proposals.length && !deck)
             out.enqueue(encode({ t: "error", v: "No answer came back. Try again in a moment." }));
         } catch {

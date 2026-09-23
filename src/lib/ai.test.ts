@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, asksTasks, needsThinking, taskBlocks, toolsFor, toProposal, wantsChange } from "./ai";
+import { calendarLines, classLines, asksTasks, needsThinking, taskAnswer, toolsFor, toProposal, wantsChange } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -101,14 +101,46 @@ test("task questions get no tools; flashcards only when asked", () => {
   expect(names("add an essay due friday")).not.toContain("make_flashcards");
 });
 
-test("task questions get server-built work lists", () => {
-  const tasks = { overdue: ["aaa111"], thisWeek: ["bbb222", "ccc333"] };
-  expect(asksTasks("What's due this week?")).toBe(true);
-  expect(asksTasks("What should I work on first this week?")).toBe(true);
-  expect(asksTasks("Make me flashcards for Chapter 4.")).toBe(false);
-  expect(asksTasks("explain photosynthesis")).toBe(false);
-  expect(taskBlocks("What's overdue?", tasks)).not.toContain("bbb222");
-  expect(taskBlocks("What's due this week?", tasks)).toMatch(/title: Overdue\naaa111[\s\S]*title: Due this week\nbbb222\nccc333/);
-  expect(taskBlocks("What should I work on first?", tasks)).toContain("title: Next up");
-  expect(taskBlocks("What's overdue?", { overdue: [], thisWeek: [] })).toBe("");
+test("task questions are routed by phrasing, not one exact sentence", () => {
+  for (const q of [
+    "What assignments are due this week?",
+    "What should I work on this week?",
+    "Show my assignments this week in order of urgency.",
+    "What's due this week?",
+    "What do I have due this week?",
+    "What homework do I have?",
+    "What should I work on first this week?",
+    "I'm behind. What's overdue, and what should I do first?",
+  ])
+    expect(asksTasks(q), q).toBe("week");
+  expect(asksTasks("What's overdue?")).toBe("overdue");
+  // other time frames, single items, tutoring, cards and changes go to the model
+  for (const q of [
+    "What's due next week?",
+    "Do I have anything due Friday?",
+    "When is my essay due?",
+    "What's the late policy?",
+    "I'm behind in calc, explain limits",
+    "Make me flashcards for Chapter 4.",
+    "I have a quiz due Friday",
+    "explain photosynthesis",
+  ])
+    expect(asksTasks(q), q).toBeNull();
+  expect(wantsChange("What do I have due this week?")).toBe(false);
+  expect(wantsChange("my problem set is due Friday")).toBe(false);
+});
+
+test("task answers: a one-line lead naming the most urgent thing, then ordered work lists", () => {
+  const t = (ref: string, when: string) => ({ ref, title: `Item ${ref}`, when });
+  const tasks = {
+    overdue: [t("aaa111", "was due 2 days ago")],
+    thisWeek: [t("bbb222", "is due tomorrow at 9:00 AM"), t("ccc333", "is due Friday at 11:59 PM")],
+  };
+  const week = taskAnswer("What's due this week?", tasks);
+  expect(week).toMatch(/^\*\*Start with \[Item aaa111\]\(item:aaa111\)\*\*: it was due 2 days ago\. 1 overdue, 2 due/);
+  expect(week).toMatch(/title: Overdue\naaa111\n[\s\S]*title: Due this week\nbbb222\nccc333\n/);
+  expect(taskAnswer("What's overdue?", tasks)).not.toContain("bbb222");
+  expect(taskAnswer("What should I work on first this week?", tasks)).toContain("title: Next up");
+  expect(taskAnswer("What's overdue?", { overdue: [], thisWeek: [] })).toBe("**Nothing overdue.** Enjoy it while it lasts.");
+  expect((taskAnswer("What's due this week?", tasks).match(/```work/g) ?? []).length).toBe(2);
 });
