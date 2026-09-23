@@ -1,7 +1,29 @@
+"use client";
+
+import { useRef } from "react";
 import { Block } from "@/components/block";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { progress, type Item } from "@/lib/progress";
 import { termStart, WEEKS } from "@/lib/sample";
+
+// Rolls the number on screen from its old value to the new one. Server HTML shows the real value,
+// so nothing animates on load; only changes count.
+function Count({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const shown = useRef({ v: value });
+  useGSAP(
+    () => {
+      const text = ref.current?.firstChild;
+      if (!text) return;
+      const draw = () => (text.nodeValue = String(Math.round(shown.current.v)));
+      draw(); // React already wrote the new value; put the old one back before the first paint
+      gsap.to(shown.current, { v: value, duration: 0.6, ease: "power3.out", overwrite: true, onUpdate: draw });
+    },
+    { dependencies: [value] },
+  );
+  return <span ref={ref}>{value}</span>;
+}
 
 function verdict(percent: number, overdue: number) {
   if (percent === 100) return "Fully caught up. Suspicious.";
@@ -13,6 +35,24 @@ function verdict(percent: number, overdue: number) {
 export function ProgressBlock({ items, now, className }: { items: Item[]; now: number; className?: string }) {
   const p = progress(items, termStart, WEEKS, new Date(now));
   const tallest = Math.max(1, ...p.bars.map((b) => b.total));
+  const nowBar = useRef<HTMLDivElement>(null);
+  const week = p.bars[p.current];
+  const cleared = week.total > 0 && week.done === week.total;
+  const wasCleared = useRef(cleared);
+
+  // Week cleared: once the fill lands, the bar flashes like an LED confirming it.
+  useGSAP(
+    () => {
+      if (cleared && !wasCleared.current && nowBar.current) {
+        gsap
+          .timeline({ delay: 0.45 })
+          .to(nowBar.current, { filter: "brightness(1.9)", duration: 0.12, ease: "power2.out" })
+          .to(nowBar.current, { filter: "brightness(1)", duration: 0.7, ease: "power2.out" });
+      }
+      wasCleared.current = cleared;
+    },
+    { dependencies: [cleared] },
+  );
 
   return (
     <Block className={className}>
@@ -20,7 +60,7 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
         <div>
           <p className="flex items-baseline font-mono tabular-nums">
             <span className="text-7xl leading-none font-medium tracking-tighter md:text-8xl">
-              {p.percent}
+              <Count value={p.percent} />
             </span>
             <span className="ml-1 text-3xl text-muted-foreground">%</span>
           </p>
@@ -31,7 +71,7 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
           {p.delta !== 0 && (
             <span className={cn("block font-mono text-xs", p.delta > 0 ? "text-done" : "text-destructive")}>
               {p.delta > 0 ? "+" : "−"}
-              {Math.abs(p.delta)} vs last week
+              <Count value={Math.abs(p.delta)} /> vs last week
             </span>
           )}
         </p>
@@ -58,6 +98,7 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
             >
               {(past || now) && (
                 <div
+                  ref={now ? nowBar : undefined}
                   className={cn(
                     "absolute inset-0 transition-[clip-path] duration-500 ease-out-quint motion-reduce:transition-none",
                     now ? "bg-brand" : "bg-foreground",

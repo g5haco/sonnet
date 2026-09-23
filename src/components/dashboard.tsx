@@ -1,7 +1,6 @@
 "use client";
 
 import { BookOpen, CalendarClock, FilePlus2, FileUp, Plus, Search } from "lucide-react";
-import { MotionConfig } from "motion/react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -67,7 +66,6 @@ export function Dashboard() {
   const week = Math.floor((now - termStart.getTime()) / (7 * 864e5)) + 1;
 
   return (
-    <MotionConfig reducedMotion="user">
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 pb-10 md:px-6 md:pt-6">
         <header className="mb-4 flex flex-wrap items-center gap-3">
           <div className="mr-auto md:mr-0">
@@ -161,6 +159,5 @@ export function Dashboard() {
           </Block>
         </div>
       </main>
-    </MotionConfig>
   );
 }

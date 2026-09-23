@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -57,7 +56,7 @@ export function UpNext({
             const done = !!i.doneAt;
             const due = when(i.due, now);
             return (
-              <motion.li layout key={i.id} transition={{ type: "spring", stiffness: 500, damping: 40 }}>
+              <li key={i.id}>
                 <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
                   <Checkbox
                     // a real <button>: a <span> checkbox inside <label> toggles twice on Space
@@ -66,11 +65,13 @@ export function UpNext({
                     checked={done}
                     onCheckedChange={() => onToggle(i.id)}
                     aria-label={i.title}
-                    className="size-5 rounded-full transition-transform active:scale-80 data-checked:border-done data-checked:bg-done"
+                    className="size-5 rounded-full transition-transform active:scale-80 data-checked:animate-check-pop data-checked:border-done data-checked:bg-done"
                   />
                   <span className="min-w-0 flex-1">
-                    <span className={cn("block truncate transition-opacity", done && "line-through opacity-45")}>
-                      {i.title}
+                    <span className={cn("block truncate transition-opacity duration-300", done && "opacity-45")}>
+                      <span className="strike" data-done={done || undefined}>
+                        {i.title}
+                      </span>
                       {i.kind === "exam" && (
                         <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-mono text-xs text-secondary-foreground no-underline">
                           exam
@@ -91,7 +92,7 @@ export function UpNext({
                     {done ? "done" : due.label}
                   </span>
                 </label>
-              </motion.li>
+              </li>
             );
           })}
         </ul>

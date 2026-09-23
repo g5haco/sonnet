@@ -25,6 +25,12 @@ test("percent, overdue, bars and weekly delta", () => {
   ]);
 });
 
+test("done counts now even if it was checked after `now` was read", () => {
+  const p = progress([item(2, 9)], start, 2, new Date(at(5)));
+  expect(p.percent).toBe(100);
+  expect(p.overdue).toBe(0);
+});
+
 test("nothing due yet counts as fully caught up", () => {
   expect(progress([], start, 2, start).percent).toBe(100);
 });
