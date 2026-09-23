@@ -8,7 +8,7 @@ export const metadata = { title: "Calendar · Sonnet" };
 export default async function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   const { supabase } = await requireUser();
   const [settings, courses, items, meetings] = await Promise.all([
-    supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
+    supabase.from("settings").select("term_start, term_weeks, feed_token").maybeSingle(),
     supabase.from("courses").select("id, code, name, hue").order("created_at"),
     supabase.from("items").select("id, title, kind, due, done_at, course_id").order("due"),
     supabase.from("class_meetings").select("id, course_id, weekdays, starts, ends, location").order("starts"),
@@ -23,6 +23,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
       // ?view=week&date=2026-09-23 keeps your place across reloads (the page writes it back as you navigate)
       initial={{ view: String(q.view ?? ""), date: String(q.date ?? "") }}
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
+      feed={settings.data?.feed_token ?? null}
       items={items.data!.map((i): Item => ({
         id: i.id,
         title: i.title,

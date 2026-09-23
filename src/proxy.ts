@@ -22,7 +22,8 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const path = request.nextUrl.pathname;
-  if (!data?.claims && !path.startsWith("/login") && !path.startsWith("/auth")) {
+  // /api/cal: Google Calendar fetches the feed signed out; its secret URL is the key.
+  if (!data?.claims && !["/login", "/auth", "/api/cal/"].some((p) => path.startsWith(p))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   return response;

@@ -80,6 +80,17 @@ export async function deleteMeeting(id: string): Promise<Result> {
   return done(error, "remove the class time");
 }
 
+// A fresh secret for the Google Calendar feed; the old URL stops working (e.g. if it was shared by accident).
+export async function resetFeed(): Promise<Result> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const { error } = await supabase
+    .from("settings")
+    .update({ feed_token: crypto.randomUUID() })
+    .eq("user_id", data?.claims.sub ?? "");
+  return done(error, "make a new link");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

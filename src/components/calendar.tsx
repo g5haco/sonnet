@@ -60,7 +60,13 @@ const longDay = (d: Date) => d.toLocaleDateString(undefined, { weekday: "long", 
 const minutes = (d: Date) => d.getHours() * 60 + d.getMinutes();
 const hhmm = (min: number) => `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 
-type Props = { items: Item[]; meetings: ClassMeeting[]; term: Term | null; initial: { view: string; date: string } };
+type Props = {
+  items: Item[];
+  meetings: ClassMeeting[];
+  term: Term | null;
+  feed: string | null; // secret for the Google Calendar feed URL
+  initial: { view: string; date: string };
+};
 
 const noop = () => () => {};
 
@@ -75,7 +81,7 @@ export function Calendar(props: Props) {
   return browser ? <CalendarBody {...props} /> : <main className={FRAME} aria-busy="true" />;
 }
 
-function CalendarBody({ items, meetings, term, initial }: Props) {
+function CalendarBody({ items, meetings, term, feed, initial }: Props) {
   const [view, setView] = useState<View>(() =>
     VIEWS.includes(initial.view as View)
       ? (initial.view as View)
@@ -213,6 +219,7 @@ function CalendarBody({ items, meetings, term, initial }: Props) {
           meetings={meetings}
           term={term}
           now={now}
+          feed={feed}
           onPick={(d, to) => jump(d, to)}
         />
         <div className="relative min-w-0 flex-1 overflow-hidden">

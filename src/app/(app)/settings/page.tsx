@@ -1,4 +1,5 @@
 import { Block } from "@/components/block";
+import { FeedLink } from "@/components/calendar-rail";
 import { Appearance, CourseRow, SemesterForm, SignOut } from "@/components/settings-forms";
 import { requireUser } from "@/lib/supabase/server";
 
@@ -7,7 +8,7 @@ export const metadata = { title: "Settings · Sonnet" };
 export default async function Settings() {
   const { supabase, email } = await requireUser();
   const [settings, courses] = await Promise.all([
-    supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
+    supabase.from("settings").select("term_start, term_weeks, feed_token").maybeSingle(),
     supabase
       .from("courses")
       .select("id, code, name, hue, items(count), class_meetings(id, weekdays, starts, ends, location)")
@@ -39,6 +40,10 @@ export default async function Settings() {
             ))}
           </ul>
         )}
+      </Block>
+
+      <Block title="Google Calendar">
+        <FeedLink token={settings.data?.feed_token ?? null} />
       </Block>
 
       <Block title="Appearance">

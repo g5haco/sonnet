@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { dayKey } from "./course";
-import { lanes, range, sessions, step, type ClassMeeting } from "./calendar";
+import { lanes, range, sessions, step, toIcs, type ClassMeeting } from "./calendar";
 
 const keys = (days: Date[]) => days.map(dayKey);
 const wed = new Date(2026, 8, 23); // Wed Sep 23 2026
@@ -48,4 +48,31 @@ test("overlapping events split the column; separate ones keep it whole", () => {
     [1, 2],
     [0, 1],
   ]);
+});
+
+test("Google Calendar feed: weekly classes in wall-clock time, deadlines in UTC, text escaped", () => {
+  const feed = toIcs(
+    {
+      term: { start: "2026-08-24", weeks: 16 },
+      courses: [{ id: "c1", code: "POLS 202" }],
+      meetings: [
+        { id: "m1", course_id: "c1", weekdays: [1, 3], starts: "10:30:00", ends: "12:20:00", location: "ECON 119" },
+      ],
+      items: [
+        {
+          id: "i1",
+          course_id: "c1",
+          kind: "exam",
+          title: "Midterm 1, part A",
+          due: "2026-10-02T17:00:00+00:00",
+          done_at: null,
+        },
+      ],
+    },
+    new Date("2026-09-23T07:00:00Z"),
+  );
+  expect(feed).toContain("DTSTART:20260824T103000\r\nDTEND:20260824T122000\r\n");
+  expect(feed).toContain("RRULE:FREQ=WEEKLY;BYDAY=MO,WE;UNTIL=20261213T235959");
+  expect(feed).toContain("DTSTART:20261002T170000Z\r\nSUMMARY:Exam: Midterm 1\\, part A (POLS 202)");
+  expect(feed.startsWith("BEGIN:VCALENDAR\r\n") && feed.endsWith("END:VCALENDAR\r\n")).toBe(true);
 });
