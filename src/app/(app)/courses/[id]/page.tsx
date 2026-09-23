@@ -29,7 +29,8 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       items={toItems(items.data!, [course.data])}
       meetings={toMeetings(meetings.data!, [course.data])}
-      materials={materials.data ?? []}
+      // A file's extracted text is for the assistant only; don't ship it to the page.
+      materials={(materials.data ?? []).map((m) => (m.kind === "note" ? m : { ...m, body: null }))}
     />
   );
 }

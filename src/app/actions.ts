@@ -10,6 +10,7 @@ import {
   syncCanvasUser,
   type CanvasCourse,
 } from "@/lib/canvas";
+import { extractText } from "@/lib/extract";
 import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -345,13 +346,20 @@ export async function addMaterial(m: {
   if (m.kind === "note" && !m.body?.trim()) return { error: "The note is empty." };
   if (m.kind === "file" && !m.path) return { error: "The upload didn't finish." };
   const supabase = await createClient();
+  let text: string | null = null;
+  // Read the file back (the user's own storage policies apply) so the assistant can use its text.
+  // ponytail: extraction runs inline and skips files over 15 MB; move to a background job if uploads get slow.
+  if (m.kind === "file" && (m.size ?? 0) <= 15_000_000) {
+    const { data } = await supabase.storage.from("materials").download(m.path!);
+    if (data) text = await extractText(new Uint8Array(await data.arrayBuffer()), m.mime ?? data.type).catch(() => null);
+  }
   const { error } = await supabase.from("materials").insert({
     course_id: m.course,
     kind: m.kind,
     name,
     path: m.kind === "file" ? m.path : null,
     url: m.kind === "link" ? m.url : null,
-    body: m.kind === "note" ? m.body!.slice(0, 100_000) : null,
+    body: m.kind === "note" ? m.body!.slice(0, 100_000) : text,
     size: m.size ?? null,
     mime: m.mime ?? null,
   });
