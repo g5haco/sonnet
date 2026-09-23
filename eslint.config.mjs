@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored Kibo UI registry code; updated via `npx kibo-ui add`, not edited here.
+    "src/components/kibo-ui/**",
   ]),
 ]);
 
