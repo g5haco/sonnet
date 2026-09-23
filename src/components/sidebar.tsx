@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { CreateMenu, type CreateKind } from "@/components/create-menu";
+import { GooeyMenu, type CreateKind } from "@/components/gooey-menu";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -58,7 +58,7 @@ function NavLink({
   );
 }
 
-export function Sidebar({ onCreate }: { onCreate: (kind: CreateKind) => void }) {
+export function Sidebar({ onCreate, onAsk }: { onCreate: (kind: CreateKind) => void; onAsk: () => void }) {
   const [hovered, setHovered] = useState(false);
   const [creating, setCreating] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -94,7 +94,14 @@ export function Sidebar({ onCreate }: { onCreate: (kind: CreateKind) => void }) 
             <span className="text-brand">.</span>
           </Link>
 
-          <CreateMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
+          <GooeyMenu
+            direction="right"
+            open={creating}
+            onOpenChange={setCreating}
+            onPick={onCreate}
+            // chat sits beside the "+" while the rail is open, and tucks into it otherwise
+            companion={{ label: "Ask the assistant (Ctrl+K)", icon: MessageCircle, onClick: onAsk, show: open }}
+          />
 
           <div className="flex flex-col gap-1">
             {NAV.map((l) => (
@@ -121,7 +128,7 @@ export function Sidebar({ onCreate }: { onCreate: (kind: CreateKind) => void }) 
           sonnet<span className="text-brand">.</span>
         </Link>
         <div className="ml-auto">
-          <CreateMenu direction="down" open={creating} onOpenChange={setCreating} onPick={onCreate} />
+          <GooeyMenu direction="down" open={creating} onOpenChange={setCreating} onPick={onCreate} />
         </div>
       </div>
       <AnimatePresence>

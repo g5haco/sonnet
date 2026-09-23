@@ -10,7 +10,7 @@ import { useCreate } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { CourseFace, courseStats, type CourseCard } from "@/components/course-card";
 import { field, FormError, label, useSubmit } from "@/components/create-forms";
-import { CreateMenu, type MenuItem } from "@/components/create-menu";
+import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
 import { TiltCard } from "@/components/tilt-card";
 import { Button } from "@/components/ui/button";
 import { UpNext, useWork } from "@/components/up-next";
@@ -98,7 +98,7 @@ export function CourseView({
             {s.nextClass && <span>next class {s.nextClass}</span>}
           </p>
         </div>
-        <CreateMenu
+        <GooeyMenu
           direction="down"
           label="Add"
           tone="primary"

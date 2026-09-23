@@ -10,7 +10,7 @@ import { ThinkingOrb } from "thinking-orbs";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
-import type { CreateKind } from "@/components/create-menu";
+import type { CreateKind } from "@/components/gooey-menu";
 import { Sidebar } from "@/components/sidebar";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ClassMeeting } from "@/lib/calendar";
@@ -221,7 +221,7 @@ export function AppShell({
           }}
         >
           <div className="flex min-h-dvh flex-col md:flex-row">
-            <Sidebar onCreate={create} />
+            <Sidebar onCreate={create} onAsk={openAssistant} />
             <div className="min-w-0 flex-1">{children}</div>
             {docked &&
               !onChatPage &&

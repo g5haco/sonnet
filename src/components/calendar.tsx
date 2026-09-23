@@ -20,7 +20,7 @@ import { setDone } from "@/app/actions";
 import { useCreate } from "@/components/app-shell";
 import { CalendarRail } from "@/components/calendar-rail";
 import { ItemDetails } from "@/components/item-details";
-import { CreateMenu, type CreateKind, type MenuItem } from "@/components/create-menu";
+import { GooeyMenu, type CreateKind, type MenuItem } from "@/components/gooey-menu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -190,7 +190,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
         </h1>
         <div className="ml-auto flex items-center gap-2">
           <ViewSwitch view={view} onChange={(v) => jump(anchor, v)} />
-          <CreateMenu
+          <GooeyMenu
             direction="down"
             label="Add"
             tone="primary"

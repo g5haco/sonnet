@@ -8,6 +8,7 @@ import { ThinkingOrb } from "thinking-orbs";
 import { useAssistant } from "@/components/app-shell";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatLog } from "@/components/chat/chat-panel";
+import { GooeyMenu } from "@/components/gooey-menu";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
 import { courseColor } from "@/lib/course";
 
@@ -17,6 +18,7 @@ export function ChatPage() {
   const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses } = useAssistant();
   const { resolvedTheme } = useTheme();
   const [more, setMore] = useState(false);
+  const [picking, setPicking] = useState(false);
   const log = useRef<HTMLDivElement>(null);
   useEffect(() => {
     log.current?.scrollTo({ top: log.current.scrollHeight });
@@ -50,26 +52,22 @@ export function ChatPage() {
   return (
     <main className="flex h-[calc(100dvh-3.5rem)] flex-col md:h-dvh">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 md:px-6">
-        <label className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-secondary pr-1 pl-3 text-sm focus-within:ring-2 focus-within:ring-ring">
-          <span
-            className="size-2 rounded-full"
-            style={{ background: hue !== undefined ? courseColor(hue) : "var(--muted-foreground)" }}
-            aria-hidden="true"
-          />
-          <span className="sr-only">Which course is this chat about?</span>
-          <select
-            value={focus}
-            onChange={(e) => setFocus(e.target.value)}
-            className="h-full cursor-pointer bg-transparent pr-2 font-mono text-xs outline-none"
-          >
-            <option value="">All courses</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.code}>
-                {c.code}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* Which course the chat is about: the same gooey menu as Create, one pill per course. */}
+        <GooeyMenu
+          direction="below"
+          chevron
+          mono
+          label={focus || "All courses"}
+          dot={hue !== undefined ? courseColor(hue) : "var(--muted-foreground)"}
+          selected={focus}
+          items={[
+            { kind: "", label: "All courses", color: "var(--muted-foreground)" },
+            ...courses.map((c) => ({ kind: c.code, label: c.code, color: courseColor(c.hue) })),
+          ]}
+          open={picking}
+          onOpenChange={setPicking}
+          onPick={setFocus}
+        />
         <span className="text-muted-foreground" aria-hidden="true">
           ›
         </span>
