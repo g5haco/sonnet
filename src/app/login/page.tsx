@@ -9,7 +9,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
           sonnet<span className="text-brand">.</span>
         </p>
         <h1 className="mt-6 text-2xl font-medium tracking-tight">Welcome back.</h1>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">No password. We&apos;ll email you a link.</p>
+        <p className="mt-1 mb-6 text-sm text-muted-foreground">Your deadlines missed you.</p>
         <LoginForm expired={expired === "1"} />
       </section>
     </main>

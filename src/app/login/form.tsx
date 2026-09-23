@@ -3,10 +3,13 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { sendLink } from "./actions";
+import { signIn } from "./actions";
+
+const field =
+  "h-11 rounded-full bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm";
 
 export function LoginForm({ expired }: { expired: boolean }) {
-  const [state, action, pending] = useActionState(sendLink, null);
+  const [state, action, pending] = useActionState(signIn, null);
   const note = state ?? (expired ? { ok: false, message: "That link expired or was already used. Get a fresh one." } : null);
 
   return (
@@ -21,10 +24,23 @@ export function LoginForm({ expired }: { expired: boolean }) {
         required
         autoComplete="email"
         aria-describedby="login-note"
-        className="h-11 rounded-full bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
+        className={field}
       />
-      <Button type="submit" disabled={pending} className="mt-2 h-11 rounded-full transition-transform active:scale-[0.97]">
-        {pending ? "Sending…" : "Email me a sign-in link"}
+      <label htmlFor="password" className="mt-2 text-sm font-medium">
+        Password
+      </label>
+      <input id="password" name="password" type="password" autoComplete="current-password" className={field} />
+      <Button
+        type="submit"
+        name="intent"
+        value="password"
+        disabled={pending}
+        className="mt-2 h-11 rounded-full transition-transform active:scale-[0.97]"
+      >
+        {pending ? "One sec…" : "Sign in"}
+      </Button>
+      <Button type="submit" name="intent" value="link" variant="ghost" disabled={pending} className="h-11 rounded-full">
+        Email me a link instead
       </Button>
       <p
         id="login-note"
