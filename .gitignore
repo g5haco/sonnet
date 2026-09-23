@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify: keep graph.json + GRAPH_REPORT.md, skip local/derived files
+graphify-out/cache/
+graphify-out/graph.html
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/cost.json

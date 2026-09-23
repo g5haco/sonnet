@@ -1,0 +1,8 @@
+.agents/
+.claude/
+.impeccable/
+src/components/kibo-ui/
+src/components/ui/
+graphify-out/
+skills-lock.json
+
