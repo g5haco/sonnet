@@ -2,7 +2,7 @@
 
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/gooey-menu";
+import { UploadWindow } from "@/components/materials";
 import { SettingsWindow, type Account, type SettingsSection } from "@/components/settings-forms";
 import { Sidebar } from "@/components/sidebar";
 import type { Deck, Proposal } from "@/lib/ai";
@@ -68,6 +69,8 @@ export function AppShell({
   const [due, setDue] = useState<string>();
   const [pick, setPick] = useState<string>();
   const [settings, setSettings] = useState<SettingsSection | null>(null); // the floating window; null = closed
+  // The uploader: `n` gives each opening a fresh window (and course pick); closing keeps it mounted to animate.
+  const [upload, setUpload] = useState<{ open: boolean; course?: string; n: number }>({ open: false, n: 0 });
   // Assistant: docked (wide screens, open by default) or a sheet (everything else).
   const [docked, setDocked] = useState(true);
   const [sheet, setSheet] = useState(false);
@@ -80,12 +83,11 @@ export function AppShell({
   const onChatPage = usePathname() === "/chat"; // the page is the assistant there: no panel, no Ask button
   const nextId = useRef(0);
   const inflight = useRef<AbortController | null>(null);
-  const router = useRouter();
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
 
   const create = (kind: CreateKind, due?: string, course?: string) => {
-    if (kind === "upload") return router.push("/courses"); // materials live on each course's page
+    if (kind === "upload") return setUpload((u) => ({ open: true, course, n: u.n + 1 }));
     setDue(due);
     setPick(course);
     if (kind !== "course" && courses.length === 0) {
@@ -328,6 +330,12 @@ export function AppShell({
               onSection={setSettings}
               onClose={() => setSettings(null)}
               account={account}
+            />
+            <UploadWindow
+              key={upload.n}
+              open={upload.open}
+              course={upload.course}
+              onClose={() => setUpload((u) => ({ ...u, open: false }))}
             />
             <CourseDialog open={dialog === "course"} onOpenChange={(o) => !o && setDialog(null)} />
             <ItemDialog

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, FilePlus2, Plus } from "lucide-react";
+import { CalendarClock, FilePlus2, FileUp, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -57,9 +57,10 @@ export function CoursesGrid({ courses }: { courses: CourseCard[] }) {
   );
 }
 
-const ADD: MenuItem<"assignment" | "exam">[] = [
+const ADD: MenuItem<"assignment" | "exam" | "upload">[] = [
   { kind: "assignment", label: "Assignment", icon: FilePlus2 },
   { kind: "exam", label: "Exam", icon: CalendarClock },
+  { kind: "upload", label: "Materials", icon: FileUp },
 ];
 
 // One course: its work, class times, and its name and color.
