@@ -1,6 +1,6 @@
 import { Block } from "@/components/block";
 import type { Item } from "@/lib/progress";
-import { courseColor } from "@/lib/sample";
+import { courseColor } from "@/lib/course";
 
 const TICKS = 60;
 const RUNWAY = 21 * 864e5; // the ring is full three weeks out and drains to the exam
@@ -57,7 +57,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
         </p>
       </div>
       <p className="mt-4 flex items-center gap-2 text-sm">
-        <span className="size-2 rounded-full" style={{ background: courseColor(exam.course) }} />
+        <span className="size-2 rounded-full" style={{ background: courseColor(exam.hue) }} />
         <span className="font-mono text-xs text-muted-foreground">{exam.course}</span>
         <span className="truncate">{exam.title}</span>
         <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">{date}</span>

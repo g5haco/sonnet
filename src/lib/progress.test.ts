@@ -4,7 +4,7 @@ import { progress, type Item } from "./progress";
 const start = new Date("2026-08-24T00:00:00");
 const at = (day: number) => new Date(start.getTime() + day * 864e5).toISOString();
 const item = (due: number, doneOn: number | null): Item => ({
-  id: String(due) + doneOn, title: "", course: "X", kind: "assignment",
+  id: String(due) + doneOn, title: "", course: "X", hue: 0, kind: "assignment",
   due: at(due), doneAt: doneOn === null ? null : at(doneOn),
 });
 

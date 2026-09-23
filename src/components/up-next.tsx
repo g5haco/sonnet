@@ -4,7 +4,8 @@ import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { Item } from "@/lib/progress";
-import { courseColor } from "@/lib/sample";
+import { Button } from "@/components/ui/button";
+import { courseColor } from "@/lib/course";
 
 const DAY = 864e5;
 
@@ -31,12 +32,14 @@ export function UpNext({
   now,
   checked,
   onToggle,
+  onAddCourse,
   className,
 }: {
   items: Item[];
   now: number;
   checked: Set<string>; // checked this session: stays visible so a mis-tap can be undone
   onToggle: (id: string) => void;
+  onAddCourse?: () => void; // set when there are no courses yet
   className?: string;
 }) {
   const open = items
@@ -47,9 +50,18 @@ export function UpNext({
   return (
     <Block title="Up next" aside={headline(items.filter((i) => !i.doneAt), now)} className={className}>
       {list.length === 0 ? (
-        <p className="m-auto py-10 text-center text-sm text-muted-foreground">
-          Nothing due. Connect Canvas or drop in a syllabus to fill this up.
-        </p>
+        <div className="m-auto flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
+          {onAddCourse ? (
+            <>
+              <p>Start with a course. Assignments and exams hang off it.</p>
+              <Button onClick={onAddCourse} className="h-11 rounded-full px-5 transition-transform active:scale-[0.97]">
+                Add your first course
+              </Button>
+            </>
+          ) : (
+            <p>Nothing due. Add an assignment from Create, or wait for Canvas sync.</p>
+          )}
+        </div>
       ) : (
         <ul className="-mx-2">
           {list.map((i) => {
@@ -79,7 +91,7 @@ export function UpNext({
                       )}
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                      <span className="size-2 rounded-full" style={{ background: courseColor(i.course) }} />
+                      <span className="size-2 rounded-full" style={{ background: courseColor(i.hue) }} />
                       {i.course}
                     </span>
                   </span>

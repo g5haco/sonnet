@@ -5,7 +5,6 @@ import { Block } from "@/components/block";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { progress, type Item } from "@/lib/progress";
-import { termStart, WEEKS } from "@/lib/sample";
 
 // Rolls the number on screen from its old value to the new one. Server HTML shows the real value,
 // so nothing animates on load; only changes count.
@@ -32,12 +31,24 @@ function verdict(percent: number, overdue: number) {
   return `${overdue} overdue. Pick the smallest one and start there.`;
 }
 
-export function ProgressBlock({ items, now, className }: { items: Item[]; now: number; className?: string }) {
-  const p = progress(items, termStart, WEEKS, new Date(now));
+export function ProgressBlock({
+  items,
+  now,
+  termStart,
+  weeks,
+  className,
+}: {
+  items: Item[];
+  now: number;
+  termStart: Date;
+  weeks: number;
+  className?: string;
+}) {
+  const p = progress(items, termStart, weeks, new Date(now));
   const tallest = Math.max(1, ...p.bars.map((b) => b.total));
   const nowBar = useRef<HTMLDivElement>(null);
-  const week = p.bars[p.current];
-  const cleared = week.total > 0 && week.done === week.total;
+  const week = p.bars[p.current]; // undefined before week 1 or after the last week
+  const cleared = !!week && week.total > 0 && week.done === week.total;
   const wasCleared = useRef(cleared);
 
   // Week cleared: once the fill lands, the bar flashes like an LED confirming it.
@@ -79,7 +90,7 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
 
       <div
         role="img"
-        aria-label={`Week ${p.current + 1} of ${WEEKS}. ${p.percent}% of work due so far is done.`}
+        aria-label={`Week ${p.current + 1} of ${weeks}. ${p.percent}% of work due so far is done.`}
         className="mt-8 flex h-28 items-end gap-[3px] md:h-32 md:gap-1"
       >
         {p.bars.map((b, i) => {
@@ -114,11 +125,11 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
         <span>wk 1</span>
         <span
           className="absolute -translate-x-1/2 text-brand"
-          style={{ left: `${((p.current + 0.5) / WEEKS) * 100}%` }}
+          style={{ left: `${((p.current + 0.5) / weeks) * 100}%` }}
         >
           now
         </span>
-        <span>wk {WEEKS}</span>
+        <span>wk {weeks}</span>
       </div>
     </Block>
   );
