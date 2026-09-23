@@ -16,6 +16,9 @@ export async function sendLink(_: LoginState, form: FormData): Promise<LoginStat
     // No sign-ups: v1 is single-user, so only the existing account gets a link.
     options: { emailRedirectTo: `${origin}/auth/confirm`, shouldCreateUser: false },
   });
+  if (error?.code === "otp_disabled" || /signups not allowed/i.test(error?.message ?? ""))
+    return { ok: false, message: "There's no account for that email." };
+  if (error?.status === 429) return { ok: false, message: "Too many links requested. Try again in a few minutes." };
   if (error) return { ok: false, message: `Couldn't send the link: ${error.message}` };
   return { ok: true, message: `Link sent to ${email}. Check your inbox (and spam).` };
 }
