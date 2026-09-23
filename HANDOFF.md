@@ -1,16 +1,16 @@
 # PROJECT HANDOFF
 
-> Updated 2026-09-23 at HEAD `7eb1e4f` (46 commits). The first version of this file was written at `d765b6e`, before 19 more commits (Phase 4 and the "extras before Phase 5"); this version reflects them. Verified at update time: git clean and in sync with `origin/main`, `npm test` 13/13, `npx tsc --noEmit` clean, `npm run lint` clean. **The code wins over this document** if they disagree. For phase-by-phase status, `docs/ROADMAP.md` is the most current source.
+> Updated 2026-09-23 after Phase 5 implementation commit `309e905` (49 commits before this handoff update). Verified at update time: `npm test` 17/17, `npx tsc --noEmit`, `npm run lint`, and `npx next build --webpack` all pass. Local `main` is ahead of `origin/main`; deployment and live Canvas verification are still pending. **The code wins over this document** if they disagree. For phase-by-phase status, `docs/ROADMAP.md` is the most current source.
 
 ---
 
 ## 1. Executive Summary
 
-- **Project:** **Sonnet**. Repo `g5haco/sonnet` (private). Live at **https://www.ericwei.me** (Vercel, auto-deploys every push to `main`).
+- **Project:** **Sonnet**. Repo `g5haco/sonnet` (currently public). Live at **https://www.ericwei.me** (Vercel, auto-deploys every push to `main`).
 - **What it is:** a web app for a college student that puts a semester in one place: every assignment/exam/quiz/reading, class times, a calendar, how caught up you are, per-course pages with materials, and a **global AI assistant** that knows all of it, can change anything (after a confirm card), makes flashcards, and keeps a chat history.
-- **Stage:** personal MVP in active development. **Phases 0–4 are done** (foundation, items & progress, app shell, AI assistant, calendar), plus extras the user asked for before Phase 5 (Courses pages, Chat page with history, course materials, floating Settings and uploader).
+- **Stage:** personal MVP in active development. **Phases 0–4 are done**. Phase 5's code is built and locally validated; migration 0005, server secrets, deployment, and the first real Canvas sync remain.
 - **Who it's for now:** one user (the owner, a college student), daily use. Sign-ups closed.
-- **Next:** **Phase 5: Canvas sync.**
+- **Next:** finish the **Phase 5 live setup and first sync**, then begin Phase 6 (materials intelligence and syllabus import).
 - **Success for this stage:** the owner opens Sonnet daily instead of Canvas; every deadline and class is in it; the assistant is fast and correct.
 
 ## 2. Original Product Vision
@@ -25,9 +25,9 @@
 
 ## 3. Current Scope
 
-**Done and in the app:** login; courses (tilt-card grid, a page per course: work, class times, materials, code/name/color, delete); items (add, check off, delete with undo, show done); class times; semester settings; Home (greeting with name, status line, progress, Up next, exam ring, week strip, courses carousel, grades/study placeholders, "semester looks wrong" nudge); Calendar (day/week/month, due rows, class grid, now-line, popovers, heat map rail, mini month, keyboard shortcuts, gooey view switch + Add); Google Calendar subscribe feed; global AI (side panel + full Chat page, same conversation) with Markdown rendering, live chips/cards, confirm cards for every change type, flashcards, course focus, saved chat history; floating Settings window; floating uploader + per-course materials (files to Supabase Storage, links, notes).
+**Done in code:** login; courses; items; class times; semester settings; Home; Calendar; Google Calendar subscribe feed; global AI; floating Settings and uploader; per-course materials; and Phase 5 Canvas sync through an access token and/or ICS feed. Canvas includes encrypted token storage, manual and daily sync, status/error reporting, course and assignment upserts, submission scores/state, descriptions for AI context, and a larger Settings window.
 
-**Not built yet / deferred:** Canvas sync (Phase 5, next); AI reading materials + syllabus import + exam study guides (Phase 6 remainder); real grades (Phase 7); focus timer + heatmap data (Phase 8); polish/real-use pass (Phase 9); audio/video/YouTube, lecture recording, Quizlet (no API), two-way Google Calendar, auto time-blocking, XP/badges.
+**Not live or not built:** Canvas has not been deployed or connected to the real account yet. AI reading uploaded materials + syllabus import + exam study guides (Phase 6 remainder), real grades (Phase 7), focus timer + heatmap data (Phase 8), and polish/real-use pass (Phase 9) remain; audio/video/YouTube, lecture recording, Quizlet, two-way Google Calendar, auto time-blocking, and XP/badges are deferred.
 
 **Placeholders still in place:** Grades block ("with Canvas sync"), Study days ("with the focus timer").
 
@@ -47,10 +47,10 @@
 - **Next.js 16 App Router** (TypeScript) on **Vercel**. **Supabase**: Postgres with RLS, Auth (email+password, magic-link fallback), **Storage** (private `materials` bucket).
 - **Server components** load data per page; `(app)/layout.tsx` also loads what the shell needs (courses, schedule = items + class meetings, settings row, account) for the Create dialogs, AI cards and Settings window.
 - **Server actions** (`src/app/actions.ts`) do all writes (validated, `revalidatePath("/", "layout")`).
-- **Route handlers:** `POST /api/chat` (AI, NDJSON stream); `GET /api/cal/[token]` (ICS feed via the `calendar_feed(token)` security-definer SQL function; the proxy lets it through signed out).
+- **Route handlers:** `POST /api/chat` (AI, NDJSON stream); `GET /api/cal/[token]` (ICS feed); `GET /api/cron/canvas` (daily Canvas sync, protected by `CRON_SECRET`).
 - **Proxy** (`src/proxy.ts`, Next 16's renamed middleware): session refresh + redirect signed-out visitors to `/login`; every page also calls `requireUser()`.
 - **Client state:** `AppShell` holds the one assistant conversation (shared by the side panel and `/chat` via `useAssistant()`), the Create/uploader/Settings windows, and exposes `useCreate()` and `useOpenSettings()`. A `useWork()` hook (check-off + delete with undo) is shared by Home and course pages. No global store library.
-- No background jobs yet (Phase 5 plans Vercel Cron for daily Canvas sync).
+- **Background jobs:** Vercel Cron calls the Canvas sync route daily at 11:00 UTC. Manual sync uses the same server-only sync module.
 
 ```mermaid
 graph TD
@@ -63,6 +63,8 @@ graph TD
     Chat --> AI["src/lib/ai.ts: context, tools, streaming"] --> DB
     AI --> OR["OpenRouter free models (fallback chain)"]
     Google["Google Calendar (signed out)"] -->|GET /api/cal/token.ics| Feed["src/app/api/cal/[token]"] -->|calendar_feed(token)| DB
+    Canvas["Canvas REST + ICS"] --> Sync["src/lib/canvas.ts"] --> DB
+    Cron["Vercel Cron"] -->|CRON_SECRET| Sync
 ```
 
 ## 6. Technology Stack (installed and used)
@@ -83,7 +85,7 @@ graph TD
 | next-themes, sonner, lucide-react, date-fns | | Theme, toasts, icons (date-fns via Kibo). |
 | Vitest | 5.0.1 | `npm test` (needs `@types/node@^24`). |
 
-**Planned, not installed:** Vercel Cron (Phase 5), text extraction for materials (Phase 6).
+**Planned, not installed:** text extraction for materials (Phase 6). Vercel Cron is configured in `vercel.json`.
 
 ## 7. Repository Map
 
@@ -96,13 +98,15 @@ graph TD
 ├── docs/ROADMAP.md              ← phase status (most current), extras, ideas, old→new phase map
 ├── docs/superpowers/specs/      ← v1 spec (Canvas design lives here), v1.5 spec (shell/AI/calendar/materials)
 ├── docs/superpowers/plans/      ← Phase 0 plan (historical)
-├── supabase/migrations/0001–0004 ← schema (see §9)
+├── supabase/migrations/0001–0005 ← schema (see §9)
+├── vercel.json                  ← daily Canvas cron
 └── src/
     ├── proxy.ts
     ├── app/
     │   ├── layout.tsx, globals.css, actions.ts
     │   ├── api/chat/route.ts     ← AI endpoint
     │   ├── api/cal/[token]/      ← ICS feed
+    │   ├── api/cron/canvas/      ← protected daily Canvas sync
     │   ├── login/, auth/confirm/
     │   └── (app)/  layout.tsx · page.tsx (Home) · calendar/ · chat/ · courses/ · courses/[id]/
     ├── components/
@@ -118,8 +122,9 @@ graph TD
         ├── ai.ts (+ ai.test.ts)             ← context, calendar/class grounding, tools, proposals, streaming, reasoning rule
         ├── calendar.ts (+ calendar.test.ts) ← calendar date math, toIcs()
         ├── progress.ts (+ progress.test.ts)
+        ├── canvas.ts (+ canvas.test.ts)     ← Canvas REST/ICS normalization, encryption, sync
         ├── course.ts (hues, courseColor, meetingLabel, dayKey) · rows.ts (DB row → UI mapping) · spring.ts
-        └── gsap.ts · utils.ts (cn, isShown) · supabase/{server,client}.ts (requireUser)
+        └── gsap.ts · utils.ts (cn, isShown) · supabase/{server,client,admin}.ts
 ```
 
 ## 8. Important Files
@@ -133,9 +138,12 @@ graph TD
 | `src/components/chat/markdown.tsx`, `widgets.tsx` | Answer rendering | Markdown, code blocks + Copy, `item:`/`class:` link chips, course-code auto-links, ```work and ```plan blocks as live cards, flashcard deck. |
 | `src/components/chat/chat-page.tsx` | `/chat` | Course-focus gooey picker, idea chips, History (reopen/delete), border beam around the input. |
 | `src/components/calendar.tsx`, `calendar-rail.tsx` | `/calendar` | Views, popovers, add from an empty slot, rail (mini month, heat map, class times, feed link). The URL keeps your place; T/D/W/M + arrow keys. |
-| `src/app/actions.ts` | All writes | Term, courses, meetings (create/update/delete), feed reset, name (auth user metadata), items, done, chats (save/list/load/delete), materials (add/delete). |
+| `src/app/actions.ts` | All writes | Existing planner writes plus Canvas connect, sync-now, and disconnect actions. |
 | `src/components/materials.tsx` | Materials | Course Materials block (drop files, links, notes, 60s signed links) + floating `UploadWindow`. |
-| `src/components/settings-forms.tsx` | Settings window | Semester, Google Calendar feed link (copy / new link two-step), Appearance, Account (name, sign out). |
+| `src/components/settings-forms.tsx` | Settings window | Enlarged floating window; Semester, Canvas connection/sync status, Google Calendar, Appearance, Account. |
+| `src/lib/canvas.ts` | Canvas integration | Validates URLs, encrypts/decrypts tokens, follows REST pagination, parses ICS, deduplicates sources, and performs server-only upserts. |
+| `src/lib/supabase/admin.ts` | Privileged server client | Uses a Supabase secret/service-role key only on the server; required for encrypted Canvas connection rows and cron. |
+| `src/app/api/cron/canvas/route.ts` | Automatic Canvas sync | `CRON_SECRET`-protected daily endpoint configured by `vercel.json`. |
 | `supabase/migrations/*.sql` | Schema | Applied manually by the user; see §9 for the status uncertainty. |
 | `docs/ROADMAP.md` | Status | Update at the end of each phase/step. |
 
@@ -148,8 +156,8 @@ All tables have RLS, `user_id default auth.uid()`, and policies scoped to `(sele
 - **0003:** `settings.feed_token uuid unique default gen_random_uuid()`; function `calendar_feed(token) returns jsonb` (security definer, `search_path = ''`, execute granted to anon/authenticated), returning term/courses/items/meetings for the matching token only.
 - **0004:** `chats (id, user_id, title ≤120, focus ≤40, messages jsonb, updated_at)`; `materials (id, user_id, course_id → courses cascade, kind file|link|note, name 1..200, path, url, body ≤100000, created_at)`; private storage bucket `materials` (50 MB, docs/slides/images/text) with policies limiting objects to the user's own folder (`foldername[1] = auth.uid()`).
 - **Display name:** stored in Supabase auth user metadata (no table).
-- **Migration status (uncertain):** the user confirmed running **0001**. 0002–0004 were each committed with "needs migration applied", and whether the user ran them is **not confirmed here**. Course pages survive a missing 0004 (commit `6c8097b`). Ask the user, or check, before building on them.
-- **Expected next:** Phase 5 adds Canvas connection fields (base URL, encrypted token, ICS URL, last sync status) and Canvas item fields (description, points, score, url), per the v1 spec.
+- **0005:** Canvas settings/status fields; `canvas_connections` with encrypted token and no client privileges; Canvas course ids; assignment description, points, score, and URL fields.
+- **Migration status:** the user confirmed **0001–0004 are applied**. **0005 is not yet confirmed applied.**
 
 ## 10. Core Product Flows
 
@@ -164,17 +172,18 @@ Most features after Phase 3 were checked visually with sample data; they were no
 - **Materials:** upload window (tiles: PDF/PowerPoint/Word/Images/Link/Note, drag and drop) and the per-course block. Files upload from the browser into the user's folder and open through 60s signed links. The AI does **not** read them yet (Phase 6).
 - **Assistant:** side panel or `/chat` (same conversation), course focus, Think toggle, dictation, shortcut/idea chips. Answers stream; proposals become confirm cards; flashcards become a flip deck. Chats auto-save after each answer; History is on `/chat`.
 - **Settings window:** opened from the sidebar or any `useOpenSettings()` call (e.g. Home's "set your real semester length" nudge when weeks ≤ 2).
+- **Canvas:** Settings → Canvas accepts the school's base URL, access token, and/or calendar feed. Save validates the token without returning it to the client; Sync now imports courses and assignments. The daily cron repeats the sync after deployment.
 
 ## 11. AI System (single assistant, "Sonnet")
 
 - **Provider/models:** OpenRouter free models, default chain `nvidia/nemotron-3-super-120b-a12b:free` → `qwen/qwen3.8-27b:free` → `nvidia/nemotron-3-ultra-550b-a55b:free` (Gemma dropped: frequent 429). The account showed 1,000 free requests/day and 20/min. Free providers may log prompts.
 - **Reasoning:** off by default (~0.5s to the first word). Auto-on via `needsThinking()` for tutoring asks (explain, why, how do…, solve, study, quiz, compare, outline…) or messages over 280 characters; never for planner edits (add/move/change/mark/…). The **Think** toggle forces it (`effort: "low"`, `max_tokens` 2000).
-- **Context:** the current time in the student's timezone; `calendarLines()` (this/next week, next 14 days, the "this/next Friday" rule); every class in the coming week with real dates, today/tomorrow/happening now, and a countdown; semester week; courses; class times; the work list written as the chat's own links (`[Title](item:ref)`, `class:` refs); optional course focus.
+- **Context:** the current time in the student's timezone; calendar and class grounding; semester week; courses; work links; optional course focus; and sanitized Canvas assignment descriptions for the focused course or work due within 90 days. Canvas content is explicitly labeled untrusted data, not instructions.
 - **Tools (each becomes a confirm card; nothing auto-saves):** `add_item`, `update_item`, `delete_item`, `add_class_time`, `update_class_time`, `delete_class_time`, `add_course`, `update_course`, `delete_course`, `set_semester`, and `make_flashcards` (a deck shown in chat, never saved).
 - **Rendering:** Markdown (react-markdown + remark-gfm) with item/course/class chips and ```work / ```plan blocks, plus a Copy button.
 - **Streaming protocol:** NDJSON events `think`, `text`, `propose` (Proposal[]), `cards` (Deck), `error`.
 - **History:** chats are saved per conversation (`chats` table, migration 0004). **This reverses the earlier "session-only" decision** (made during the extras work).
-- **Orb states:** searching (reading data), solving (thinking), composing (writing), breathing (idle); `connecting` is reserved for Canvas sync and `working` for upload processing.
+- **Orb states:** searching (reading data), solving (thinking), composing (writing), breathing (idle), `connecting` during Canvas sync, and `working` for upload processing.
 - **Resilience:** 55s timeout, one silent retry before any text arrives, errors logged, friendly 429/401 messages.
 
 ## 12. UI / UX System
@@ -213,31 +222,32 @@ Most features after Phase 3 were checked visually with sample data; they were no
   - floating uploader (`6a31e01`)
   - materials guard (`6c8097b`)
   - roadmap docs, and the handoff skill (`7eb1e4f`)
+  - Matt Pocock project-local skills (`44a9e78`)
+  - secure Canvas token + ICS sync, daily cron, AI assignment details, and enlarged Settings (`309e905`)
 
 ## 14. Work In Progress
 
-- **Phase 6 (partial):** uploads, links and notes per course work (needs 0004). **AI reading materials, syllabus import and exam study guides have not started.**
-- **Nothing half-written in the working tree** (it's clean).
-- **Not verified signed in by Claude:** most features after Phase 3 were checked visually with sample data in the preview pane, not with the user's real account (the pane can't sign in, and Claude must not type passwords).
+- **Phase 5 live setup:** implementation is complete locally. It still needs migration 0005, three server secrets, deployment, credentials entered through Settings, and the first real sync.
+- **Phase 6 (partial):** uploads, links and notes per course work. **AI reading materials, syllabus import and exam study guides have not started.**
+- **Not verified signed in:** the Canvas flow and enlarged Settings window have not been exercised against the user's real account. The user must enter secrets and Canvas credentials themselves.
 
 ## 15. Current Immediate Task
 
-**The last finished work** was the extras before Phase 5 (Courses, Chat page with history, materials, floating Settings/uploader), then docs (`5357910`) and adding the `handoff` skill (`7eb1e4f`).
+**The last finished code** is the Phase 5 implementation (`309e905`). The user confirmed migrations 0002–0004 are applied, wants both Canvas methods, and set the semester to 11 weeks.
 
-**The next task is Phase 5: Canvas sync** (`docs/ROADMAP.md`). Before coding, confirm with the user:
-1. Which migrations (0002–0004) have been applied.
-2. The school's Canvas base URL, and whether they'll connect with an access token, the calendar feed URL, or both. They asked for both options. The token is entered in the app, never pasted in chat.
-3. That the semester length is set correctly.
+**The immediate task is to activate Phase 5 safely:**
+
+1. Apply `supabase/migrations/0005_canvas_sync.sql`.
+2. Add `SUPABASE_SECRET_KEY`, `CANVAS_ENCRYPTION_KEY`, and `CRON_SECRET` to Vercel without sharing them in chat.
+3. Push/deploy the local commits.
+4. In Settings → Canvas, enter the Canvas base URL, access token, and calendar feed URL; Save, then Sync now.
+5. Verify courses, deadlines, submitted/score state, descriptions in AI context, last-sync status, and the next cron run.
 
 ## 16. Next Steps
 
-### P0: Phase 5, Canvas sync (design in `docs/superpowers/specs/2026-09-22-student-hub-design.md`)
-1. **Migration 0005:** Canvas connection on `settings` (base URL, token **encrypted at rest**, ICS URL, last sync time/status/error) and Canvas item fields (description, points, score, html_url). Done when it's applied, RLS is intact, and the client can never read the token.
-2. **Sync logic (server-only):** token REST (`/api/v1/courses`, `/courses/:id/assignments?include[]=submission`) and/or ICS parsing → upsert courses/items on `(user_id, source, external_id)`; submitted = done; store scores; never delete on a failed fetch. Done when unit tests cover mapping and dedupe, and a real sync fills the user's account.
-3. **Canvas section in the Settings window:** connect, Sync now, last sync status, and the `connecting` orb while syncing. Done when the user can connect and sync from the UI.
-4. **Daily auto-sync** (Vercel Cron), once manual sync works.
-5. **AI context:** add assignment descriptions so the assistant can summarize assignments.
-6. Update `docs/ROADMAP.md`, and commit and push after each step.
+### P0: finish Phase 5 live setup
+
+The migration, server-only REST/ICS sync, encrypted token storage, Settings UI, daily Vercel Cron, AI description context, tests, and roadmap update are built. Complete the five activation/verification steps in §15. Do not call Phase 5 fully complete until a real sync succeeds.
 
 ### P1
 - The rest of Phase 6: text extraction, the AI reading materials, syllabus import with review cards, exam study guides.
@@ -254,7 +264,9 @@ Most features after Phase 3 were checked visually with sample data; they were no
 
 | Issue | Severity | Symptoms | Cause | Files | Status | Fix |
 |---|---|---|---|---|---|---|
-| Migrations 0002–0004 possibly not applied | High (if not) | Class times, feed, chats and materials fail on the live site | The user applies SQL manually | `supabase/migrations/` | Unknown | Ask the user; they paste each file into the Supabase SQL Editor |
+| Migration 0005 not applied | High for Canvas | Canvas fields/table do not exist, so connection and sync fail | The user applies SQL manually | `supabase/migrations/0005_canvas_sync.sql` | Pending | Paste 0005 into Supabase SQL Editor |
+| Canvas server secrets not configured | High for Canvas | Save/sync/cron returns a setup error | Secrets must be set outside Git | `.env.example`, Vercel env | Pending | Add the three Phase 5 server secrets and redeploy |
+| Canvas not live-tested | Medium | Provider-specific API/feed differences may surface | No real credentials in the development environment | `src/lib/canvas.ts` | Open | Run one manual sync and verify results before relying on cron |
 | Free AI models intermittently 429/503 | Medium | A "busy" message, or a retry | Free tier | `src/lib/ai.ts` | Mitigated | Reorder `AI_MODEL`; use a paid model for SaaS |
 | Features not tested signed in with real data | Medium | Possible real-data bugs | The preview pane can't sign in | many | Open | Ask the user to sign in to the pane, or test on ericwei.me |
 | Magic link only works in the same browser | Low | "link expired" | Supabase's default PKCE link; editing templates needs custom SMTP | `src/app/auth/confirm/route.ts` | Known | Resend SMTP + a `token_hash` template (the route already supports it) |
@@ -302,26 +314,28 @@ Node 24, npm 11, Windows (Git Bash/PowerShell).
 npm install
 cp .env.example .env.local     # fill in values; never commit
 npm run dev                    # http://localhost:3000 (preview config "dev")
-npm test                       # vitest (13 tests)
+npm test                       # vitest (17 tests)
 npx tsc --noEmit
 npm run lint
 npm run build
 npx next typegen               # after adding routes
 ```
 
-- **Env var names:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `AI_API_KEY`; optional `AI_BASE_URL`, `AI_MODEL`. Use the same names in Vercel → Settings → Environment Variables (they apply on the next deploy).
+- **Env var names:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `AI_API_KEY`, `SUPABASE_SECRET_KEY`, `CANVAS_ENCRYPTION_KEY`, and `CRON_SECRET`; optional `AI_BASE_URL`, `AI_MODEL`. `SUPABASE_SERVICE_ROLE_KEY` is accepted as a legacy fallback. Use the same names in Vercel → Settings → Environment Variables; never expose the three server-only secrets to client code.
 - **Database:** paste each `supabase/migrations/000N_*.sql` into Supabase → SQL Editor, in order.
 - **Supabase URL config:** should include Site URL `https://www.ericwei.me` and redirect `https://www.ericwei.me/auth/confirm` (plus localhost). The user was told to set this; it's not verified.
 - **Formatting:** there's no Prettier config; use `npx prettier --print-width 120 --write <files>` to match the code (~120 columns).
 
 ## 21. Testing Status
 
-- **Automated (13 tests, 3 files):** progress math; AI calendar lines, the reasoning rule and `toProposal`; calendar date math and `toIcs()`.
+- **Automated (17 tests, 4 files):** previous progress/AI/calendar coverage plus Canvas assignment mapping, opaque-link pagination, ICS unfolding and REST-over-ICS deduplication, and authenticated encryption/tamper detection.
 - **Live AI checks** (temporary `tsx` scripts, since deleted): streaming, retry, proposals, date/class grounding, flashcards, a class-room change, setting the semester.
 - **Visual checks** in the preview pane with sample data (mostly 1440px dark; the calendar also at 375px).
 - **Untested / highest risk:**
   - everything after Phase 3, signed in with real data
-  - migrations 0002–0004 on the live project
+  - migration 0005 on the live project
+  - a real Canvas REST + ICS sync and the following cron run
+  - the enlarged Settings window across phone/desktop and light/dark themes
   - uploads to Storage
   - saving and loading chat history
   - the ICS feed in Google Calendar
@@ -330,18 +344,18 @@ npx next typegen               # after adding routes
 
 ## 22. Git State
 
-`main` = `origin/main`, clean at `7eb1e4f`. The only branch is `main`. Never commit `.env.local`. Ignored: `.next/`, `next-env.d.ts`, `*.tsbuildinfo`, and `.impeccable/hook.cache.json` (via `.git/info/exclude`).
+Local `main` contains `44a9e78` and `309e905` beyond `origin/main`; this handoff update is the only expected working-tree change before its own commit. Nothing has been pushed or deployed yet. The only branch is `main`. Never commit `.env.local`. Ignored: `.next/`, `next-env.d.ts`, `*.tsbuildinfo`, and `.impeccable/hook.cache.json`.
 
 ## 23. External Services
 
-- **Supabase:** DB, auth, and the storage bucket `materials`. Env: the two `NEXT_PUBLIC_SUPABASE_*` variables. Built-in email is rate-limited; editing templates needs custom SMTP.
-- **Vercel:** hosting; domain `ericwei.me` (apex → `www`); env vars set by the user.
+- **Supabase:** DB, auth, storage, and (after 0005) the admin-only Canvas connection table. Canvas sync also needs a server-only secret key.
+- **Vercel:** hosting; domain `ericwei.me`; env vars set by the user; daily Canvas cron is configured but not deployed yet.
 - **IONOS:** DNS (A `@` → Vercel, CNAME `www` → the project's Vercel DNS host; mail records kept).
 - **OpenRouter:** AI. Env `AI_API_KEY` (plus optional overrides).
 - **Google Calendar:** subscribes to `/api/cal/<token>.ics` (one-way).
 - **Browser Web Speech API:** dictation (Chrome sends the audio to Google).
 - **GitHub:** `g5haco/sonnet`; the `gh` CLI is authenticated on this machine.
-- **Canvas:** not connected yet (Phase 5).
+- **Canvas:** integration code is built; no real base URL, access token, or calendar feed has been entered yet.
 
 ## 24. Security / Privacy
 
@@ -352,12 +366,12 @@ npx next typegen               # after adding routes
 - All writes are validated server-side; `/api/chat` requires auth and validates input.
 - AI tools never execute server-side: they become confirm cards, and refs are resolved server-side (the model never sees full ids).
 - Secrets live only in env vars; sign-ups are closed.
+- Canvas access tokens are AES-256-GCM encrypted before storage in an admin-only table; the client sees only a connected flag. Cron is protected by `CRON_SECRET`.
 
 **Needed before wider distribution:**
 - a paid, privacy-respecting AI provider
 - per-user rate limits
 - an email provider
-- **Canvas token encryption (a Phase 5 requirement)**
 - sandboxed text extraction for uploads (Phase 6)
 - a privacy note for dictation
 - a check that feed tokens can't leak through logs
@@ -386,15 +400,14 @@ npx next typegen               # after adding routes
 
 ## 27. Assumptions and Uncertainties
 
-- **Confirmed:** the repo state and checks above; 0001 applied; login works; the AI key is set locally and in Vercel; the user has used the assistant on the live site; the domain works.
+- **Confirmed:** the repo state and checks above; migrations 0001–0004 are applied; the semester is 11 weeks; the user can obtain both a Canvas access token and calendar feed; login works; the AI key is set locally and in Vercel; the domain works.
 - **Unknown:**
-  - whether 0002–0004 were applied
-  - whether the user's semester length was fixed
+  - whether migration 0005 has been applied (not confirmed)
+  - whether the three Phase 5 server secrets have been configured
   - whether the Supabase URL config was updated
   - whether the newer features work with real data
 - **Unresolved:**
-  - the Canvas details (base URL, token vs feed)
-  - when Phase 6 extraction happens relative to Canvas
+  - the real Canvas base URL and credentials (correctly kept out of chat and Git)
   - when the SaaS step starts
 - **Provenance:** the sections of this document covering work after `d765b6e` were reconstructed from commit messages and the code, not from the conversations that produced them.
 
@@ -433,7 +446,7 @@ npx next typegen               # after adding routes
 >
 > 1. Read this file, then `docs/ROADMAP.md`, `PRODUCT.md`, `AGENTS.md`, and the Canvas sections of the v1 spec.
 > 2. Run `git status`, `git log --oneline -10`, `npm test`, `npx tsc --noEmit` and `npm run lint`. The code is the source of truth.
-> 3. Unless the user says otherwise, start **Phase 5 (Canvas sync)**: first settle the three questions in §15, then take the architectural path (a short design and the user's approval), then build in committed steps (§16).
+> 3. Finish **Phase 5 activation** using §15: migration 0005, server secrets, deploy, connect through Settings, and verify the first sync. Do not rebuild the implementation.
 > 4. Work in steps and report in plain language. Commit and push each important change to `main`, update `docs/ROADMAP.md`, keep code minimal, run the impeccable detector on UI changes, and test in the preview pane (ask the user to sign in there; never type passwords).
 > 5. Preserve §19 and §26 unless the user explicitly asks to revisit them.
 
@@ -443,13 +456,13 @@ npx next typegen               # after adding routes
 
 ```yaml
 project_name: Sonnet (student planner)
-current_phase: "Phases 0-4 done + extras (Courses, Chat page/history, materials, floating Settings/uploader); Phase 5 next"
-current_goal: "Canvas sync: token and/or calendar feed, Sync now, daily auto-sync, assignment descriptions for the AI"
+current_phase: "Phases 0-4 done; Phase 5 built locally and awaiting live activation/verification"
+current_goal: "Apply migration 0005, configure server secrets, deploy, connect both Canvas sources, and verify the first sync"
 current_branch: main
-head: 7eb1e4f
-working_tree_clean: true
-last_finished_work: "Extras before Phase 5 (6a31e01, 6c8097b), roadmap docs (5357910), handoff skill (7eb1e4f)"
-next_action: "Ask which migrations (0002-0004) are applied + Canvas URL and connection method; then design Phase 5"
+head_before_this_handoff_commit: 309e905
+working_tree_clean_after_handoff_commit: true
+last_finished_work: "Secure Canvas REST + ICS sync, cron, AI details, enlarged Settings (309e905)"
+next_action: "Apply 0005 and add SUPABASE_SECRET_KEY, CANVAS_ENCRYPTION_KEY, CRON_SECRET; then deploy and run Sync now"
 major_completed_features:
   - Auth (password + email link), RLS everywhere
   - Courses (tilt grid, per-course pages), items, class times, semester settings
@@ -457,13 +470,15 @@ major_completed_features:
   - Calendar (day/week/month, heat map rail, gooey switch/Add) + Google Calendar feed
   - Assistant (panel + /chat), Markdown answers, confirm cards for all changes, flashcards, saved history
   - Floating Settings window and uploader; per-course materials (files/links/notes)
+  - Canvas integration code (encrypted token, ICS, manual/daily sync, status, AI assignment descriptions)
 major_in_progress_features:
+  - "Phase 5 live activation and first real sync"
   - "Phase 6: AI reading materials, syllabus import, study guides (not started; uploads done)"
-major_pending_features: [Phase 5 Canvas sync, Phase 7 grades, Phase 8 focus timer, Phase 9 polish]
+major_pending_features: [Phase 6 materials intelligence, Phase 7 grades, Phase 8 focus timer, Phase 9 polish]
 known_blockers:
-  - "Unknown whether migrations 0002-0004 are applied on the live project"
-  - "Claude can't sign in to the preview pane; real-data testing needs the user"
-important_files: [src/lib/ai.ts, src/app/api/chat/route.ts, src/components/app-shell.tsx, src/components/chat/proposal-card.tsx, src/app/actions.ts, src/components/calendar.tsx, supabase/migrations/, docs/ROADMAP.md]
+  - "Migration 0005 and three server secrets require user dashboard access"
+  - "Real Canvas credentials must be entered by the user in Settings, never chat"
+important_files: [src/lib/canvas.ts, src/lib/canvas.test.ts, src/lib/supabase/admin.ts, src/app/api/cron/canvas/route.ts, src/components/settings-forms.tsx, src/app/actions.ts, supabase/migrations/0005_canvas_sync.sql, vercel.json, docs/ROADMAP.md]
 do_not_change:
   - "AI changes only via confirm cards"
   - "Free OpenRouter chain, reasoning-off default + auto/Think, date/class grounding"
