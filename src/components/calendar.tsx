@@ -19,14 +19,8 @@ import { toast } from "sonner";
 import { setDone } from "@/app/actions";
 import { useCreate } from "@/components/app-shell";
 import { CalendarRail } from "@/components/calendar-rail";
-import type { CreateKind } from "@/components/create-menu";
+import { CreateMenu, type CreateKind, type MenuItem } from "@/components/create-menu";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   lanes,
@@ -51,6 +45,11 @@ const EASE = [0.22, 1, 0.36, 1] as const; // --ease-out-quint
 const KIND: Record<Item["kind"], string> = { assignment: "Assignment", exam: "Exam", quiz: "Quiz", reading: "Reading" };
 const FRAME = "@container flex h-[calc(100dvh-3.5rem)] flex-col md:h-dvh"; // phone top bar is 3.5rem
 const PILL = "h-9 rounded-full px-4";
+const ADD: MenuItem<"assignment" | "exam" | "class">[] = [
+  { kind: "assignment", label: "Assignment", icon: FilePlus2 },
+  { kind: "exam", label: "Exam", icon: CalendarClock },
+  { kind: "class", label: "Class times", icon: Clock },
+];
 
 // A course color washed into the page (--event sets the strength per theme): fills keep foreground text readable.
 const tint = (hue: number, k = 1) =>
@@ -92,6 +91,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
   const [anchor, setAnchor] = useState(() =>
     /^\d{4}-\d{2}-\d{2}$/.test(initial.date) ? parseDay(initial.date) : startOfDay(new Date()),
   );
+  const [adding, setAdding] = useState(false);
   const [dir, setDir] = useState(0); // page slide: -1 back, 1 forward, 0 = view change (fade)
   const [now, setNow] = useState(() => Date.now());
   const [list, flip] = useOptimistic(items, (all, id: string) =>
@@ -190,22 +190,15 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
         </h1>
         <div className="ml-auto flex items-center gap-2">
           <ViewSwitch view={view} onChange={(v) => jump(anchor, v)} />
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button className={cn(PILL, "active:scale-[0.97]")} />}>
-              <Plus /> Add
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onClick={() => add("assignment")}>
-                <FilePlus2 /> Assignment
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => add("exam")}>
-                <CalendarClock /> Exam
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/settings")}>
-                <Clock /> Class times
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CreateMenu
+            direction="down"
+            label="Add"
+            tone="primary"
+            items={ADD}
+            open={adding}
+            onOpenChange={setAdding}
+            onPick={(k) => (k === "class" ? router.push("/settings") : add(k))}
+          />
         </div>
       </header>
 
