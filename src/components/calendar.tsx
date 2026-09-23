@@ -500,7 +500,7 @@ function TimeGrid({
             <div
               aria-hidden="true"
               className={cn(
-                "pointer-events-none absolute top-0 left-14 truncate rounded-md bg-accent px-1.5 pt-0.5 font-mono text-[11px] text-muted-foreground duration-150 ease-out-quint motion-reduce:transition-none",
+                "@container pointer-events-none absolute top-0 left-14 truncate rounded-md bg-accent px-1.5 pt-0.5 font-mono text-[11px] text-muted-foreground duration-150 ease-out-quint motion-reduce:transition-none",
                 hover.glide ? "transition-[opacity,transform]" : "transition-opacity",
                 !hover.on && "opacity-0",
               )}
@@ -510,7 +510,10 @@ function TimeGrid({
                 transform: `translate(calc(${hover.col} * (100% + 8px) + 4px), ${(hover.min / 60) * HOUR}px)`,
               }}
             >
-              + exam {clock(new Date(2000, 0, 1, 0, hover.min))}
+              {/* Narrow columns drop "exam", then "+"; the time always shows (widths fit "12:30 PM" in 11px mono). */}
+              <span className="hidden @[4.25rem]:inline">+ </span>
+              <span className="hidden @[6.25rem]:inline">exam </span>
+              {clock(new Date(2000, 0, 1, 0, hover.min))}
             </div>
           </div>
         </div>
