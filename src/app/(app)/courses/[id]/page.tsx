@@ -18,7 +18,8 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
       .eq("course_id", id)
       .order("created_at", { ascending: false }),
   ]);
-  const error = settings.error ?? course.error ?? items.error ?? meetings.error ?? materials.error;
+  // Materials are extra: if they can't load (e.g. before migration 0004), the course page still works.
+  const error = settings.error ?? course.error ?? items.error ?? meetings.error;
   if (error) throw new Error(`Couldn't load this course: ${error.message}`);
   if (!course.data) notFound();
 
@@ -28,7 +29,7 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       items={toItems(items.data!, [course.data])}
       meetings={toMeetings(meetings.data!, [course.data])}
-      materials={materials.data!}
+      materials={materials.data ?? []}
     />
   );
 }
