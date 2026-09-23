@@ -8,9 +8,11 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
+import { createItem, updateItem } from "@/app/actions";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/create-menu";
 import { Sidebar } from "@/components/sidebar";
+import type { Proposal } from "@/lib/ai";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
@@ -87,14 +89,16 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
-          const e = JSON.parse(line) as { t: "think" | "text" | "error"; v?: string };
+          const e = JSON.parse(line) as { t: "think" | "text" | "propose" | "error"; v?: string | Proposal[] };
           if (e.t === "think") patch((m) => ({ ...m, state: m.text ? m.state : "thinking" }));
           else if (e.t === "text") patch((m) => ({ ...m, text: m.text + e.v, state: "writing" }));
-          else throw new Error(e.v);
+          else if (e.t === "propose")
+            patch((m) => ({ ...m, proposals: (e.v as Proposal[]).map((p) => ({ p, status: "pending" as const })) }));
+          else throw new Error(String(e.v));
         }
       }
       patch((m) =>
-        m.text
+        m.text || m.proposals?.length
           ? { ...m, state: undefined }
           : { ...m, role: "note", text: "No answer came back. Try again.", state: undefined },
       );
@@ -107,6 +111,37 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         state: undefined,
       }));
     }
+  };
+
+  // The student said yes (or no) to a change the assistant proposed. Only now is anything saved.
+  const resolve = async (message: number, index: number, accept: boolean) => {
+    const set = (status: "saving" | "saved" | "skipped" | "error", error?: string) =>
+      setMessages((all) =>
+        all.map((m) =>
+          m.id === message
+            ? { ...m, proposals: m.proposals?.map((x, i) => (i === index ? { ...x, status, error } : x)) }
+            : m,
+        ),
+      );
+    const p = messages.find((m) => m.id === message)?.proposals?.[index]?.p;
+    if (!p || !accept) return set("skipped");
+    set("saving");
+    let result: { error?: string };
+    if (p.type === "add") {
+      const squash = (code: string) => code.replace(/\s+/g, "").toUpperCase();
+      const course = courses.find((c) => squash(c.code) === squash(p.course));
+      if (!course) return set("error", `No course called ${p.course}. Add it first with the +.`);
+      const form = new FormData();
+      form.set("title", p.title);
+      form.set("kind", p.kind);
+      form.set("course", course.id);
+      form.set("due", new Date(p.due).toISOString()); // the model gives local time; this browser knows the zone
+      result = await createItem(form);
+    } else {
+      result = await updateItem(p.id, { title: p.title, due: p.due && new Date(p.due).toISOString(), done: p.done });
+    }
+    if (result.error) set("error", result.error);
+    else set("saved");
   };
 
   const clear = () => {
@@ -132,6 +167,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
       onSend={send}
       onClear={clear}
       busy={messages.some((m) => m.state)}
+      onResolve={resolve}
       onClose={onClose}
       focusKey={focusKey}
       className={className}

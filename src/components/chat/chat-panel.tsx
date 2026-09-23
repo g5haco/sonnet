@@ -1,9 +1,13 @@
 "use client";
 
-import { SquarePen, X } from "lucide-react";
+import { Check, SquarePen, X } from "lucide-react";
+import { MetalBadge } from "metal-fx";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
+import { Button } from "@/components/ui/button";
+import type { Proposal } from "@/lib/ai";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +17,88 @@ export type ChatMessage = {
   text: string;
   // assistant only, while it streams: reading your data → thinking → writing
   state?: "reading" | "thinking" | "writing";
+  // changes the assistant proposed; nothing is saved until the student confirms
+  proposals?: { p: Proposal; status: "pending" | "saving" | "saved" | "skipped" | "error"; error?: string }[];
 };
+
+const when = (local: string) =>
+  new Date(local).toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+// One proposed change: what it will do, in plain words, and the student's yes/no.
+function ProposalCard({
+  item,
+  onResolve,
+}: {
+  item: NonNullable<ChatMessage["proposals"]>[number];
+  onResolve: (accept: boolean) => void;
+}) {
+  const { resolvedTheme } = useTheme();
+  const { p, status } = item;
+  const lines =
+    p.type === "add"
+      ? [`${p.title}`, `${p.kind} · ${p.course} · due ${when(p.due)}`]
+      : [
+          p.was,
+          [
+            p.title && `rename to “${p.title}”`,
+            p.due && `due ${when(p.due)}`,
+            p.done !== undefined && (p.done ? "mark done" : "mark not done"),
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        ];
+  return (
+    <div className="mt-2 rounded-2xl bg-secondary p-3">
+      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+        {/* Metal marks the AI: this came from the assistant, check it before saving. */}
+        <MetalBadge theme={resolvedTheme === "light" ? "light" : "dark"} scale={0.85}>
+          AI
+        </MetalBadge>
+        {p.type === "add" ? "Add" : "Change"}
+      </div>
+      <p className="text-sm font-medium">{lines[0]}</p>
+      <p className="font-mono text-xs text-muted-foreground">{lines[1]}</p>
+      {status === "pending" || status === "saving" ? (
+        <div className="mt-3 flex gap-2">
+          <Button
+            size="sm"
+            disabled={status === "saving"}
+            onClick={() => onResolve(true)}
+            className="h-9 rounded-full px-4 transition-transform active:scale-[0.97]"
+          >
+            {status === "saving" ? "Saving…" : p.type === "add" ? "Add" : "Save"}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={status === "saving"}
+            onClick={() => onResolve(false)}
+            className="h-9 rounded-full px-4"
+          >
+            Skip
+          </Button>
+        </div>
+      ) : (
+        <p
+          className={cn(
+            "mt-2 flex items-center gap-1.5 text-xs",
+            status === "saved" ? "text-done" : status === "error" ? "text-destructive" : "text-muted-foreground",
+          )}
+          role="status"
+        >
+          {status === "saved" && <Check className="size-3.5" />}
+          {status === "saved" ? "Saved" : status === "skipped" ? "Skipped" : item.error}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // Models slip into markdown now and then; the panel shows plain text.
 const plain = (t: string) =>
@@ -35,10 +120,12 @@ export function ChatPanel({
   onClose,
   focusKey,
   busy,
+  onResolve,
   className,
 }: {
   messages: ChatMessage[];
   busy: boolean;
+  onResolve: (message: number, index: number, accept: boolean) => void;
   onSend: (text: string) => void;
   onClear: () => void;
   onClose: () => void;
@@ -125,6 +212,9 @@ export function ChatPanel({
                 // aria-busy: screen readers announce the finished answer, not every streamed word
                 <li key={m.id} className="text-sm leading-relaxed whitespace-pre-wrap" aria-busy={!!m.state}>
                   {plain(m.text)}
+                  {m.proposals?.map((item, i) => (
+                    <ProposalCard key={i} item={item} onResolve={(accept) => onResolve(m.id, i, accept)} />
+                  ))}
                   {m.state === "writing" && (
                     <ThinkingOrb
                       state="composing"

@@ -82,6 +82,25 @@ export async function deleteItem(id: string): Promise<Result> {
   return done(error, "delete it");
 }
 
+// Assistant proposals the student confirmed (rename, re-date, check off). Validated here, not trusted.
+export async function updateItem(id: string, patch: { title?: string; due?: string; done?: boolean }): Promise<Result> {
+  const row: { title?: string; due?: string; done_at?: string | null } = {};
+  if (patch.title !== undefined) {
+    const title = patch.title.trim();
+    if (!title || title.length > 200) return { error: "Give it a title." };
+    row.title = title;
+  }
+  if (patch.due !== undefined) {
+    if (Number.isNaN(Date.parse(patch.due))) return { error: "That due date doesn't look right." };
+    row.due = new Date(patch.due).toISOString();
+  }
+  if (patch.done !== undefined) row.done_at = patch.done ? new Date().toISOString() : null;
+  if (!Object.keys(row).length) return { error: "Nothing to change." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("items").update(row).eq("id", id);
+  return done(error, "save the change");
+}
+
 export async function setDone(id: string, isDone: boolean): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase

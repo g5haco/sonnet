@@ -5,17 +5,61 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
 const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
 const MODELS = (
-  process.env.AI_MODEL ?? "nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free,nvidia/nemotron-3-ultra-550b-a55b:free"
+  process.env.AI_MODEL ??
+  "nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free,nvidia/nemotron-3-ultra-550b-a55b:free"
 ).split(",");
 
 export type Turn = { role: "user" | "assistant"; content: string };
+
+// What the model may ask for. Nothing is saved until the student confirms in the chat panel.
+export type Proposal =
+  | { type: "add"; course: string; title: string; kind: "assignment" | "exam" | "quiz" | "reading"; due: string }
+  | { type: "update"; id: string; was: string; title?: string; due?: string; done?: boolean };
+type Ref = { id: string; title: string; course: string };
+
+const TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "add_item",
+      description: "Propose adding an assignment, exam, quiz or reading. The student confirms before it is saved.",
+      parameters: {
+        type: "object",
+        properties: {
+          course: { type: "string", description: "Course code exactly as listed, e.g. CHEM 1210" },
+          title: { type: "string" },
+          kind: { type: "string", enum: ["assignment", "exam", "quiz", "reading"] },
+          due: { type: "string", description: "Local date-time YYYY-MM-DDTHH:mm. Use 23:59 when no time is given." },
+        },
+        required: ["course", "title", "kind", "due"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_item",
+      description: "Propose renaming, re-dating or checking off an existing item. The student confirms first.",
+      parameters: {
+        type: "object",
+        properties: {
+          ref: { type: "string", description: "The item's ref from the work list" },
+          title: { type: "string" },
+          due: { type: "string", description: "New local date-time YYYY-MM-DDTHH:mm" },
+          done: { type: "boolean" },
+        },
+        required: ["ref"],
+      },
+    },
+  },
+];
 
 // Everything the assistant knows, rendered as plain text in the student's timezone.
 export async function studentContext(supabase: SupabaseClient, timeZone: string) {
   const [settings, courses, items] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("id, code, name").order("created_at"),
-    supabase.from("items").select("title, kind, due, done_at, course_id").order("due").limit(300),
+    supabase.from("items").select("id, title, kind, due, done_at, course_id").order("due").limit(300),
   ]);
   const now = Date.now();
   const fmt = (iso: string, opts: Intl.DateTimeFormatOptions) =>
@@ -23,18 +67,22 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
   const code = new Map((courses.data ?? []).map((c) => [c.id, c.code]));
   const recent = now - 14 * 864e5; // done work older than two weeks is noise
 
+  // Short refs (first 6 chars of the id) let the model point at an item without long UUIDs.
+  const refs = new Map<string, Ref>();
   const work = (items.data ?? [])
     .filter((i) => !i.done_at || Date.parse(i.due) > recent)
     .map((i) => {
       const status = i.done_at ? "done" : Date.parse(i.due) < now ? "OVERDUE" : "open";
       const due = fmt(i.due, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-      return `- [${status}] ${code.get(i.course_id) ?? "?"} · ${i.kind} · "${i.title}" · due ${due}`;
+      const ref = i.id.slice(0, 6);
+      refs.set(ref, { id: i.id, title: i.title, course: code.get(i.course_id) ?? "?" });
+      return `- [${status}] ${code.get(i.course_id) ?? "?"} · ${i.kind} · "${i.title}" · due ${due} · ref ${ref}`;
     });
 
   const term = settings.data;
   const week = term && Math.floor((now - Date.parse(`${term.term_start}T00:00:00`)) / (7 * 864e5)) + 1;
 
-  return [
+  const text = [
     `Now: ${fmt(new Date(now).toISOString(), { dateStyle: "full", timeStyle: "short" })} (${timeZone}).`,
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
@@ -42,6 +90,7 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
     "Work (due dates in the student's local time):",
     work.join("\n") || "- nothing added yet",
   ].join("\n");
+  return { text, refs };
 }
 
 const RULES = `You are Sonnet, the assistant inside a college student's planner. Precise, warm, a little cheeky; never preachy.
@@ -49,12 +98,13 @@ Rules:
 - Use only the courses and work listed. If something isn't there, say you don't see it and suggest adding it with the + in the sidebar.
 - Never invent due dates, grades, exam content or class times.
 - Plans: name concrete days and short time blocks; overdue first, then the soonest and heaviest.
+- To add or change work, call add_item or update_item right away. The student confirms each change in the app, so don't ask "shall I?"; just add one short line saying what you proposed.
 - Talk like a person: never copy the raw list format above (no "[open]", no "·" field separators). Say "Essay 1 draft for WRTG 1150, due Friday".
 - Plain text only: no markdown (no asterisks, no #). Short lines, "•" for bullets. Under 180 words unless asked for more.`;
 
 // Streams the reply as newline-delimited JSON events the chat panel understands:
 // {"t":"think"} while the model reasons, {"t":"text","v":"..."} for answer text, {"t":"error","v":"..."}.
-export async function streamReply(context: string, turns: Turn[]) {
+export async function streamReply({ text: context, refs }: { text: string; refs: Map<string, Ref> }, turns: Turn[]) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
   const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
@@ -71,6 +121,7 @@ export async function streamReply(context: string, turns: Turn[]) {
         reasoning: { enabled: false },
         stream: true,
         max_tokens: 900,
+        tools: TOOLS,
         messages: [{ role: "system", content: `${RULES}\n\n${context}` }, ...turns],
       }),
     }).catch(() => null);
@@ -98,6 +149,7 @@ export async function streamReply(context: string, turns: Turn[]) {
         let thinking = false;
         let sent = false; // any answer text yet?
         let retried = false;
+        const calls: { name: string; args: string }[] = []; // tool calls arrive in pieces
         try {
           for (;;) {
             const { value, done } = await reader.read();
@@ -136,8 +188,15 @@ export async function streamReply(context: string, turns: Turn[]) {
                 sent = true;
                 out.enqueue(encode({ t: "text", v: delta.content }));
               }
+              for (const tc of delta.tool_calls ?? []) {
+                const call = (calls[tc.index ?? 0] ??= { name: "", args: "" });
+                call.name += tc.function?.name ?? "";
+                call.args += tc.function?.arguments ?? "";
+              }
             }
           }
+          const proposals = calls.map((c) => toProposal(c, refs)).filter((p) => p !== null);
+          if (proposals.length) out.enqueue(encode({ t: "propose", v: proposals }));
         } catch {
           out.enqueue(encode({ t: "error", v: "The AI took too long. Try again, or ask something shorter." }));
         }
@@ -146,4 +205,34 @@ export async function streamReply(context: string, turns: Turn[]) {
     }),
     { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } },
   );
+}
+
+// A tool call becomes a proposal only if it's well-formed; refs resolve to real ids here, server-side.
+function toProposal(call: { name: string; args: string }, refs: Map<string, Ref>): Proposal | null {
+  let a: Record<string, unknown>;
+  try {
+    a = JSON.parse(call.args || "{}");
+  } catch {
+    return null;
+  }
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : undefined);
+  if (call.name === "add_item") {
+    const kind = (["assignment", "exam", "quiz", "reading"] as const).find((k) => k === a.kind) ?? "assignment";
+    const [course, title, due] = [str(a.course), str(a.title), str(a.due)];
+    return course && title && due && !Number.isNaN(Date.parse(due)) ? { type: "add", course, title, kind, due } : null;
+  }
+  if (call.name === "update_item") {
+    const item = refs.get(String(a.ref ?? ""));
+    if (!item) return null;
+    const due = str(a.due);
+    return {
+      type: "update",
+      id: item.id,
+      was: `${item.title} (${item.course})`,
+      title: str(a.title),
+      due: due && !Number.isNaN(Date.parse(due)) ? due : undefined,
+      done: typeof a.done === "boolean" ? a.done : undefined,
+    };
+  }
+  return null;
 }
