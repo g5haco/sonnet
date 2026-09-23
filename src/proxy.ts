@@ -22,8 +22,8 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const path = request.nextUrl.pathname;
-  // /api/cal: Google Calendar fetches the feed signed out; its secret URL is the key.
-  if (!data?.claims && !["/login", "/auth", "/api/cal/"].some((p) => path.startsWith(p))) {
+  // Calendar subscriptions and Vercel Cron authenticate with secrets instead of a user session.
+  if (!data?.claims && !["/login", "/auth", "/api/cal/", "/api/cron/"].some((p) => path.startsWith(p))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   return response;

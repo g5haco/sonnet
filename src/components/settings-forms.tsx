@@ -1,11 +1,20 @@
 "use client";
 
-import { CalendarDays, CalendarSync, CircleUser, SunMoon } from "lucide-react";
+import { CalendarDays, CalendarSync, CircleUser, Cloud, RefreshCw, SunMoon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { resetFeed, saveName, saveTerm, signOut } from "@/app/actions";
+import { ThinkingOrb } from "thinking-orbs";
+import {
+  disconnectCanvas,
+  resetFeed,
+  saveCanvasConnection,
+  saveName,
+  saveTerm,
+  signOut,
+  syncCanvasNow,
+} from "@/app/actions";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
 import { ThemeSwitcher } from "@/components/kibo-ui/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -69,16 +78,26 @@ export function Appearance() {
   );
 }
 
-export type SettingsSection = "semester" | "calendar" | "appearance" | "account";
+export type SettingsSection = "semester" | "canvas" | "calendar" | "appearance" | "account";
 export type Account = {
   email: string;
   name: string;
   term: { start: string; weeks: number } | null;
   feed: string | null;
+  canvas: {
+    baseUrl: string;
+    icsUrl: string;
+    tokenConnected: boolean;
+    lastSyncAt: string | null;
+    lastSyncStatus: "idle" | "syncing" | "success" | "error";
+    lastSyncError: string | null;
+    lastSyncCount: number;
+  };
 };
 
 const SECTIONS: { id: SettingsSection; label: string; icon: typeof CalendarDays }[] = [
   { id: "semester", label: "Semester", icon: CalendarDays },
+  { id: "canvas", label: "Canvas", icon: Cloud },
   { id: "calendar", label: "Google Calendar", icon: CalendarSync },
   { id: "appearance", label: "Appearance", icon: SunMoon },
   { id: "account", label: "Account", icon: CircleUser },
@@ -100,12 +119,12 @@ export function SettingsWindow({
   const help = "mt-1 mb-5 text-sm text-pretty text-muted-foreground";
   return (
     <Dialog open={section !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex h-[min(34rem,calc(100dvh-2rem))] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-2xl">
+      <DialogContent className="flex h-[min(46rem,calc(100dvh-2rem))] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
           <nav
             aria-label="Settings sections"
-            className="flex shrink-0 gap-1 overflow-x-auto border-b border-border p-2 sm:w-52 sm:flex-col sm:border-r sm:border-b-0 sm:p-3"
+            className="flex shrink-0 gap-1 overflow-x-auto border-b border-border p-2 sm:w-60 sm:flex-col sm:border-r sm:border-b-0 sm:p-4"
           >
             <p className="hidden px-2.5 pt-1 pb-3 text-sm font-medium sm:block">Settings</p>
             {SECTIONS.map(({ id, label: text, icon: Icon }) => (
@@ -126,7 +145,7 @@ export function SettingsWindow({
               </button>
             ))}
           </nav>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8">
             <AnimatePresence mode="wait" initial={false}>
               <motion.section
                 key={section}
@@ -156,6 +175,7 @@ export function SettingsWindow({
                     <FeedLink token={account.feed} />
                   </>
                 )}
+                {section === "canvas" && <CanvasForm connection={account.canvas} />}
                 {section === "appearance" && (
                   <>
                     <h2 className={heading}>Appearance</h2>
@@ -179,6 +199,165 @@ export function SettingsWindow({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CanvasForm({ connection }: { connection: Account["canvas"] }) {
+  const { resolvedTheme } = useTheme();
+  const {
+    pending: saving,
+    error,
+    submit,
+  } = useSubmit(saveCanvasConnection, () => toast.success("Canvas connection saved."));
+  const [syncing, startSync] = useTransition();
+  const [disconnecting, startDisconnect] = useTransition();
+  const [confirming, setConfirming] = useState(false);
+  const connected = connection.tokenConnected || Boolean(connection.icsUrl);
+  const sync = () =>
+    startSync(async () => {
+      const result = await syncCanvasNow();
+      if (result.error) toast.error(result.error);
+      else toast.success(`Canvas synced ${result.count ?? 0} item${result.count === 1 ? "" : "s"}.`);
+    });
+  const disconnect = () =>
+    startDisconnect(async () => {
+      const result = await disconnectCanvas();
+      setConfirming(false);
+      if (result.error) toast.error(result.error);
+      else toast("Canvas disconnected. Imported work stays in Sonnet.");
+    });
+  const last = connection.lastSyncAt
+    ? new Date(connection.lastSyncAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+    : "Not synced yet";
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-base font-medium">Canvas</h2>
+          <p className="mt-1 mb-5 text-sm text-pretty text-muted-foreground">
+            Pull courses, deadlines, assignment details and scores. Use either connection—or both for the best coverage.
+          </p>
+        </div>
+        {(syncing || connection.lastSyncStatus === "syncing") && (
+          <ThinkingOrb
+            state="connecting"
+            size={32}
+            theme={resolvedTheme === "light" ? "dark" : "light"}
+            aria-label="Connecting to Canvas"
+          />
+        )}
+      </div>
+
+      <form action={submit} className="grid gap-4">
+        <div className="grid gap-2">
+          <label htmlFor="canvas-base" className={label}>
+            Canvas address
+          </label>
+          <input
+            id="canvas-base"
+            name="baseUrl"
+            type="url"
+            required
+            defaultValue={connection.baseUrl}
+            placeholder="https://school.instructure.com"
+            className={field}
+          />
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
+          <div className="grid gap-2">
+            <label htmlFor="canvas-token" className={label}>
+              Access token
+            </label>
+            <input
+              id="canvas-token"
+              name="token"
+              type="password"
+              autoComplete="off"
+              placeholder={connection.tokenConnected ? "Connected — leave blank to keep" : "Paste token"}
+              className={field}
+            />
+            <p className="text-xs text-muted-foreground">
+              Encrypted before it is stored and never sent back to this screen.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="canvas-ics" className={label}>
+              Calendar feed URL
+            </label>
+            <input
+              id="canvas-ics"
+              name="icsUrl"
+              type="url"
+              defaultValue={connection.icsUrl}
+              placeholder="https://school.instructure.com/feeds/calendars/..."
+              className={field}
+            />
+            <p className="text-xs text-muted-foreground">
+              Adds dated Canvas events that are not returned by the token API.
+            </p>
+          </div>
+        </div>
+        <FormError text={error} />
+        <div className="flex flex-wrap gap-2">
+          <Button type="submit" disabled={saving} className="h-10 rounded-full px-5 active:scale-[0.97]">
+            {saving ? "Checking…" : "Save connection"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!connected || syncing}
+            onClick={sync}
+            className="h-10 rounded-full px-5 active:scale-[0.97]"
+          >
+            <RefreshCw className={cn("size-4", syncing && "animate-spin")} aria-hidden="true" />
+            {syncing ? "Syncing…" : "Sync now"}
+          </Button>
+        </div>
+      </form>
+
+      <div className="mt-6 rounded-xl bg-secondary/70 p-4 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="font-medium">{connected ? "Connected" : "Not connected"}</span>
+          <span className="font-mono text-xs text-muted-foreground">{last}</span>
+        </div>
+        {connection.lastSyncStatus === "success" && (
+          <p className="mt-1 text-muted-foreground">
+            Last sync found {connection.lastSyncCount} item{connection.lastSyncCount === 1 ? "" : "s"}.
+          </p>
+        )}
+        {connection.lastSyncError && (
+          <p role="alert" className="mt-1 text-destructive">
+            {connection.lastSyncError}
+          </p>
+        )}
+      </div>
+
+      {connected && (
+        <div className="mt-6 border-t border-border pt-5">
+          {confirming ? (
+            <Button
+              variant="destructive"
+              disabled={disconnecting}
+              onClick={disconnect}
+              onBlur={() => setConfirming(false)}
+              autoFocus
+              className="h-9 rounded-full px-4"
+            >
+              {disconnecting ? "Disconnecting…" : "Imported work stays. Disconnect?"}
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={() => setConfirming(true)}
+              className="h-9 rounded-full px-4 text-muted-foreground"
+            >
+              Disconnect Canvas
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

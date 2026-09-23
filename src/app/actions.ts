@@ -2,8 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  canvasBaseUrl,
+  canvasFeedUrl,
+  canvasPages,
+  encryptCanvasToken,
+  syncCanvasUser,
+  type CanvasCourse,
+} from "@/lib/canvas";
 import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Every action returns an error message for the UI, or nothing on success.
@@ -112,6 +121,101 @@ export async function resetFeed(): Promise<Result> {
     .update({ feed_token: crypto.randomUUID() })
     .eq("user_id", data?.claims.sub ?? "");
   return done(error, "make a new link");
+}
+
+// ---- Canvas ----
+
+export async function saveCanvasConnection(form: FormData): Promise<Result> {
+  const base = canvasBaseUrl(text(form, "baseUrl"));
+  const feedInput = text(form, "icsUrl");
+  const feed = feedInput ? canvasFeedUrl(feedInput) : null;
+  const token = text(form, "token");
+  if (!base) return { error: "Use your school's full HTTPS Canvas address." };
+  if (feedInput && !feed) return { error: "That Canvas calendar link doesn't look right." };
+
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (!userId) return { error: "Sign in again." };
+
+  try {
+    const admin = createAdminClient();
+    const { data: current, error: settingsError } = await admin
+      .from("settings")
+      .select("canvas_token_connected")
+      .eq("user_id", userId)
+      .single();
+    if (settingsError) throw settingsError;
+    if (!token && !feed && !current?.canvas_token_connected)
+      return { error: "Add an access token, a calendar link, or both." };
+    if (token) {
+      await canvasPages<CanvasCourse>(
+        `${base}/api/v1/courses?enrollment_type=student&state[]=available&per_page=1`,
+        token,
+      );
+      const { error } = await admin.from("canvas_connections").upsert({
+        user_id: userId,
+        token_encrypted: encryptCanvasToken(token),
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    }
+    const { error } = await admin
+      .from("settings")
+      .update({
+        canvas_base_url: base,
+        canvas_ics_url: feed,
+        canvas_token_connected: Boolean(token || current?.canvas_token_connected),
+        canvas_last_sync_status: "idle",
+        canvas_last_sync_error: null,
+      })
+      .eq("user_id", userId);
+    if (error) throw error;
+    revalidatePath("/", "layout");
+    return {};
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Couldn't save the Canvas connection." };
+  }
+}
+
+export async function syncCanvasNow(): Promise<Result & { count?: number }> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (!userId) return { error: "Sign in again." };
+  try {
+    const result = await syncCanvasUser(createAdminClient(), userId);
+    revalidatePath("/", "layout");
+    return { count: result.items };
+  } catch (error) {
+    revalidatePath("/", "layout");
+    return { error: error instanceof Error ? error.message : "Canvas sync failed." };
+  }
+}
+
+export async function disconnectCanvas(): Promise<Result> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (!userId) return { error: "Sign in again." };
+  try {
+    const admin = createAdminClient();
+    const { error: secretError } = await admin.from("canvas_connections").delete().eq("user_id", userId);
+    if (secretError) throw secretError;
+    const { error } = await admin
+      .from("settings")
+      .update({
+        canvas_base_url: null,
+        canvas_ics_url: null,
+        canvas_token_connected: false,
+        canvas_last_sync_status: "idle",
+        canvas_last_sync_error: null,
+      })
+      .eq("user_id", userId);
+    return done(error, "disconnect Canvas");
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Couldn't disconnect Canvas." };
+  }
 }
 
 // Stored on the account (auth user metadata), so it needs no table. Refreshing the session puts it in
