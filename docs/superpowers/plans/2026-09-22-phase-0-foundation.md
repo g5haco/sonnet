@@ -60,6 +60,8 @@ git add -A && git commit -m "chore: scaffold Next.js + Tailwind + shadcn"
 
 ### Task 2: Design tokens + Block component + dashboard shell
 
+> **As built:** shadcn already owns `muted`/`accent` as *background* colors, so custom names were dropped. Use shadcn's: `bg-background` (page), `bg-card` (block), `bg-secondary` (raised), `text-foreground`, `text-muted-foreground`, plus one new `brand` green (`--brand: #34c77b`). Blocks use `rounded-xl` (`--radius: 1rem`).
+
 **Files:**
 - Modify: `src/app/globals.css` (replace generated color variables with tokens below)
 - Modify: `src/app/layout.tsx` (Geist font, `className="dark"` on `<html>`, title "Sonnet")
