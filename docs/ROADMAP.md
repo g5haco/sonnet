@@ -1,8 +1,8 @@
 # Roadmap
 
-Each phase ends with: working feature deployed, committed + pushed, short update to Eric before starting the next.
+Each phase ends with: working feature deployed, committed + pushed, short update to you before starting the next.
 
-| # | Phase | You get | Needs from Eric |
+| # | Phase | You get | Needs from you |
 | --- | --- | --- | --- |
 | 0 | **Foundation** | Next.js app, dark "blocks" design system, magic-link login, deployed on Vercel | Supabase + Vercel accounts |
 | 1 | **Items & progress** | Courses, manual add, Up next list with check-off, **progress block** | — |
