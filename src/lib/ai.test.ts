@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, needsThinking } from "./ai";
+import { calendarLines, classLines, needsThinking } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -32,4 +32,18 @@ test("class times read Monday-first, without seconds", () => {
   expect(meetingLabel({ weekdays: [0, 2], starts: "18:30:00", ends: "20:00:00", location: "" })).toBe(
     "Tue/Sun 18:30–20:00",
   );
+});
+
+test("next class is found by date: today until it ends, then the next class day", () => {
+  const pols = [{ course: "POLS 202", weekdays: [1, 3], starts: "10:30:00", ends: "12:20:00", location: "" }];
+  const la = "America/Los_Angeles";
+  // 12:30 AM Wednesday Sep 23 in LA: today's class hasn't happened yet.
+  expect(classLines(pols, Date.parse("2026-09-23T07:30:00Z"), la)).toContain(
+    ": Wed, Sep 23 (today, starts in 10h 0m) 10:30–12:20 POLS 202; Mon, Sep 28 10:30–12:20 POLS 202; Wed, Sep 30",
+  );
+  // 11:00 AM: in class. 1:00 PM: over, so Monday is next.
+  expect(classLines(pols, Date.parse("2026-09-23T18:00:00Z"), la)).toContain(": Wed, Sep 23 (today, happening now)");
+  expect(classLines(pols, Date.parse("2026-09-23T20:00:00Z"), la)).toContain(": Mon, Sep 28 10:30–12:20 POLS 202;");
+  // Tuesday night: Wednesday is tomorrow.
+  expect(classLines(pols, Date.parse("2026-09-23T04:00:00Z"), la)).toContain(": Wed, Sep 23 (tomorrow)");
 });

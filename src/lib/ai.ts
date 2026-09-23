@@ -55,27 +55,66 @@ const TOOLS = [
   },
 ];
 
+// The student's local date (at noon UTC, so adding days never trips on DST) and local clock time "HH:MM".
+function localNow(now: number, timeZone: string) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(new Date(now))
+      .map((x) => [x.type, x.value]),
+  );
+  return { today: Date.UTC(+p.year, +p.month - 1, +p.day, 12), time: `${p.hour}:${p.minute}` };
+}
+
+const dayName = (ms: number) =>
+  new Date(ms).toLocaleDateString("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" });
+
 // The model doesn't count days reliably (it put "next Friday" on this Friday), so it gets an explicit calendar.
 export function calendarLines(now: number, timeZone: string) {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "numeric", day: "numeric" })
-      .formatToParts(new Date(now))
-      .map((p) => [p.type, p.value]),
-  );
-  const today = Date.UTC(+parts.year, +parts.month - 1, +parts.day, 12); // the local date, at noon UTC
-  const day = (i: number) =>
-    new Date(today + i * 864e5).toLocaleDateString("en-US", {
-      timeZone: "UTC",
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
+  const { today } = localNow(now, timeZone);
+  const day = (i: number) => dayName(today + i * 864e5);
   const monday = -((new Date(today).getUTCDay() + 6) % 7); // days back to this week's Monday
   return [
     `This week: ${day(monday)} to ${day(monday + 6)} (today is ${day(0)}). Next week: ${day(monday + 7)} to ${day(monday + 13)}.`,
     `Next 14 days: ${Array.from({ length: 14 }, (_, i) => day(i) + (i === 0 ? " (today)" : "")).join(", ")}.`,
     `Dates: "this Friday" = Friday of this week; "next Friday" = Friday of next week; a bare "Friday" = the next Friday to come. Always take dates from these lines.`,
   ];
+}
+
+type ClassRow = { course: string; weekdays: number[]; starts: string; ends: string; location: string };
+
+// Same reason: it named Thursday as the next Mon/Wed class. Real dates for every class in the coming week,
+// skipping today's classes that already ended, so "when's my next class" is a lookup, not arithmetic.
+export function classLines(meetings: ClassRow[], now: number, timeZone: string) {
+  const { today, time } = localNow(now, timeZone);
+  const sessions = [];
+  for (let i = 0; i <= 7; i++) {
+    const weekday = new Date(today + i * 864e5).getUTCDay();
+    for (const m of [...meetings].sort((a, b) => a.starts.localeCompare(b.starts))) {
+      if (!m.weekdays.includes(weekday) || (i === 0 && m.ends.slice(0, 5) <= time)) continue;
+      const mins = (t: string) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+      const wait = mins(m.starts) - mins(time); // the model miscounted this too ("10h 38m" for 10h 8m)
+      const when =
+        i === 0
+          ? wait <= 0
+            ? " (today, happening now)"
+            : ` (today, starts in ${Math.floor(wait / 60) ? `${Math.floor(wait / 60)}h ` : ""}${wait % 60}m)`
+          : i === 1
+            ? " (tomorrow)"
+            : "";
+      sessions.push(
+        `${dayName(today + i * 864e5)}${when} ${m.starts.slice(0, 5)}–${m.ends.slice(0, 5)} ${m.course}${m.location ? ` in ${m.location}` : ""}`,
+      );
+    }
+  }
+  return `Upcoming classes, in order (use these dates; never work out class days yourself): ${sessions.join("; ") || "none"}.`;
 }
 
 // Everything the assistant knows, rendered as plain text in the student's timezone.
@@ -112,7 +151,16 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
     ...calendarLines(now, timeZone),
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
-    `Class times (local): ${(meetings.data ?? []).map((m) => `${code.get(m.course_id) ?? "?"} ${meetingLabel(m)}`).join("; ") || "not added yet"}.`,
+    `Weekly class times (local): ${(meetings.data ?? []).map((m) => `${code.get(m.course_id) ?? "?"} ${meetingLabel(m)}`).join("; ") || "not added yet"}.`,
+    ...(meetings.data?.length
+      ? [
+          classLines(
+            meetings.data.map((m) => ({ ...m, course: code.get(m.course_id) ?? "?" })),
+            now,
+            timeZone,
+          ),
+        ]
+      : []),
     "Work (due dates in the student's local time):",
     work.join("\n") || "- nothing added yet",
   ].join("\n");
