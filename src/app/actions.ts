@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +15,7 @@ const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 async function done(error: { message: string } | null, what: string): Promise<Result> {
   if (error) return { error: `Couldn't ${what}. ${error.message}` };
-  revalidatePath("/");
+  revalidatePath("/", "layout"); // the shell (Create dialogs) reads courses too
   return {};
 }
 
@@ -38,6 +39,29 @@ export async function createCourse(form: FormData): Promise<Result> {
   if (readError) return done(readError, "add the course");
   const { error } = await supabase.from("courses").insert({ code, name, hue: nextHue(taken.map((c) => c.hue)) });
   return done(error, "add the course");
+}
+
+export async function updateCourse(form: FormData): Promise<Result> {
+  const code = text(form, "code");
+  const name = text(form, "name");
+  if (!code || code.length > 40) return { error: "Give the course a short code, like CHEM 1210." };
+  if (name.length > 120) return { error: "That name is too long." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("courses").update({ code, name }).eq("id", text(form, "id"));
+  return done(error, "save the course");
+}
+
+// Also deletes the course's items (on delete cascade), so the UI confirms first.
+export async function deleteCourse(id: string): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("courses").delete().eq("id", id);
+  return done(error, "delete the course");
+}
+
+export async function signOut() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }
 
 export async function createItem(form: FormData): Promise<Result> {

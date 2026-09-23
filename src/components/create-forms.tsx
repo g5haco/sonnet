@@ -11,10 +11,10 @@ import type { Item } from "@/lib/progress";
 
 export const field =
   "h-11 w-full rounded-full bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm";
-const label = "text-sm font-medium";
+export const label = "text-sm font-medium";
 
 // Runs a server action from a form; closes/continues on success, shows the error otherwise.
-function useSubmit(action: (f: FormData) => Promise<{ error?: string }>, onDone: () => void) {
+export function useSubmit(action: (f: FormData) => Promise<{ error?: string }>, onDone: () => void) {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
   const submit = (f: FormData) =>
@@ -26,7 +26,7 @@ function useSubmit(action: (f: FormData) => Promise<{ error?: string }>, onDone:
   return { pending, error, submit };
 }
 
-function Submit({ pending, children }: { pending: boolean; children: React.ReactNode }) {
+export function Submit({ pending, children }: { pending: boolean; children: React.ReactNode }) {
   return (
     <Button type="submit" disabled={pending} className="mt-2 h-11 rounded-full transition-transform active:scale-[0.97]">
       {pending ? "Saving…" : children}
@@ -34,7 +34,7 @@ function Submit({ pending, children }: { pending: boolean; children: React.React
   );
 }
 
-function FormError({ text }: { text: string }) {
+export function FormError({ text }: { text: string }) {
   return (
     <p role="alert" className="min-h-5 text-sm text-destructive">
       {text}

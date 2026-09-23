@@ -1,13 +1,9 @@
-import { redirect } from "next/navigation";
 import { Dashboard } from "@/components/dashboard";
 import type { Item } from "@/lib/progress";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/server";
 
 export default async function Page() {
-  const supabase = await createClient();
-  // The real check (proxy.ts only redirects optimistically).
-  const { data: auth } = await supabase.auth.getClaims();
-  if (!auth?.claims) redirect("/login");
+  const { supabase } = await requireUser();
 
   const [settings, courses, items] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),

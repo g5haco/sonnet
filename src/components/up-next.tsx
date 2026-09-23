@@ -65,7 +65,7 @@ export function UpNext({
               </Button>
             </>
           ) : (
-            <p>Nothing due. Add an assignment from Create, or wait for Canvas sync.</p>
+            <p>Nothing due. Add an assignment with the + in the sidebar, or wait for Canvas sync.</p>
           )}
         </div>
       ) : (

@@ -15,7 +15,7 @@ export function Block({
   return (
     <section className={cn("flex flex-col rounded-2xl bg-card p-5 md:p-6", className)}>
       {title && (
-        <header className="mb-4 flex items-baseline justify-between gap-3">
+        <header className="mb-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
           {aside && <div className="font-mono text-xs text-muted-foreground">{aside}</div>}
         </header>
