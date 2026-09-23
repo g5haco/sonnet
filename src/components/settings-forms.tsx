@@ -59,7 +59,7 @@ export function NameForm({ name }: { name: string }) {
           {pending ? "Saving…" : "Save"}
         </Button>
       </div>
-      <FormError text={error} />
+      {error && <FormError text={error} />}
     </form>
   );
 }
@@ -171,7 +171,7 @@ const SECTIONS: { id: SettingsSection; label: string; short?: string; icon: type
 
 const heading = "text-base font-medium";
 const help = "mt-1 text-sm text-pretty text-muted-foreground";
-const group = "mt-8 border-t border-border pt-6";
+const group = "mt-6 border-t border-border pt-6";
 
 // Settings float over whatever page you're on (it stays visible behind), so closing drops you right back.
 export function SettingsWindow({

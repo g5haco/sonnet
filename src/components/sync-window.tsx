@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarSync, ChevronDown, Cloud, Copy, RefreshCw } from "lucide-react";
+import { CalendarSync, ChevronDown, Cloud, Copy, ExternalLink, RefreshCw } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import { disconnectCanvas, resetFeed, saveCanvasConnection, syncCanvasNow } from
 import { useOpenSettings } from "@/components/app-shell";
 import { field, FormError, label, useSubmit } from "@/components/create-forms";
 import type { Account } from "@/components/settings-forms";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,7 @@ export function SyncWindow({ open, onClose, account }: { open: boolean; onClose:
           </DialogDescription>
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 sm:p-4">
-          <CanvasService connection={account.canvas} />
+          <CanvasService connection={account.canvas} hasTerm={Boolean(account.term)} />
           <Service
             icon={CalendarSync}
             name="Google Calendar"
@@ -100,10 +100,28 @@ export function SyncWindow({ open, onClose, account }: { open: boolean; onClose:
   );
 }
 
-function CanvasService({ connection }: { connection: Account["canvas"] }) {
+// Canvas and the feed both live on the semester's settings row, so both need semester dates first.
+function NeedsSemester({ what, className }: { what: string; className?: string }) {
+  const openSettings = useOpenSettings();
+  return (
+    <p className={cn("text-sm text-pretty text-muted-foreground", className)}>
+      {what} needs your semester dates.{" "}
+      <button
+        type="button"
+        onClick={() => openSettings("semester")}
+        className="text-foreground underline underline-offset-4"
+      >
+        Set them
+      </button>
+    </p>
+  );
+}
+
+function CanvasService({ connection, hasTerm }: { connection: Account["canvas"]; hasTerm: boolean }) {
   const connected = connection.tokenConnected || Boolean(connection.icsUrl);
   const [editing, setEditing] = useState(false);
-  const [syncing, startSync] = useTransition();
+  const [pending, startSync] = useTransition();
+  const syncing = pending || connection.lastSyncStatus === "syncing"; // this tab's click, or the server's run
   const sync = () =>
     startSync(async () => {
       const result = await syncCanvasNow();
@@ -112,7 +130,7 @@ function CanvasService({ connection }: { connection: Account["canvas"] }) {
     });
   const failed = connection.lastSyncStatus === "error" || Boolean(connection.lastSyncError);
   const status =
-    syncing || connection.lastSyncStatus === "syncing" ? (
+    syncing ? (
       <Status tone="busy">Syncing…</Status>
     ) : !connected ? (
       <Status tone="off">Not connected</Status>
@@ -175,7 +193,13 @@ function CanvasService({ connection }: { connection: Account["canvas"] }) {
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <CanvasForm connection={connection} connected={connected} onSaved={() => setEditing(false)} />
+            {!hasTerm && <NeedsSemester what="Canvas" className="mb-4 px-1" />}
+            <CanvasForm
+              connection={connection}
+              connected={connected}
+              disabled={!hasTerm}
+              onSaved={() => setEditing(false)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -186,10 +210,12 @@ function CanvasService({ connection }: { connection: Account["canvas"] }) {
 function CanvasForm({
   connection,
   connected,
+  disabled,
   onSaved,
 }: {
   connection: Account["canvas"];
   connected: boolean;
+  disabled: boolean; // no semester yet: nowhere to save the connection
   onSaved: () => void;
 }) {
   const { pending, error, submit } = useSubmit(saveCanvasConnection, () => {
@@ -253,7 +279,7 @@ function CanvasForm({
       </div>
       <FormError text={error} />
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" disabled={pending} className="h-10 rounded-full px-5 active:scale-[0.97]">
+        <Button type="submit" disabled={pending || disabled} className="h-10 rounded-full px-5 active:scale-[0.97]">
           {pending ? "Checking…" : connected ? "Save changes" : "Connect Canvas"}
         </Button>
         {connected &&
@@ -287,25 +313,15 @@ function CanvasForm({
 // The Google Calendar feed. The link is a secret (anyone with it sees your schedule), so it stays hidden
 // until asked for. "New link" retires the old URL, so it asks twice.
 export function FeedLink({ token, className }: { token: string | null; className?: string }) {
-  const openSettings = useOpenSettings();
   const [shown, setShown] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useTransition();
-  if (!token)
-    return (
-      <p className={cn("text-sm text-pretty text-muted-foreground", className)}>
-        The feed needs your semester dates.{" "}
-        <button
-          type="button"
-          onClick={() => openSettings("semester")}
-          className="text-foreground underline underline-offset-4"
-        >
-          Set them
-        </button>
-      </p>
-    );
+  if (!token) return <NeedsSemester what="The feed" className={className} />;
 
   const url = () => `${location.origin}/api/cal/${token}.ics`;
+  // Google's subscribe-by-URL takes the feed in `cid` (webcal:// is the calendar-subscription scheme).
+  const google = () =>
+    `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(url().replace(/^https?:/, "webcal:"))}`;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url());
@@ -347,7 +363,16 @@ export function FeedLink({ token, className }: { token: string | null; className
         Anyone with this link can see your schedule. If it leaks, make a new one.
       </p>
       <div className="flex flex-wrap gap-2">
-        <Button onClick={copy} className="h-9 rounded-full px-4 active:scale-[0.97]">
+        <a
+          href={google()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(buttonVariants(), "h-9 rounded-full px-4 active:scale-[0.97]")}
+        >
+          <ExternalLink className="size-4" aria-hidden="true" />
+          Open in Google Calendar
+        </a>
+        <Button variant="secondary" onClick={copy} className="h-9 rounded-full px-4 active:scale-[0.97]">
           <Copy className="size-4" aria-hidden="true" />
           Copy
         </Button>
