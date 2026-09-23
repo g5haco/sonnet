@@ -10,7 +10,7 @@ College students taking 4–6 courses, each with its own syllabus, Canvas page a
 
 ## Product Purpose
 
-One place for a student's classes. Canvas sync and syllabus import feed a single list of everything due; a progress readout shows how caught up you are; an AI that knows each course explains assignments and builds exam study guides. Success is opening Sonnet daily instead of Canvas, with every deadline for the semester already in it.
+One place for a student's classes. Canvas sync, syllabus import and a materials hub feed a single list of everything due and a calendar of classes, deadlines and exams; a progress readout shows how caught up you are; a global AI assistant that knows every course, assignment and exam answers questions, plans the week and builds study guides. Success is opening Sonnet daily instead of Canvas, with every deadline for the semester already in it.
 
 ## Brand Personality
 
