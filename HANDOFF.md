@@ -140,7 +140,8 @@ graph TD
 | `src/components/calendar.tsx`, `calendar-rail.tsx` | `/calendar` | Views, popovers, add from an empty slot, rail (mini month, heat map, class times, feed link). The URL keeps your place; T/D/W/M + arrow keys. |
 | `src/app/actions.ts` | All writes | Existing planner writes plus Canvas connect, sync-now, and disconnect actions. |
 | `src/components/materials.tsx` | Materials | Course Materials block (drop files, links, notes, 60s signed links) + floating `UploadWindow`. |
-| `src/components/settings-forms.tsx` | Settings window | Enlarged floating window; Semester, Canvas connection/sync status, Google Calendar, Appearance, Account. |
+| `src/components/settings-forms.tsx` | Settings window | Floating window, three groups: Account & appearance (visual theme picker), Semester (week N of M glance + dates), Data & privacy (Reset all data, type RESET). |
+| `src/components/sync-window.tsx` | Sync window | Floating window: one card per integration (Canvas, Google Calendar feed) with connected / not connected / syncing / failed status and the next action. The feed link is hidden behind "View feed link". |
 | `src/lib/canvas.ts` | Canvas integration | Validates URLs, encrypts/decrypts tokens, follows REST pagination, parses ICS, deduplicates sources, and performs server-only upserts. |
 | `src/lib/supabase/admin.ts` | Privileged server client | Uses a Supabase secret/service-role key only on the server; required for encrypted Canvas connection rows and cron. |
 | `src/app/api/cron/canvas/route.ts` | Automatic Canvas sync | `CRON_SECRET`-protected daily endpoint configured by `vercel.json`. |
@@ -171,7 +172,8 @@ Most features after Phase 3 were checked visually with sample data; they were no
 - **Courses:** `/courses` tilt grid → `/courses/[id]` (work, class times, materials, edit code/name/color, delete).
 - **Materials:** upload window (tiles: PDF/PowerPoint/Word/Images/Link/Note, drag and drop) and the per-course block. Files upload from the browser into the user's folder and open through 60s signed links. The AI does **not** read them yet (Phase 6).
 - **Assistant:** side panel or `/chat` (same conversation), course focus, Think toggle, dictation, shortcut/idea chips. Answers stream; proposals become confirm cards; flashcards become a flip deck. Chats auto-save after each answer; History is on `/chat`.
-- **Settings window:** opened from the sidebar or any `useOpenSettings()` call (e.g. Home's "set your real semester length" nudge when weeks ≤ 2).
+- **Settings and Sync windows:** both open from the sidebar (Sync gets a red dot when Canvas sync fails); Settings also from any `useOpenSettings()` call (e.g. Home's semester nudge).
+- **Chat task questions:** "what's due this week / overdue / what first" are answered on the server (`asksTasks`/`taskAnswer` in `ai.ts`): a one-line lead plus ordered Overdue / Due this week / Next up work cards, no model call. Flashcards only when asked (tool forced).
 - **Canvas:** Settings → Canvas accepts the school's base URL, access token, and/or calendar feed. Save validates the token without returning it to the client; Sync now imports courses and assignments. The daily cron repeats the sync after deployment.
 
 ## 11. AI System (single assistant, "Sonnet")
@@ -191,7 +193,7 @@ Most features after Phase 3 were checked visually with sample data; they were no
 - **Aesthetic:** "Precise, tactile, cheeky" (Linear/Raycast precision, Teenage Engineering readouts, grown-up Duolingo copy). Light and dark (system default; toggle in Settings). Tokens live in `src/app/globals.css` (OKLCH).
 - **Color meaning:** the brand "oscilloscope cyan" means "you, now" only; green = done; red = late/destructive. Course hues come from `HUES` in `src/lib/course.ts` (at least 40° away from red, green and cyan) and always appear with the course code.
 - **Type:** Geist + Geist Mono (readouts, labels, numbers).
-- **Layout:** sidebar rail (expands over content; a chat button sits beside the "+" when expanded) | page | AI panel docked at ≥1280px (a sheet below that; hidden on `/chat`). Settings and the uploader are **floating windows** over the current page. Nav: Home, Calendar, Courses, Chat (+ Settings). The **Materials tab was replaced by Courses**; materials live on course pages.
+- **Layout:** sidebar rail (expands over content; a round Chat button beside the "+" opens `/chat`) | page | AI panel docked at ≥1280px (a sheet below that; hidden on `/chat`). Settings and the uploader are **floating windows** over the current page. Nav: Home, Calendar, Courses (+ Sync and Settings windows at the bottom; Chat via the button by "+"). The **Materials tab was replaced by Courses**; materials live on course pages.
 - **Component rules:**
   - gooey (liquid-gooey): every liquid menu and picker (Create, Add, the chat course picker) and the calendar view switch
   - metal (silver): AI only (send, Ask, "AI" badge)
