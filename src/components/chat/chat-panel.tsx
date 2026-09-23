@@ -126,7 +126,7 @@ export function ChatPanel({
   messages: ChatMessage[];
   busy: boolean;
   onResolve: (message: number, index: number, accept: boolean) => void;
-  onSend: (text: string) => void;
+  onSend: (text: string, think?: boolean) => void;
   onClear: () => void;
   onClose: () => void;
   focusKey?: number;

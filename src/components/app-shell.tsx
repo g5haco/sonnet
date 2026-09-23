@@ -55,7 +55,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   };
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
-  const send = async (text: string) => {
+  const send = async (text: string, think = false) => {
     const history = [...messages.filter((m) => m.role !== "note" && m.text), { role: "user" as const, text }];
     const answer = (nextId.current += 2);
     const patch = (change: (m: ChatMessage) => ChatMessage) =>
@@ -74,6 +74,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          think,
           messages: history.map((m) => ({ role: m.role, content: m.text })),
         }),
         signal: ctrl.signal,

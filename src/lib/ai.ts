@@ -54,6 +54,29 @@ const TOOLS = [
   },
 ];
 
+// The model doesn't count days reliably (it put "next Friday" on this Friday), so it gets an explicit calendar.
+export function calendarLines(now: number, timeZone: string) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "numeric", day: "numeric" })
+      .formatToParts(new Date(now))
+      .map((p) => [p.type, p.value]),
+  );
+  const today = Date.UTC(+parts.year, +parts.month - 1, +parts.day, 12); // the local date, at noon UTC
+  const day = (i: number) =>
+    new Date(today + i * 864e5).toLocaleDateString("en-US", {
+      timeZone: "UTC",
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  const monday = -((new Date(today).getUTCDay() + 6) % 7); // days back to this week's Monday
+  return [
+    `This week: ${day(monday)} to ${day(monday + 6)} (today is ${day(0)}). Next week: ${day(monday + 7)} to ${day(monday + 13)}.`,
+    `Next 14 days: ${Array.from({ length: 14 }, (_, i) => day(i) + (i === 0 ? " (today)" : "")).join(", ")}.`,
+    `Dates: "this Friday" = Friday of this week; "next Friday" = Friday of next week; a bare "Friday" = the next Friday to come. Always take dates from these lines.`,
+  ];
+}
+
 // Everything the assistant knows, rendered as plain text in the student's timezone.
 export async function studentContext(supabase: SupabaseClient, timeZone: string) {
   const [settings, courses, items] = await Promise.all([
@@ -84,6 +107,7 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
 
   const text = [
     `Now: ${fmt(new Date(now).toISOString(), { dateStyle: "full", timeStyle: "short" })} (${timeZone}).`,
+    ...calendarLines(now, timeZone),
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
     "Class times: not added yet.",
@@ -102,9 +126,23 @@ Rules:
 - Talk like a person: never copy the raw list format above (no "[open]", no "·" field separators). Say "Essay 1 draft for WRTG 1150, due Friday".
 - Plain text only: no markdown (no asterisks, no #). Short lines, "•" for bullets. Under 180 words unless asked for more.`;
 
+// Reasoning costs ~10s before the first word, so it's only on when the question needs it:
+// tutoring-style asks (explain, solve, study, quiz…) or long messages. The Think toggle forces it.
+export const needsThinking = (question: string) =>
+  // Changing the planner ("add…", "move…") is quick tool work, even when it mentions an essay.
+  !/^\s*(please \s+)?(add|put|move|change|mark|rename|reschedule|schedule|remind|delete|check off)\b/i.test(question) &&
+  (question.length > 280 ||
+    /\b(explain|why|how (do|does|did|would|should|can|is|are)|solve|prove|derive|calculate|study|quiz|teach|understand|practice|compare|outline|brainstorm|help me (with|study|understand))\b/i.test(
+      question,
+    ));
+
 // Streams the reply as newline-delimited JSON events the chat panel understands:
 // {"t":"think"} while the model reasons, {"t":"text","v":"..."} for answer text, {"t":"error","v":"..."}.
-export async function streamReply({ text: context, refs }: { text: string; refs: Map<string, Ref> }, turns: Turn[]) {
+export async function streamReply(
+  { text: context, refs }: { text: string; refs: Map<string, Ref> },
+  turns: Turn[],
+  think = false,
+) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
   const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
@@ -118,9 +156,9 @@ export async function streamReply({ text: context, refs }: { text: string; refs:
       signal: AbortSignal.timeout(55_000), // route maxDuration is 60s
       body: JSON.stringify({
         ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }), // `models` = OpenRouter fallbacks
-        reasoning: { enabled: false },
+        reasoning: think ? { effort: "low" } : { enabled: false },
         stream: true,
-        max_tokens: 900,
+        max_tokens: think ? 2000 : 900, // reasoning tokens count against the budget
         tools: TOOLS,
         messages: [{ role: "system", content: `${RULES}\n\n${context}` }, ...turns],
       }),

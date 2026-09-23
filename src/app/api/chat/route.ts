@@ -1,4 +1,4 @@
-import { streamReply, studentContext, type Turn } from "@/lib/ai";
+import { needsThinking, streamReply, studentContext, type Turn } from "@/lib/ai";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 60; // free models can reason for a while before answering
@@ -29,5 +29,7 @@ export async function POST(request: Request) {
     timeZone = "UTC";
   }
 
-  return streamReply(await studentContext(supabase, timeZone), turns);
+  // Think toggle forces careful mode; otherwise the question decides.
+  const think = body?.think === true || needsThinking(turns.at(-1)!.content);
+  return streamReply(await studentContext(supabase, timeZone), turns, think);
 }

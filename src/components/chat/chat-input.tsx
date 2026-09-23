@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { ArrowUp, Mic, Square } from "lucide-react";
+import { ArrowUp, Lightbulb, Mic, Square } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
@@ -54,7 +54,7 @@ export function ChatInput({
   shortcuts = true,
   className,
 }: {
-  onSend: (text: string) => void;
+  onSend: (text: string, think: boolean) => void;
   busy?: boolean; // an answer is streaming
   shortcuts?: boolean; // off while the empty state already lists them
   focusKey?: number; // bump to focus the input (e.g. ⌘K)
@@ -64,6 +64,7 @@ export function ChatInput({
   const [focused, setFocused] = useState(false);
   const [placeholder, setPlaceholder] = useState(0);
   const [listening, setListening] = useState(false);
+  const [think, setThink] = useState(false); // off = Sonnet decides per question
   const wrapper = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const rec = useRef<Recognition | null>(null);
@@ -101,7 +102,7 @@ export function ChatInput({
     const t = text.trim();
     if (!t || busy) return;
     rec.current?.stop();
-    onSend(t);
+    onSend(t, think);
     setValue("");
   };
 
@@ -202,6 +203,23 @@ export function ChatInput({
               )}
             </div>
 
+            {/* Think: force careful (slower) answers. Off = Sonnet decides from the question. */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setThink((v) => !v);
+              }}
+              aria-pressed={think}
+              aria-label="Think harder"
+              title={think ? "Thinking on: slower, more careful answers" : "Think harder (otherwise Sonnet decides)"}
+              className={cn(
+                "grid size-9 shrink-0 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                think ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              <Lightbulb className={cn("size-4", think && "fill-current")} />
+            </button>
             {dictation && (
               <button
                 type="button"
