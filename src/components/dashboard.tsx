@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCreate } from "@/components/app-shell";
+import { useCreate, useOpenSettings } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
@@ -34,6 +34,7 @@ export function Dashboard({
   const [now] = useState(() => Date.now()); // one clock per render tree
   const { shown, checked, toggle: flipItem, remove } = useWork(items);
   const create = useCreate();
+  const openSettings = useOpenSettings();
 
   if (!term) return <TermSetup />;
   const termStart = new Date(`${term.start}T00:00:00`);
@@ -81,6 +82,19 @@ export function Dashboard({
         <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
         <p className="mt-1.5 text-base text-muted-foreground">
           {today} · week {week} of {term.weeks}
+          {/* A 1-week semester is almost always a typo, and it flattens every weekly readout. */}
+          {term.weeks <= 2 && (
+            <>
+              {" · "}
+              <button
+                type="button"
+                onClick={() => openSettings("semester")}
+                className="text-foreground underline underline-offset-4 hover:text-brand"
+              >
+                set your real semester length
+              </button>
+            </>
+          )}
         </p>
         <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
           <span>{dueThisWeek === 0 ? "nothing due this week" : `${dueThisWeek} due this week`}</span>

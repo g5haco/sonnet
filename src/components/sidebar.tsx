@@ -17,7 +17,6 @@ const NAV = [
   { href: "/courses", label: "Courses", icon: BookOpen }, // materials live on each course's page
   { href: "/chat", label: "Chat", icon: MessageCircle },
 ];
-const SETTINGS = { href: "/settings", label: "Settings", icon: Settings };
 
 const RAIL = 60;
 const WIDE = 232;
@@ -58,7 +57,36 @@ function NavLink({
   );
 }
 
-export function Sidebar({ onCreate, onAsk }: { onCreate: (kind: CreateKind) => void; onAsk: () => void }) {
+// Settings isn't a page: it opens the floating window over whatever page you're on.
+function SettingsButton({ open, onClick }: { open: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={open ? undefined : "Settings"}
+      className="group/link flex h-10 w-full items-center gap-3 rounded-xl px-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Settings className="size-5 shrink-0" aria-hidden="true" />
+      <motion.span
+        initial={false}
+        animate={{ opacity: open ? 1 : 0, display: open ? "inline-block" : "none" }}
+        className="whitespace-pre transition-transform duration-150 group-hover/link:translate-x-0.5"
+      >
+        Settings
+      </motion.span>
+    </button>
+  );
+}
+
+export function Sidebar({
+  onCreate,
+  onAsk,
+  onSettings,
+}: {
+  onCreate: (kind: CreateKind) => void;
+  onAsk: () => void;
+  onSettings: () => void;
+}) {
   const [hovered, setHovered] = useState(false);
   const [creating, setCreating] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -109,7 +137,7 @@ export function Sidebar({ onCreate, onAsk }: { onCreate: (kind: CreateKind) => v
             ))}
           </div>
           <div className="mt-auto">
-            <NavLink link={SETTINGS} open={open} active={isActive(SETTINGS.href)} />
+            <SettingsButton open={open} onClick={onSettings} />
           </div>
         </motion.nav>
       </div>
@@ -149,9 +177,16 @@ export function Sidebar({ onCreate, onAsk }: { onCreate: (kind: CreateKind) => v
             >
               <X className="size-5" />
             </button>
-            {[...NAV, SETTINGS].map((l) => (
+            {NAV.map((l) => (
               <NavLink key={l.href} link={l} open active={isActive(l.href)} onNavigate={() => setMenu(false)} />
             ))}
+            <SettingsButton
+              open
+              onClick={() => {
+                setMenu(false);
+                onSettings();
+              }}
+            />
           </motion.nav>
         )}
       </AnimatePresence>

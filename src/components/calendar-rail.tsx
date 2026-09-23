@@ -2,9 +2,9 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { resetFeed } from "@/app/actions";
+import { useState } from "react";
+import { useOpenSettings } from "@/components/app-shell";
+import { FeedLink } from "@/components/settings-forms";
 import { Button } from "@/components/ui/button";
 import { addDays, parseDay, range, type ClassMeeting, type Term, type View } from "@/lib/calendar";
 import { courseColor, dayKey, meetingLabel } from "@/lib/course";
@@ -135,15 +135,16 @@ function MiniMonth({ view, anchor, days, items, now, onPick }: Props) {
 // The semester at a glance: one cell per week, darker = more due. Doubles as navigation.
 const LEVELS = [0, 12, 26, 60, 82]; // % of foreground mixed into the cell; text flips to light from level 3
 function Semester({ term, items, now, days, view, onPick }: Props) {
+  const openSettings = useOpenSettings();
   if (!term)
     return (
       <section>
         <h2 className="mb-1 pl-1 text-sm font-medium">Semester</h2>
         <p className="pl-1 text-sm text-muted-foreground">
           Set your semester dates in{" "}
-          <Link href="/settings" className="text-foreground underline underline-offset-4">
+          <button type="button" onClick={() => openSettings()} className="text-foreground underline underline-offset-4">
             Settings
-          </Link>{" "}
+          </button>{" "}
           to see which weeks are heavy.
         </p>
       </section>
@@ -250,59 +251,5 @@ function Classes({ meetings }: { meetings: ClassMeeting[] }) {
         </ul>
       )}
     </section>
-  );
-}
-
-// Subscribe once in Google Calendar (one-way). "New link" retires the old secret URL, so it asks twice.
-export function FeedLink({ token, className }: { token: string | null; className?: string }) {
-  const [confirming, setConfirming] = useState(false);
-  const [pending, start] = useTransition();
-  if (!token) return <p className={cn("text-sm text-muted-foreground", className)}>Set your semester dates first.</p>;
-
-  const copy = async () => {
-    const url = `${location.origin}/api/cal/${token}.ics`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Feed link copied", { description: "Google Calendar: Other calendars, +, From URL, paste." });
-    } catch {
-      toast("Copy this link", { description: url, duration: 20_000 });
-    }
-  };
-  const renew = () =>
-    start(async () => {
-      const r = await resetFeed();
-      setConfirming(false);
-      if (r.error) toast.error(r.error);
-      else toast("New link made. The old one no longer works.");
-    });
-
-  return (
-    <div className={cn("flex flex-col gap-3", className)}>
-      <p className="text-sm text-pretty text-muted-foreground">
-        Classes, due dates and exams in Google Calendar. Copy the link, then in Google Calendar pick Other calendars, +,
-        From URL. Google refreshes it every few hours.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={copy} className="h-9 rounded-full px-4 active:scale-[0.97]">
-          Copy feed link
-        </Button>
-        {confirming ? (
-          <Button
-            variant="destructive"
-            disabled={pending}
-            onClick={renew}
-            onBlur={() => setConfirming(false)}
-            autoFocus
-            className="h-9 rounded-full px-4"
-          >
-            {pending ? "Making…" : "Old link stops working. OK?"}
-          </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => setConfirming(true)} className="h-9 rounded-full px-4">
-            New link
-          </Button>
-        )}
-      </div>
-    </div>
   );
 }

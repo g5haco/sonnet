@@ -11,6 +11,7 @@ import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/gooey-menu";
+import { SettingsWindow, type Account, type SettingsSection } from "@/components/settings-forms";
 import { Sidebar } from "@/components/sidebar";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ClassMeeting } from "@/lib/calendar";
@@ -39,6 +40,10 @@ type Assistant = {
   schedule: Schedule;
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
+// Any page can open the floating Settings window (e.g. the calendar's "set your semester dates").
+const SettingsContext = createContext<(section?: SettingsSection) => void>(() => {});
+export const useOpenSettings = () => useContext(SettingsContext);
+
 const AssistantContext = createContext<Assistant | null>(null);
 export const useAssistant = () => useContext(AssistantContext)!;
 
@@ -47,16 +52,19 @@ const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
 export function AppShell({
   courses,
   schedule,
+  account,
   children,
 }: {
   courses: Course[];
   schedule: Schedule;
+  account: Account;
   children: React.ReactNode;
 }) {
   const [now] = useState(() => Date.now());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
   const [due, setDue] = useState<string>();
   const [pick, setPick] = useState<string>();
+  const [settings, setSettings] = useState<SettingsSection | null>(null); // the floating window; null = closed
   // Assistant: docked (wide screens, open by default) or a sheet (everything else).
   const [docked, setDocked] = useState(true);
   const [sheet, setSheet] = useState(false);
@@ -206,89 +214,97 @@ export function AppShell({
   return (
     <MotionConfig reducedMotion="user">
       <CreateContext.Provider value={create}>
-        <AssistantContext.Provider
-          value={{
-            messages,
-            busy: messages.some((m) => m.state),
-            send,
-            clear,
-            resolve,
-            focus,
-            setFocus,
-            focusKey,
-            courses,
-            schedule,
-          }}
-        >
-          <div className="flex min-h-dvh flex-col md:flex-row">
-            <Sidebar onCreate={create} onAsk={openAssistant} />
-            <div className="min-w-0 flex-1">{children}</div>
-            {docked &&
-              !onChatPage &&
-              panel(
-                () => setDocked(false),
-                "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex",
-              )}
-          </div>
-
-          {/* The metal "Ask" button: always below xl; on xl only while the dock is closed. */}
-          <div
-            className={cn(
-              "fixed right-4 bottom-4 z-40 md:right-6 md:bottom-6",
-              docked && "xl:hidden",
-              onChatPage && "hidden",
-            )}
+        <SettingsContext.Provider value={(section = "semester") => setSettings(section)}>
+          <AssistantContext.Provider
+            value={{
+              messages,
+              busy: messages.some((m) => m.state),
+              send,
+              clear,
+              resolve,
+              focus,
+              setFocus,
+              focusKey,
+              courses,
+              schedule,
+            }}
           >
-            <MetalFx variant="circle" preset="silver" theme={theme}>
-              <button
-                type="button"
-                onClick={openAssistant}
-                aria-label="Ask the assistant (Ctrl+K)"
-                className="grid size-12 place-items-center rounded-full bg-foreground shadow-lg transition-transform active:scale-95"
-              >
-                <ThinkingOrb
-                  state="breathing"
-                  size={20}
-                  theme={theme === "dark" ? "light" : "dark"}
-                  aria-hidden="true"
-                />
-              </button>
-            </MetalFx>
-          </div>
+            <div className="flex min-h-dvh flex-col md:flex-row">
+              <Sidebar onCreate={create} onAsk={openAssistant} onSettings={() => setSettings("semester")} />
+              <div className="min-w-0 flex-1">{children}</div>
+              {docked &&
+                !onChatPage &&
+                panel(
+                  () => setDocked(false),
+                  "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex",
+                )}
+            </div>
 
-          <AnimatePresence>
-            {sheet && (
-              <div className="fixed inset-0 z-50 xl:hidden">
-                <motion.div
-                  className="absolute inset-0 bg-black/40"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setSheet(false)}
-                />
-                <motion.div
-                  className="absolute inset-y-0 right-0 flex w-full sm:w-[420px]"
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            {/* The metal "Ask" button: always below xl; on xl only while the dock is closed. */}
+            <div
+              className={cn(
+                "fixed right-4 bottom-4 z-40 md:right-6 md:bottom-6",
+                docked && "xl:hidden",
+                onChatPage && "hidden",
+              )}
+            >
+              <MetalFx variant="circle" preset="silver" theme={theme}>
+                <button
+                  type="button"
+                  onClick={openAssistant}
+                  aria-label="Ask the assistant (Ctrl+K)"
+                  className="grid size-12 place-items-center rounded-full bg-foreground shadow-lg transition-transform active:scale-95"
                 >
-                  {panel(() => setSheet(false), "h-dvh w-full border-l border-border")}
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
+                  <ThinkingOrb
+                    state="breathing"
+                    size={20}
+                    theme={theme === "dark" ? "light" : "dark"}
+                    aria-hidden="true"
+                  />
+                </button>
+              </MetalFx>
+            </div>
 
-          <CourseDialog open={dialog === "course"} onOpenChange={(o) => !o && setDialog(null)} />
-          <ItemDialog
-            kind={dialog === "course" ? null : dialog}
-            courses={courses}
-            now={now}
-            due={due}
-            course={pick}
-            onOpenChange={(o) => !o && setDialog(null)}
-          />
-        </AssistantContext.Provider>
+            <AnimatePresence>
+              {sheet && (
+                <div className="fixed inset-0 z-50 xl:hidden">
+                  <motion.div
+                    className="absolute inset-0 bg-black/40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setSheet(false)}
+                  />
+                  <motion.div
+                    className="absolute inset-y-0 right-0 flex w-full sm:w-[420px]"
+                    initial={{ x: "100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "100%" }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    {panel(() => setSheet(false), "h-dvh w-full border-l border-border")}
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
+            <SettingsWindow
+              section={settings}
+              onSection={setSettings}
+              onClose={() => setSettings(null)}
+              account={account}
+            />
+            <CourseDialog open={dialog === "course"} onOpenChange={(o) => !o && setDialog(null)} />
+            <ItemDialog
+              kind={dialog === "course" ? null : dialog}
+              courses={courses}
+              now={now}
+              due={due}
+              course={pick}
+              onOpenChange={(o) => !o && setDialog(null)}
+            />
+          </AssistantContext.Provider>
+        </SettingsContext.Provider>
       </CreateContext.Provider>
     </MotionConfig>
   );
