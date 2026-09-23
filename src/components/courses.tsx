@@ -11,6 +11,7 @@ import { Block } from "@/components/block";
 import { CourseFace, courseStats, type CourseCard } from "@/components/course-card";
 import { field, FormError, label, useSubmit } from "@/components/create-forms";
 import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
+import { Materials, type Material } from "@/components/materials";
 import { TiltCard } from "@/components/tilt-card";
 import { Button } from "@/components/ui/button";
 import { UpNext, useWork } from "@/components/up-next";
@@ -66,11 +67,13 @@ export function CourseView({
   course,
   items,
   meetings,
+  materials,
   term,
 }: {
   course: { id: string; code: string; name: string; hue: number };
   items: Item[];
   meetings: ClassMeeting[];
+  materials: Material[];
   term: Term | null;
 }) {
   const [now] = useState(() => Date.now());
@@ -121,6 +124,7 @@ export function CourseView({
             onDelete={remove}
             empty={`Nothing for ${course.code} yet. Add an assignment or exam with Add.`}
           />
+          <Materials course={course} materials={materials} />
         </div>
         <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
           <Block title="Class times">

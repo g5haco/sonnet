@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
+import { loadChat, saveChat } from "@/app/actions";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
@@ -38,6 +39,8 @@ type Assistant = {
   focusKey: number;
   courses: Course[];
   schedule: Schedule;
+  open: (id: string) => Promise<void>; // reopen a saved chat
+  chatId: string | null;
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
 // Any page can open the floating Settings window (e.g. the calendar's "set your semester dates").
@@ -69,8 +72,10 @@ export function AppShell({
   const [docked, setDocked] = useState(true);
   const [sheet, setSheet] = useState(false);
   const [focusKey, setFocusKey] = useState(0);
-  // Session-only history (decided 2026-09-23): lives here, so it survives page changes.
+  // The conversation lives here, so it survives page changes; each chat is also saved (History on /chat).
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const dirty = useRef(false); // changed since the last save
   const [focus, setFocus] = useState("");
   const onChatPage = usePathname() === "/chat"; // the page is the assistant there: no panel, no Ask button
   const nextId = useRef(0);
@@ -99,6 +104,8 @@ export function AppShell({
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
   const send = async (text: string, think = false) => {
+    if (!chatId) setChatId(crypto.randomUUID());
+    dirty.current = true;
     const history = [...messages.filter((m) => m.role !== "note" && m.text), { role: "user" as const, text }];
     const answer = (nextId.current += 2);
     const patch = (change: (m: ChatMessage) => ChatMessage) =>
@@ -173,6 +180,7 @@ export function AppShell({
             : m,
         ),
       );
+    dirty.current = true;
     const p = messages.find((m) => m.id === message)?.proposals?.[index]?.p;
     if (!p || !accept) return set("skipped");
     set("saving");
@@ -184,6 +192,31 @@ export function AppShell({
   const clear = () => {
     inflight.current?.abort();
     setMessages([]);
+    setChatId(null);
+  };
+
+  // Save once an answer (or a yes/no) settles. Streaming states and in-flight saves aren't stored.
+  useEffect(() => {
+    if (!dirty.current || !chatId || !messages.length || messages.some((m) => m.state)) return;
+    dirty.current = false;
+    const title = messages.find((m) => m.role === "user")?.text ?? "";
+    const stored = messages.map((m) => ({
+      ...m,
+      state: undefined, // dropped by JSON
+      proposals: m.proposals?.map((x) => (x.status === "saving" ? { ...x, status: "pending" as const } : x)),
+    }));
+    saveChat(chatId, title, focus, stored).then((r) => r.error && console.error("[chat]", r.error));
+  }, [messages, chatId, focus]);
+
+  const open = async (id: string) => {
+    const r = await loadChat(id);
+    if (!r.chat) return void toast.error(r.error);
+    inflight.current?.abort();
+    const loaded = (r.chat.messages as ChatMessage[]).map((m, i) => ({ ...m, id: i }));
+    nextId.current = loaded.length + 1; // new messages get fresh ids
+    setMessages(loaded);
+    setFocus(r.chat.focus);
+    setChatId(id);
   };
 
   // ⌘K / Ctrl+K: straight to the assistant from anywhere. Escape closes the sheet.
@@ -227,6 +260,8 @@ export function AppShell({
               focusKey,
               courses,
               schedule,
+              open,
+              chatId,
             }}
           >
             <div className="flex min-h-dvh flex-col md:flex-row">

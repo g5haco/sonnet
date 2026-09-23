@@ -7,13 +7,18 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { supabase } = await requireUser();
-  const [settings, course, items, meetings] = await Promise.all([
+  const [settings, course, items, meetings, materials] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("id, code, name, hue").eq("id", id).maybeSingle(),
     supabase.from("items").select(ITEM_COLS).eq("course_id", id).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).eq("course_id", id).order("starts"),
+    supabase
+      .from("materials")
+      .select("id, kind, name, path, url, body, size, mime, created_at")
+      .eq("course_id", id)
+      .order("created_at", { ascending: false }),
   ]);
-  const error = settings.error ?? course.error ?? items.error ?? meetings.error;
+  const error = settings.error ?? course.error ?? items.error ?? meetings.error ?? materials.error;
   if (error) throw new Error(`Couldn't load this course: ${error.message}`);
   if (!course.data) notFound();
 
@@ -23,6 +28,7 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       items={toItems(items.data!, [course.data])}
       meetings={toMeetings(meetings.data!, [course.data])}
+      materials={materials.data!}
     />
   );
 }

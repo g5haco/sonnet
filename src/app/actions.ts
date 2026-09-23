@@ -177,3 +177,87 @@ export async function setDone(id: string, isDone: boolean): Promise<Result> {
     .eq("id", id);
   return done(error, "save that check-off");
 }
+
+// ---- Chat history ----
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Saved after each answer (and each yes/no on a proposal). Chats aren't shown elsewhere, so no revalidate.
+export async function saveChat(id: string, title: string, focus: string, messages: unknown[]): Promise<Result> {
+  if (!UUID.test(id) || !Array.isArray(messages)) return { error: "Bad chat." };
+  const kept = messages.slice(-100);
+  if (JSON.stringify(kept).length > 400_000) return { error: "That chat is too long to save." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("chats").upsert({
+    id,
+    title: title.slice(0, 120),
+    focus: focus.slice(0, 40),
+    messages: kept,
+    updated_at: new Date().toISOString(),
+  });
+  return error ? { error: `Couldn't save the chat. ${error.message}` } : {};
+}
+
+export async function listChats() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("chats")
+    .select("id, title, focus, updated_at")
+    .order("updated_at", { ascending: false })
+    .limit(40);
+  return error ? { error: `Couldn't load your chats. ${error.message}`, chats: [] } : { chats: data };
+}
+
+export async function loadChat(id: string) {
+  if (!UUID.test(id)) return { error: "Bad chat." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("chats").select("id, focus, messages").eq("id", id).maybeSingle();
+  if (error || !data) return { error: "Couldn't open that chat." };
+  return { chat: data as { id: string; focus: string; messages: unknown[] } };
+}
+
+export async function deleteChat(id: string): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("chats").delete().eq("id", id);
+  return error ? { error: `Couldn't delete the chat. ${error.message}` } : {};
+}
+
+// ---- Course materials ----
+// Files go browser -> Storage directly (server actions have a 1 MB body limit); this records them.
+
+export async function addMaterial(m: {
+  course: string;
+  kind: "file" | "link" | "note";
+  name: string;
+  path?: string;
+  url?: string;
+  body?: string;
+  size?: number;
+  mime?: string;
+}): Promise<Result> {
+  const name = m.name?.trim().slice(0, 200);
+  if (!UUID.test(m.course) || !["file", "link", "note"].includes(m.kind) || !name) return { error: "Give it a name." };
+  if (m.kind === "link" && !/^https?:\/\/\S+$/i.test(m.url ?? "")) return { error: "That doesn't look like a link." };
+  if (m.kind === "note" && !m.body?.trim()) return { error: "The note is empty." };
+  if (m.kind === "file" && !m.path) return { error: "The upload didn't finish." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("materials").insert({
+    course_id: m.course,
+    kind: m.kind,
+    name,
+    path: m.kind === "file" ? m.path : null,
+    url: m.kind === "link" ? m.url : null,
+    body: m.kind === "note" ? m.body!.slice(0, 100_000) : null,
+    size: m.size ?? null,
+    mime: m.mime ?? null,
+  });
+  return done(error, "add it");
+}
+
+export async function deleteMaterial(id: string): Promise<Result> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("materials").select("path").eq("id", id).maybeSingle();
+  if (data?.path) await supabase.storage.from("materials").remove([data.path]);
+  const { error } = await supabase.from("materials").delete().eq("id", id);
+  return done(error, "delete it");
+}
