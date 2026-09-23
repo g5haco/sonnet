@@ -1,5 +1,6 @@
 import { addDays, sessions, startOfDay, type ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
+import { cn } from "@/lib/utils";
 
 export type CourseCard = {
   id: string;
@@ -38,7 +39,8 @@ export function courseStats(items: Item[], meetings: ClassMeeting[], now: number
 
 // A course as a physical index card in its own color. Same light card in both themes, so the dark ink on it
 // keeps >= 7:1 contrast whatever the page is doing.
-export function CourseFace({ course, now }: { course: CourseCard; now: number }) {
+// `compact`: the Home carousel's smaller cards keep only what reads at that size.
+export function CourseFace({ course, now, compact }: { course: CourseCard; now: number; compact?: boolean }) {
   const s = courseStats(course.items, course.meetings, now);
   return (
     <div
@@ -47,17 +49,29 @@ export function CourseFace({ course, now }: { course: CourseCard; now: number })
         background: `linear-gradient(165deg, oklch(0.82 0.11 ${course.hue}), oklch(0.7 0.13 ${course.hue}))`,
       }}
     >
-      <p className="font-mono text-lg leading-tight font-semibold tracking-tight">{course.code}</p>
-      {course.name && <p className="mt-1 line-clamp-2 text-sm leading-snug font-medium">{course.name}</p>}
+      <p className={cn("font-mono leading-tight font-semibold tracking-tight", compact ? "text-xl" : "text-lg")}>
+        {course.code}
+      </p>
+      {course.name && (
+        <p className={cn("mt-1 text-sm leading-snug font-medium", compact ? "line-clamp-1" : "line-clamp-2")}>
+          {course.name}
+        </p>
+      )}
       <div className="mt-auto">
         <p className="text-6xl leading-none font-medium tracking-tight tabular-nums">{s.week}</p>
         <p className="mt-1 font-mono text-xs">
           due this week{s.late > 0 && <span className="font-semibold"> · {s.late} late</span>}
         </p>
-        <p className="mt-3 flex flex-wrap justify-between gap-x-2 border-t border-[oklch(0.2_0_0/0.2)] pt-2 font-mono text-[11px] whitespace-nowrap">
-          <span>{s.examIn ? `exam in ${s.examIn}d` : "no exams yet"}</span>
-          <span>{s.nextClass ?? "no class times"}</span>
-        </p>
+        {compact ? (
+          <p className="mt-3 border-t border-[oklch(0.2_0_0/0.2)] pt-2 font-mono text-xs">
+            {s.examIn ? `exam in ${s.examIn}d` : s.nextClass ? `class ${s.nextClass}` : "no exams yet"}
+          </p>
+        ) : (
+          <p className="mt-3 flex flex-wrap justify-between gap-x-2 border-t border-[oklch(0.2_0_0/0.2)] pt-2 font-mono text-[11px] whitespace-nowrap">
+            <span>{s.examIn ? `exam in ${s.examIn}d` : "no exams yet"}</span>
+            <span>{s.nextClass ?? "no class times"}</span>
+          </p>
+        )}
       </div>
     </div>
   );

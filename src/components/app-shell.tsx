@@ -13,6 +13,7 @@ import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/create-menu";
 import { Sidebar } from "@/components/sidebar";
 import type { Deck, Proposal } from "@/lib/ai";
+import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
@@ -30,18 +31,28 @@ type Assistant = {
   busy: boolean;
   send: (text: string, think?: boolean) => void;
   clear: () => void;
-  resolve: (message: number, index: number, accept: boolean) => void;
+  resolve: (message: number, index: number, accept: boolean, due?: string) => void;
   focus: string; // course code this chat is about, "" = all courses
   setFocus: (code: string) => void;
   focusKey: number;
   courses: Course[];
+  schedule: Schedule;
 };
+export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
 const AssistantContext = createContext<Assistant | null>(null);
 export const useAssistant = () => useContext(AssistantContext)!;
 
 const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
 
-export function AppShell({ courses, children }: { courses: Course[]; children: React.ReactNode }) {
+export function AppShell({
+  courses,
+  schedule,
+  children,
+}: {
+  courses: Course[];
+  schedule: Schedule;
+  children: React.ReactNode;
+}) {
   const [now] = useState(() => Date.now());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
   const [due, setDue] = useState<string>();
@@ -144,7 +155,8 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   };
 
   // The student said yes (or no) to a change the assistant proposed. Only now is anything saved.
-  const resolve = async (message: number, index: number, accept: boolean) => {
+  // `due` is the card's (possibly corrected) local date-time, e.g. an exam time the student picked.
+  const resolve = async (message: number, index: number, accept: boolean, due?: string) => {
     const set = (status: "saving" | "saved" | "skipped" | "error", error?: string) =>
       setMessages((all) =>
         all.map((m) =>
@@ -165,10 +177,11 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
       form.set("title", p.title);
       form.set("kind", p.kind);
       form.set("course", course.id);
-      form.set("due", new Date(p.due).toISOString()); // the model gives local time; this browser knows the zone
+      form.set("due", new Date(due ?? p.due).toISOString()); // local time; this browser knows the zone
       result = await createItem(form);
     } else {
-      result = await updateItem(p.id, { title: p.title, due: p.due && new Date(p.due).toISOString(), done: p.done });
+      const when = due ?? p.due;
+      result = await updateItem(p.id, { title: p.title, due: when && new Date(when).toISOString(), done: p.done });
     }
     if (result.error) set("error", result.error);
     else set("saved");
@@ -218,6 +231,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
             setFocus,
             focusKey,
             courses,
+            schedule,
           }}
         >
           <div className="flex min-h-dvh flex-col md:flex-row">

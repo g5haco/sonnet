@@ -23,7 +23,9 @@ export function Dashboard({
   courses,
   items,
   cards,
+  name,
 }: {
+  name: string;
   term: Term | null;
   courses: Course[];
   items: Item[];
@@ -49,7 +51,17 @@ export function Dashboard({
   const today = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   const week = Math.min(Math.max(Math.floor((now - termStart.getTime()) / (7 * 864e5)) + 1, 1), term.weeks);
   const hour = date.getHours();
-  const greeting = hour < 5 ? "Up late." : hour < 12 ? "Morning." : hour < 18 ? "Afternoon." : "Evening.";
+  // A few ways to say hello per time of day, one per date (so it doesn't change on every visit), with your name.
+  const n = name.trim().split(/\s+/)[0];
+  const hellos =
+    hour < 5
+      ? [`Up late${n && `, ${n}`}.`, `Still up${n && `, ${n}`}?`]
+      : hour < 12
+        ? [`Morning${n && `, ${n}`}.`, `Ready to get to work${n && `, ${n}`}?`, `Fresh start${n && `, ${n}`}.`]
+        : hour < 18
+          ? [`Afternoon${n && `, ${n}`}.`, `Keep it rolling${n && `, ${n}`}.`, `Halfway there${n && `, ${n}`}.`]
+          : [`Evening${n && `, ${n}`}.`, `One more push${n && `, ${n}`}?`, `Wind-down time${n && `, ${n}`}.`];
+  const greeting = hellos[Math.floor((now - termStart.getTime()) / 864e5) % hellos.length] ?? hellos[0];
 
   // The one-line situation report under the greeting.
   const sunday = new Date(date);
@@ -65,12 +77,12 @@ export function Dashboard({
 
   return (
     <main className="@container mx-auto w-full max-w-6xl px-4 pt-5 pb-24 md:px-6 md:pt-7">
-      <header className="mb-5">
-        <h1 className="text-2xl font-medium tracking-tight">{greeting}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <header className="mb-6">
+        <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
+        <p className="mt-1.5 text-base text-muted-foreground">
           {today} · week {week} of {term.weeks}
         </p>
-        <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
+        <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
           <span>{dueThisWeek === 0 ? "nothing due this week" : `${dueThisWeek} due this week`}</span>
           {overdue > 0 && <span className="text-destructive">{overdue} overdue</span>}
           {nextExam && (
@@ -86,28 +98,6 @@ export function Dashboard({
       <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />
-          {cards.length > 0 && (
-            // Quick access to every course: spin the ring, tap a card to open it.
-            <Block
-              title="Courses"
-              aside={
-                <Link href="/courses" className="hover:text-foreground">
-                  all courses →
-                </Link>
-              }
-              className="overflow-hidden"
-            >
-              <Carousel
-                label="Your courses"
-                slides={cards.map((c) => ({
-                  key: c.id,
-                  href: `/courses/${c.id}`,
-                  label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
-                  face: <CourseFace course={c} now={now} />,
-                }))}
-              />
-            </Block>
-          )}
           <UpNext
             items={shown}
             now={now}
@@ -121,6 +111,31 @@ export function Dashboard({
         <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
           <ExamRing items={shown} now={now} />
           <WeekStrip items={shown} now={now} />
+          {cards.length > 0 && (
+            // Quick access to every course: spin the ring, tap a card to open it.
+            <Block
+              title="Courses"
+              aside={
+                <Link href="/courses" className="hover:text-foreground">
+                  all courses →
+                </Link>
+              }
+              className="overflow-hidden"
+            >
+              <Carousel
+                label="Your courses"
+                orbit={92}
+                width={360}
+                slides={cards.map((c) => ({
+                  key: c.id,
+                  href: `/courses/${c.id}`,
+                  label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
+                  face: <CourseFace course={c} now={now} compact />,
+                }))}
+              />
+            </Block>
+          )}
+
           <Block title="Grades" aside="with Canvas sync">
             {courses.length === 0 ? (
               <p className="text-sm text-muted-foreground">Your courses will line up here.</p>

@@ -3,7 +3,7 @@ import { ITEM_COLS, MEETING_COLS, toCards, toItems, toMeetings } from "@/lib/row
 import { requireUser } from "@/lib/supabase/server";
 
 export default async function Page() {
-  const { supabase } = await requireUser();
+  const { supabase, name } = await requireUser();
 
   const [settings, courses, items, meetings] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
@@ -17,6 +17,7 @@ export default async function Page() {
   const all = toItems(items.data!, courses.data!);
   return (
     <Dashboard
+      name={name}
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       courses={courses.data!}
       items={all}

@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { saveTerm, signOut } from "@/app/actions";
+import { saveName, saveTerm, signOut } from "@/app/actions";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
 import { ThemeSwitcher } from "@/components/kibo-ui/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,32 @@ export function SemesterForm({ start, weeks }: { start: string; weeks: number })
       <div className="sm:col-span-3">
         <FormError text={error} />
       </div>
+    </form>
+  );
+}
+
+// What Home calls you ("Morning, Eric.").
+export function NameForm({ name }: { name: string }) {
+  const { pending, error, submit } = useSubmit(saveName, () => toast.success("Saved. Say hi on Home."));
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <label htmlFor="your-name" className={label}>
+        What should Sonnet call you?
+      </label>
+      <div className="flex gap-2">
+        <input
+          id="your-name"
+          name="name"
+          maxLength={40}
+          defaultValue={name}
+          placeholder="First name"
+          className={field}
+        />
+        <Button type="submit" variant="secondary" disabled={pending} className="h-11 shrink-0 rounded-full px-5">
+          {pending ? "Saving…" : "Save"}
+        </Button>
+      </div>
+      <FormError text={error} />
     </form>
   );
 }

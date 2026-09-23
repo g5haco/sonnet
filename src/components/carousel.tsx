@@ -82,11 +82,11 @@ type Spot = { x: number; y: number; s: number; z: number };
    ONE function, read by the first paint and by the drag both.
    `f` is 1 at the front and 0 at the back, and it drives the
    size, the lean and the paint order together. */
-const spotOf = (i: number, n: number, turn: number): Spot => {
+const spotOf = (i: number, n: number, turn: number, orbit: number): Spot => {
   const th = (i - turn) * ((Math.PI * 2) / n);
   const f = (Math.cos(th) + 1) / 2;
   return {
-    x: Math.sin(th) * ORBIT,
+    x: Math.sin(th) * orbit,
     y: -(1 - f) * LEAN,
     s: mix(1 - DEPTH / 200, 1, f),
     /* paint order is a z-index, by hand: everything here is 2D, so
@@ -104,7 +104,19 @@ const write = (el: HTMLElement, sp: Spot, angle: number) => {
 
 const out = (t: number) => 1 - (1 - t) ** 4;
 
-export function Carousel({ slides, label = "Carousel" }: { slides: Slide[]; label?: string }) {
+export function Carousel({
+  slides,
+  label = "Carousel",
+  /* how far out to the sides the ring reaches, and the stage width that holds it. A small ring
+     (e.g. 64 / 320 in a side column) keeps the cards big and lets the others peek from behind. */
+  orbit = ORBIT,
+  width = STAGE_W,
+}: {
+  slides: Slide[];
+  label?: string;
+  orbit?: number;
+  width?: number;
+}) {
   const still = stillness();
   const n = slides.length;
   const router = useRouter();
@@ -128,19 +140,19 @@ export function Carousel({ slides, label = "Carousel" }: { slides: Slide[]; labe
   const [held, setHeld] = useState(false);
 
   const paint = useCallback(() => {
-    slots.current.forEach((el, i) => el && write(el, spotOf(i, n, turn.current), ANGLE[i % ANGLE.length]));
-  }, [n]);
+    slots.current.forEach((el, i) => el && write(el, spotOf(i, n, turn.current, orbit), ANGLE[i % ANGLE.length]));
+  }, [n, orbit]);
   useLayoutEffect(paint, [paint]);
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
   useLayoutEffect(() => {
     const el = frame.current!;
-    const fit = () => setK(Math.min(1, el.clientWidth / STAGE_W));
+    const fit = () => setK(Math.min(1, el.clientWidth / width));
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [width]);
 
   /* ── the settle ──────────────────────────────────────────
      Quart-out from wherever the ring currently is to a whole
@@ -229,7 +241,7 @@ export function Carousel({ slides, label = "Carousel" }: { slides: Slide[]; labe
     <div ref={frame} className="relative w-full" style={{ height: STAGE_H * k }}>
       <div
         className="car absolute top-0 left-1/2 origin-top"
-        style={{ width: STAGE_W, height: STAGE_H, transform: `translateX(-50%) scale(${k})` }}
+        style={{ width, height: STAGE_H, transform: `translateX(-50%) scale(${k})` }}
       >
         <div
           className="car-track"

@@ -96,6 +96,18 @@ export async function resetFeed(): Promise<Result> {
   return done(error, "make a new link");
 }
 
+// Stored on the account (auth user metadata), so it needs no table. Refreshing the session puts it in
+// the token right away, which is where pages read it.
+export async function saveName(form: FormData): Promise<Result> {
+  const name = text(form, "name").slice(0, 40);
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ data: { name } });
+  if (error) return { error: `Couldn't save your name. ${error.message}` };
+  await supabase.auth.refreshSession();
+  revalidatePath("/", "layout");
+  return {};
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

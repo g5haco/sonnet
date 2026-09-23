@@ -12,7 +12,7 @@ import { SHORTCUTS } from "@/components/chat/shortcuts";
 import { courseColor } from "@/lib/course";
 
 // The assistant as a full page: the same conversation as the side panel, with room to study in it.
-// Border beam rule: it runs around the input only while the assistant is working on an answer.
+// Border beam (Libraries.dev): always riding the page's input, brighter while the assistant is working.
 export function ChatPage() {
   const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses } = useAssistant();
   const { resolvedTheme } = useTheme();
@@ -131,12 +131,11 @@ export function ChatPage() {
 
       <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pb-4 md:px-6 md:pb-6">
         <BorderBeam
-          active={busy}
           size="md"
           colorVariant="colorful"
           theme={resolvedTheme === "light" ? "light" : "dark"}
           borderRadius={24}
-          strength={0.85}
+          strength={busy ? 1 : 0.7}
           className="w-full"
         >
           <ChatInput onSend={send} focusKey={focusKey} busy={busy} shortcuts={messages.length > 0} />

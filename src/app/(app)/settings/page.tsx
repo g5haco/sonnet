@@ -1,12 +1,12 @@
 import { Block } from "@/components/block";
 import { FeedLink } from "@/components/calendar-rail";
-import { Appearance, SemesterForm, SignOut } from "@/components/settings-forms";
+import { Appearance, NameForm, SemesterForm, SignOut } from "@/components/settings-forms";
 import { requireUser } from "@/lib/supabase/server";
 
 export const metadata = { title: "Settings · Sonnet" };
 
 export default async function Settings() {
-  const { supabase, email } = await requireUser();
+  const { supabase, email, name } = await requireUser();
   const settings = await supabase.from("settings").select("term_start, term_weeks, feed_token").maybeSingle();
   if (settings.error) throw new Error("Couldn't load your settings.");
 
@@ -29,7 +29,8 @@ export default async function Settings() {
       </Block>
 
       <Block title="Account" aside={email}>
-        <div>
+        <NameForm name={name} />
+        <div className="mt-2">
           <SignOut />
         </div>
       </Block>

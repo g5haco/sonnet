@@ -6,22 +6,18 @@ import { redirect } from "next/navigation";
 // row-level security is what protects data.
 export async function createClient() {
   const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (list) => {
-          try {
-            list.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
-          } catch {
-            // Server Components can't set cookies; proxy.ts refreshes the session instead.
-          }
-        },
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (list) => {
+        try {
+          list.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        } catch {
+          // Server Components can't set cookies; proxy.ts refreshes the session instead.
+        }
       },
     },
-  );
+  });
 }
 
 // Every signed-in page calls this (layouts don't re-run on navigation, so they can't guard).
@@ -30,5 +26,6 @@ export async function requireUser() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
-  return { supabase, email: String(data.claims.email ?? "") };
+  const meta = data.claims.user_metadata as { name?: string } | undefined;
+  return { supabase, email: String(data.claims.email ?? ""), name: meta?.name ?? "" };
 }
