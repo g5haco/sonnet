@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
 type Course = { id: string; code: string; hue: number };
 
 // Any page can open the Create flows (e.g. the dashboard's "Add your first course").
-const CreateContext = createContext<(kind: CreateKind) => void>(() => {});
+// `due` pre-fills the date (datetime-local "YYYY-MM-DDTHH:mm"), e.g. from a calendar slot.
+const CreateContext = createContext<(kind: CreateKind, due?: string) => void>(() => {});
 export const useCreate = () => useContext(CreateContext);
 
 const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
@@ -27,6 +28,7 @@ const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
 export function AppShell({ courses, children }: { courses: Course[]; children: React.ReactNode }) {
   const [now] = useState(() => Date.now());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
+  const [due, setDue] = useState<string>();
   // Assistant: docked (wide screens, open by default) or a sheet (everything else).
   const [docked, setDocked] = useState(true);
   const [sheet, setSheet] = useState(false);
@@ -39,8 +41,9 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
 
-  const create = (kind: CreateKind) => {
+  const create = (kind: CreateKind, due?: string) => {
     if (kind === "upload") return router.push("/materials");
+    setDue(due);
     if (kind !== "course" && courses.length === 0) {
       toast("Add a course first. Assignments and exams hang off it.");
       return setDialog("course");
@@ -230,6 +233,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
           kind={dialog === "course" ? null : dialog}
           courses={courses}
           now={now}
+          due={due}
           onOpenChange={(o) => !o && setDialog(null)}
         />
       </CreateContext.Provider>

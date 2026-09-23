@@ -28,7 +28,11 @@ export function useSubmit(action: (f: FormData) => Promise<{ error?: string }>, 
 
 export function Submit({ pending, children }: { pending: boolean; children: React.ReactNode }) {
   return (
-    <Button type="submit" disabled={pending} className="mt-2 h-11 rounded-full transition-transform active:scale-[0.97]">
+    <Button
+      type="submit"
+      disabled={pending}
+      className="mt-2 h-11 rounded-full transition-transform active:scale-[0.97]"
+    >
       {pending ? "Saving…" : children}
     </Button>
   );
@@ -100,11 +104,13 @@ export function ItemDialog({
   kind,
   courses,
   now,
+  due,
   onOpenChange,
 }: {
   kind: Item["kind"] | null; // null = closed
   courses: Course[];
   now: number;
+  due?: string;
   onOpenChange: (o: boolean) => void;
 }) {
   const { pending, error, submit } = useSubmit(createItem, () => {
@@ -148,7 +154,14 @@ export function ItemDialog({
                   key={c.id}
                   className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-secondary px-3 font-mono text-xs has-checked:ring-2 has-checked:ring-ring has-focus-visible:ring-2 has-focus-visible:ring-ring"
                 >
-                  <input type="radio" name="course" value={c.id} defaultChecked={i === 0} required className="sr-only" />
+                  <input
+                    type="radio"
+                    name="course"
+                    value={c.id}
+                    defaultChecked={i === 0}
+                    required
+                    className="sr-only"
+                  />
                   <span className="size-2 rounded-full" style={{ background: courseColor(c.hue) }} />
                   {c.code}
                 </label>
@@ -171,7 +184,7 @@ export function ItemDialog({
           <label htmlFor="due" className={`${label} mt-2`}>
             Due
           </label>
-          <input id="due" name="due" type="datetime-local" required defaultValue={tomorrow} className={field} />
+          <input id="due" name="due" type="datetime-local" required defaultValue={due ?? tomorrow} className={field} />
           <Submit pending={pending}>{kind === "exam" ? "Add exam" : "Add"}</Submit>
           <FormError text={error} />
         </form>

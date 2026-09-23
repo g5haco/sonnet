@@ -80,6 +80,7 @@
   --done: oklch(0.5 0.14 150);
   --course-l: 0.6;
   --course-c: 0.15;
+  --event: 20%; /* how much course color washes into calendar event fills */
   --destructive: oklch(0.55 0.2 27);
   --border: oklch(0 0 0 / 8%);
   --input: oklch(0 0 0 / 12%);
@@ -120,6 +121,7 @@
   --done: oklch(0.78 0.17 150);
   --course-l: 0.76;
   --course-c: 0.13;
+  --event: 30%;
   --destructive: oklch(0.7 0.19 25);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 12%);
