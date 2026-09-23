@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, needsThinking, toProposal } from "./ai";
+import { calendarLines, classLines, needsThinking, toProposal, wantsChange } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -75,4 +75,12 @@ test("tool calls become checked proposals: a room change keeps the rest of the c
   ).toMatchObject({ type: "add_class", courseId: "c1", weekdays: [2, 4], starts: "09:00", ends: "10:15" });
   expect(call("delete_item", { ref: "ffffff" })).toBeNull(); // unknown ref
   expect(call("set_semester", { start: "2026-08-24", weeks: 40 })).toBeNull(); // out of range
+});
+
+test("planner tools only for change requests", () => {
+  expect(wantsChange("What's due this week, in order of urgency?")).toBe(false);
+  expect(wantsChange("explain photosynthesis")).toBe(false);
+  expect(wantsChange("add an essay for POLS 202 due friday")).toBe(true);
+  expect(wantsChange("I have a quiz on thursday")).toBe(true);
+  expect(wantsChange("yes")).toBe(true);
 });
