@@ -58,6 +58,28 @@ export async function deleteCourse(id: string): Promise<Result> {
   return done(error, "delete the course");
 }
 
+export async function createMeeting(form: FormData): Promise<Result> {
+  const weekdays = [...new Set(form.getAll("day").map(Number))].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+  const starts = text(form, "starts");
+  const ends = text(form, "ends");
+  const location = text(form, "location");
+  if (!weekdays.length) return { error: "Pick at least one day." };
+  if (!/^\d{2}:\d{2}$/.test(starts) || !/^\d{2}:\d{2}$/.test(ends)) return { error: "Pick a start and end time." };
+  if (ends <= starts) return { error: "Class should end after it starts." };
+  if (location.length > 80) return { error: "That room name is too long." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("class_meetings")
+    .insert({ course_id: text(form, "course"), weekdays, starts, ends, location });
+  return done(error, "add the class time");
+}
+
+export async function deleteMeeting(id: string): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("class_meetings").delete().eq("id", id);
+  return done(error, "remove the class time");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

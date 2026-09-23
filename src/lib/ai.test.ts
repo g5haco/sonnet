@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { calendarLines, needsThinking } from "./ai";
+import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
   // 10:05 PM Wednesday in Los Angeles is already Thursday in UTC; the lines must say Wednesday.
@@ -22,4 +23,13 @@ test("reasoning turns on for tutoring, stays off for planner edits and lookups",
   expect(needsThinking("add an essay for writing due next friday")).toBe(false);
   expect(needsThinking("move my midterm to wednesday")).toBe(false);
   expect(needsThinking("what's due this week?")).toBe(false);
+});
+
+test("class times read Monday-first, without seconds", () => {
+  expect(meetingLabel({ weekdays: [5, 1, 3], starts: "10:00:00", ends: "10:50:00", location: "ECCR 1B40" })).toBe(
+    "Mon/Wed/Fri 10:00–10:50 · ECCR 1B40",
+  );
+  expect(meetingLabel({ weekdays: [0, 2], starts: "18:30:00", ends: "20:00:00", location: "" })).toBe(
+    "Tue/Sun 18:30–20:00",
+  );
 });

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { meetingLabel } from "./course";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
 // Default: OpenRouter free models, tried in order when one is rate-limited (decided 2026-09-23).
@@ -79,10 +80,11 @@ export function calendarLines(now: number, timeZone: string) {
 
 // Everything the assistant knows, rendered as plain text in the student's timezone.
 export async function studentContext(supabase: SupabaseClient, timeZone: string) {
-  const [settings, courses, items] = await Promise.all([
+  const [settings, courses, items, meetings] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("id, code, name").order("created_at"),
     supabase.from("items").select("id, title, kind, due, done_at, course_id").order("due").limit(300),
+    supabase.from("class_meetings").select("course_id, weekdays, starts, ends, location").order("starts"),
   ]);
   const now = Date.now();
   const fmt = (iso: string, opts: Intl.DateTimeFormatOptions) =>
@@ -110,7 +112,7 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
     ...calendarLines(now, timeZone),
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
-    "Class times: not added yet.",
+    `Class times (local): ${(meetings.data ?? []).map((m) => `${code.get(m.course_id) ?? "?"} ${meetingLabel(m)}`).join("; ") || "not added yet"}.`,
     "Work (due dates in the student's local time):",
     work.join("\n") || "- nothing added yet",
   ].join("\n");

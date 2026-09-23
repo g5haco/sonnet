@@ -8,7 +8,10 @@ export default async function Settings() {
   const { supabase, email } = await requireUser();
   const [settings, courses] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
-    supabase.from("courses").select("id, code, name, hue, items(count)").order("created_at"),
+    supabase
+      .from("courses")
+      .select("id, code, name, hue, items(count), class_meetings(id, weekdays, starts, ends, location)")
+      .order("created_at"),
   ]);
   if (settings.error ?? courses.error) throw new Error("Couldn't load your settings.");
 
@@ -31,6 +34,7 @@ export default async function Settings() {
               <CourseRow
                 key={c.id}
                 course={{ id: c.id, code: c.code, name: c.name, hue: c.hue, items: c.items[0]?.count ?? 0 }}
+                meetings={c.class_meetings}
               />
             ))}
           </ul>
