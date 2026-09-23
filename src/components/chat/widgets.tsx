@@ -79,7 +79,8 @@ export function WorkCard({ text }: { text: string }) {
   const refs = [...new Set(lines.filter((l) => !/^title:/i.test(l)).flatMap((l) => l.match(/\b[0-9a-f]{6}\b/g) ?? []))];
   const found = refs
     .map((r) => schedule.items.find((i) => i.id.startsWith(r)))
-    .filter((i): i is Item => i !== undefined);
+    .filter((i): i is Item => i !== undefined)
+    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due)); // urgency = soonest due, whatever order the model wrote
   const { shown, toggle } = useWork(found);
   if (!shown.length) return null;
 

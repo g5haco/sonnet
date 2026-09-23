@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, needsThinking, toProposal, wantsChange } from "./ai";
+import { calendarLines, classLines, asksTasks, needsThinking, taskBlocks, toolsFor, toProposal, wantsChange } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -83,4 +83,32 @@ test("planner tools only for change requests", () => {
   expect(wantsChange("add an essay for POLS 202 due friday")).toBe(true);
   expect(wantsChange("I have a quiz on thursday")).toBe(true);
   expect(wantsChange("yes")).toBe(true);
+});
+
+test("task questions get no tools; flashcards only when asked", () => {
+  const names = (q: string) => toolsFor(q).map((t) => t.function.name);
+  for (const q of [
+    "What assignments are due this week?",
+    "What should I work on this week?",
+    "Show my assignments this week in order of urgency.",
+    "What's due this week?",
+    "What's overdue?",
+    "What should I work on first this week?",
+  ])
+    expect(names(q)).toEqual([]);
+  expect(names("Make me flashcards for Chapter 4.")).toEqual(["make_flashcards"]);
+  expect(names("add an essay due friday")).toContain("add_item");
+  expect(names("add an essay due friday")).not.toContain("make_flashcards");
+});
+
+test("task questions get server-built work lists", () => {
+  const tasks = { overdue: ["aaa111"], thisWeek: ["bbb222", "ccc333"] };
+  expect(asksTasks("What's due this week?")).toBe(true);
+  expect(asksTasks("What should I work on first this week?")).toBe(true);
+  expect(asksTasks("Make me flashcards for Chapter 4.")).toBe(false);
+  expect(asksTasks("explain photosynthesis")).toBe(false);
+  expect(taskBlocks("What's overdue?", tasks)).not.toContain("bbb222");
+  expect(taskBlocks("What's due this week?", tasks)).toMatch(/title: Overdue\naaa111[\s\S]*title: Due this week\nbbb222\nccc333/);
+  expect(taskBlocks("What should I work on first?", tasks)).toContain("title: Next up");
+  expect(taskBlocks("What's overdue?", { overdue: [], thisWeek: [] })).toBe("");
 });
