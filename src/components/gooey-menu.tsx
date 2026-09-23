@@ -17,14 +17,17 @@ export const CREATE: MenuItem<CreateKind>[] = [
 ];
 
 // Geometry (px): a 40px trigger ("+", or a labelled pill measured at runtime) and 40px-tall pills. Closed,
-// each pill shrinks under the trigger so the goo hides it; open, they drip out as a column that stays
-// bridged to it (gap < goo blur). The Liquid group must contain the whole travel, or the filter clips pills.
+// each pill shrinks under the trigger so the goo hides it; opening, they drip out bridged while they still
+// overlap, then settle apart as separate pills: GAP is 2x the goo blur, past where the goo can span (~1.6x),
+// so the resting menu reads as distinct controls. The Liquid group must contain the whole travel, or the
+// filter clips pills.
 const BTN = 40;
 const PILL_W = 144;
-const GAP = 6;
+const BLUR = 8;
+const GAP = 2 * BLUR;
 const STEP = BTN + GAP;
 
-// The gooey menu (liquid-gooey "morph"): the sidebar's Create (with its chat companion), the Add buttons on
+// The gooey menu (liquid-gooey "morph"): the sidebar's Create, the Add buttons on
 // the calendar and course pages, and the Chat page's course picker. `direction`: "right" of the trigger
 // (sidebar rail), "down" under a right-aligned trigger (page headers), "below" under a left-aligned one.
 export function GooeyMenu<K extends string = CreateKind>({
@@ -39,7 +42,6 @@ export function GooeyMenu<K extends string = CreateKind>({
   mono,
   selected,
   tone = "secondary",
-  companion,
 }: {
   direction: "right" | "down" | "below";
   open: boolean;
@@ -52,9 +54,6 @@ export function GooeyMenu<K extends string = CreateKind>({
   mono?: boolean; // course codes read better in mono
   selected?: K;
   tone?: "secondary" | "primary";
-  // A second round button beside the trigger (the sidebar's chat). It tucks under the trigger, into the goo,
-  // whenever it's hidden or the menu is open, so the two never collide.
-  companion?: { label: string; icon: typeof Plus; onClick: () => void; show: boolean };
 }) {
   const root = useRef<HTMLDivElement>(null);
   const plus = useRef<HTMLButtonElement>(null);
@@ -63,17 +62,16 @@ export function GooeyMenu<K extends string = CreateKind>({
   const pill = Math.max(chevron ? 176 : PILL_W, direction === "right" ? 0 : trigger); // pickers carry a check mark
   const box =
     direction === "right"
-      ? { plusX: 0, width: trigger + 12 + pill, height: Math.max(items.length * STEP, BTN), side: "left-0" }
+      ? { plusX: 0, width: trigger + GAP + pill, height: Math.max(items.length * STEP, BTN), side: "left-0" }
       : {
           plusX: direction === "down" ? pill - trigger : 0,
           width: pill,
-          height: (items.length + 1) * STEP + 6,
+          height: (items.length + 1) * STEP,
           side: direction === "down" ? "right-0" : "left-0",
         };
   const tucked = { x: box.plusX + trigger / 2 - pill / 2, y: 0, scale: 0.25 };
   const spot = (i: number) =>
-    direction === "right" ? { x: trigger + 12, y: i * STEP, scale: 1 } : { x: 0, y: (i + 1) * STEP + 6, scale: 1 };
-  const side = companion?.show && !open;
+    direction === "right" ? { x: trigger + GAP, y: i * STEP, scale: 1 } : { x: 0, y: (i + 1) * STEP, scale: 1 };
 
   // A labelled trigger sizes to its text; the goo geometry follows the measured width.
   useLayoutEffect(() => {
@@ -105,21 +103,16 @@ export function GooeyMenu<K extends string = CreateKind>({
     };
   }, [open, onOpenChange]);
 
-  const Companion = companion?.icon;
   return (
     // Above everything only while open, so a closed picker never covers the expanding sidebar.
-    <div
-      ref={root}
-      className={cn("relative h-10", open ? "z-50" : "z-10")}
-      style={{ width: trigger + (side ? BTN + 16 : 0) }}
-    >
+    <div ref={root} className={cn("relative h-10", open ? "z-50" : "z-10")} style={{ width: trigger }}>
       {/* Liquid forces position: relative on itself, so this box does the anchoring. */}
       <div
         className={cn("pointer-events-none absolute top-0", box.side)}
         style={{ width: box.width, height: box.height }}
       >
         <Liquid
-          blur={10}
+          blur={BLUR}
           contrast={20}
           fill={tone === "primary" ? "var(--primary)" : "var(--secondary)"}
           shadow="0 6px 18px rgb(0 0 0 / 0.18)"
@@ -163,30 +156,6 @@ export function GooeyMenu<K extends string = CreateKind>({
               </Liquid.Item>
             );
           })}
-          {companion && Companion && (
-            <Liquid.Item
-              x={side ? trigger + 16 : box.plusX + trigger / 2 - BTN / 2}
-              y={0}
-              scale={side ? 1 : 0.25}
-              transition="smooth"
-              style={{ position: "absolute", top: 0, left: 0 }}
-            >
-              <button
-                type="button"
-                tabIndex={side ? 0 : -1}
-                aria-hidden={!side}
-                onClick={companion.onClick}
-                aria-label={companion.label}
-                title={companion.label}
-                className={cn(
-                  "grid size-10 place-items-center rounded-full transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-ring",
-                  side ? "pointer-events-auto opacity-100 hover:bg-accent/70" : "opacity-0",
-                )}
-              >
-                <Companion className="size-5" aria-hidden="true" />
-              </button>
-            </Liquid.Item>
-          )}
           {/* last, so it paints above the tucked pills */}
           <Liquid.Item x={0} y={0} style={{ position: "absolute", top: 0, left: box.plusX }}>
             <button

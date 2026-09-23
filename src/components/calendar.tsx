@@ -321,7 +321,11 @@ function TimeGrid({
   onDay,
 }: GridProps & { scroll: RefObject<number | null>; onAdd: (kind: CreateKind, due?: string) => void }) {
   const box = useRef<HTMLDivElement>(null);
-  const [hover, setHover] = useState<{ col: number; min: number } | null>(null);
+  // The "+ exam" hint is one element for the whole grid: it fades in and out and glides between slots, rather
+  // than mounting per column (that blinked on every column change and every class block you crossed).
+  // `glide` is off on the move that shows it, so it never slides in from where it last hid.
+  const [hover, setHover] = useState({ col: 0, min: 0, on: false, glide: false });
+  const off = () => setHover((h) => (h.on ? { ...h, on: false } : h));
   const single = days.length === 1;
   const todayKey = dayKey(new Date(now));
   const nowMin = minutes(new Date(now));
@@ -424,7 +428,18 @@ function TimeGrid({
         </div>
 
         <div ref={box} className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative grid" style={{ ...cols, height: 24 * HOUR }}>
+          <div
+            className="relative grid"
+            style={{ ...cols, height: 24 * HOUR }}
+            // Empty time = an exam at that time (deadlines go in the Due row above); anything else hides the hint.
+            onPointerMove={(e) => {
+              const col = (e.target as HTMLElement).dataset.col;
+              if (col === undefined) return off();
+              const min = slot(e);
+              setHover((h) => (h.on && h.col === +col && h.min === min ? h : { col: +col, min, on: true, glide: h.on }));
+            }}
+            onPointerLeave={off}
+          >
             <div className="relative">
               {Array.from({ length: 23 }, (_, h) => (
                 <span
@@ -453,29 +468,18 @@ function TimeGrid({
               return (
                 <div
                   key={key}
+                  data-col={col}
                   className={cn("relative cursor-cell border-l border-border", key === todayKey && "bg-brand/[0.04]")}
                   style={{
                     backgroundImage: "linear-gradient(var(--border) 1px, transparent 1px)",
                     backgroundSize: `100% ${HOUR}px`,
                   }}
-                  // Empty time = an exam at that time. Deadlines go in the Due row above.
-                  onPointerMove={(e) => {
-                    const min = slot(e);
-                    setHover((h) =>
-                      e.target !== e.currentTarget ? null : h?.col === col && h.min === min ? h : { col, min },
-                    );
+                  onClick={(e) => {
+                    if (e.target !== e.currentTarget) return;
+                    off(); // don't leave a stale hint behind the dialog
+                    onAdd("exam", `${key}T${hhmm(slot(e))}`);
                   }}
-                  onPointerLeave={() => setHover(null)}
-                  onClick={(e) => e.target === e.currentTarget && onAdd("exam", `${key}T${hhmm(slot(e))}`)}
                 >
-                  {hover?.col === col && (
-                    <div
-                      className="pointer-events-none absolute inset-x-1 rounded-md bg-accent px-1.5 pt-0.5 font-mono text-[11px] text-muted-foreground"
-                      style={{ top: (hover.min / 60) * HOUR, height: HOUR / 2 }}
-                    >
-                      + exam {clock(new Date(2000, 0, 1, 0, hover.min))}
-                    </div>
-                  )}
                   {placed
                     .filter((s) => dayKey(s.start) === key)
                     .map((s) => (
@@ -493,6 +497,21 @@ function TimeGrid({
                 </div>
               );
             })}
+            <div
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute top-0 left-14 truncate rounded-md bg-accent px-1.5 pt-0.5 font-mono text-[11px] text-muted-foreground duration-150 ease-out-quint motion-reduce:transition-none",
+                hover.glide ? "transition-[opacity,transform]" : "transition-opacity",
+                !hover.on && "opacity-0",
+              )}
+              style={{
+                width: `calc((100% - 3.5rem) / ${days.length} - 8px)`,
+                height: HOUR / 2,
+                transform: `translate(calc(${hover.col} * (100% + 8px) + 4px), ${(hover.min / 60) * HOUR}px)`,
+              }}
+            >
+              + exam {clock(new Date(2000, 0, 1, 0, hover.min))}
+            </div>
           </div>
         </div>
       </div>

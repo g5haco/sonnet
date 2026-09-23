@@ -115,9 +115,14 @@ export function ItemDialog({
   course?: string; // pre-picked course id
   onOpenChange: (o: boolean) => void;
 }) {
+  // `kind` turns null the moment it closes, but the dialog still animates out: keep showing what was open, or it
+  // flips to "Add an assignment", grows a Type row and jumps mid-exit.
+  const [last, setLast] = useState(kind);
+  if (kind && kind !== last) setLast(kind);
+  const exam = (kind ?? last) === "exam";
   const { pending, error, submit } = useSubmit(createItem, () => {
     onOpenChange(false);
-    toast.success(kind === "exam" ? "Exam added. It's on the countdown." : "Added to Up next.");
+    toast.success(exam ? "Exam added. It's on the countdown." : "Added to Up next.");
   });
   // Default: tomorrow at 11:59pm, the most common deadline there is.
   const tomorrow = `${dayKey(new Date(now + 864e5))}T23:59`;
@@ -126,7 +131,7 @@ export function ItemDialog({
     <Dialog open={kind !== null} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-2xl sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{kind === "exam" ? "Add an exam" : "Add an assignment"}</DialogTitle>
+          <DialogTitle>{exam ? "Add an exam" : "Add an assignment"}</DialogTitle>
           <DialogDescription>Shows up in Up next and your weekly progress.</DialogDescription>
         </DialogHeader>
         <form
@@ -145,7 +150,7 @@ export function ItemDialog({
             name="title"
             required
             maxLength={200}
-            placeholder={kind === "exam" ? "Midterm 1" : "Problem Set 3"}
+            placeholder={exam ? "Midterm 1" : "Problem Set 3"}
             className={field}
           />
           <fieldset className="mt-2 flex flex-col gap-2">
@@ -170,7 +175,7 @@ export function ItemDialog({
               ))}
             </div>
           </fieldset>
-          {kind !== "exam" && (
+          {!exam && (
             <>
               <label htmlFor="kind" className={`${label} mt-2`}>
                 Type
@@ -182,12 +187,12 @@ export function ItemDialog({
               </select>
             </>
           )}
-          {kind === "exam" && <input type="hidden" name="kind" value="exam" />}
+          {exam && <input type="hidden" name="kind" value="exam" />}
           <label htmlFor="due" className={`${label} mt-2`}>
             Due
           </label>
           <input id="due" name="due" type="datetime-local" required defaultValue={due ?? tomorrow} className={field} />
-          <Submit pending={pending}>{kind === "exam" ? "Add exam" : "Add"}</Submit>
+          <Submit pending={pending}>{exam ? "Add exam" : "Add"}</Submit>
           <FormError text={error} />
         </form>
       </DialogContent>
