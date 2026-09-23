@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { progress, type Item } from "./progress";
+import { progress, verdict, type Item } from "./progress";
 
 const start = new Date("2026-08-24T00:00:00");
 const at = (day: number) => new Date(start.getTime() + day * 864e5).toISOString();
@@ -17,9 +17,9 @@ test("percent, overdue, bars and weekly delta", () => {
   ];
   const p = progress(items, start, 4, new Date(at(16)));
   expect(p.current).toBe(2);
-  expect(p.percent).toBe(67); // 2 of 3 due-so-far done
+  expect(p.percent).toBe(66); // 2 of 3 due-so-far done (floored)
   expect(p.overdue).toBe(1);
-  expect(p.delta).toBe(17);   // day 9: 1 of 2 done (50%) -> 67%
+  expect(p.delta).toBe(16);   // day 9: 1 of 2 done (50%) -> 66%
   expect(p.bars).toEqual([
     { total: 1, done: 1 }, { total: 2, done: 1 }, { total: 1, done: 0 }, { total: 0, done: 0 },
   ]);
@@ -33,4 +33,26 @@ test("done counts now even if it was checked after `now` was read", () => {
 
 test("nothing due yet counts as fully caught up", () => {
   expect(progress([], start, 2, start).percent).toBe(100);
+});
+
+test("one overdue among many never rounds up to 100%", () => {
+  const items = [...Array.from({ length: 199 }, () => item(1, 1)), item(2, null)];
+  expect(progress(items, start, 2, new Date(at(3))).percent).toBe(99);
+});
+
+test("never 'fully caught up' while work is overdue or still open this week", () => {
+  // 2026-08-26 is a Wednesday; the week ends Sunday the 30th.
+  const now = new Date(at(2.5)); // Wed noon
+  const quiz = item(2.9, null);  // due tonight
+  const late = item(1, null);    // due yesterday
+  const nextWeek = item(8, null);
+  const say = (items: Item[]) => verdict(progress(items, start, 4, now));
+
+  expect(say([late, quiz])).toBe("One thing slipped. Very fixable.");
+  expect(say([quiz, nextWeek])).toBe("Nothing overdue. One thing left this week.");
+  expect(say([quiz, item(5, null), nextWeek])).toBe("Nothing overdue. 2 left this week.");
+  // Check them off and the verdict follows.
+  const done = (i: Item) => ({ ...i, doneAt: at(2) });
+  expect(say([done(late), done(quiz), nextWeek])).toBe("Fully caught up. Suspicious.");
+  expect(progress([done(late), done(quiz)], start, 4, now).percent).toBe(100);
 });

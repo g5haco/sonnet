@@ -13,7 +13,7 @@ import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { WeekStrip } from "@/components/week-strip";
 import { courseColor } from "@/lib/course";
-import { progress, type Item } from "@/lib/progress";
+import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
 type Course = { id: string; code: string; name: string; hue: number };
@@ -65,11 +65,8 @@ export function Dashboard({
   const greeting = hellos[Math.floor((now - termStart.getTime()) / 864e5) % hellos.length] ?? hellos[0];
 
   // The one-line situation report under the greeting.
-  const sunday = new Date(date);
-  sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7));
-  sunday.setHours(23, 59, 59, 999);
   const open = shown.filter((i) => !i.doneAt);
-  const dueThisWeek = open.filter((i) => Date.parse(i.due) >= now && Date.parse(i.due) <= sunday.getTime()).length;
+  const dueThisWeek = open.filter((i) => Date.parse(i.due) >= now && Date.parse(i.due) <= endOfWeek(now)).length;
   const overdue = open.filter((i) => Date.parse(i.due) < now).length;
   const nextExam = open
     .filter((i) => i.kind === "exam" && Date.parse(i.due) > now)
@@ -108,9 +105,12 @@ export function Dashboard({
       </header>
 
       {/* Two independent columns (not a grid), so no block is stretched to match its neighbour.
-          Container queries: the layout reacts to the space left beside the assistant panel. */}
+          Container queries: the layout reacts to the space left beside the assistant panel.
+          Grades (one row per course, the block that grows) lives in the wide column, two-up, so many courses
+          don't make the narrow column run on. Stacked on phones, the columns dissolve (`contents`) and
+          order-1 sends the two placeholders below the live blocks. */}
       <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="contents min-w-0 flex-1 flex-col gap-3 @3xl:flex">
           <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />
           <UpNext
             items={shown}
@@ -120,9 +120,29 @@ export function Dashboard({
             onDelete={remove}
             onAddCourse={courses.length ? undefined : () => create("course")}
           />
+          <Block title="Grades" aside="with Canvas sync" className="order-1">
+            {courses.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
+            ) : (
+              <ul className="-my-2 grid divide-y divide-border @4xl:grid-cols-2 @4xl:gap-x-8 @4xl:divide-y-0">
+                {courses.map((c) => (
+                  <li key={c.id} className="flex items-center gap-3 py-2">
+                    <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
+                    <span className="min-w-0 flex-1 truncate text-sm">
+                      <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
+                      {c.name && <span className="ml-2">{c.name}</span>}
+                    </span>
+                    <span className="font-mono text-muted-foreground" aria-label="No grade yet">
+                      –
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Block>
         </div>
 
-        <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
+        <div className="contents flex-col gap-3 @3xl:flex @3xl:w-80 @3xl:shrink-0">
           <ExamRing items={shown} now={now} />
           <WeekStrip items={shown} now={now} />
           {cards.length > 0 && (
@@ -150,27 +170,7 @@ export function Dashboard({
             </Block>
           )}
 
-          <Block title="Grades" aside="with Canvas sync">
-            {courses.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
-            ) : (
-              <ul className="-my-2 divide-y divide-border">
-                {courses.map((c) => (
-                  <li key={c.id} className="flex items-center gap-3 py-2">
-                    <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
-                    <span className="min-w-0 flex-1 truncate text-sm">
-                      <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
-                      {c.name && <span className="ml-2">{c.name}</span>}
-                    </span>
-                    <span className="font-mono text-muted-foreground" aria-label="No grade yet">
-                      –
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Block>
-          <Block title="Study days" aside="with the focus timer">
+          <Block title="Study days" aside="with the focus timer" className="order-1">
             <p className="text-sm text-muted-foreground">Your streak starts the first time you use the focus timer.</p>
           </Block>
         </div>

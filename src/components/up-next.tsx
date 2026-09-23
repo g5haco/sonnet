@@ -6,7 +6,7 @@ import { deleteItem, setDone } from "@/app/actions";
 import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import type { Item } from "@/lib/progress";
+import { endOfWeek, type Item } from "@/lib/progress";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { courseColor } from "@/lib/course";
@@ -79,10 +79,7 @@ export function when(due: string, now: number) {
 }
 
 function headline(open: Item[], now: number) {
-  const sunday = new Date(now);
-  sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7));
-  sunday.setHours(23, 59, 59);
-  const n = open.filter((i) => Date.parse(i.due) <= sunday.getTime()).length;
+  const n = open.filter((i) => Date.parse(i.due) <= endOfWeek(now)).length;
   if (n === 0) return "Nothing due this week. Suspicious.";
   if (n === 1) return "1 thing between you and the weekend.";
   return `${n} things between you and the weekend.`;
@@ -147,7 +144,9 @@ export function UpNext({
             const due = when(i.due, now);
             return (
               <li key={i.id} className="group flex items-center">
-                <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
+                {/* min-w-0: otherwise a long title sets the row's minimum width and pushes the due label and
+                    delete button out of the card */}
+                <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
                   <Checkbox
                     // a real <button>: a <span> checkbox inside <label> toggles twice on Space
                     nativeButton
@@ -158,24 +157,30 @@ export function UpNext({
                     className="size-5 rounded-full transition-transform active:scale-80 data-checked:animate-check-pop data-checked:border-done data-checked:bg-done"
                   />
                   <span className="min-w-0 flex-1">
-                    <span className={cn("block truncate transition-opacity duration-300", done && "opacity-45")}>
+                    {/* Two lines at most (anywhere: even one unbroken word wraps); the full title is on hover. */}
+                    <span
+                      title={i.title}
+                      className={cn(
+                        "line-clamp-2 [overflow-wrap:anywhere] transition-opacity duration-300",
+                        done && "opacity-45",
+                      )}
+                    >
                       <span className="strike" data-done={done || undefined}>
                         {i.title}
                       </span>
-                      {i.kind === "exam" && (
-                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-mono text-xs text-secondary-foreground no-underline">
-                          exam
-                        </span>
-                      )}
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                      <span className="size-2 rounded-full" style={{ background: courseColor(i.hue) }} />
-                      {i.course}
+                      <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
+                      <span className="truncate">{i.course}</span>
+                      {/* on the meta line, so a long title can't clip it */}
+                      {i.kind === "exam" && (
+                        <span className="shrink-0 rounded-full bg-secondary px-1.5 text-secondary-foreground">exam</span>
+                      )}
                     </span>
                   </span>
                   <span
                     className={cn(
-                      "font-mono text-sm tabular-nums",
+                      "shrink-0 font-mono text-sm tabular-nums",
                       done ? "text-muted-foreground" : due.late ? "text-destructive" : "text-foreground",
                     )}
                   >

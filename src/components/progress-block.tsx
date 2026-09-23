@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Block } from "@/components/block";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
-import { progress, type Item } from "@/lib/progress";
+import { progress, verdict, type Item } from "@/lib/progress";
 
 // Rolls the number on screen from its old value to the new one. Server HTML shows the real value,
 // so nothing animates on load; only changes count.
@@ -24,13 +24,6 @@ function Count({ value }: { value: number }) {
   return <span ref={ref}>{value}</span>;
 }
 
-function verdict(percent: number, overdue: number) {
-  if (percent === 100) return "Fully caught up. Suspicious.";
-  if (overdue === 1) return "One thing slipped. Very fixable.";
-  if (percent >= 80) return `${overdue} overdue. The rest is on track.`;
-  return `${overdue} overdue. Pick the smallest one and start there.`;
-}
-
 export function ProgressBlock({
   items,
   now,
@@ -48,6 +41,7 @@ export function ProgressBlock({
   const tallest = Math.max(1, ...p.bars.map((b) => b.total));
   const nowBar = useRef<HTMLDivElement>(null);
   const week = p.bars[p.current]; // undefined before week 1 or after the last week
+  const inTerm = !!week;
   const cleared = !!week && week.total > 0 && week.done === week.total;
   const wasCleared = useRef(cleared);
 
@@ -86,7 +80,7 @@ export function ProgressBlock({
               </span>
             )}
           </p>
-          <p className="mt-3 text-sm text-pretty">{verdict(p.percent, p.overdue)}</p>
+          <p className="mt-3 text-sm text-pretty">{verdict(p)}</p>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -123,15 +117,20 @@ export function ProgressBlock({
               );
             })}
           </div>
-          <div className="relative mt-2 flex justify-between font-mono text-xs text-muted-foreground">
-            <span>wk 1</span>
+          {/* "now" sits under its bar; each edge label shows only if its side has room (container query),
+              so they never overlap at any width. */}
+          <div className="mt-2 flex font-mono text-xs text-muted-foreground">
             <span
-              className="absolute -translate-x-1/2 text-brand"
-              style={{ left: `${((p.current + 0.5) / weeks) * 100}%` }}
+              className={cn("@container", !inTerm && "flex-1")}
+              style={inTerm ? { width: `calc(${((p.current + 0.5) / weeks) * 100}% - 1.5ch)` } : undefined}
             >
-              now
+              {/* label width plus a 1ch gap */}
+              <span className="hidden @min-[5ch]:inline">wk 1</span>
             </span>
-            <span>wk {weeks}</span>
+            {inTerm && <span className="w-[3ch] shrink-0 text-center text-brand">now</span>}
+            <span className="@container flex-1 text-right">
+              {weeks > 1 && <span className="hidden @min-[6ch]:inline">wk {weeks}</span>}
+            </span>
           </div>
         </div>
       </div>
