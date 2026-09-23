@@ -18,10 +18,10 @@
     "semantic_hash": "9b77af189a21a7a64e4bd7a426f64176"
   },
   "package.json": {
-    "mtime": 1790181119.014166,
-    "seen": 1790203714.8057725,
-    "ast_hash": "3e3c63f131b925f42b8ebc91554d419a",
-    "semantic_hash": "3e3c63f131b925f42b8ebc91554d419a"
+    "mtime": 1790203747.459138,
+    "seen": 1790203817.4435492,
+    "ast_hash": "dd40e808cd7b305d0e65a9b61371888b",
+    "semantic_hash": ""
   },
   "postcss.config.mjs": {
     "mtime": 1790128682.4333184,
@@ -42,10 +42,10 @@
     "semantic_hash": "506aee91392e720341a6e670cef3de76"
   },
   "src/app/(app)/courses/[id]/page.tsx": {
-    "mtime": 1790182320.3939018,
-    "seen": 1790203714.8057725,
-    "ast_hash": "73d785c17d95f0b524d1cce3c3b15bda",
-    "semantic_hash": "73d785c17d95f0b524d1cce3c3b15bda"
+    "mtime": 1790203769.5072181,
+    "seen": 1790203817.4435492,
+    "ast_hash": "056a93189aba880469e2b5675b3ccf23",
+    "semantic_hash": ""
   },
   "src/app/(app)/courses/page.tsx": {
     "mtime": 1790150324.3527515,
@@ -66,10 +66,10 @@
     "semantic_hash": "4cd1a1940d829f2f7d3d3c36671235de"
   },
   "src/app/actions.ts": {
-    "mtime": 1790202478.5952404,
-    "seen": 1790203714.8057725,
-    "ast_hash": "41acec49047391599bcd516f40fae6c9",
-    "semantic_hash": "41acec49047391599bcd516f40fae6c9"
+    "mtime": 1790203778.4190168,
+    "seen": 1790203817.4435492,
+    "ast_hash": "bbf6482675da39134db91aaf9f55798a",
+    "semantic_hash": ""
   },
   "src/app/api/cal/[token]/route.ts": {
     "mtime": 1790149645.7354324,
@@ -426,10 +426,10 @@
     "semantic_hash": "01e8142356e15c3404e0d84c48187cd0"
   },
   "CLAUDE.md": {
-    "mtime": 1790128682.428815,
-    "seen": 1790203714.8057725,
-    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
-    "semantic_hash": "5c27369b226fcf2be8a6cfe52224e767"
+    "mtime": 1790203718.59491,
+    "seen": 1790203817.4435492,
+    "ast_hash": "b0517ee048d45b5cd5463430230eb52f",
+    "semantic_hash": ""
   },
   "HANDOFF.md": {
     "mtime": 1790202478.59324,
@@ -478,5 +478,17 @@
     "seen": 1790203714.8057725,
     "ast_hash": "1717819aee917efa5c4bac7a2391f465",
     "semantic_hash": "1717819aee917efa5c4bac7a2391f465"
+  },
+  "src/lib/extract.test.ts": {
+    "mtime": 1790203778.450533,
+    "seen": 1790203817.4435492,
+    "ast_hash": "193d2f1c17927c58ce422f9eec1dddce",
+    "semantic_hash": ""
+  },
+  "src/lib/extract.ts": {
+    "mtime": 1790203752.7694764,
+    "seen": 1790203817.4435492,
+    "ast_hash": "7ca402f10744338a97fe1c3fba3f2eb5",
+    "semantic_hash": ""
   }
 }
