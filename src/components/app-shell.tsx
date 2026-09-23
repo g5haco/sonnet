@@ -4,7 +4,7 @@ import { MetalFx } from "metal-fx";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
@@ -31,6 +31,8 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   const [focusKey, setFocusKey] = useState(0);
   // Session-only history (decided 2026-09-23): lives here, so it survives page changes.
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const nextId = useRef(0);
+  const inflight = useRef<AbortController | null>(null);
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
@@ -50,13 +52,67 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
     setFocusKey((k) => k + 1);
   };
 
-  const send = (text: string) =>
-    setMessages((m) => [
-      ...m,
-      { id: m.length, role: "user", text },
-      // Phase 3 connects Claude; until then, say so instead of pretending.
-      { id: m.length + 1, role: "note", text: "I'm not connected yet. Real answers arrive in Phase 3." },
+  // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
+  const send = async (text: string) => {
+    const history = [...messages.filter((m) => m.role !== "note" && m.text), { role: "user" as const, text }];
+    const answer = (nextId.current += 2);
+    const patch = (change: (m: ChatMessage) => ChatMessage) =>
+      setMessages((all) => all.map((m) => (m.id === answer ? change(m) : m)));
+    setMessages((all) => [
+      ...all,
+      { id: answer - 1, role: "user", text },
+      { id: answer, role: "assistant", text: "", state: "reading" },
     ]);
+
+    const ctrl = new AbortController();
+    inflight.current = ctrl;
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          messages: history.map((m) => ({ role: m.role, content: m.text })),
+        }),
+        signal: ctrl.signal,
+      });
+      if (!res.ok || !res.body)
+        throw new Error((await res.json().catch(() => null))?.error ?? "Couldn't reach the assistant.");
+      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+      let buffer = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += value;
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines.filter(Boolean)) {
+          const e = JSON.parse(line) as { t: "think" | "text" | "error"; v?: string };
+          if (e.t === "think") patch((m) => ({ ...m, state: m.text ? m.state : "thinking" }));
+          else if (e.t === "text") patch((m) => ({ ...m, text: m.text + e.v, state: "writing" }));
+          else throw new Error(e.v);
+        }
+      }
+      patch((m) =>
+        m.text
+          ? { ...m, state: undefined }
+          : { ...m, role: "note", text: "No answer came back. Try again.", state: undefined },
+      );
+    } catch (err) {
+      if (ctrl.signal.aborted) return; // "new chat" cancelled it
+      patch((m) => ({
+        ...m,
+        role: "note",
+        text: err instanceof Error ? err.message : "Something went wrong.",
+        state: undefined,
+      }));
+    }
+  };
+
+  const clear = () => {
+    inflight.current?.abort();
+    setMessages([]);
+  };
 
   // ⌘K / Ctrl+K: straight to the assistant from anywhere. Escape closes the sheet.
   useEffect(() => {
@@ -74,7 +130,8 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
     <ChatPanel
       messages={messages}
       onSend={send}
-      onClear={() => setMessages([])}
+      onClear={clear}
+      busy={messages.some((m) => m.state)}
       onClose={onClose}
       focusKey={focusKey}
       className={className}
@@ -87,7 +144,11 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         <div className="flex min-h-dvh flex-col md:flex-row">
           <Sidebar onCreate={create} />
           <div className="min-w-0 flex-1">{children}</div>
-          {docked && panel(() => setDocked(false), "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex")}
+          {docked &&
+            panel(
+              () => setDocked(false),
+              "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex",
+            )}
         </div>
 
         {/* The metal "Ask" button: always below xl; on xl only while the dock is closed. */}

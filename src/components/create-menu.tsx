@@ -3,7 +3,7 @@
 import { BookOpen, CalendarClock, FilePlus2, FileUp, Plus } from "lucide-react";
 import { Liquid } from "liquid-gooey";
 import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { cn, isShown } from "@/lib/utils";
 
 export type CreateKind = "assignment" | "exam" | "course" | "upload";
 
@@ -65,10 +65,10 @@ export function CreateMenu({
     if (!open) return;
     const outside = (e: PointerEvent) => {
       // Two copies exist (desktop rail, phone bar); only the visible one decides.
-      if (root.current?.offsetParent && !root.current.contains(e.target as Node)) onOpenChange(false);
+      if (isShown(root.current) && !root.current?.contains(e.target as Node)) onOpenChange(false);
     };
     const escape = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || !root.current?.offsetParent) return;
+      if (e.key !== "Escape" || !isShown(root.current)) return;
       onOpenChange(false);
       plus.current?.focus();
     };

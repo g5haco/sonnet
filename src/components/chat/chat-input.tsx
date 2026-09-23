@@ -11,7 +11,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
-import { cn } from "@/lib/utils";
+import { cn, isShown } from "@/lib/utils";
 
 const PLACEHOLDERS = [
   "What's due before Friday?",
@@ -50,10 +50,12 @@ const useDictationSupported = () =>
 export function ChatInput({
   onSend,
   focusKey,
+  busy = false,
   shortcuts = true,
   className,
 }: {
   onSend: (text: string) => void;
+  busy?: boolean; // an answer is streaming
   shortcuts?: boolean; // off while the empty state already lists them
   focusKey?: number; // bump to focus the input (e.g. ⌘K)
   className?: string;
@@ -90,14 +92,14 @@ export function ChatInput({
   }, []);
 
   useEffect(() => {
-    if (focusKey && field.current?.offsetParent) field.current.focus();
+    if (focusKey && isShown(field.current)) field.current?.focus();
   }, [focusKey]);
 
   useEffect(() => () => rec.current?.stop(), []);
 
   const send = (text: string) => {
     const t = text.trim();
-    if (!t) return;
+    if (!t || busy) return;
     rec.current?.stop();
     onSend(t);
     setValue("");
@@ -174,21 +176,26 @@ export function ChatInput({
                       initial="hidden"
                       animate="shown"
                       exit="gone"
-                      variants={{ shown: { transition: { staggerChildren: 0.02 } }, gone: { transition: { staggerChildren: 0.01 } } }}
+                      variants={{
+                        shown: { transition: { staggerChildren: 0.02 } },
+                        gone: { transition: { staggerChildren: 0.01 } },
+                      }}
                     >
-                      {(focused ? "Ask anything about your courses…" : PLACEHOLDERS[placeholder]).split("").map((ch, i) => (
-                        <motion.span
-                          key={i}
-                          className="inline-block"
-                          variants={{
-                            hidden: { opacity: 0, filter: "blur(8px)", y: 6 },
-                            shown: { opacity: 1, filter: "blur(0px)", y: 0, transition: { duration: 0.3 } },
-                            gone: { opacity: 0, filter: "blur(8px)", y: -6, transition: { duration: 0.2 } },
-                          }}
-                        >
-                          {ch === " " ? "\u00a0" : ch}
-                        </motion.span>
-                      ))}
+                      {(focused ? "Ask anything about your courses…" : PLACEHOLDERS[placeholder])
+                        .split("")
+                        .map((ch, i) => (
+                          <motion.span
+                            key={i}
+                            className="inline-block"
+                            variants={{
+                              hidden: { opacity: 0, filter: "blur(8px)", y: 6 },
+                              shown: { opacity: 1, filter: "blur(0px)", y: 0, transition: { duration: 0.3 } },
+                              gone: { opacity: 0, filter: "blur(8px)", y: -6, transition: { duration: 0.2 } },
+                            }}
+                          >
+                            {ch === " " ? "\u00a0" : ch}
+                          </motion.span>
+                        ))}
                     </motion.span>
                   </AnimatePresence>
                 </div>
@@ -207,7 +214,9 @@ export function ChatInput({
                 title="Dictation uses your browser's speech service (Chrome sends the audio to Google)."
                 className={cn(
                   "grid size-9 shrink-0 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  listening ? "bg-brand text-brand-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                  listening
+                    ? "bg-brand text-brand-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
                 {listening ? <Square className="size-3.5 fill-current" /> : <Mic className="size-4" />}
@@ -215,14 +224,14 @@ export function ChatInput({
             )}
 
             {/* Metal marks the AI: it brightens once there's something to send. */}
-            <MetalFx variant="circle" preset="silver" theme={theme} strength={value.trim() ? 1 : 0.35}>
+            <MetalFx variant="circle" preset="silver" theme={theme} strength={value.trim() && !busy ? 1 : 0.35}>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   send(value);
                 }}
-                disabled={!value.trim()}
+                disabled={!value.trim() || busy}
                 aria-label="Send"
                 className="grid size-9 place-items-center rounded-full bg-foreground text-background transition-transform active:scale-95 disabled:bg-accent disabled:text-muted-foreground"
               >

@@ -30,8 +30,9 @@ All motion respects `prefers-reduced-motion` (the packages ship their own handli
 
 ## AI assistant
 
-- `POST /api/chat` route handler, streaming, Anthropic SDK (consult the claude-api skill when building). Model: Sonnet 5 for chat.
-- Context per request: today's date, semester, courses, class times, open and recently done items, exams. Prompt-cached. Budget target unchanged (≤ $10/month single user).
+- `POST /api/chat` route handler, streaming. Provider: **OpenRouter free models** (decided 2026-09-23 for cost), called through the OpenAI-compatible API so switching provider or model is config (`AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY`). Default fallback chain: Nemotron 3 Ultra → Qwen 3.8 27B → Gemma 4 31B, low reasoning effort. Free tier: 20 requests/min, 1,000/day on this account. Free providers may log prompts; revisit before the SaaS step.
+- Resilience: 55s timeout, one silent retry when a free model fails before answering, upstream errors logged.
+- Context per request: now (in the student's timezone), semester, courses, open, overdue and recently done items, exams. Budget: $0 on free models.
 - Shortcuts: "What's due this week?", "Plan my week", "Help me study for my next exam", "Catch me up" (overdue triage), "Explain an assignment". Later: context-aware chips (e.g. an exam within 7 days).
 - Later in the phase: tool use so the assistant can add and edit items ("put my essay due Friday"), always shown for confirmation before saving.
 - Voice dictation: browser Web Speech API (free; Chrome, Edge, Safari). Hidden where unsupported (Firefox). Note: Chrome sends dictated audio to Google for recognition; stated in Settings.
