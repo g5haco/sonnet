@@ -2,7 +2,7 @@
 
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import { createItem, updateItem } from "@/app/actions";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/create-menu";
 import { Sidebar } from "@/components/sidebar";
-import type { Proposal } from "@/lib/ai";
+import type { Deck, Proposal } from "@/lib/ai";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,21 @@ type Course = { id: string; code: string; hue: number };
 // the course (an id), e.g. from that course's page.
 const CreateContext = createContext<(kind: CreateKind, due?: string, course?: string) => void>(() => {});
 export const useCreate = () => useContext(CreateContext);
+
+// The one conversation, shared by the side panel and the Chat page.
+type Assistant = {
+  messages: ChatMessage[];
+  busy: boolean;
+  send: (text: string, think?: boolean) => void;
+  clear: () => void;
+  resolve: (message: number, index: number, accept: boolean) => void;
+  focus: string; // course code this chat is about, "" = all courses
+  setFocus: (code: string) => void;
+  focusKey: number;
+  courses: Course[];
+};
+const AssistantContext = createContext<Assistant | null>(null);
+export const useAssistant = () => useContext(AssistantContext)!;
 
 const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
 
@@ -37,6 +52,8 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   const [focusKey, setFocusKey] = useState(0);
   // Session-only history (decided 2026-09-23): lives here, so it survives page changes.
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [focus, setFocus] = useState("");
+  const onChatPage = usePathname() === "/chat"; // the page is the assistant there: no panel, no Ask button
   const nextId = useRef(0);
   const inflight = useRef<AbortController | null>(null);
   const router = useRouter();
@@ -55,6 +72,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   };
 
   const openAssistant = () => {
+    if (onChatPage) return setFocusKey((k) => k + 1);
     if (window.matchMedia(WIDE).matches) setDocked(true);
     else setSheet(true);
     setFocusKey((k) => k + 1);
@@ -81,6 +99,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         body: JSON.stringify({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           think,
+          focus: focus || undefined,
           messages: history.map((m) => ({ role: m.role, content: m.text })),
         }),
         signal: ctrl.signal,
@@ -96,16 +115,20 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
-          const e = JSON.parse(line) as { t: "think" | "text" | "propose" | "error"; v?: string | Proposal[] };
+          const e = JSON.parse(line) as {
+            t: "think" | "text" | "propose" | "cards" | "error";
+            v?: string | Proposal[] | Deck;
+          };
           if (e.t === "think") patch((m) => ({ ...m, state: m.text ? m.state : "thinking" }));
           else if (e.t === "text") patch((m) => ({ ...m, text: m.text + e.v, state: "writing" }));
           else if (e.t === "propose")
             patch((m) => ({ ...m, proposals: (e.v as Proposal[]).map((p) => ({ p, status: "pending" as const })) }));
+          else if (e.t === "cards") patch((m) => ({ ...m, cards: e.v as Deck }));
           else throw new Error(String(e.v));
         }
       }
       patch((m) =>
-        m.text || m.proposals?.length
+        m.text || m.proposals?.length || m.cards
           ? { ...m, state: undefined }
           : { ...m, role: "note", text: "No answer came back. Try again.", state: undefined },
       );
@@ -166,7 +189,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
     };
     document.addEventListener("keydown", keys);
     return () => document.removeEventListener("keydown", keys);
-  }, []);
+  }, [onChatPage]); // eslint-disable-line react-hooks/exhaustive-deps -- openAssistant only varies by page
 
   const panel = (onClose: () => void, className: string) => (
     <ChatPanel
@@ -184,62 +207,88 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   return (
     <MotionConfig reducedMotion="user">
       <CreateContext.Provider value={create}>
-        <div className="flex min-h-dvh flex-col md:flex-row">
-          <Sidebar onCreate={create} />
-          <div className="min-w-0 flex-1">{children}</div>
-          {docked &&
-            panel(
-              () => setDocked(false),
-              "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex",
+        <AssistantContext.Provider
+          value={{
+            messages,
+            busy: messages.some((m) => m.state),
+            send,
+            clear,
+            resolve,
+            focus,
+            setFocus,
+            focusKey,
+            courses,
+          }}
+        >
+          <div className="flex min-h-dvh flex-col md:flex-row">
+            <Sidebar onCreate={create} />
+            <div className="min-w-0 flex-1">{children}</div>
+            {docked &&
+              !onChatPage &&
+              panel(
+                () => setDocked(false),
+                "sticky top-0 hidden h-dvh w-[380px] shrink-0 border-l border-border xl:flex",
+              )}
+          </div>
+
+          {/* The metal "Ask" button: always below xl; on xl only while the dock is closed. */}
+          <div
+            className={cn(
+              "fixed right-4 bottom-4 z-40 md:right-6 md:bottom-6",
+              docked && "xl:hidden",
+              onChatPage && "hidden",
             )}
-        </div>
-
-        {/* The metal "Ask" button: always below xl; on xl only while the dock is closed. */}
-        <div className={cn("fixed right-4 bottom-4 z-40 md:right-6 md:bottom-6", docked && "xl:hidden")}>
-          <MetalFx variant="circle" preset="silver" theme={theme}>
-            <button
-              type="button"
-              onClick={openAssistant}
-              aria-label="Ask the assistant (Ctrl+K)"
-              className="grid size-12 place-items-center rounded-full bg-foreground shadow-lg transition-transform active:scale-95"
-            >
-              <ThinkingOrb state="breathing" size={20} theme={theme === "dark" ? "light" : "dark"} aria-hidden="true" />
-            </button>
-          </MetalFx>
-        </div>
-
-        <AnimatePresence>
-          {sheet && (
-            <div className="fixed inset-0 z-50 xl:hidden">
-              <motion.div
-                className="absolute inset-0 bg-black/40"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setSheet(false)}
-              />
-              <motion.div
-                className="absolute inset-y-0 right-0 flex w-full sm:w-[420px]"
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <MetalFx variant="circle" preset="silver" theme={theme}>
+              <button
+                type="button"
+                onClick={openAssistant}
+                aria-label="Ask the assistant (Ctrl+K)"
+                className="grid size-12 place-items-center rounded-full bg-foreground shadow-lg transition-transform active:scale-95"
               >
-                {panel(() => setSheet(false), "h-dvh w-full border-l border-border")}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+                <ThinkingOrb
+                  state="breathing"
+                  size={20}
+                  theme={theme === "dark" ? "light" : "dark"}
+                  aria-hidden="true"
+                />
+              </button>
+            </MetalFx>
+          </div>
 
-        <CourseDialog open={dialog === "course"} onOpenChange={(o) => !o && setDialog(null)} />
-        <ItemDialog
-          kind={dialog === "course" ? null : dialog}
-          courses={courses}
-          now={now}
-          due={due}
-          course={pick}
-          onOpenChange={(o) => !o && setDialog(null)}
-        />
+          <AnimatePresence>
+            {sheet && (
+              <div className="fixed inset-0 z-50 xl:hidden">
+                <motion.div
+                  className="absolute inset-0 bg-black/40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSheet(false)}
+                />
+                <motion.div
+                  className="absolute inset-y-0 right-0 flex w-full sm:w-[420px]"
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {panel(() => setSheet(false), "h-dvh w-full border-l border-border")}
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          <CourseDialog open={dialog === "course"} onOpenChange={(o) => !o && setDialog(null)} />
+          <ItemDialog
+            kind={dialog === "course" ? null : dialog}
+            courses={courses}
+            now={now}
+            due={due}
+            course={pick}
+            onOpenChange={(o) => !o && setDialog(null)}
+          />
+        </AssistantContext.Provider>
       </CreateContext.Provider>
     </MotionConfig>
   );

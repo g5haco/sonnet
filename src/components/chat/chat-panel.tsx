@@ -1,13 +1,13 @@
 "use client";
 
-import { Check, SquarePen, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, SquarePen, X } from "lucide-react";
 import { MetalBadge } from "metal-fx";
 import { useTheme } from "next-themes";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
 import { Button } from "@/components/ui/button";
-import type { Proposal } from "@/lib/ai";
+import type { Deck, Proposal } from "@/lib/ai";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,7 @@ export type ChatMessage = {
   state?: "reading" | "thinking" | "writing";
   // changes the assistant proposed; nothing is saved until the student confirms
   proposals?: { p: Proposal; status: "pending" | "saving" | "saved" | "skipped" | "error"; error?: string }[];
+  cards?: Deck; // flashcards the assistant made
 };
 
 const when = (local: string) =>
@@ -189,44 +190,7 @@ export function ChatPanel({
             </ul>
           </div>
         ) : (
-          <ol className="flex flex-col gap-4">
-            {messages.map((m) =>
-              m.role === "user" ? (
-                <li
-                  key={m.id}
-                  className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 text-sm"
-                >
-                  {m.text}
-                </li>
-              ) : m.role === "note" ? (
-                <li key={m.id} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <ThinkingOrb state="breathing" size={20} aria-hidden="true" className="mt-px shrink-0" />
-                  {m.text}
-                </li>
-              ) : !m.text && (m.state === "reading" || m.state === "thinking") ? (
-                <li key={m.id} className="flex items-center gap-2.5 text-sm text-muted-foreground" aria-busy="true">
-                  <ThinkingOrb state={STATUS[m.state].orb} size={20} aria-hidden="true" />
-                  {STATUS[m.state].label}
-                </li>
-              ) : (
-                // aria-busy: screen readers announce the finished answer, not every streamed word
-                <li key={m.id} className="text-sm leading-relaxed whitespace-pre-wrap" aria-busy={!!m.state}>
-                  {plain(m.text)}
-                  {m.proposals?.map((item, i) => (
-                    <ProposalCard key={i} item={item} onResolve={(accept) => onResolve(m.id, i, accept)} />
-                  ))}
-                  {m.state === "writing" && (
-                    <ThinkingOrb
-                      state="composing"
-                      size={20}
-                      aria-hidden="true"
-                      className="ml-1 inline-block align-middle"
-                    />
-                  )}
-                </li>
-              ),
-            )}
-          </ol>
+          <ChatLog messages={messages} onResolve={onResolve} />
         )}
       </div>
 
@@ -234,5 +198,102 @@ export function ChatPanel({
         <ChatInput onSend={onSend} focusKey={focusKey} busy={busy} shortcuts={messages.length > 0} />
       </div>
     </aside>
+  );
+}
+
+// The conversation itself, shared by the side panel and the Chat page (`roomy` = the page's bigger type).
+export function ChatLog({
+  messages,
+  onResolve,
+  roomy,
+}: {
+  messages: ChatMessage[];
+  onResolve: (message: number, index: number, accept: boolean) => void;
+  roomy?: boolean;
+}) {
+  return (
+    <ol className={cn("flex flex-col", roomy ? "gap-6 text-[15px]" : "gap-4 text-sm")}>
+      {messages.map((m) =>
+        m.role === "user" ? (
+          <li key={m.id} className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">
+            {m.text}
+          </li>
+        ) : m.role === "note" ? (
+          <li key={m.id} className="flex items-start gap-2.5 text-muted-foreground">
+            <ThinkingOrb state="breathing" size={20} aria-hidden="true" className="mt-px shrink-0" />
+            {m.text}
+          </li>
+        ) : !m.text && (m.state === "reading" || m.state === "thinking") ? (
+          <li key={m.id} className="flex items-center gap-2.5 text-muted-foreground" aria-busy="true">
+            <ThinkingOrb state={STATUS[m.state].orb} size={20} aria-hidden="true" />
+            {STATUS[m.state].label}
+          </li>
+        ) : (
+          // aria-busy: screen readers announce the finished answer, not every streamed word
+          <li key={m.id} className="leading-relaxed whitespace-pre-wrap" aria-busy={!!m.state}>
+            {plain(m.text)}
+            {m.proposals?.map((item, i) => (
+              <ProposalCard key={i} item={item} onResolve={(accept) => onResolve(m.id, i, accept)} />
+            ))}
+            {m.cards && <FlashDeck deck={m.cards} />}
+            {m.state === "writing" && (
+              <ThinkingOrb state="composing" size={20} aria-hidden="true" className="ml-1 inline-block align-middle" />
+            )}
+          </li>
+        ),
+      )}
+    </ol>
+  );
+}
+
+// A flashcard deck: one card at a time, tap (or Space) to flip, arrows to move. Nothing is saved.
+function FlashDeck({ deck }: { deck: Deck }) {
+  const [at, setAt] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const go = (d: number) => {
+    setFlipped(false);
+    setAt((i) => (i + d + deck.cards.length) % deck.cards.length);
+  };
+  const card = deck.cards[at];
+  return (
+    <div className="mt-3 rounded-2xl bg-secondary p-3">
+      <p className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span className="truncate font-medium text-foreground">{deck.title}</span>
+        <span className="shrink-0 font-mono tabular-nums">
+          {at + 1}/{deck.cards.length}
+        </span>
+      </p>
+      <div className="[perspective:900px]">
+        <button
+          type="button"
+          onClick={() => setFlipped((f) => !f)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+              e.preventDefault();
+              go(e.key === "ArrowRight" ? 1 : -1);
+            }
+          }}
+          aria-label={`${flipped ? "Answer" : "Question"}: ${flipped ? card.back : card.front}. Press to flip.`}
+          className="relative grid min-h-36 w-full transition-transform duration-500 ease-out-quint [transform-style:preserve-3d] outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+          style={{ transform: flipped ? "rotateY(180deg)" : undefined }}
+        >
+          <span className="col-start-1 row-start-1 grid place-items-center rounded-xl bg-background p-5 text-center text-base font-medium text-balance [backface-visibility:hidden]">
+            {card.front}
+          </span>
+          <span className="col-start-1 row-start-1 grid place-items-center rounded-xl bg-background p-5 text-center text-sm text-pretty [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            {card.back}
+          </span>
+        </button>
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => go(-1)} aria-label="Previous card" className="rounded-full">
+          <ChevronLeft />
+        </Button>
+        <span className="font-mono text-xs text-muted-foreground">{flipped ? "answer" : "tap to flip"}</span>
+        <Button variant="ghost" size="icon" onClick={() => go(1)} aria-label="Next card" className="rounded-full">
+          <ChevronRight />
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -17,6 +17,8 @@ export type Proposal =
   | { type: "add"; course: string; title: string; kind: "assignment" | "exam" | "quiz" | "reading"; due: string }
   | { type: "update"; id: string; was: string; title?: string; due?: string; done?: boolean };
 type Ref = { id: string; title: string; course: string };
+// A study deck the assistant made; shown as flip cards in the chat, never saved.
+export type Deck = { title: string; cards: { front: string; back: string }[] };
 
 const TOOLS = [
   {
@@ -50,6 +52,33 @@ const TOOLS = [
           done: { type: "boolean" },
         },
         required: ["ref"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "make_flashcards",
+      description:
+        "Make a deck of study flashcards when the student asks for flashcards. The chat shows them as flip cards.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Short deck title, e.g. POLS 202: Federalism" },
+          cards: {
+            type: "array",
+            description: "6 to 12 cards",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string", description: "Question or term, under 120 characters" },
+                back: { type: "string", description: "Answer or definition, under 240 characters" },
+              },
+              required: ["front", "back"],
+            },
+          },
+        },
+        required: ["title", "cards"],
       },
     },
   },
@@ -118,7 +147,7 @@ export function classLines(meetings: ClassRow[], now: number, timeZone: string) 
 }
 
 // Everything the assistant knows, rendered as plain text in the student's timezone.
-export async function studentContext(supabase: SupabaseClient, timeZone: string) {
+export async function studentContext(supabase: SupabaseClient, timeZone: string, focus?: string) {
   const [settings, courses, items, meetings] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("id, code, name").order("created_at"),
@@ -151,6 +180,9 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string)
     ...calendarLines(now, timeZone),
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
+    ...((courses.data ?? []).some((c) => c.code === focus)
+      ? [`This chat is about ${focus}: answer for that course unless the student asks about something else.`]
+      : []),
     `Weekly class times (local): ${(meetings.data ?? []).map((m) => `${code.get(m.course_id) ?? "?"} ${meetingLabel(m)}`).join("; ") || "not added yet"}.`,
     ...(meetings.data?.length
       ? [
@@ -173,6 +205,7 @@ Rules:
 - Never invent due dates, grades, exam content or class times.
 - Plans: name concrete days and short time blocks; overdue first, then the soonest and heaviest.
 - To add or change work, call add_item or update_item right away. The student confirms each change in the app, so don't ask "shall I?"; just add one short line saying what you proposed.
+- Flashcards and quizzes come from general knowledge of the course's subject (there are no uploaded materials yet); say so in one short line. For flashcards, call make_flashcards and add one short line, no list.
 - Talk like a person: never copy the raw list format above (no "[open]", no "·" field separators). Say "Essay 1 draft for WRTG 1150, due Friday".
 - Plain text only: no markdown (no asterisks, no #). Short lines, "•" for bullets. Under 180 words unless asked for more.`;
 
@@ -208,7 +241,7 @@ export async function streamReply(
         ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }), // `models` = OpenRouter fallbacks
         reasoning: think ? { effort: "low" } : { enabled: false },
         stream: true,
-        max_tokens: think ? 2000 : 900, // reasoning tokens count against the budget
+        max_tokens: think ? 2500 : 1500, // reasoning tokens count against the budget; decks need room
         tools: TOOLS,
         messages: [{ role: "system", content: `${RULES}\n\n${context}` }, ...turns],
       }),
@@ -285,6 +318,8 @@ export async function streamReply(
           }
           const proposals = calls.map((c) => toProposal(c, refs)).filter((p) => p !== null);
           if (proposals.length) out.enqueue(encode({ t: "propose", v: proposals }));
+          const deck = calls.map(toDeck).find((d) => d !== null);
+          if (deck) out.enqueue(encode({ t: "cards", v: deck }));
         } catch {
           out.enqueue(encode({ t: "error", v: "The AI took too long. Try again, or ask something shorter." }));
         }
@@ -323,4 +358,23 @@ function toProposal(call: { name: string; args: string }, refs: Map<string, Ref>
     };
   }
   return null;
+}
+
+// A make_flashcards call becomes a deck if it has at least one usable card (trimmed and capped).
+function toDeck(call: { name: string; args: string }): Deck | null {
+  if (call.name !== "make_flashcards") return null;
+  try {
+    const a = JSON.parse(call.args || "{}");
+    const cards = (Array.isArray(a.cards) ? a.cards : [])
+      .filter((c: { front?: unknown; back?: unknown }) => typeof c?.front === "string" && typeof c?.back === "string")
+      .slice(0, 20)
+      .map((c: { front: string; back: string }) => ({
+        front: c.front.trim().slice(0, 300),
+        back: c.back.trim().slice(0, 600),
+      }))
+      .filter((c: { front: string; back: string }) => c.front && c.back);
+    return cards.length ? { title: String(a.title ?? "Flashcards").slice(0, 120), cards } : null;
+  } catch {
+    return null;
+  }
 }

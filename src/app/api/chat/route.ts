@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 60; // free models can reason for a while before answering
 
-// POST { messages: Turn[], timeZone } → NDJSON stream (see streamReply).
+// POST { messages: Turn[], timeZone, think?, focus? } → NDJSON stream (see streamReply).
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
@@ -31,5 +31,7 @@ export async function POST(request: Request) {
 
   // Think toggle forces careful mode; otherwise the question decides.
   const think = body?.think === true || needsThinking(turns.at(-1)!.content);
-  return streamReply(await studentContext(supabase, timeZone), turns, think);
+  // Optional course focus from the chat page (a course code); studentContext ignores unknown codes.
+  const focus = typeof body?.focus === "string" ? body.focus.slice(0, 40) : undefined;
+  return streamReply(await studentContext(supabase, timeZone, focus), turns, think);
 }
