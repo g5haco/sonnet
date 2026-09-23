@@ -2,9 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
 // Default: OpenRouter free models, tried in order when one is rate-limited (decided 2026-09-23).
+// Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
 const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
 const MODELS = (
-  process.env.AI_MODEL ?? "nvidia/nemotron-3-ultra-550b-a55b:free,qwen/qwen3.8-27b:free,google/gemma-4-31b-it:free"
+  process.env.AI_MODEL ?? "nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free,nvidia/nemotron-3-ultra-550b-a55b:free"
 ).split(",");
 
 export type Turn = { role: "user" | "assistant"; content: string };
@@ -48,6 +49,7 @@ Rules:
 - Use only the courses and work listed. If something isn't there, say you don't see it and suggest adding it with the + in the sidebar.
 - Never invent due dates, grades, exam content or class times.
 - Plans: name concrete days and short time blocks; overdue first, then the soonest and heaviest.
+- Talk like a person: never copy the raw list format above (no "[open]", no "·" field separators). Say "Essay 1 draft for WRTG 1150, due Friday".
 - Plain text only: no markdown (no asterisks, no #). Short lines, "•" for bullets. Under 180 words unless asked for more.`;
 
 // Streams the reply as newline-delimited JSON events the chat panel understands:
@@ -66,7 +68,7 @@ export async function streamReply(context: string, turns: Turn[]) {
       signal: AbortSignal.timeout(55_000), // route maxDuration is 60s
       body: JSON.stringify({
         ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }), // `models` = OpenRouter fallbacks
-        reasoning: { effort: "low" },
+        reasoning: { enabled: false },
         stream: true,
         max_tokens: 900,
         messages: [{ role: "system", content: `${RULES}\n\n${context}` }, ...turns],

@@ -30,7 +30,7 @@ All motion respects `prefers-reduced-motion` (the packages ship their own handli
 
 ## AI assistant
 
-- `POST /api/chat` route handler, streaming. Provider: **OpenRouter free models** (decided 2026-09-23 for cost), called through the OpenAI-compatible API so switching provider or model is config (`AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY`). Default fallback chain: Nemotron 3 Ultra → Qwen 3.8 27B → Gemma 4 31B, low reasoning effort. Free tier: 20 requests/min, 1,000/day on this account. Free providers may log prompts; revisit before the SaaS step.
+- `POST /api/chat` route handler, streaming. Provider: **OpenRouter free models** (decided 2026-09-23 for cost), called through the OpenAI-compatible API so switching provider or model is config (`AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY`). Default fallback chain: Nemotron 3 Super → Qwen 3.8 27B → Nemotron 3 Ultra, reasoning off (first words ~0.5-2s vs ~15s with reasoning; quality held in testing). Free tier: 20 requests/min, 1,000/day on this account. Free providers may log prompts; revisit before the SaaS step.
 - Resilience: 55s timeout, one silent retry when a free model fails before answering, upstream errors logged.
 - Context per request: now (in the student's timezone), semester, courses, open, overdue and recently done items, exams. Budget: $0 on free models.
 - Shortcuts: "What's due this week?", "Plan my week", "Help me study for my next exam", "Catch me up" (overdue triage), "Explain an assignment". Later: context-aware chips (e.g. an exam within 7 days).
