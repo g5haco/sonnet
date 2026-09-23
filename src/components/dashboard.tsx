@@ -123,7 +123,7 @@ export function Dashboard({ term, courses, items }: { term: Term | null; courses
                   <span className="size-2 rounded-full" style={{ background: courseColor(c.hue) }} />
                   <span className="min-w-0 flex-1">
                     <span className="block font-mono text-xs text-muted-foreground">{c.code}</span>
-                    <span className="block truncate text-sm">{c.name || " "}</span>
+                    <span className="block truncate text-sm">{c.name || "\u00a0"}</span>
                   </span>
                   <span className="font-mono text-2xl font-medium text-muted-foreground" aria-label="No grade yet">
                     –
