@@ -76,11 +76,12 @@ export function Dashboard() {
             </p>
             <p className="font-mono text-xs text-muted-foreground">
               {today} · wk {week}/{WEEKS}
+              <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">sample data</span>
             </p>
           </div>
 
           <form
-            className="order-last flex h-11 w-full items-center gap-2 rounded-full bg-secondary px-4 md:order-none md:mx-6 md:w-auto md:flex-1"
+            className="order-last flex h-11 w-full items-center gap-2 rounded-full bg-secondary px-4 transition-shadow focus-within:ring-2 focus-within:ring-ring md:order-none md:mx-6 md:w-auto md:flex-1"
             onSubmit={(e) => {
               e.preventDefault();
               soon("The course assistant", 5)();
@@ -126,7 +127,7 @@ export function Dashboard() {
           <ExamRing items={items} now={now} className="md:col-span-4" />
           <UpNext items={items} now={now} checked={checked} onToggle={toggle} className="md:col-span-7 md:row-span-2" />
 
-          <Block title="Grades" aside="weighted" className="md:col-span-5">
+          <Block title="Grades" aside="so far" className="md:col-span-5">
             <ul className="divide-y divide-border">
               {courses.map((c) => (
                 <li key={c.code} className="flex items-center gap-3 py-2.5">
@@ -145,7 +146,7 @@ export function Dashboard() {
           </Block>
 
           <Block title="Study days" aside={`${streak(now)}-day streak`} className="md:col-span-5">
-            <ContributionGraph data={studyDays} blockSize={11} blockMargin={3} blockRadius={3} fontSize={11}>
+            <ContributionGraph data={studyDays} blockSize={12} blockMargin={3} blockRadius={3} fontSize={12}>
               <ContributionGraphCalendar className="font-mono text-muted-foreground">
                 {({ activity, dayIndex, weekIndex }) => (
                   <ContributionGraphBlock

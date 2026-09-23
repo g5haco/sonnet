@@ -23,19 +23,17 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
               {p.percent}
             </span>
             <span className="ml-1 text-3xl text-muted-foreground">%</span>
-            {p.delta !== 0 && (
-              <span className={cn("ml-3 text-sm", p.delta > 0 ? "text-done" : "text-destructive")}>
-                {p.delta > 0 ? "+" : ""}
-                {p.delta}
-              </span>
-            )}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">{verdict(p.percent, p.overdue)}</p>
         </div>
         <p className="text-right text-sm text-muted-foreground">
           caught up
-          <br />
-          <span className="font-mono text-xs">vs last week</span>
+          {p.delta !== 0 && (
+            <span className={cn("block font-mono text-xs", p.delta > 0 ? "text-done" : "text-destructive")}>
+              {p.delta > 0 ? "+" : "−"}
+              {Math.abs(p.delta)} vs last week
+            </span>
+          )}
         </p>
       </div>
 
@@ -54,14 +52,14 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
               title={`Week ${i + 1}: ${b.done} of ${b.total} done`}
               className={cn(
                 "relative flex-1 overflow-hidden rounded-full",
-                past && filled < 1 ? "bg-destructive/25" : "bg-muted",
+                past && filled < 1 ? "bg-destructive/25" : "bg-muted-foreground/20",
               )}
               style={{ height: `${b.total ? 22 + (78 * b.total) / tallest : 10}%` }}
             >
               {(past || now) && (
                 <div
                   className={cn(
-                    "absolute inset-0 transition-[clip-path] duration-500 ease-spring motion-reduce:transition-none",
+                    "absolute inset-0 transition-[clip-path] duration-500 ease-out-quint motion-reduce:transition-none",
                     now ? "bg-brand" : "bg-foreground",
                   )}
                   style={{ clipPath: `inset(${(1 - filled) * 100}% 0 0 0 round 999px)` }}
@@ -71,7 +69,7 @@ export function ProgressBlock({ items, now, className }: { items: Item[]; now: n
           );
         })}
       </div>
-      <div className="relative mt-2 flex justify-between font-mono text-[11px] text-muted-foreground">
+      <div className="relative mt-2 flex justify-between font-mono text-xs text-muted-foreground">
         <span>wk 1</span>
         <span
           className="absolute -translate-x-1/2 text-brand"

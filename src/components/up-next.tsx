@@ -40,10 +40,10 @@ export function UpNext({
   onToggle: (id: string) => void;
   className?: string;
 }) {
-  const list = items
+  const open = items
     .filter((i) => !i.doneAt || checked.has(i.id))
-    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))
-    .slice(0, 8);
+    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
+  const list = open.slice(0, 8);
 
   return (
     <Block title="Up next" aside={headline(items.filter((i) => !i.doneAt), now)} className={className}>
@@ -59,18 +59,20 @@ export function UpNext({
             return (
               <motion.li layout key={i.id} transition={{ type: "spring", stiffness: 500, damping: 40 }}>
                 <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
-                  <motion.span whileTap={{ scale: 0.8 }} className="flex">
-                    <Checkbox
-                      checked={done}
-                      onCheckedChange={() => onToggle(i.id)}
-                      className="size-5 rounded-full data-checked:border-done data-checked:bg-done"
-                    />
-                  </motion.span>
+                  <Checkbox
+                    // a real <button>: a <span> checkbox inside <label> toggles twice on Space
+                    nativeButton
+                    render={<button type="button" />}
+                    checked={done}
+                    onCheckedChange={() => onToggle(i.id)}
+                    aria-label={i.title}
+                    className="size-5 rounded-full transition-transform active:scale-80 data-checked:border-done data-checked:bg-done"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className={cn("block truncate transition-opacity", done && "line-through opacity-45")}>
                       {i.title}
                       {i.kind === "exam" && (
-                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-mono text-[11px] text-secondary-foreground no-underline">
+                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-mono text-xs text-secondary-foreground no-underline">
                           exam
                         </span>
                       )}
@@ -93,6 +95,11 @@ export function UpNext({
             );
           })}
         </ul>
+      )}
+      {open.length > list.length && (
+        <p className="mt-auto pt-4 font-mono text-xs text-muted-foreground">
+          +{open.length - list.length} more this term
+        </p>
       )}
     </Block>
   );

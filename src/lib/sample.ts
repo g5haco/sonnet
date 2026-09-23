@@ -2,11 +2,11 @@ import type { Item } from "./progress";
 
 // Demo data until Phase 1/2 wire up real courses. Dates are relative to "now" so it always looks live.
 export const courses = [
-  { code: "CHEM 1210", name: "General Chemistry I", hue: 25, grade: 88.6 },
-  { code: "MATH 2415", name: "Calculus III", hue: 265, grade: 93.1 },
-  { code: "PSYC 1010", name: "Intro to Psychology", hue: 330, grade: 96.4 },
-  { code: "WRTG 1150", name: "First-Year Writing", hue: 85, grade: 84.9 },
-  { code: "CSCI 1300", name: "Computer Science 1", hue: 160, grade: 91.7 },
+  { code: "CHEM 1210", name: "General Chemistry I", hue: 65, grade: 88.6 },
+  { code: "MATH 2415", name: "Calculus III", hue: 290, grade: 93.1 },
+  { code: "PSYC 1010", name: "Intro to Psychology", hue: 335, grade: 96.4 },
+  { code: "WRTG 1150", name: "First-Year Writing", hue: 100, grade: 84.9 },
+  { code: "CSCI 1300", name: "Computer Science 1", hue: 255, grade: 91.7 },
 ];
 
 export const courseColor = (code: string) =>

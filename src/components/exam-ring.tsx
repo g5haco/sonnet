@@ -22,7 +22,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
   const days = Math.floor(left / 864e5);
   const hours = Math.floor((left % 864e5) / 3600e3);
   const lit = Math.ceil(TICKS * Math.min(1, left / RUNWAY));
-  const color = courseColor(exam.course);
+  // The ring is your countdown, so it wears the brand ("you, now"); the dot names the course.
   const date = new Date(exam.due).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 
   return (
@@ -43,7 +43,8 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
                 y2={at(92, Math.sin)}
                 strokeWidth={2.5}
                 strokeLinecap="round"
-                style={{ stroke: i < lit ? color : "var(--muted)" }}
+                style={{ stroke: i < lit ? "var(--brand)" : "var(--muted-foreground)" }}
+                strokeOpacity={i < lit ? 1 : 0.3}
               />
             );
           })}
@@ -56,7 +57,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
         </p>
       </div>
       <p className="mt-4 flex items-center gap-2 text-sm">
-        <span className="size-2 rounded-full" style={{ background: color }} />
+        <span className="size-2 rounded-full" style={{ background: courseColor(exam.course) }} />
         <span className="font-mono text-xs text-muted-foreground">{exam.course}</span>
         <span className="truncate">{exam.title}</span>
         <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">{date}</span>
