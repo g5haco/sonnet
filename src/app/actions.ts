@@ -52,6 +52,12 @@ export async function createItem(form: FormData): Promise<Result> {
   return done(error, "save it");
 }
 
+export async function deleteItem(id: string): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("items").delete().eq("id", id);
+  return done(error, "delete it");
+}
+
 export async function setDone(id: string, isDone: boolean): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase

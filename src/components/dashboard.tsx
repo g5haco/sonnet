@@ -4,7 +4,7 @@ import { BookOpen, CalendarClock, FilePlus2, FileUp, Plus, Search } from "lucide
 import { useTheme } from "next-themes";
 import { startTransition, useOptimistic, useState } from "react";
 import { toast } from "sonner";
-import { setDone } from "@/app/actions";
+import { deleteItem, setDone } from "@/app/actions";
 import { Block } from "@/components/block";
 import { CourseDialog, ItemDialog, TermSetup } from "@/components/create-forms";
 import { ExamRing } from "@/components/exam-ring";
@@ -35,11 +35,13 @@ export function Dashboard({ term, courses, items }: { term: Term | null; courses
   const [now] = useState(() => Date.now()); // one clock per render tree
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const { theme, setTheme } = useTheme();
   // Check-offs show instantly; if saving fails the item flips back when the transition ends.
-  const [shown, flip] = useOptimistic(items, (list, id: string) =>
+  const [optimistic, flip] = useOptimistic(items, (list, id: string) =>
     list.map((i) => (i.id === id ? { ...i, doneAt: i.doneAt ? null : new Date().toISOString() } : i)),
   );
+  const shown = optimistic.filter((i) => !hidden.has(i.id));
 
   if (!term) return <TermSetup />;
   const termStart = new Date(`${term.start}T00:00:00`);
@@ -56,6 +58,40 @@ export function Dashboard({ term, courses, items }: { term: Term | null; courses
     const p = progress(next, termStart, term.weeks, new Date(now));
     const week = p.bars[p.current];
     if (nowDone && week?.total && week.done === week.total) toast.success("Week cleared. Go outside.");
+  };
+
+  // Delete hides the row at once and only deletes when the Undo toast closes (5s).
+  // If the tab closes first, the item simply survives: the safe failure.
+  const remove = (item: Item) => {
+    const show = (on: boolean) =>
+      setHidden((s) => {
+        const n = new Set(s);
+        if (on) n.delete(item.id);
+        else n.add(item.id);
+        return n;
+      });
+    let settled = false;
+    const commit = async () => {
+      if (settled) return;
+      settled = true;
+      const r = await deleteItem(item.id);
+      if (r.error) {
+        toast.error(r.error);
+        show(true);
+      }
+    };
+    show(false);
+    toast(`Deleted "${item.title}"`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          settled = true;
+          show(true);
+        },
+      },
+      onAutoClose: commit,
+      onDismiss: commit,
+    });
   };
 
   // Assignments and exams need a course to belong to.
@@ -142,6 +178,7 @@ export function Dashboard({ term, courses, items }: { term: Term | null; courses
           now={now}
           checked={checked}
           onToggle={toggle}
+          onDelete={remove}
           onAddCourse={courses.length ? undefined : () => setDialog("course")}
           className="md:col-span-7 md:row-span-2"
         />

@@ -22,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
-          <Toaster position="bottom-center" />
+          <Toaster position="bottom-center" closeButton />
         </ThemeProvider>
       </body>
     </html>

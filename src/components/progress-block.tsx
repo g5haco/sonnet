@@ -96,7 +96,7 @@ export function ProgressBlock({
         {p.bars.map((b, i) => {
           const past = i < p.current;
           const now = i === p.current;
-          const filled = b.total ? b.done / b.total : 1;
+          const filled = b.total ? b.done / b.total : 0;
           return (
             <div
               key={i}
@@ -107,7 +107,7 @@ export function ProgressBlock({
               )}
               style={{ height: `${b.total ? 22 + (78 * b.total) / tallest : 10}%` }}
             >
-              {(past || now) && (
+              {(past || now) && b.total > 0 && (
                 <div
                   ref={now ? nowBar : undefined}
                   className={cn(

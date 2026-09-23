@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { Item } from "@/lib/progress";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { courseColor } from "@/lib/course";
 
@@ -32,6 +34,7 @@ export function UpNext({
   now,
   checked,
   onToggle,
+  onDelete,
   onAddCourse,
   className,
 }: {
@@ -39,11 +42,14 @@ export function UpNext({
   now: number;
   checked: Set<string>; // checked this session: stays visible so a mis-tap can be undone
   onToggle: (id: string) => void;
+  onDelete: (item: Item) => void;
   onAddCourse?: () => void; // set when there are no courses yet
   className?: string;
 }) {
+  const [showDone, setShowDone] = useState(false);
+  const doneCount = items.filter((i) => i.doneAt).length;
   const open = items
-    .filter((i) => !i.doneAt || checked.has(i.id))
+    .filter((i) => showDone || !i.doneAt || checked.has(i.id))
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
   const list = open.slice(0, 8);
 
@@ -68,8 +74,8 @@ export function UpNext({
             const done = !!i.doneAt;
             const due = when(i.due, now);
             return (
-              <li key={i.id}>
-                <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
+              <li key={i.id} className="group flex items-center">
+                <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
                   <Checkbox
                     // a real <button>: a <span> checkbox inside <label> toggles twice on Space
                     nativeButton
@@ -104,14 +110,33 @@ export function UpNext({
                     {done ? "done" : due.label}
                   </span>
                 </label>
+                {/* always visible on touch; appears on hover/focus with a mouse */}
+                <button
+                  type="button"
+                  onClick={() => onDelete(i)}
+                  aria-label={`Delete ${i.title}`}
+                  className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-opacity hover:text-destructive focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+                >
+                  <Trash2 className="size-4" />
+                </button>
               </li>
             );
           })}
         </ul>
       )}
-      {open.length > list.length && (
-        <p className="mt-auto pt-4 font-mono text-xs text-muted-foreground">
-          +{open.length - list.length} more this term
+      {(open.length > list.length || doneCount > 0) && (
+        <p className="mt-auto flex items-center justify-between gap-3 pt-4 font-mono text-xs text-muted-foreground">
+          <span>{open.length > list.length && `+${open.length - list.length} more this term`}</span>
+          {doneCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowDone((v) => !v)}
+              aria-pressed={showDone}
+              className="-m-2 rounded-full p-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {showDone ? "Hide done" : `Show done (${doneCount})`}
+            </button>
+          )}
         </p>
       )}
     </Block>
