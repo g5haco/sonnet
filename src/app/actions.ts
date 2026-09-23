@@ -145,8 +145,10 @@ export async function saveCanvasConnection(form: FormData): Promise<Result> {
       .from("settings")
       .select("canvas_token_connected")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
     if (settingsError) throw settingsError;
+    // Canvas settings live on the semester row (new account, or after Reset all data).
+    if (!current) return { error: "Set your semester dates first (Settings → Semester), then connect Canvas." };
     if (!token && !feed && !current?.canvas_token_connected)
       return { error: "Add an access token, a calendar link, or both." };
     if (token) {
@@ -217,6 +219,45 @@ export async function disconnectCanvas(): Promise<Result> {
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Couldn't disconnect Canvas." };
   }
+}
+
+// Settings → Data: wipes the academic data but keeps the account (login, name). Canvas is disconnected
+// first, or the daily sync would import everything again. Deleting courses cascades to their items, class
+// times and materials; deleting the settings row clears the semester, the feed token and Canvas sync status.
+export async function resetAllData(confirm: string): Promise<Result> {
+  if (confirm !== "RESET") return { error: "Type RESET to confirm." };
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (!userId) return { error: "Sign in again." };
+
+  const canvas = await disconnectCanvas();
+  if (canvas.error) return canvas;
+
+  // Uploads live at <user id>/<course id>/<file>; storage policies only reach the user's own folder.
+  // ponytail: one page (1000) per folder; paginate if anyone ever uploads more to a single course.
+  const bucket = supabase.storage.from("materials");
+  const { data: top, error: listError } = await bucket.list(userId, { limit: 1000 });
+  if (listError) return { error: `Couldn't reset your files. ${listError.message}` };
+  const paths: string[] = [];
+  for (const entry of top ?? []) {
+    if (entry.id) paths.push(`${userId}/${entry.name}`); // a file (folders have no id)
+    else {
+      const { data: files } = await bucket.list(`${userId}/${entry.name}`, { limit: 1000 });
+      paths.push(...(files ?? []).map((f) => `${userId}/${entry.name}/${f.name}`));
+    }
+  }
+  if (paths.length) {
+    const { error } = await bucket.remove(paths);
+    if (error) return { error: `Couldn't reset your files. ${error.message}` };
+  }
+
+  for (const table of ["courses", "chats", "settings"] as const) {
+    const { error } = await supabase.from(table).delete().eq("user_id", userId);
+    if (error) return { error: `Couldn't reset your ${table}. ${error.message}` };
+  }
+  revalidatePath("/", "layout");
+  return {};
 }
 
 // Stored on the account (auth user metadata), so it needs no table. Refreshing the session puts it in

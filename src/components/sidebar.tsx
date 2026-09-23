@@ -3,7 +3,7 @@
 // Adapted from the Aceternity-style sidebar (sidebar.txt): icon rail that expands on hover.
 // Changes: built on `motion` (already installed), expands OVER the page so content never reflows,
 // also expands on keyboard focus, real <button>s on mobile, active route highlighted.
-import { BookOpen, CalendarDays, House, Menu, MessageCircle, Settings, X } from "lucide-react";
+import { BookOpen, CalendarDays, House, Menu, MessageCircle, RefreshCw, Settings, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,7 +15,6 @@ const NAV = [
   { href: "/", label: "Home", icon: House },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/courses", label: "Courses", icon: BookOpen }, // materials live on each course's page
-  { href: "/chat", label: "Chat", icon: MessageCircle },
 ];
 
 const RAIL = 60;
@@ -57,35 +56,73 @@ function NavLink({
   );
 }
 
-// Settings isn't a page: it opens the floating window over whatever page you're on.
-function SettingsButton({ open, onClick }: { open: boolean; onClick: () => void }) {
+// Settings and Sync aren't pages: they open floating windows over whatever page you're on.
+function WindowButton({
+  open,
+  onClick,
+  icon: Icon,
+  label,
+  alert,
+}: {
+  open: boolean;
+  onClick: () => void;
+  icon: typeof Settings;
+  label: string;
+  alert?: string; // a red dot plus this text for screen readers, e.g. "sync failed"
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={open ? undefined : "Settings"}
+      aria-label={open ? undefined : alert ? `${label}, ${alert}` : label}
       className="group/link flex h-10 w-full items-center gap-3 rounded-xl px-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Settings className="size-5 shrink-0" aria-hidden="true" />
+      <span className="relative shrink-0">
+        <Icon className="size-5" aria-hidden="true" />
+        {alert && <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-destructive" />}
+      </span>
       <motion.span
         initial={false}
         animate={{ opacity: open ? 1 : 0, display: open ? "inline-block" : "none" }}
         className="whitespace-pre transition-transform duration-150 group-hover/link:translate-x-0.5"
       >
-        Settings
+        {label}
+        {alert && <span className="sr-only">, {alert}</span>}
       </motion.span>
     </button>
   );
 }
 
+// Chat's one entry point sits with the "+": beside it on the open rail and the phone bar, under it on the
+// collapsed rail. (Ctrl+K and the Ask button still open the side panel.)
+function ChatLink({ active, onNavigate }: { active: boolean; onNavigate?: () => void }) {
+  return (
+    <Link
+      href="/chat"
+      onClick={onNavigate}
+      aria-label="Chat"
+      title="Chat"
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "grid size-10 shrink-0 place-items-center rounded-full shadow-[0_6px_18px_rgb(0_0_0/0.18)] transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+        active ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-accent",
+      )}
+    >
+      <MessageCircle className="size-5" aria-hidden="true" />
+    </Link>
+  );
+}
+
 export function Sidebar({
   onCreate,
-  onAsk,
   onSettings,
+  onSync,
+  syncFailed,
 }: {
   onCreate: (kind: CreateKind) => void;
-  onAsk: () => void;
   onSettings: () => void;
+  onSync: () => void;
+  syncFailed: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -94,6 +131,8 @@ export function Sidebar({
   const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   // The Create droplets pop out to the right of the rail, so the rail stays collapsed while they're open.
   const open = hovered && !creating;
+  const onChat = path === "/chat";
+  const alert = syncFailed ? "sync failed" : undefined;
 
   return (
     <>
@@ -122,22 +161,22 @@ export function Sidebar({
             <span className="text-brand">.</span>
           </Link>
 
-          <GooeyMenu
-            direction="right"
-            open={creating}
-            onOpenChange={setCreating}
-            onPick={onCreate}
-            // chat sits beside the "+" while the rail is open, and tucks into it otherwise
-            companion={{ label: "Ask the assistant (Ctrl+K)", icon: MessageCircle, onClick: onAsk, show: open }}
-          />
+          {/* Fixed height, so opening the rail moves only the chat button and never the links under the pointer. */}
+          <div className={cn("flex h-[86px] items-start", open ? "flex-row gap-4" : "flex-col gap-1.5")}>
+            <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
+            <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
+              <ChatLink active={onChat} />
+            </motion.div>
+          </div>
 
           <div className="flex flex-col gap-1">
             {NAV.map((l) => (
               <NavLink key={l.href} link={l} open={open} active={isActive(l.href)} />
             ))}
           </div>
-          <div className="mt-auto">
-            <SettingsButton open={open} onClick={onSettings} />
+          <div className="mt-auto flex flex-col gap-1">
+            <WindowButton open={open} onClick={onSync} icon={RefreshCw} label="Sync" alert={alert} />
+            <WindowButton open={open} onClick={onSettings} icon={Settings} label="Settings" />
           </div>
         </motion.nav>
       </div>
@@ -155,7 +194,8 @@ export function Sidebar({
         <Link href="/" className="font-mono text-lg font-medium tracking-tight">
           sonnet<span className="text-brand">.</span>
         </Link>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <ChatLink active={onChat} />
           <GooeyMenu direction="down" open={creating} onOpenChange={setCreating} onPick={onCreate} />
         </div>
       </div>
@@ -180,13 +220,27 @@ export function Sidebar({
             {NAV.map((l) => (
               <NavLink key={l.href} link={l} open active={isActive(l.href)} onNavigate={() => setMenu(false)} />
             ))}
-            <SettingsButton
-              open
-              onClick={() => {
-                setMenu(false);
-                onSettings();
-              }}
-            />
+            <div className="mt-auto flex flex-col gap-1">
+              <WindowButton
+                open
+                icon={RefreshCw}
+                label="Sync"
+                alert={alert}
+                onClick={() => {
+                  setMenu(false);
+                  onSync();
+                }}
+              />
+              <WindowButton
+                open
+                icon={Settings}
+                label="Settings"
+                onClick={() => {
+                  setMenu(false);
+                  onSettings();
+                }}
+              />
+            </div>
           </motion.nav>
         )}
       </AnimatePresence>

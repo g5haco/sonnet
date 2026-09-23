@@ -1,24 +1,17 @@
 "use client";
 
-import { CalendarDays, CalendarSync, CircleUser, Cloud, RefreshCw, SunMoon } from "lucide-react";
+import { CalendarDays, Check, CircleUser, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { ThinkingOrb } from "thinking-orbs";
-import {
-  disconnectCanvas,
-  resetFeed,
-  saveCanvasConnection,
-  saveName,
-  saveTerm,
-  signOut,
-  syncCanvasNow,
-} from "@/app/actions";
+import { resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
+import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
-import { ThemeSwitcher } from "@/components/kibo-ui/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 
 export function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
@@ -71,14 +64,88 @@ export function NameForm({ name }: { name: string }) {
   );
 }
 
-export function Appearance() {
-  const { theme, setTheme } = useTheme();
+// Each preview paints its own theme whatever the app is in now, so the colors are fixed here
+// (the neutral surfaces from globals.css: background, sidebar/card, accent, foreground).
+const PAINT = {
+  light: { bg: "oklch(1 0 0)", rail: "oklch(0.968 0 0)", line: "oklch(0.9 0 0)", ink: "oklch(0.18 0 0)" },
+  dark: { bg: "oklch(0.145 0 0)", rail: "oklch(0.195 0 0)", line: "oklch(0.29 0 0)", ink: "oklch(0.965 0 0)" },
+};
+const THEMES = [
+  { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
+  { id: "system", label: "System" },
+] as const;
+
+// A tiny Sonnet: rail, a heading, a line of text, two cards.
+function Mini({ paint, className }: { paint: (typeof PAINT)["light"]; className?: string }) {
   return (
-    <ThemeSwitcher value={(theme as "light" | "dark" | "system") ?? "system"} onChange={setTheme} className="w-fit" />
+    <span className={cn("absolute inset-0 flex", className)} style={{ background: paint.bg }}>
+      <span className="flex w-1/5 flex-col items-center gap-1.5 pt-2.5" style={{ background: paint.rail }}>
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="size-2 rounded-full" style={{ background: paint.line }} />
+        ))}
+      </span>
+      <span className="flex flex-1 flex-col gap-1.5 p-2.5">
+        <span className="h-1.5 w-1/2 rounded-full" style={{ background: paint.ink }} />
+        <span className="h-1 w-3/4 rounded-full" style={{ background: paint.line }} />
+        <span className="mt-auto grid grid-cols-2 gap-1.5">
+          <span className="h-5 rounded-md" style={{ background: paint.rail }} />
+          <span className="h-5 rounded-md" style={{ background: paint.rail }} />
+        </span>
+      </span>
+    </span>
   );
 }
 
-export type SettingsSection = "semester" | "canvas" | "calendar" | "appearance" | "account";
+// Light / Dark / System as real radio buttons, drawn as little previews of the app.
+export function ThemePicker() {
+  const { theme, setTheme } = useTheme();
+  const current = theme ?? "system";
+  return (
+    <fieldset className="grid max-w-md grid-cols-3 gap-3">
+      <legend className="sr-only">Theme</legend>
+      {THEMES.map(({ id, label: text }) => (
+        <label key={id} className="group flex cursor-pointer flex-col gap-2">
+          <input
+            type="radio"
+            name="theme"
+            value={id}
+            checked={current === id}
+            onChange={() => setTheme(id)}
+            className="peer sr-only"
+          />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "relative block aspect-[4/3] overflow-hidden rounded-xl ring-1 ring-border ring-offset-2 ring-offset-background transition-shadow duration-150",
+              "group-hover:ring-foreground/30 peer-checked:ring-2 peer-checked:ring-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-ring",
+            )}
+          >
+            {id === "system" ? (
+              <>
+                <Mini paint={PAINT.light} className="[clip-path:inset(0_50%_0_0)]" />
+                <Mini paint={PAINT.dark} className="[clip-path:inset(0_0_0_50%)]" />
+              </>
+            ) : (
+              <Mini paint={PAINT[id]} />
+            )}
+          </span>
+          <span
+            className={cn(
+              "flex items-center gap-1.5 text-sm transition-colors",
+              current === id ? "font-medium" : "text-muted-foreground group-hover:text-foreground",
+            )}
+          >
+            {text}
+            {current === id && <Check className="size-3.5" aria-hidden="true" />}
+          </span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+export type SettingsSection = "account" | "semester" | "data";
 export type Account = {
   email: string;
   name: string;
@@ -95,13 +162,16 @@ export type Account = {
   };
 };
 
-const SECTIONS: { id: SettingsSection; label: string; icon: typeof CalendarDays }[] = [
+// Preferences only. Integrations (Canvas, the Google Calendar feed) live in Sync.
+const SECTIONS: { id: SettingsSection; label: string; short?: string; icon: typeof CalendarDays }[] = [
+  { id: "account", label: "Account & appearance", short: "Account", icon: CircleUser },
   { id: "semester", label: "Semester", icon: CalendarDays },
-  { id: "canvas", label: "Canvas", icon: Cloud },
-  { id: "calendar", label: "Google Calendar", icon: CalendarSync },
-  { id: "appearance", label: "Appearance", icon: SunMoon },
-  { id: "account", label: "Account", icon: CircleUser },
+  { id: "data", label: "Data & privacy", icon: ShieldCheck },
 ];
+
+const heading = "text-base font-medium";
+const help = "mt-1 text-sm text-pretty text-muted-foreground";
+const group = "mt-8 border-t border-border pt-6";
 
 // Settings float over whatever page you're on (it stays visible behind), so closing drops you right back.
 export function SettingsWindow({
@@ -115,8 +185,6 @@ export function SettingsWindow({
   onClose: () => void;
   account: Account;
 }) {
-  const heading = "text-base font-medium";
-  const help = "mt-1 mb-5 text-sm text-pretty text-muted-foreground";
   return (
     <Dialog open={section !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="flex h-[min(46rem,calc(100dvh-2rem))] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
@@ -127,7 +195,7 @@ export function SettingsWindow({
             className="flex shrink-0 gap-1 overflow-x-auto border-b border-border p-2 sm:w-60 sm:flex-col sm:border-r sm:border-b-0 sm:p-4"
           >
             <p className="hidden px-2.5 pt-1 pb-3 text-sm font-medium sm:block">Settings</p>
-            {SECTIONS.map(({ id, label: text, icon: Icon }) => (
+            {SECTIONS.map(({ id, label: text, short, icon: Icon }) => (
               <button
                 key={id}
                 type="button"
@@ -140,8 +208,10 @@ export function SettingsWindow({
                     : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                 )}
               >
-                <Icon className="size-4" aria-hidden="true" />
-                {text}
+                {/* phones: no icons and short labels, so all three tabs fit */}
+                <Icon className="hidden size-4 sm:block" aria-hidden="true" />
+                <span className={cn(short && "hidden sm:inline")}>{text}</span>
+                {short && <span className="sm:hidden">{short}</span>}
               </button>
             ))}
           </nav>
@@ -153,44 +223,32 @@ export function SettingsWindow({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="max-w-2xl"
               >
-                {section === "semester" && (
-                  <>
-                    <h2 className={heading}>Semester</h2>
-                    <p className={help}>
-                      Sets the weekly bars on Home, the calendar&apos;s heat map, and when class times stop repeating.
-                    </p>
-                    {account.term && account.term.weeks <= 2 && (
-                      <p className="mb-4 rounded-xl bg-secondary px-3 py-2 text-sm">
-                        Set to {account.term.weeks} week{account.term.weeks === 1 ? "" : "s"}? Most semesters run 15 or
-                        16.
-                      </p>
-                    )}
-                    <SemesterForm start={account.term?.start ?? ""} weeks={account.term?.weeks ?? 16} />
-                  </>
-                )}
-                {section === "calendar" && (
-                  <>
-                    <h2 className={cn(heading, "mb-3")}>Google Calendar</h2>
-                    <FeedLink token={account.feed} />
-                  </>
-                )}
-                {section === "canvas" && <CanvasForm connection={account.canvas} />}
-                {section === "appearance" && (
-                  <>
-                    <h2 className={heading}>Appearance</h2>
-                    <p className={help}>Light, dark, or follow your device.</p>
-                    <Appearance />
-                  </>
-                )}
                 {section === "account" && (
                   <>
-                    <h2 className={heading}>Account</h2>
-                    <p className={cn(help, "font-mono")}>{account.email}</p>
+                    <h2 className={heading}>Account &amp; appearance</h2>
+                    <p className={cn(help, "mb-6 font-mono")}>{account.email}</p>
                     <NameForm name={account.name} />
-                    <div className="mt-4">
+                    <div className={group}>
+                      <h3 className={label}>Theme</h3>
+                      <p className={cn(help, "mb-4")}>Light, dark, or follow your device.</p>
+                      <ThemePicker />
+                    </div>
+                    <div className={group}>
                       <SignOut />
                     </div>
+                  </>
+                )}
+                {section === "semester" && <SemesterSettings term={account.term} />}
+                {section === "data" && (
+                  <>
+                    <h2 className={heading}>Data &amp; privacy</h2>
+                    <p className={cn(help, "mb-6")}>
+                      Everything you add is private to your account. Your Canvas token is encrypted, and the Google
+                      Calendar link is a secret you can replace any time in Sync.
+                    </p>
+                    <ResetData onDone={onClose} />
                   </>
                 )}
               </motion.section>
@@ -202,162 +260,155 @@ export function SettingsWindow({
   );
 }
 
-function CanvasForm({ connection }: { connection: Account["canvas"] }) {
-  const { resolvedTheme } = useTheme();
-  const {
-    pending: saving,
-    error,
-    submit,
-  } = useSubmit(saveCanvasConnection, () => toast.success("Canvas connection saved."));
-  const [syncing, startSync] = useTransition();
-  const [disconnecting, startDisconnect] = useTransition();
-  const [confirming, setConfirming] = useState(false);
-  const connected = connection.tokenConnected || Boolean(connection.icsUrl);
-  const sync = () =>
-    startSync(async () => {
-      const result = await syncCanvasNow();
-      if (result.error) toast.error(result.error);
-      else toast.success(`Canvas synced ${result.count ?? 0} item${result.count === 1 ? "" : "s"}.`);
+const day = (d: Date) => d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+
+// The semester at a glance (where you are in it), then the two numbers that define it.
+function SemesterSettings({ term }: { term: Account["term"] }) {
+  const [now] = useState(() => new Date());
+  const g = term && termGlance(term, now);
+  return (
+    <>
+      <h2 className={heading}>Semester</h2>
+      <p className={cn(help, "mb-6")}>
+        Sets the weekly bars on Home, the calendar&apos;s heat map, and when class times stop repeating.
+      </p>
+      {g ? (
+        <div className="rounded-2xl bg-secondary/60 p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="font-mono text-2xl font-medium tabular-nums">
+              {g.phase === "upcoming" ? (
+                "Not started"
+              ) : g.phase === "finished" ? (
+                "Finished"
+              ) : (
+                <>
+                  Week {g.week}
+                  <span className="text-muted-foreground"> of {term.weeks}</span>
+                </>
+              )}
+            </p>
+            <p className="font-mono text-xs text-muted-foreground">
+              {g.phase === "upcoming"
+                ? `starts ${day(g.start)}`
+                : g.phase === "finished"
+                  ? `ended ${day(g.end)}`
+                  : g.weeksLeft
+                    ? `${g.weeksLeft} week${g.weeksLeft === 1 ? "" : "s"} left`
+                    : "last week"}
+            </p>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Semester progress"
+            aria-valuenow={g.percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="mt-4 h-1.5 overflow-hidden rounded-full bg-foreground/10"
+          >
+            <div className="h-full rounded-full bg-foreground" style={{ width: `${g.percent}%` }} />
+          </div>
+          <p className="mt-2 flex justify-between font-mono text-xs text-muted-foreground tabular-nums">
+            <span>{day(g.start)}</span>
+            <span>{day(g.end)}</span>
+          </p>
+        </div>
+      ) : (
+        <p className="rounded-2xl bg-secondary/60 p-5 text-sm text-pretty">
+          No semester yet. Add the first day of classes to turn on weekly progress, the heat map and the Google
+          Calendar feed.
+        </p>
+      )}
+      <div className={group}>
+        <h3 className={cn(label, "mb-4")}>{term ? "Change dates" : "Set dates"}</h3>
+        {term && term.weeks <= 2 && (
+          <p className="mb-4 rounded-xl bg-secondary px-3 py-2 text-sm">
+            Set to {term.weeks} week{term.weeks === 1 ? "" : "s"}? Most semesters run 15 or 16.
+          </p>
+        )}
+        <SemesterForm start={term?.start ?? ""} weeks={term?.weeks ?? 16} />
+      </div>
+    </>
+  );
+}
+
+// Deliberately slow: open, read what goes, type RESET. No one-click path.
+function ResetData({ onDone }: { onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [error, setError] = useState("");
+  const [pending, start] = useTransition();
+  const { clear } = useAssistant();
+  const router = useRouter();
+  const reset = () =>
+    start(async () => {
+      const r = await resetAllData(typed);
+      if (r.error) return setError(r.error);
+      clear(); // the open conversation would otherwise be saved again
+      toast("All data cleared. Fresh start.");
+      onDone();
+      router.replace("/");
     });
-  const disconnect = () =>
-    startDisconnect(async () => {
-      const result = await disconnectCanvas();
-      setConfirming(false);
-      if (result.error) toast.error(result.error);
-      else toast("Canvas disconnected. Imported work stays in Sonnet.");
-    });
-  const last = connection.lastSyncAt
-    ? new Date(connection.lastSyncAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
-    : "Not synced yet";
+  const cancel = () => {
+    setOpen(false);
+    setTyped("");
+    setError("");
+  };
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-base font-medium">Canvas</h2>
-          <p className="mt-1 mb-5 text-sm text-pretty text-muted-foreground">
-            Pull courses, deadlines, assignment details and scores. Use either connection—or both for the best coverage.
-          </p>
-        </div>
-        {(syncing || connection.lastSyncStatus === "syncing") && (
-          <ThinkingOrb
-            state="connecting"
-            size={32}
-            theme={resolvedTheme === "light" ? "dark" : "light"}
-            aria-label="Connecting to Canvas"
-          />
-        )}
-      </div>
-
-      <form action={submit} className="grid gap-4">
-        <div className="grid gap-2">
-          <label htmlFor="canvas-base" className={label}>
-            Canvas address
+    <section aria-labelledby="reset-title" className="rounded-2xl border border-destructive/40 p-5">
+      <h3 id="reset-title" className="text-sm font-medium text-destructive">
+        Reset all data
+      </h3>
+      <p className={help}>
+        Deletes every course with its assignments, exams, class times and materials (uploaded files too), your
+        chats, and your semester dates. Canvas gets disconnected, or its daily sync would bring everything back.
+        Your login and name stay. This can&apos;t be undone.
+      </p>
+      {open ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            reset();
+          }}
+          className="mt-5 flex flex-col gap-2"
+        >
+          <label htmlFor="reset-confirm" className={label}>
+            Type <span className="font-mono">RESET</span> to confirm
           </label>
           <input
-            id="canvas-base"
-            name="baseUrl"
-            type="url"
-            required
-            defaultValue={connection.baseUrl}
-            placeholder="https://school.instructure.com"
-            className={field}
+            id="reset-confirm"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            autoFocus
+            autoComplete="off"
+            spellCheck={false}
+            className={cn(field, "max-w-xs font-mono")}
           />
-        </div>
-        <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
-          <div className="grid gap-2">
-            <label htmlFor="canvas-token" className={label}>
-              Access token
-            </label>
-            <input
-              id="canvas-token"
-              name="token"
-              type="password"
-              autoComplete="off"
-              placeholder={connection.tokenConnected ? "Connected — leave blank to keep" : "Paste token"}
-              className={field}
-            />
-            <p className="text-xs text-muted-foreground">
-              Encrypted before it is stored and never sent back to this screen.
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <label htmlFor="canvas-ics" className={label}>
-              Calendar feed URL
-            </label>
-            <input
-              id="canvas-ics"
-              name="icsUrl"
-              type="url"
-              defaultValue={connection.icsUrl}
-              placeholder="https://school.instructure.com/feeds/calendars/..."
-              className={field}
-            />
-            <p className="text-xs text-muted-foreground">
-              Adds dated Canvas events that are not returned by the token API.
-            </p>
-          </div>
-        </div>
-        <FormError text={error} />
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" disabled={saving} className="h-10 rounded-full px-5 active:scale-[0.97]">
-            {saving ? "Checking…" : "Save connection"}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={!connected || syncing}
-            onClick={sync}
-            className="h-10 rounded-full px-5 active:scale-[0.97]"
-          >
-            <RefreshCw className={cn("size-4", syncing && "animate-spin")} aria-hidden="true" />
-            {syncing ? "Syncing…" : "Sync now"}
-          </Button>
-        </div>
-      </form>
-
-      <div className="mt-6 rounded-xl bg-secondary/70 p-4 text-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-medium">{connected ? "Connected" : "Not connected"}</span>
-          <span className="font-mono text-xs text-muted-foreground">{last}</span>
-        </div>
-        {connection.lastSyncStatus === "success" && (
-          <p className="mt-1 text-muted-foreground">
-            Last sync found {connection.lastSyncCount} item{connection.lastSyncCount === 1 ? "" : "s"}.
-          </p>
-        )}
-        {connection.lastSyncError && (
-          <p role="alert" className="mt-1 text-destructive">
-            {connection.lastSyncError}
-          </p>
-        )}
-      </div>
-
-      {connected && (
-        <div className="mt-6 border-t border-border pt-5">
-          {confirming ? (
+          <FormError text={error} />
+          <div className="flex flex-wrap gap-2">
             <Button
+              type="submit"
               variant="destructive"
-              disabled={disconnecting}
-              onClick={disconnect}
-              onBlur={() => setConfirming(false)}
-              autoFocus
-              className="h-9 rounded-full px-4"
+              disabled={typed !== "RESET" || pending}
+              className="h-10 rounded-full px-5"
             >
-              {disconnecting ? "Disconnecting…" : "Imported work stays. Disconnect?"}
+              {pending ? "Deleting…" : "Delete everything"}
             </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              onClick={() => setConfirming(true)}
-              className="h-9 rounded-full px-4 text-muted-foreground"
-            >
-              Disconnect Canvas
+            <Button type="button" variant="ghost" onClick={cancel} className="h-10 rounded-full px-4">
+              Cancel
             </Button>
-          )}
-        </div>
+          </div>
+        </form>
+      ) : (
+        <Button
+          variant="outline"
+          onClick={() => setOpen(true)}
+          className="mt-5 h-10 rounded-full border-destructive/40 px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          Reset all data…
+        </Button>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -372,59 +423,5 @@ export function SignOut() {
     >
       {pending ? "Signing out…" : "Sign out"}
     </Button>
-  );
-}
-
-// Subscribe once in Google Calendar (one-way). "New link" retires the old secret URL, so it asks twice.
-export function FeedLink({ token, className }: { token: string | null; className?: string }) {
-  const [confirming, setConfirming] = useState(false);
-  const [pending, start] = useTransition();
-  if (!token) return <p className={cn("text-sm text-muted-foreground", className)}>Set your semester dates first.</p>;
-
-  const copy = async () => {
-    const url = `${location.origin}/api/cal/${token}.ics`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Feed link copied", { description: "Google Calendar: Other calendars, +, From URL, paste." });
-    } catch {
-      toast("Copy this link", { description: url, duration: 20_000 });
-    }
-  };
-  const renew = () =>
-    start(async () => {
-      const r = await resetFeed();
-      setConfirming(false);
-      if (r.error) toast.error(r.error);
-      else toast("New link made. The old one no longer works.");
-    });
-
-  return (
-    <div className={cn("flex flex-col gap-3", className)}>
-      <p className="text-sm text-pretty text-muted-foreground">
-        Classes, due dates and exams in Google Calendar. Copy the link, then in Google Calendar pick Other calendars, +,
-        From URL. Google refreshes it every few hours.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={copy} className="h-9 rounded-full px-4 active:scale-[0.97]">
-          Copy feed link
-        </Button>
-        {confirming ? (
-          <Button
-            variant="destructive"
-            disabled={pending}
-            onClick={renew}
-            onBlur={() => setConfirming(false)}
-            autoFocus
-            className="h-9 rounded-full px-4"
-          >
-            {pending ? "Making…" : "Old link stops working. OK?"}
-          </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => setConfirming(true)} className="h-9 rounded-full px-4">
-            New link
-          </Button>
-        )}
-      </div>
-    </div>
   );
 }

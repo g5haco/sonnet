@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useOpenSettings } from "@/components/app-shell";
-import { FeedLink } from "@/components/settings-forms";
+import { FeedLink } from "@/components/sync-window";
 import { Button } from "@/components/ui/button";
 import { addDays, parseDay, range, type ClassMeeting, type Term, type View } from "@/lib/calendar";
 import { courseColor, dayKey, meetingLabel } from "@/lib/course";

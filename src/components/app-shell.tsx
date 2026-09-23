@@ -15,6 +15,7 @@ import type { CreateKind } from "@/components/gooey-menu";
 import { UploadWindow } from "@/components/materials";
 import { SettingsWindow, type Account, type SettingsSection } from "@/components/settings-forms";
 import { Sidebar } from "@/components/sidebar";
+import { SyncWindow } from "@/components/sync-window";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
@@ -44,7 +45,7 @@ type Assistant = {
   chatId: string | null;
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
-// Any page can open the floating Settings window (e.g. the calendar's "set your semester dates").
+// Any page can open the floating Settings window (e.g. the calendar's "set your semester dates"), closing Sync if open.
 const SettingsContext = createContext<(section?: SettingsSection) => void>(() => {});
 export const useOpenSettings = () => useContext(SettingsContext);
 
@@ -69,6 +70,7 @@ export function AppShell({
   const [due, setDue] = useState<string>();
   const [pick, setPick] = useState<string>();
   const [settings, setSettings] = useState<SettingsSection | null>(null); // the floating window; null = closed
+  const [sync, setSync] = useState(false); // the Sync window (Canvas, Google Calendar)
   // The uploader: `n` gives each opening a fresh window (and course pick); closing keeps it mounted to animate.
   const [upload, setUpload] = useState<{ open: boolean; course?: string; n: number }>({ open: false, n: 0 });
   // Assistant: docked (wide screens, open by default) or a sheet (everything else).
@@ -249,7 +251,12 @@ export function AppShell({
   return (
     <MotionConfig reducedMotion="user">
       <CreateContext.Provider value={create}>
-        <SettingsContext.Provider value={(section = "semester") => setSettings(section)}>
+        <SettingsContext.Provider
+          value={(section = "semester") => {
+            setSync(false);
+            setSettings(section);
+          }}
+        >
           <AssistantContext.Provider
             value={{
               messages,
@@ -267,7 +274,15 @@ export function AppShell({
             }}
           >
             <div className="flex min-h-dvh flex-col md:flex-row">
-              <Sidebar onCreate={create} onAsk={openAssistant} onSettings={() => setSettings("semester")} />
+              <Sidebar
+                onCreate={create}
+                onSettings={() => setSettings("account")}
+                onSync={() => {
+                  setSettings(null);
+                  setSync(true);
+                }}
+                syncFailed={account.canvas.lastSyncStatus === "error"}
+              />
               <div className="min-w-0 flex-1">{children}</div>
               {docked &&
                 !onChatPage &&
@@ -331,6 +346,7 @@ export function AppShell({
               onClose={() => setSettings(null)}
               account={account}
             />
+            <SyncWindow open={sync} onClose={() => setSync(false)} account={account} />
             <UploadWindow
               key={upload.n}
               open={upload.open}
