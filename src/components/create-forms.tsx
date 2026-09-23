@@ -105,12 +105,14 @@ export function ItemDialog({
   courses,
   now,
   due,
+  course,
   onOpenChange,
 }: {
   kind: Item["kind"] | null; // null = closed
   courses: Course[];
   now: number;
   due?: string;
+  course?: string; // pre-picked course id
   onOpenChange: (o: boolean) => void;
 }) {
   const { pending, error, submit } = useSubmit(createItem, () => {
@@ -158,7 +160,7 @@ export function ItemDialog({
                     type="radio"
                     name="course"
                     value={c.id}
-                    defaultChecked={i === 0}
+                    defaultChecked={course ? c.id === course : i === 0}
                     required
                     className="sr-only"
                   />

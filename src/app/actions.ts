@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { nextHue } from "@/lib/course";
+import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,10 +44,15 @@ export async function createCourse(form: FormData): Promise<Result> {
 export async function updateCourse(form: FormData): Promise<Result> {
   const code = text(form, "code");
   const name = text(form, "name");
+  const hue = Number(form.get("hue"));
   if (!code || code.length > 40) return { error: "Give the course a short code, like CHEM 1210." };
   if (name.length > 120) return { error: "That name is too long." };
+  if (form.has("hue") && !HUES.includes(hue)) return { error: "Pick one of the course colors." };
   const supabase = await createClient();
-  const { error } = await supabase.from("courses").update({ code, name }).eq("id", text(form, "id"));
+  const { error } = await supabase
+    .from("courses")
+    .update(form.has("hue") ? { code, name, hue } : { code, name })
+    .eq("id", text(form, "id"));
   return done(error, "save the course");
 }
 

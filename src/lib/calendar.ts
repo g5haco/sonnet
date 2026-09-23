@@ -5,7 +5,7 @@ import { dayKey, type Meeting } from "./course";
 
 export type View = "day" | "week" | "month";
 export type Term = { start: string; weeks: number };
-export type ClassMeeting = Meeting & { course: string; name: string; hue: number };
+export type ClassMeeting = Meeting & { course: string; name: string; hue: number; courseId?: string };
 export type Session = { key: string; meeting: ClassMeeting; start: Date; end: Date };
 
 // setDate keeps wall-clock time across DST changes; adding 864e5 ms would not.
@@ -101,7 +101,11 @@ export type Feed = {
 const BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const LABEL: Record<string, string> = { assignment: "Due", exam: "Exam", quiz: "Quiz", reading: "Reading" };
 const ics = (s: string) => s.replace(/[\\;,]/g, (c) => "\\" + c).replace(/\r?\n/g, "\\n");
-const utc = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); // 20260924T010000Z
+const utc = (d: Date) =>
+  d
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, ""); // 20260924T010000Z
 // No timezone on class times ("floating"): Google shows them at the same wall-clock time in your own zone.
 const floating = (day: Date, time: string) => `${utc(day).slice(0, 8)}T${time.slice(0, 5).replace(":", "")}00`;
 

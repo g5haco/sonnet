@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useOptimistic, useState } from "react";
+import { toast } from "sonner";
+import { deleteItem, setDone } from "@/app/actions";
 import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -10,6 +12,63 @@ import { Button } from "@/components/ui/button";
 import { courseColor } from "@/lib/course";
 
 const DAY = 864e5;
+
+// Check-offs show instantly (and flip back if saving fails). Delete hides the row at once and only deletes
+// when the Undo toast closes (5s); if the tab closes first, the item simply survives: the safe failure.
+export function useWork(items: Item[]) {
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [optimistic, flip] = useOptimistic(items, (list, id: string) =>
+    list.map((i) => (i.id === id ? { ...i, doneAt: i.doneAt ? null : new Date().toISOString() } : i)),
+  );
+  const shown = optimistic.filter((i) => !hidden.has(i.id));
+
+  // Returns the list as it will look, so callers can react (e.g. "week cleared").
+  const toggle = (id: string) => {
+    const nowDone = !shown.find((i) => i.id === id)?.doneAt;
+    setChecked((s) => new Set(s).add(id));
+    startTransition(async () => {
+      flip(id);
+      const r = await setDone(id, nowDone);
+      if (r.error) toast.error(r.error);
+    });
+    return shown.map((i) => (i.id === id ? { ...i, doneAt: nowDone ? "x" : null } : i));
+  };
+
+  const remove = (item: Item) => {
+    const show = (on: boolean) =>
+      setHidden((s) => {
+        const n = new Set(s);
+        if (on) n.delete(item.id);
+        else n.add(item.id);
+        return n;
+      });
+    let settled = false;
+    const commit = async () => {
+      if (settled) return;
+      settled = true;
+      const r = await deleteItem(item.id);
+      if (r.error) {
+        toast.error(r.error);
+        show(true);
+      }
+    };
+    show(false);
+    toast(`Deleted "${item.title}"`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          settled = true;
+          show(true);
+        },
+      },
+      onAutoClose: commit,
+      onDismiss: commit,
+    });
+  };
+
+  return { shown, checked, toggle, remove };
+}
 
 function when(due: string, now: number) {
   const days = Math.round((Date.parse(due) - now) / DAY);
@@ -36,6 +95,9 @@ export function UpNext({
   onToggle,
   onDelete,
   onAddCourse,
+  title = "Up next",
+  limit = 8,
+  empty = "Nothing due. Add an assignment with the + in the sidebar, or wait for Canvas sync.",
   className,
 }: {
   items: Item[];
@@ -44,6 +106,9 @@ export function UpNext({
   onToggle: (id: string) => void;
   onDelete: (item: Item) => void;
   onAddCourse?: () => void; // set when there are no courses yet
+  title?: string;
+  limit?: number;
+  empty?: string;
   className?: string;
 }) {
   const [showDone, setShowDone] = useState(false);
@@ -51,10 +116,17 @@ export function UpNext({
   const open = items
     .filter((i) => showDone || !i.doneAt || checked.has(i.id))
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
-  const list = open.slice(0, 8);
+  const list = open.slice(0, limit);
 
   return (
-    <Block title="Up next" aside={headline(items.filter((i) => !i.doneAt), now)} className={className}>
+    <Block
+      title={title}
+      aside={headline(
+        items.filter((i) => !i.doneAt),
+        now,
+      )}
+      className={className}
+    >
       {list.length === 0 ? (
         <div className="m-auto flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
           {onAddCourse ? (
@@ -65,7 +137,7 @@ export function UpNext({
               </Button>
             </>
           ) : (
-            <p>Nothing due. Add an assignment with the + in the sidebar, or wait for Canvas sync.</p>
+            <p>{empty}</p>
           )}
         </div>
       ) : (

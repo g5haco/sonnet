@@ -171,3 +171,106 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ══ Tilt card (Bencho, MIT) ══════════════════════════════════
+   Almost nothing is here: the rotation, both gradients and the
+   shadow are written per frame from the pointer's position. What
+   is left is the things that are true whatever the pointer does. */
+.tlt {
+  position: relative;
+  /* The frame is what the pointer is measured against and it is
+     deliberately the ONLY thing in here that never moves. The
+     perspective lives on it rather than on the card: on the card
+     itself the vanishing point rides along with the rotation
+     instead of staying put in the room. */
+}
+.tlt-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-color: var(--card); /* Bencho's --surface-2 */
+  overflow: hidden;
+  /* NO `will-change`: it would hold a composited layer for every
+     card, permanently, to save one frame on a hover that may never
+     come. The browser promotes this once the transform moves. */
+}
+/* the dent and the rim: one element, two gradients, both placed
+   from the pointer. It inherits the corner rather than being told one. */
+.tlt-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ══ Carousel (Bencho, MIT) ═══════════════════════════════════
+   Cards on a ring that drift at rest, give under the pointer and
+   can be thrown. Three motions on three nested elements, one
+   transform each: the slot (where on the ring), the float (the
+   drift, CSS keyframes) and the card (the tilt, springs). */
+.car {
+  position: relative;
+  font-family: var(--font-sans); /* Bencho's --font-ui */
+}
+/* the frame is only a frame: no background, no clip, no mask. The
+   cards are on a ring and never reach an edge. */
+.car-track {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.car-track[data-held="true"] {
+  cursor: grabbing;
+}
+.car-track:focus-visible {
+  outline: none;
+  border-radius: 1rem;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring); /* Bencho's --bg / --ink-rgb */
+}
+/* written per frame by the component, so no transition of its own:
+   the easing and the drag would re-interpolate against each other */
+.car-slot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+}
+/* the drift: keyframes rather than a loop, so it runs on the
+   compositor and pauses itself when the tab hides. The perspective
+   lives HERE so each card gets its own vanishing point. */
+.car-float {
+  width: 100%;
+  height: 100%;
+  perspective: 760px;
+  animation: car-bob 5s ease-in-out infinite;
+}
+.car-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* no transition: the tilt is sprung in the component */
+}
+.car-sheen {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .car-float {
+    animation: none;
+  }
+}
+/* --lift and --sway are set per card by the component */
+@keyframes car-bob {
+  0%,
+  100% {
+    transform: translateY(calc(var(--lift, 4px) * -1)) rotate(calc(var(--sway, 1deg) * -1));
+  }
+  50% {
+    transform: translateY(var(--lift, 4px)) rotate(var(--sway, 1deg));
+  }
+}

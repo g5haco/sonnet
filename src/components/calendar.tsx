@@ -197,7 +197,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
             items={ADD}
             open={adding}
             onOpenChange={setAdding}
-            onPick={(k) => (k === "class" ? router.push("/settings") : add(k))}
+            onPick={(k) => (k === "class" ? router.push("/courses") : add(k))}
           />
         </div>
       </header>
@@ -547,7 +547,10 @@ function SessionBlock({
         </p>
         {m.location && <p>{m.location}</p>}
         <p className="font-mono text-xs text-muted-foreground">Every {meetingLabel(m)}</p>
-        <Link href="/settings" className="mt-1 text-sm underline underline-offset-4 hover:text-foreground">
+        <Link
+          href={m.courseId ? `/courses/${m.courseId}` : "/courses"}
+          className="mt-1 text-sm underline underline-offset-4 hover:text-foreground"
+        >
           Edit class times
         </Link>
       </PopoverContent>
@@ -732,7 +735,7 @@ function Empty({ hasClasses, onAdd }: { hasClasses: boolean; onAdd: (kind: Creat
               Add an assignment
             </Button>
           ) : (
-            <Link href="/settings" className={cn(buttonVariants({ variant: "secondary" }), PILL)}>
+            <Link href="/courses" className={cn(buttonVariants({ variant: "secondary" }), PILL)}>
               Add class times
             </Link>
           )}

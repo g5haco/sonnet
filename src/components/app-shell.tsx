@@ -19,8 +19,9 @@ import { cn } from "@/lib/utils";
 type Course = { id: string; code: string; hue: number };
 
 // Any page can open the Create flows (e.g. the dashboard's "Add your first course").
-// `due` pre-fills the date (datetime-local "YYYY-MM-DDTHH:mm"), e.g. from a calendar slot.
-const CreateContext = createContext<(kind: CreateKind, due?: string) => void>(() => {});
+// `due` pre-fills the date (datetime-local "YYYY-MM-DDTHH:mm"), e.g. from a calendar slot; `course` pre-picks
+// the course (an id), e.g. from that course's page.
+const CreateContext = createContext<(kind: CreateKind, due?: string, course?: string) => void>(() => {});
 export const useCreate = () => useContext(CreateContext);
 
 const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
@@ -29,6 +30,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   const [now] = useState(() => Date.now());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
   const [due, setDue] = useState<string>();
+  const [pick, setPick] = useState<string>();
   // Assistant: docked (wide screens, open by default) or a sheet (everything else).
   const [docked, setDocked] = useState(true);
   const [sheet, setSheet] = useState(false);
@@ -41,9 +43,10 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
 
-  const create = (kind: CreateKind, due?: string) => {
-    if (kind === "upload") return router.push("/materials");
+  const create = (kind: CreateKind, due?: string, course?: string) => {
+    if (kind === "upload") return router.push("/courses"); // materials live on each course's page
     setDue(due);
+    setPick(course);
     if (kind !== "course" && courses.length === 0) {
       toast("Add a course first. Assignments and exams hang off it.");
       return setDialog("course");
@@ -234,6 +237,7 @@ export function AppShell({ courses, children }: { courses: Course[]; children: R
           courses={courses}
           now={now}
           due={due}
+          course={pick}
           onOpenChange={(o) => !o && setDialog(null)}
         />
       </CreateContext.Provider>

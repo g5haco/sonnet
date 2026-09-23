@@ -220,15 +220,15 @@ function Classes({ meetings }: { meetings: ClassMeeting[] }) {
     <section>
       <header className="mb-2 flex items-baseline justify-between pl-1">
         <h2 className="text-sm font-medium">Classes</h2>
-        <Link href="/settings" className="font-mono text-xs text-muted-foreground hover:text-foreground">
+        <Link href="/courses" className="font-mono text-xs text-muted-foreground hover:text-foreground">
           edit →
         </Link>
       </header>
       {byCourse.length === 0 ? (
         <p className="pl-1 text-sm text-muted-foreground">
           No class times yet.{" "}
-          <Link href="/settings" className="text-foreground underline underline-offset-4">
-            Add them in Settings
+          <Link href="/courses" className="text-foreground underline underline-offset-4">
+            Add them on a course
           </Link>
           .
         </p>

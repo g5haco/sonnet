@@ -2,6 +2,7 @@ export type Item = {
   id: string;
   title: string;
   course: string; // course code, e.g. "CHEM 1210"
+  courseId?: string;
   hue: number; // course color hue
   kind: "assignment" | "exam" | "quiz" | "reading";
   due: string;

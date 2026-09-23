@@ -1,34 +1,26 @@
 import { Dashboard } from "@/components/dashboard";
-import type { Item } from "@/lib/progress";
+import { ITEM_COLS, MEETING_COLS, toCards, toItems, toMeetings } from "@/lib/rows";
 import { requireUser } from "@/lib/supabase/server";
 
 export default async function Page() {
   const { supabase } = await requireUser();
 
-  const [settings, courses, items] = await Promise.all([
+  const [settings, courses, items, meetings] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("id, code, name, hue").order("created_at"),
-    supabase.from("items").select("id, title, kind, due, done_at, course_id").order("due"),
+    supabase.from("items").select(ITEM_COLS).order("due"),
+    supabase.from("class_meetings").select(MEETING_COLS).order("starts"),
   ]);
-  const error = settings.error ?? courses.error ?? items.error;
+  const error = settings.error ?? courses.error ?? items.error ?? meetings.error;
   if (error) throw new Error(`Couldn't load your dashboard: ${error.message}`);
 
-  const byId = new Map(courses.data!.map((c) => [c.id, c]));
+  const all = toItems(items.data!, courses.data!);
   return (
     <Dashboard
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       courses={courses.data!}
-      items={items.data!.map(
-        (i): Item => ({
-          id: i.id,
-          title: i.title,
-          kind: i.kind,
-          due: i.due,
-          doneAt: i.done_at,
-          course: byId.get(i.course_id)?.code ?? "",
-          hue: byId.get(i.course_id)?.hue ?? 0,
-        }),
-      )}
+      items={all}
+      cards={toCards(courses.data!, all, toMeetings(meetings.data!, courses.data!))}
     />
   );
 }

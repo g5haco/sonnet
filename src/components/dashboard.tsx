@@ -1,14 +1,16 @@
 "use client";
 
-import { startTransition, useOptimistic, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
-import { deleteItem, setDone } from "@/app/actions";
 import { useCreate } from "@/components/app-shell";
 import { Block } from "@/components/block";
+import { Carousel } from "@/components/carousel";
+import { CourseFace, type CourseCard } from "@/components/course-card";
 import { TermSetup } from "@/components/create-forms";
 import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
-import { UpNext } from "@/components/up-next";
+import { UpNext, useWork } from "@/components/up-next";
 import { WeekStrip } from "@/components/week-strip";
 import { courseColor } from "@/lib/course";
 import { progress, type Item } from "@/lib/progress";
@@ -16,66 +18,31 @@ import { progress, type Item } from "@/lib/progress";
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
 type Course = { id: string; code: string; name: string; hue: number };
 
-export function Dashboard({ term, courses, items }: { term: Term | null; courses: Course[]; items: Item[] }) {
+export function Dashboard({
+  term,
+  courses,
+  items,
+  cards,
+}: {
+  term: Term | null;
+  courses: Course[];
+  items: Item[];
+  cards: CourseCard[];
+}) {
   const [now] = useState(() => Date.now()); // one clock per render tree
-  const [checked, setChecked] = useState<Set<string>>(new Set());
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const { shown, checked, toggle: flipItem, remove } = useWork(items);
   const create = useCreate();
-  // Check-offs show instantly; if saving fails the item flips back when the transition ends.
-  const [optimistic, flip] = useOptimistic(items, (list, id: string) =>
-    list.map((i) => (i.id === id ? { ...i, doneAt: i.doneAt ? null : new Date().toISOString() } : i)),
-  );
-  const shown = optimistic.filter((i) => !hidden.has(i.id));
 
   if (!term) return <TermSetup />;
   const termStart = new Date(`${term.start}T00:00:00`);
 
+  // Checking off the last thing due this week earns the "week cleared" moment.
   const toggle = (id: string) => {
-    const nowDone = !shown.find((i) => i.id === id)?.doneAt;
-    setChecked((s) => new Set(s).add(id));
-    startTransition(async () => {
-      flip(id);
-      const r = await setDone(id, nowDone);
-      if (r.error) toast.error(r.error);
-    });
-    const next = shown.map((i) => (i.id === id ? { ...i, doneAt: nowDone ? "x" : null } : i));
+    const next = flipItem(id);
     const p = progress(next, termStart, term.weeks, new Date(now));
     const week = p.bars[p.current];
-    if (nowDone && week?.total && week.done === week.total) toast.success("Week cleared. Go outside.");
-  };
-
-  // Delete hides the row at once and only deletes when the Undo toast closes (5s).
-  // If the tab closes first, the item simply survives: the safe failure.
-  const remove = (item: Item) => {
-    const show = (on: boolean) =>
-      setHidden((s) => {
-        const n = new Set(s);
-        if (on) n.delete(item.id);
-        else n.add(item.id);
-        return n;
-      });
-    let settled = false;
-    const commit = async () => {
-      if (settled) return;
-      settled = true;
-      const r = await deleteItem(item.id);
-      if (r.error) {
-        toast.error(r.error);
-        show(true);
-      }
-    };
-    show(false);
-    toast(`Deleted "${item.title}"`, {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          settled = true;
-          show(true);
-        },
-      },
-      onAutoClose: commit,
-      onDismiss: commit,
-    });
+    if (next.find((i) => i.id === id)?.doneAt && week?.total && week.done === week.total)
+      toast.success("Week cleared. Go outside.");
   };
 
   const date = new Date(now);
@@ -119,6 +86,28 @@ export function Dashboard({ term, courses, items }: { term: Term | null; courses
       <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />
+          {cards.length > 0 && (
+            // Quick access to every course: spin the ring, tap a card to open it.
+            <Block
+              title="Courses"
+              aside={
+                <Link href="/courses" className="hover:text-foreground">
+                  all courses →
+                </Link>
+              }
+              className="overflow-hidden"
+            >
+              <Carousel
+                label="Your courses"
+                slides={cards.map((c) => ({
+                  key: c.id,
+                  href: `/courses/${c.id}`,
+                  label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
+                  face: <CourseFace course={c} now={now} />,
+                }))}
+              />
+            </Block>
+          )}
           <UpNext
             items={shown}
             now={now}
