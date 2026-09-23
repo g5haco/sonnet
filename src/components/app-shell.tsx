@@ -8,7 +8,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
-import { createItem, updateItem } from "@/app/actions";
+import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
 import type { CreateKind } from "@/components/create-menu";
 import { Sidebar } from "@/components/sidebar";
@@ -168,21 +168,7 @@ export function AppShell({
     const p = messages.find((m) => m.id === message)?.proposals?.[index]?.p;
     if (!p || !accept) return set("skipped");
     set("saving");
-    let result: { error?: string };
-    if (p.type === "add") {
-      const squash = (code: string) => code.replace(/\s+/g, "").toUpperCase();
-      const course = courses.find((c) => squash(c.code) === squash(p.course));
-      if (!course) return set("error", `No course called ${p.course}. Add it first with the +.`);
-      const form = new FormData();
-      form.set("title", p.title);
-      form.set("kind", p.kind);
-      form.set("course", course.id);
-      form.set("due", new Date(due ?? p.due).toISOString()); // local time; this browser knows the zone
-      result = await createItem(form);
-    } else {
-      const when = due ?? p.due;
-      result = await updateItem(p.id, { title: p.title, due: when && new Date(when).toISOString(), done: p.done });
-    }
+    const result = await applyProposal(p, courses, due);
     if (result.error) set("error", result.error);
     else set("saved");
   };

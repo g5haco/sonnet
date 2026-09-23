@@ -79,6 +79,24 @@ export async function createMeeting(form: FormData): Promise<Result> {
   return done(error, "add the class time");
 }
 
+// A changed class time the student confirmed (e.g. "my POLS class is in B102"). Validated here, not trusted.
+export async function updateMeeting(
+  id: string,
+  m: { weekdays: number[]; starts: string; ends: string; location: string },
+): Promise<Result> {
+  const weekdays = [...new Set(m.weekdays)].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+  if (!weekdays.length) return { error: "Pick at least one day." };
+  if (!/^\d{2}:\d{2}$/.test(m.starts) || !/^\d{2}:\d{2}$/.test(m.ends)) return { error: "Pick a start and end time." };
+  if (m.ends <= m.starts) return { error: "Class should end after it starts." };
+  if (m.location.length > 80) return { error: "That room name is too long." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("class_meetings")
+    .update({ weekdays, starts: m.starts, ends: m.ends, location: m.location.trim() })
+    .eq("id", id);
+  return done(error, "save the class time");
+}
+
 export async function deleteMeeting(id: string): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase.from("class_meetings").delete().eq("id", id);

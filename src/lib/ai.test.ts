@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, needsThinking } from "./ai";
+import { calendarLines, classLines, needsThinking, toProposal } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -46,4 +46,33 @@ test("next class is found by date: today until it ends, then the next class day"
   expect(classLines(pols, Date.parse("2026-09-23T20:00:00Z"), la)).toContain(": Mon, Sep 28 10:30–12:20 POLS 202;");
   // Tuesday night: Wednesday is tomorrow.
   expect(classLines(pols, Date.parse("2026-09-23T04:00:00Z"), la)).toContain(": Wed, Sep 23 (tomorrow)");
+});
+
+test("tool calls become checked proposals: a room change keeps the rest of the class time", () => {
+  const refs = {
+    items: new Map([["2657af", { id: "2657af-full", title: "Essay", course: "POLS 202" }]]),
+    classes: new Map([
+      [
+        "4d5e6f",
+        { id: "4d5e6f-full", course: "POLS 202", weekdays: [1, 3], starts: "10:30:00", ends: "12:20:00", location: "" },
+      ],
+    ]),
+    courses: [{ id: "c1", code: "POLS 202", name: "Civics", items: 1 }],
+  };
+  const call = (name: string, args: object) => toProposal({ name, args: JSON.stringify(args) }, refs);
+  expect(call("update_class_time", { ref: "class:4d5e6f", room: "B102" })).toEqual({
+    type: "update_class",
+    id: "4d5e6f-full",
+    course: "POLS 202",
+    was: { weekdays: [1, 3], starts: "10:30", ends: "12:20", location: "" },
+    weekdays: [1, 3],
+    starts: "10:30",
+    ends: "12:20",
+    location: "B102",
+  });
+  expect(
+    call("add_class_time", { course: "pols202", days: ["Tuesday", "thu"], starts: "9:00", ends: "10:15" }),
+  ).toMatchObject({ type: "add_class", courseId: "c1", weekdays: [2, 4], starts: "09:00", ends: "10:15" });
+  expect(call("delete_item", { ref: "ffffff" })).toBeNull(); // unknown ref
+  expect(call("set_semester", { start: "2026-08-24", weeks: 40 })).toBeNull(); // out of range
 });

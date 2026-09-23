@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { setDone } from "@/app/actions";
 import { useCreate } from "@/components/app-shell";
 import { CalendarRail } from "@/components/calendar-rail";
+import { ItemDetails } from "@/components/item-details";
 import { CreateMenu, type CreateKind, type MenuItem } from "@/components/create-menu";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,7 +43,6 @@ import { cn } from "@/lib/utils";
 const VIEWS: View[] = ["day", "week", "month"];
 const HOUR = 48; // px per hour in the time grid
 const EASE = [0.22, 1, 0.36, 1] as const; // --ease-out-quint
-const KIND: Record<Item["kind"], string> = { assignment: "Assignment", exam: "Exam", quiz: "Quiz", reading: "Reading" };
 const FRAME = "@container flex h-[calc(100dvh-3.5rem)] flex-col md:h-dvh"; // phone top bar is 3.5rem
 const PILL = "h-9 rounded-full px-4";
 const ADD: MenuItem<"assignment" | "exam" | "class">[] = [
@@ -609,28 +609,7 @@ function ItemChip({
         </span>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 gap-1.5 rounded-xl p-3.5">
-        <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-          <span className="size-2 rounded-full" style={{ background: courseColor(item.hue) }} />
-          {item.course} · {KIND[item.kind].toLowerCase()}
-        </p>
-        <p className="text-base leading-snug font-medium">{item.title}</p>
-        <p className={late ? "text-destructive" : "text-muted-foreground"}>
-          {item.doneAt ? "Done. Was due " : late ? "Overdue. Was due " : "Due "}
-          {due.toLocaleString(undefined, {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-        </p>
-        <Button
-          variant={item.doneAt ? "secondary" : "default"}
-          onClick={() => onToggle(item.id)}
-          className="mt-1.5 h-9 rounded-full active:scale-[0.97]"
-        >
-          {item.doneAt ? "Not done yet" : "Mark done"}
-        </Button>
+        <ItemDetails item={item} now={now} onToggle={onToggle} />
       </PopoverContent>
     </Popover>
   );

@@ -4,10 +4,12 @@ import { ChevronLeft, ChevronRight, SquarePen, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
+import { Markdown } from "@/components/chat/markdown";
 import { ProposalCard } from "@/components/chat/proposal-card";
 import { Button } from "@/components/ui/button";
 import type { Deck, Proposal } from "@/lib/ai";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
+import { CopyAnswer } from "@/components/chat/widgets";
 import { cn } from "@/lib/utils";
 
 export type ChatMessage = {
@@ -20,13 +22,6 @@ export type ChatMessage = {
   proposals?: { p: Proposal; status: "pending" | "saving" | "saved" | "skipped" | "error"; error?: string }[];
   cards?: Deck; // flashcards the assistant made
 };
-
-// Models slip into markdown now and then; the panel shows plain text.
-const plain = (t: string) =>
-  t
-    .replace(/\*\*|__/g, "")
-    .replace(/^#{1,6}\s*/gm, "")
-    .replace(/^\s*[-*]\s+/gm, "• ");
 
 const STATUS = {
   reading: { orb: "searching", label: "Reading your courses…" },
@@ -132,10 +127,13 @@ export function ChatLog({
   roomy?: boolean;
 }) {
   return (
-    <ol className={cn("flex flex-col", roomy ? "gap-6 text-[15px]" : "gap-4 text-sm")}>
+    <ol className={cn("flex flex-col leading-relaxed", roomy ? "gap-8 text-[15px]" : "gap-6 text-sm")}>
       {messages.map((m) =>
         m.role === "user" ? (
-          <li key={m.id} className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">
+          <li
+            key={m.id}
+            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 whitespace-pre-wrap"
+          >
             {m.text}
           </li>
         ) : m.role === "note" ? (
@@ -150,12 +148,13 @@ export function ChatLog({
           </li>
         ) : (
           // aria-busy: screen readers announce the finished answer, not every streamed word
-          <li key={m.id} className="leading-relaxed whitespace-pre-wrap" aria-busy={!!m.state}>
-            {plain(m.text)}
+          <li key={m.id} className="min-w-0" aria-busy={!!m.state}>
+            <Markdown text={m.text} />
             {m.proposals?.map((item, i) => (
               <ProposalCard key={i} item={item} onResolve={(accept, due) => onResolve(m.id, i, accept, due)} />
             ))}
             {m.cards && <FlashDeck deck={m.cards} />}
+            {!m.state && m.text && <CopyAnswer text={m.text} />}
             {m.state === "writing" && (
               <ThinkingOrb state="composing" size={20} aria-hidden="true" className="ml-1 inline-block align-middle" />
             )}

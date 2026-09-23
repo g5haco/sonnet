@@ -70,7 +70,7 @@ export function useWork(items: Item[]) {
   return { shown, checked, toggle, remove };
 }
 
-function when(due: string, now: number) {
+export function when(due: string, now: number) {
   const days = Math.round((Date.parse(due) - now) / DAY);
   if (days < 0) return { label: `${-days}d late`, late: true };
   if (days === 0) return { label: "today", late: false };
