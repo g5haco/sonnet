@@ -95,7 +95,7 @@ export function CourseView({
           <h1 className="font-mono text-2xl font-medium tracking-tight">{course.code}</h1>
           {course.name && <p className="text-sm text-muted-foreground">{course.name}</p>}
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
-            {percent !== null && <span>{percent}% caught up</span>}
+            {percent !== null && <span>{percent}% of due work done</span>}
             <span>{s.week === 0 ? "nothing due this week" : `${s.week} due this week`}</span>
             {s.late > 0 && <span className="text-destructive">{s.late} late</span>}
             {s.examIn && <span>exam in {s.examIn}d</span>}

@@ -80,7 +80,7 @@ export function when(due: string, now: number) {
 
 function headline(open: Item[], now: number) {
   const n = open.filter((i) => Date.parse(i.due) <= endOfWeek(now)).length;
-  if (n === 0) return "Nothing due this week. Suspicious.";
+  if (n === 0) return "Nothing due this week."; // the joke lives in the progress block's verdict
   if (n === 1) return "1 thing between you and the weekend.";
   return `${n} things between you and the weekend.`;
 }

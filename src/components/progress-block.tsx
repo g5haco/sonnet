@@ -71,7 +71,7 @@ export function ProgressBlock({
             <span className="ml-1 text-3xl text-muted-foreground">%</span>
           </p>
           <p className="mt-2 font-mono text-xs text-muted-foreground">
-            caught up
+            of due work done
             {p.delta !== 0 && (
               <span className={p.delta > 0 ? "text-done" : "text-destructive"}>
                 {" · "}
@@ -80,7 +80,7 @@ export function ProgressBlock({
               </span>
             )}
           </p>
-          <p className="mt-3 text-sm text-pretty">{verdict(p)}</p>
+          <p className="mt-3 text-sm text-pretty [overflow-wrap:anywhere]">{verdict(p)}</p>
         </div>
 
         <div className="min-w-0 flex-1">
