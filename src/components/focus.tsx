@@ -1,8 +1,6 @@
 "use client";
 
 import { Block } from "@/components/block";
-import { LENGTH, mmss, useFocus } from "@/components/focus-timer";
-import { Button } from "@/components/ui/button";
 import { dayKey } from "@/lib/course";
 import { streak, studyDays, type FocusSession } from "@/lib/focus";
 import { cn } from "@/lib/utils";
@@ -10,7 +8,7 @@ import { cn } from "@/lib/utils";
 const WEEKS = 18; // heatmap columns
 const SHADES = ["bg-secondary", "bg-done/35", "bg-done/55", "bg-done/80", "bg-done"]; // heatmap, by level
 
-// The study heatmap the focus timer fills (the timer itself lives in the sidebar; this opens it).
+// The study heatmap the focus timer (in the sidebar) fills.
 export function FocusBlock({
   sessions,
   now,
@@ -20,7 +18,6 @@ export function FocusBlock({
   now: number;
   className?: string;
 }) {
-  const { run, left, open, setOpen } = useFocus();
   const days = studyDays(sessions);
   const today = new Date(now);
   const inRow = streak(days, today);
@@ -36,27 +33,8 @@ export function FocusBlock({
 
   return (
     <Block title="Study days" aside={inRow ? `${inRow}-day streak` : undefined} className={className}>
-      <div className="flex items-center gap-3">
-        <p className="min-w-0 flex-1 text-sm text-muted-foreground">
-          {run ? (
-            <>
-              Focusing: <span className="font-mono text-foreground tabular-nums">{mmss(left)}</span> left
-            </>
-          ) : (
-            `${LENGTH} minutes, one course, then a break.`
-          )}
-        </p>
-        <Button
-          variant={run || open ? "secondary" : "default"}
-          className="h-10 shrink-0 rounded-full px-5 active:scale-[0.97]"
-          onClick={() => setOpen(!open)}
-        >
-          {open ? "Hide timer" : run ? "Show timer" : "Focus"}
-        </Button>
-      </div>
-
       <div
-        className="mt-4 grid grid-flow-col grid-rows-7 gap-[3px] overflow-x-auto"
+        className="grid grid-flow-col grid-rows-7 gap-[3px] overflow-x-auto"
         style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}
         role="img"
         aria-label={`Focus minutes per day, last ${WEEKS} weeks. ${inRow}-day streak.`}
@@ -73,7 +51,7 @@ export function FocusBlock({
         })}
       </div>
       {sessions.length === 0 && (
-        <p className="mt-3 text-sm text-muted-foreground">Each focus session fills in a day. Start one above.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Each focus session fills in a day. Start one with the timer in the sidebar.</p>
       )}
     </Block>
   );
