@@ -2,98 +2,98 @@
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+Project got knowledge graph at graphify-out/ — god nodes, community structure, cross-file relations.
 
 Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- Codebase question? Run `graphify query "<question>"` first when graphify-out/graph.json exist. Use `graphify path "<A>" "<B>"` for relations, `graphify explain "<concept>"` for concepts. Return scoped subgraph, smaller than GRAPH_REPORT.md or raw grep.
+- graphify-out/wiki/index.md exist? Use for broad nav, not raw source browse.
+- Read graphify-out/GRAPH_REPORT.md only for broad arch review or when query/path/explain not enough.
+- After code change, run `graphify update .` — keep graph current (AST-only, no API cost).
 
 ## Working style
 
-Optimize for token efficiency. Prefer the smallest effective number of agents.
+Optimize token efficiency. Use smallest effective agent count.
 
 ### Default implementation review rule
 
-For normal feature work, use a lightweight review process by default:
+Normal feature work — lightweight review default:
 
-1. Implement the requested change normally.
-2. Run the relevant tests/build/app flow.
-3. Spawn one fresh reviewer sub-agent that did not implement the task.
-4. Reviewer checks only:
-   - all prompt requirements were completed
-   - the feature works in the running app
-   - no obvious bugs, regressions, overflow, broken states, or runtime errors
-   - existing functionality was not unnecessarily broken or rewritten
-5. If important issues are found, fix them and re-test.
-6. Maximum one review/fix round.
-7. Do not spawn a large agent team unless the task clearly benefits from parallel work.
-8. Do not spend tokens on subjective micro-polish unless explicitly requested.
+1. Implement change normal.
+2. Run relevant tests/build/app flow.
+3. Spawn one fresh reviewer sub-agent, not the implementer.
+4. Reviewer check only:
+   - all prompt requirements done
+   - feature work in running app
+   - no obvious bug, regression, overflow, broken state, runtime error
+   - existing function not broken/rewritten needlessly
+5. Issues found? Fix, retest.
+6. Max one review/fix round.
+7. No big agent team unless task clearly need parallel work.
+8. No tokens on subjective micro-polish unless asked.
 
-For tiny changes, skip the reviewer and just implement + verify.
+Tiny change? Skip reviewer, just implement + verify.
 
-For major milestones or release-critical features, use a full multi-round Gauntlet only when explicitly requested.
+Major milestone or release-critical feature — full multi-round Gauntlet only if explicitly asked.
 
 ## Codebase Navigation
 
-Use Graphify as the primary method for understanding the repository.
+Graphify = primary method for understand repo.
 
-Before performing broad Glob, Grep, or exploratory Read operations:
+Before broad Glob, Grep, exploratory Read:
 
-1. Query the Graphify knowledge graph first.
-2. Identify the smallest set of relevant files/symbols.
-3. Read only those files necessary for the task.
-4. Do not recursively explore unrelated parts of the repository.
+1. Query Graphify knowledge graph first.
+2. Find smallest set relevant files/symbols.
+3. Read only files needed for task.
+4. No recursive explore of unrelated repo parts.
 
 Use:
-- `graphify query "<question>"` for architecture/subsystem questions
-- `graphify explain "<concept>"` to understand a component or concept
-- `graphify path "<A>" "<B>"` to understand how two parts of the system connect
+- `graphify query "<question>"` for arch/subsystem question
+- `graphify explain "<concept>"` for understand component/concept
+- `graphify path "<A>" "<B>"` for see how two parts connect
 
-After significant code changes, update the graph rather than rebuilding it from scratch.
+After big code change, update graph — don't rebuild from scratch.
 
-Optimize for minimum context usage while preserving correctness.
+Optimize min context usage, keep correctness.
 
 ## Token Efficiency
 
-Optimize for minimal context usage without sacrificing correctness.
+Optimize min context, keep correctness.
 
 ### Repository Navigation
-Use Graphify before broad source exploration.
+Use Graphify before broad source explore.
 
-1. Query Graphify to locate relevant subsystems, symbols, dependencies, and execution paths.
-2. Read only the minimum source files necessary.
-3. Avoid broad recursive Glob/Grep/Read operations unless Graphify is insufficient.
+1. Query Graphify — find subsystem, symbol, dependency, exec path.
+2. Read only min source files needed.
+3. Avoid broad recursive Glob/Grep/Read unless Graphify not enough.
 
 ### Communication
-Use Caveman-style concise communication.
+Use Caveman-style terse talk.
 
-- No conversational filler.
-- No lengthy preambles.
-- Do not restate my request.
-- Report findings, decisions, blockers, and results directly.
-- Keep explanations concise unless I explicitly request detail.
+- No filler talk.
+- No long preamble.
+- Don't restate my request.
+- Report finding, decision, blocker, result direct.
+- Keep explain short unless I ask detail.
 
 ### Tool Output
-Prefer compressed command/tool output where possible.
+Prefer compressed command/tool output where can.
 
-For large:
+For big:
 - test output
-- build logs
+- build log
 - JSON
-- diffs
-- search results
+- diff
+- search result
 - web output
 
-use Caveman compression rather than loading full raw output into context.
+use Caveman compress, not full raw output into context.
 
-Retrieve the original output only when the compressed version is insufficient.
+Get original output only if compressed not enough.
 
 ### Context Discipline
-Do not read files merely to "understand the project."
+Don't read file just to "understand project."
 
 Use:
-- `HANDOFF.md` for current project state and decisions
-- Graphify for code architecture
-- source files only for implementation details required by the current task
+- `HANDOFF.md` for current project state, decision
+- Graphify for code arch
+- source file only for impl detail needed by current task
