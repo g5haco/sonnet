@@ -15,6 +15,21 @@ export type Turn = { role: "user" | "assistant"; content: string; images?: strin
 // Photos in the chat need a model that reads images; DeepSeek doesn't, so those turns go here.
 export const VISION_MODEL = process.env.AI_VISION_MODEL ?? "google/gemini-3.8-flash";
 
+// One non-streamed answer: the reply's text, or null if the key is missing or the call failed.
+export async function complete(request: object): Promise<string | null> {
+  const key = process.env.AI_API_KEY;
+  if (!key) return null;
+  const json = await fetch(`${BASE}/chat/completions`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(55_000),
+    body: JSON.stringify(request),
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
+  return String(json?.choices?.[0]?.message?.content ?? "").trim() || null;
+}
+
 // What the model may ask for. Nothing is saved until the student confirms the card in the chat.
 type Kind = "assignment" | "exam" | "quiz" | "reading";
 type ClassTime = { weekdays: number[]; starts: string; ends: string; location: string };

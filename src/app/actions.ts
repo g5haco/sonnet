@@ -10,7 +10,7 @@ import {
   syncCanvasUser,
   type CanvasCourse,
 } from "@/lib/canvas";
-import { BASE, MODELS } from "@/lib/ai";
+import { complete, MODELS } from "@/lib/ai";
 import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
@@ -457,30 +457,21 @@ export async function readSyllabus(
 
 // One non-streamed answer about a syllabus (the paid default model, free ones as fallback).
 async function askSyllabus(system: string, body: string): Promise<{ text: string } | { error: string }> {
-  const key = process.env.AI_API_KEY;
-  if (!key) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
+  if (!process.env.AI_API_KEY) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
   const ask = () =>
-    fetch(`${BASE}/chat/completions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(55_000),
-      body: JSON.stringify({
-        ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
-        reasoning: { enabled: false },
-        temperature: 0,
-        max_tokens: 6000,
-        messages: [
-          { role: "system", content: system },
-          // ponytail: first 40k characters; a longer syllabus would need splitting by section
-          { role: "user", content: body.slice(0, 40_000) },
-        ],
-      }),
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .catch(() => null);
+    complete({
+      ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
+      reasoning: { enabled: false },
+      temperature: 0,
+      max_tokens: 6000,
+      messages: [
+        { role: "system", content: system },
+        // ponytail: first 40k characters; a longer syllabus would need splitting by section
+        { role: "user", content: body.slice(0, 40_000) },
+      ],
+    });
   // Models fail now and then: one quiet retry before giving up.
-  const reply = (await ask()) ?? (await ask());
-  const text = String(reply?.choices?.[0]?.message?.content ?? "").trim();
+  const text = (await ask()) ?? (await ask());
   return text ? { text } : { error: "The AI couldn't read it just now. Try again in a minute." };
 }
 

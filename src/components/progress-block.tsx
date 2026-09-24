@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { animate } from "motion";
 import { Block } from "@/components/block";
-import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import { progress, verdict, type Item } from "@/lib/progress";
 
@@ -10,17 +10,20 @@ import { progress, verdict, type Item } from "@/lib/progress";
 // so nothing animates on load; only changes count.
 function Count({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const shown = useRef({ v: value });
-  useGSAP(
-    () => {
-      const text = ref.current?.firstChild;
-      if (!text) return;
-      const draw = () => (text.nodeValue = String(Math.round(shown.current.v)));
-      draw(); // React already wrote the new value; put the old one back before the first paint
-      gsap.to(shown.current, { v: value, duration: 0.6, ease: "power3.out", overwrite: true, onUpdate: draw });
-    },
-    { dependencies: [value] },
-  );
+  const shown = useRef(value);
+  useLayoutEffect(() => {
+    const text = ref.current?.firstChild;
+    if (!text) return;
+    const draw = (v: number) => {
+      shown.current = v;
+      text.nodeValue = String(Math.round(v));
+    };
+    draw(shown.current); // React already wrote the new value; put the old one back before the first paint
+    // power3.out; reduced motion lands on the final value at once.
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const a = animate(shown.current, value, { duration: still ? 0 : 0.6, ease: [0.165, 0.84, 0.44, 1], onUpdate: draw });
+    return () => a.stop();
+  }, [value]);
   return <span ref={ref}>{value}</span>;
 }
 
@@ -46,18 +49,16 @@ export function ProgressBlock({
   const wasCleared = useRef(cleared);
 
   // Week cleared: once the fill lands, the bar flashes like an LED confirming it.
-  useGSAP(
-    () => {
-      if (cleared && !wasCleared.current && nowBar.current) {
-        gsap
-          .timeline({ delay: 0.45 })
-          .to(nowBar.current, { filter: "brightness(1.9)", duration: 0.12, ease: "power2.out" })
-          .to(nowBar.current, { filter: "brightness(1)", duration: 0.7, ease: "power2.out" });
-      }
-      wasCleared.current = cleared;
-    },
-    { dependencies: [cleared] },
-  );
+  useEffect(() => {
+    const el = nowBar.current;
+    if (cleared && !wasCleared.current && el && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+      animate(
+        el,
+        { filter: ["brightness(1)", "brightness(1.9)", "brightness(1)"] },
+        { delay: 0.45, duration: 0.82, times: [0, 0.15, 1], ease: "easeOut" },
+      );
+    wasCleared.current = cleared;
+  }, [cleared]);
 
   return (
     <Block className={cn("@container", className)}>

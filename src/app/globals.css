@@ -162,7 +162,7 @@
   background-size: 100% 1.5px;
 }
 
-/* Reduced motion (Genjutsu motion-principles): CSS motion lands instantly. GSAP is handled in lib/gsap.ts. */
+/* Reduced motion (Genjutsu motion-principles): CSS motion lands instantly. JS count-ups check it themselves. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

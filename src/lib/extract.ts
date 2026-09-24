@@ -1,5 +1,5 @@
 import { extractText as pdfText, getDocumentProxy } from "unpdf";
-import { BASE, VISION_MODEL } from "./ai";
+import { complete, VISION_MODEL } from "./ai";
 
 // Plain text from an uploaded material, so the assistant can read it. PDFs go through pdf.js
 // (pure JS, no native code); text/markdown as-is. Other types (Word, PowerPoint, images) return
@@ -19,33 +19,25 @@ export async function extractText(bytes: Uint8Array, mime: string): Promise<stri
 // Photos and scanned PDFs have no text layer: the vision model transcribes them instead.
 // ponytail: one call on the whole file (<= 10 MB); page-by-page if long scans come back truncated.
 export async function visionText(bytes: Uint8Array, mime: string, name: string): Promise<string | null> {
-  const key = process.env.AI_API_KEY;
   const pdf = mime === "application/pdf";
-  if (!key || bytes.length > 10_000_000 || !(pdf || /^image\/(jpeg|png|webp|gif)$/.test(mime))) return null;
+  if (bytes.length > 10_000_000 || !(pdf || /^image\/(jpeg|png|webp|gif)$/.test(mime))) return null;
   const data = `data:${mime};base64,${Buffer.from(bytes).toString("base64")}`;
-  const res = await fetch(`${BASE}/chat/completions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(55_000),
-    body: JSON.stringify({
-      model: VISION_MODEL,
-      temperature: 0,
-      max_tokens: 8000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Transcribe all the text in this course material, in reading order, as plain text. Keep headings, lists and table rows on their own lines. Describe diagrams in one short line. Output only the transcription.",
-            },
-            pdf ? { type: "file", file: { filename: name, file_data: data } } : { type: "image_url", image_url: { url: data } },
-          ],
-        },
-      ],
-    }),
-  }).catch(() => null);
-  const json = res?.ok ? await res.json().catch(() => null) : null;
-  const text = String(json?.choices?.[0]?.message?.content ?? "").trim();
+  const text = await complete({
+    model: VISION_MODEL,
+    temperature: 0,
+    max_tokens: 8000,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Transcribe all the text in this course material, in reading order, as plain text. Keep headings, lists and table rows on their own lines. Describe diagrams in one short line. Output only the transcription.",
+          },
+          pdf ? { type: "file", file: { filename: name, file_data: data } } : { type: "image_url", image_url: { url: data } },
+        ],
+      },
+    ],
+  });
   return text ? text.slice(0, 100_000) : null;
 }
