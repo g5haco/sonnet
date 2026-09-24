@@ -39,6 +39,9 @@ export async function readAttachment(file: File): Promise<ChatFile> {
   return { name: file.name, text: text.slice(0, MAX_TEXT) };
 }
 
+// What the student typed, without the attached files' text (which must never steer routing or tools).
+export const typedPart = (content: string) => content.split(/(?:^|\n\n)\[Attached (?:file|image): /)[0];
+
 // What the model sees for a user turn: the question, then each file's text (images travel separately).
 export const withFiles = (text: string, files: ChatFile[] = []) =>
   [text, ...files.map((f) => (f.text ? `[Attached file: ${f.name}]\n${f.text}` : `[Attached image: ${f.name}]`))]

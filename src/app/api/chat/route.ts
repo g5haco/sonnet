@@ -1,4 +1,5 @@
 import { needsThinking, streamReply, studentContext, type Turn } from "@/lib/ai";
+import { typedPart } from "@/lib/attach";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 60; // free models can reason for a while before answering
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
   }
 
   // Think toggle forces careful mode; otherwise the question decides.
-  const think = body?.think === true || needsThinking(turns.at(-1)!.content.split("\n\n[Attached")[0]);
+  const think = body?.think === true || needsThinking(typedPart(turns.at(-1)!.content));
   // Optional course focus from the chat page (a course code); studentContext ignores unknown codes.
   const focus = typeof body?.focus === "string" ? body.focus.slice(0, 40) : undefined;
   return streamReply(await studentContext(supabase, timeZone, focus), turns, think);

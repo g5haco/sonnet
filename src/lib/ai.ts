@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { typedPart } from "./attach";
 import { meetingLabel } from "./course";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
@@ -496,7 +497,7 @@ export async function streamReply(
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
   const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
   // Routing reads what the student typed, not the text of files they attached.
-  const question = (turns.at(-1)?.content ?? "").split("\n\n[Attached")[0];
+  const question = typedPart(turns.at(-1)?.content ?? "");
   const vision = turns.some((t) => t.images?.length);
   if (tasks && asksTasks(question, tasks.names))
     return new Response(encode({ t: "text", v: taskAnswer(question, tasks) }), {

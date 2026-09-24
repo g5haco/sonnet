@@ -55,6 +55,23 @@ export const useAssistant = () => useContext(AssistantContext)!;
 
 const WIDE = "(min-width: 1280px)"; // xl: the assistant docks beside the page
 
+// The request for one answer: attached files' text rides in each turn's content, in full only on the newest turn
+// that has files (older ones keep 4k each); only the newest 3 photos go along, so a photo-heavy chat stays well
+// under the ~4.5 MB request limit.
+function slim(history: Pick<ChatMessage, "role" | "text" | "files">[]) {
+  let photos = 3;
+  const newest = history.findLastIndex((m) => m.files?.length);
+  const turns = [];
+  for (let i = history.length - 1; i >= 0; i--) {
+    // newest first, so the photo budget goes to the most recent photos
+    const m = history[i];
+    const files = m.files?.map((f) => (i === newest ? f : { ...f, text: f.text?.slice(0, 4000) }));
+    const images = (files ?? []).flatMap((f) => (f.image && photos-- > 0 ? [f.image] : []));
+    turns.unshift({ role: m.role, content: withFiles(m.text, files), images });
+  }
+  return turns;
+}
+
 export function AppShell({
   courses,
   schedule,
@@ -132,12 +149,7 @@ export function AppShell({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           think,
           focus: focus || undefined,
-          // Attached files' text rides in the turn's content; photos go separately (the route keeps the newest 3).
-          messages: history.map((m) => ({
-            role: m.role,
-            content: withFiles(m.text, m.files),
-            images: m.files?.flatMap((f) => (f.image ? [f.image] : [])),
-          })),
+          messages: slim(history),
         }),
         signal: ctrl.signal,
       });
@@ -221,7 +233,8 @@ export function AppShell({
     const stored = messages.map((m) => ({
       ...m,
       state: undefined, // dropped by JSON
-      files: m.files?.map((f) => ({ name: f.name, text: f.text })), // photos stay in this session only (too big to store)
+      // photos stay in this session only, and a file keeps its first 4k characters (saves have a size limit)
+      files: m.files?.map((f) => ({ name: f.name, text: f.text?.slice(0, 4000) })),
       proposals: m.proposals?.map((x) => (x.status === "saving" ? { ...x, status: "pending" as const } : x)),
     }));
     saveChat(chatId, title, focus, stored).then((r) => r.error && console.error("[chat]", r.error));
