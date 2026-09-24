@@ -359,7 +359,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   const addSyllabus = async (files: File[]) => {
     const [first] = await upload(course.id, files.slice(0, 1), true);
     if (!first) return;
-    if (!first.readable) return void toast.error("Saved, but no text could be read from it (scanned PDF?).");
+    if (!first.readable) return void toast.error("Saved, but no text could be read from it. Try a PDF or clear photos.");
     await summarize(first.id);
   };
   const ask = () => {

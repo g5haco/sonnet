@@ -11,7 +11,7 @@ import {
   type CanvasCourse,
 } from "@/lib/canvas";
 import { BASE, MODELS } from "@/lib/ai";
-import { extractText } from "@/lib/extract";
+import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
@@ -395,7 +395,11 @@ export async function addMaterial(m: {
   // ponytail: extraction runs inline and skips files over 15 MB; move to a background job if uploads get slow.
   if (m.kind === "file" && (m.size ?? 0) <= 15_000_000) {
     const { data } = await supabase.storage.from("materials").download(m.path!);
-    if (data) text = await extractText(new Uint8Array(await data.arrayBuffer()), m.mime ?? data.type).catch(() => null);
+    if (data) {
+      const bytes = new Uint8Array(await data.arrayBuffer());
+      const mime = m.mime || data.type;
+      text = (await extractText(bytes, mime).catch(() => null)) ?? (await visionText(bytes, mime, name));
+    }
   }
   const { data: row, error } = await supabase
     .from("materials")
@@ -431,7 +435,7 @@ export async function readSyllabus(
   ]);
   if (!m) return { error: "That file isn't available." };
   if (!m.body?.trim())
-    return { error: "No text could be read from this file. Scanned PDFs and Word files aren't supported yet." };
+    return { error: "No text could be read from this file. Word and PowerPoint files aren't supported yet; upload a PDF or photos instead." };
   const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
   let today: string;
   try {
@@ -492,7 +496,7 @@ export async function summarizeSyllabus(materialId: string): Promise<Result & { 
     .maybeSingle();
   if (!m) return { error: "That file isn't available." };
   if (!m.body?.trim())
-    return { error: "No text could be read from this file. Scanned PDFs and Word files aren't supported yet." };
+    return { error: "No text could be read from this file. Word and PowerPoint files aren't supported yet; upload a PDF or photos instead." };
   const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
   const reply = await askSyllabus(summaryPrompt(course), m.body);
   if ("error" in reply) return reply;
