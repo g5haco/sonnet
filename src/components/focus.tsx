@@ -15,9 +15,11 @@ const KEY = "sonnet-focus"; // the running session survives page changes and rel
 
 type Run = { start: number; course: string };
 
+// A session the student walked away from long ago (browser closed, tab slept) is dropped, not logged.
 const load = (): Run | null => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "null");
+    const run: Run | null = JSON.parse(localStorage.getItem(KEY) ?? "null");
+    return run && Date.now() - run.start < 2 * LENGTH * 60_000 ? run : null;
   } catch {
     return null;
   }
