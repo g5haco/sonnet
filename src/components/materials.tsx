@@ -352,18 +352,23 @@ export function Materials({ course, materials }: { course: { id: string; code: s
     if (tab) tab.location.href = data.signedUrl;
   };
 
+  // Until the course has a syllabus, importing one is the most useful thing on this page, so it gets a card.
+  const hasSyllabus = materials.some((m) => /syllabus/i.test(m.name));
+
   return (
     <Block
       title="Materials"
       aside={
         <span className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => syllabusInput.current?.click()}
-            className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            import syllabus
-          </button>
+          {hasSyllabus && (
+            <button
+              type="button"
+              onClick={() => syllabusInput.current?.click()}
+              className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              import syllabus
+            </button>
+          )}
           <button
             type="button"
             onClick={() => create("upload", undefined, course.id)}
@@ -385,6 +390,32 @@ export function Materials({ course, materials }: { course: { id: string; code: s
       }
     >
       <SyllabusImport material={importing} onClose={() => setImporting(null)} />
+      {!hasSyllabus && (
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            importSyllabus([...e.dataTransfer.files]);
+          }}
+          className="mb-4 flex flex-col gap-4 rounded-2xl border border-border bg-secondary p-4 sm:flex-row sm:items-center sm:p-5"
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-background">
+            <CalendarPlus className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">Import the syllabus</p>
+            <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
+              Sonnet finds every deadline and exam in it. You check them, then they land on your calendar, and the
+              assistant can answer questions about the course from it.
+            </p>
+          </div>
+          <Button onClick={() => syllabusInput.current?.click()} className="h-10 shrink-0 rounded-full px-5">
+            <FileUp className="size-4" aria-hidden="true" />
+            Choose syllabus
+          </Button>
+        </div>
+      )}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -405,7 +436,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
             className="flex w-full flex-col items-center gap-1.5 rounded-xl border border-dashed border-foreground/20 px-4 py-6 text-center transition-colors hover:border-foreground/40 focus-visible:ring-2 focus-visible:ring-ring"
           >
             <FileUp className="size-5 text-muted-foreground" aria-hidden="true" />
-            <span className="text-sm">Add the syllabus, slides or notes</span>
+            <span className="text-sm">Add slides, readings or notes</span>
             <span className="text-xs text-muted-foreground">Drop files here, or open the uploader</span>
           </button>
         ) : (
