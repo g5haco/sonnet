@@ -22,6 +22,7 @@ import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 import { shortcutsFor } from "@/components/chat/shortcuts";
+import { addStep, type Chain } from "@/components/chat/thought-chain";
 import { FocusProvider } from "@/components/focus-timer";
 
 type Course = { id: string; code: string; hue: number };
@@ -36,7 +37,8 @@ export const useCreate = () => useContext(CreateContext);
 type Assistant = {
   messages: ChatMessage[];
   busy: boolean;
-  send: (text: string, think?: boolean, files?: ChatFile[], course?: string) => void; // course: focus it first
+  // course: focus it first; search: look things up on the web
+  send: (text: string, think?: boolean, files?: ChatFile[], course?: string, search?: boolean) => void;
   clear: () => void;
   resolve: (message: number, index: number, accept: boolean, due?: string) => void;
   focus: string; // course code this chat is about, "" = all courses
@@ -128,7 +130,7 @@ export function AppShell({
   };
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
-  const send = async (text: string, think = false, files?: ChatFile[], course?: string) => {
+  const send = async (text: string, think = false, files?: ChatFile[], course?: string, search = false) => {
     if (course) setFocus(course);
     if (!chatId) setChatId(crypto.randomUUID());
     dirty.current = true;
@@ -140,7 +142,13 @@ export function AppShell({
     setMessages((all) => [
       ...all,
       { id: answer - 1, ...mine },
-      { id: answer, role: "assistant", text: "", state: "reading" },
+      {
+        id: answer,
+        role: "assistant",
+        text: "",
+        state: "reading",
+        chain: { steps: ["Reading your courses"], reasoning: "", started: Date.now() },
+      },
     ]);
 
     const ctrl = new AbortController();
@@ -152,6 +160,7 @@ export function AppShell({
         body: JSON.stringify({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           think,
+          search,
           focus: (course ?? focus) || undefined,
           messages: slim(history),
         }),
@@ -175,20 +184,34 @@ export function AppShell({
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
           const e = JSON.parse(line) as {
-            t: "think" | "text" | "propose" | "cards" | "error";
-            v?: string | Proposal[] | Deck;
+            t: "think" | "reason" | "search" | "sources" | "text" | "propose" | "cards" | "error";
+            v?: string | Proposal[] | Deck | Chain["sources"];
           };
-          if (e.t === "think") patch((m) => ({ ...m, state: m.text ? m.state : "thinking" }));
-          else if (e.t === "text") patch((m) => ({ ...m, text: m.text + e.v, state: "writing" }));
+          // Every event also moves the thought chain along (see ThoughtChain).
+          const step = (m: ChatMessage, s: string) => m.chain && addStep(m.chain, s);
+          if (e.t === "think")
+            patch((m) => ({ ...m, state: m.text ? m.state : "thinking", chain: step(m, "Thinking it through") }));
+          else if (e.t === "reason")
+            patch((m) => ({ ...m, chain: m.chain && { ...m.chain, reasoning: m.chain.reasoning + e.v } }));
+          else if (e.t === "search")
+            patch((m) => ({ ...m, chain: m.chain && { ...addStep(m.chain, "Searching the web"), query: e.v as string } }));
+          else if (e.t === "sources")
+            patch((m) => ({ ...m, chain: m.chain && { ...m.chain, sources: e.v as Chain["sources"] } }));
+          else if (e.t === "text")
+            patch((m) => ({ ...m, text: m.text + e.v, state: "writing", chain: step(m, "Writing the answer") }));
           else if (e.t === "propose")
-            patch((m) => ({ ...m, proposals: (e.v as Proposal[]).map((p) => ({ p, status: "pending" as const })) }));
-          else if (e.t === "cards") patch((m) => ({ ...m, cards: e.v as Deck }));
+            patch((m) => ({
+              ...m,
+              proposals: (e.v as Proposal[]).map((p) => ({ p, status: "pending" as const })),
+              chain: step(m, `Drafted ${(e.v as Proposal[]).length === 1 ? "a change" : `${(e.v as Proposal[]).length} changes`} for you to confirm`),
+            }));
+          else if (e.t === "cards") patch((m) => ({ ...m, cards: e.v as Deck, chain: step(m, "Made flashcards") }));
           else throw new Error(String(e.v));
         }
       }
       patch((m) =>
         m.text || m.proposals?.length || m.cards
-          ? { ...m, state: undefined }
+          ? { ...m, state: undefined, chain: m.chain && { ...m.chain, ms: Date.now() - m.chain.started } }
           : { ...m, role: "note", text: "No answer came back. Try again.", state: undefined },
       );
     } catch (err) {
@@ -239,6 +262,7 @@ export function AppShell({
       state: undefined, // dropped by JSON
       // photos stay in this session only, and a file keeps its first 4k characters (saves have a size limit)
       files: m.files?.map((f) => ({ name: f.name, text: f.text?.slice(0, 4000) })),
+      chain: m.chain && { ...m.chain, reasoning: m.chain.reasoning.slice(0, 4000) },
       proposals: m.proposals?.map((x) => (x.status === "saving" ? { ...x, status: "pending" as const } : x)),
     }));
     saveChat(chatId, title, focus, stored).then((r) => r.error && console.error("[chat]", r.error));

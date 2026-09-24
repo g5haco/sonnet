@@ -421,6 +421,13 @@ Wed Sep 23 | 2:00 PM | 2:45 PM | Outline the essay | 2657af
 
 // Reasoning costs ~10s before the first word, so it's only on when the question needs it:
 // tutoring-style asks (explain, solve, study, quiz…) or long messages. The Think toggle forces it.
+// Web search (OpenRouter's web plugin, ~$0.02 a search from credits): the Search toggle, or asks for sources,
+// fact checks or news. Schedule questions never search.
+export const needsSearch = (question: string) =>
+  /\b(search|look (it |this )?up|google|sources?|cite|citations?|fact[- ]?check|is (it|that|this) true|verify|news|according to)\b/i.test(
+    question,
+  );
+
 export const needsThinking = (question: string) =>
   // Changing the planner ("add…", "move…") is quick tool work, even when it mentions an essay.
   !/^\s*(please \s+)?(add|put|move|change|mark|rename|reschedule|schedule|remind|delete|remove|set|create|update|check off)\b/i.test(
@@ -519,6 +526,7 @@ export async function streamReply(
   turns: Turn[],
   think = false,
   toggle = false, // the Think toggle (think also turns on by itself for tutoring questions)
+  search = false, // look things up on the web first; answers carry their sources
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
@@ -551,6 +559,7 @@ export async function streamReply(
         reasoning: think ? { effort: "low" } : vision ? { effort: "minimal" } : { enabled: false },
         stream: true,
         max_tokens: think ? 2500 : 1500, // reasoning tokens count against the budget; decks need room
+        ...(search ? { plugins: [{ id: "web", max_results: 5 }] } : {}),
         ...(tools.length ? { tools } : {}),
         ...(forceCards ? { tool_choice: { type: "function", function: { name: "make_flashcards" } } } : {}),
         messages: [
@@ -594,6 +603,8 @@ export async function streamReply(
         let thinking = false;
         let sent = false; // any answer text yet?
         let retried = false;
+        const sources = new Map<string, string>(); // url -> title, from web search citations
+        if (search) out.enqueue(encode({ t: "search", v: question.slice(0, 200) }));
         const calls: { name: string; args: string }[] = []; // tool calls arrive in pieces
         try {
           for (;;) {
@@ -633,10 +644,14 @@ export async function streamReply(
                 return out.close();
               }
               const delta = chunk.choices?.[0]?.delta ?? {};
-              if (delta.reasoning && !thinking) {
+              if (delta.reasoning) {
+                if (!thinking) out.enqueue(encode({ t: "think" }));
                 thinking = true;
-                out.enqueue(encode({ t: "think" }));
+                out.enqueue(encode({ t: "reason", v: delta.reasoning }));
               }
+              for (const a of delta.annotations ?? [])
+                if (a?.type === "url_citation" && /^https?:\/\//.test(a.url_citation?.url ?? ""))
+                  sources.set(a.url_citation.url, String(a.url_citation.title ?? "").slice(0, 200));
               if (delta.content) {
                 sent = true;
                 out.enqueue(encode({ t: "text", v: delta.content }));
@@ -648,6 +663,8 @@ export async function streamReply(
               }
             }
           }
+          if (sources.size)
+            out.enqueue(encode({ t: "sources", v: [...sources].slice(0, 8).map(([url, title]) => ({ url, title })) }));
           const proposals = calls.map((c) => toProposal(c, refs)).filter((p) => p !== null);
           if (proposals.length) out.enqueue(encode({ t: "propose", v: proposals }));
           const deck = calls.map(toDeck).find((d) => d !== null);

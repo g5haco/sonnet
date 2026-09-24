@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, asksTasks, needsThinking, needsVision, taskAnswer, toolsFor, toProposal, wantsChange } from "./ai";
+import { calendarLines, classLines, asksTasks, needsSearch, needsThinking, needsVision, taskAnswer, toolsFor, toProposal, wantsChange } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -191,4 +191,11 @@ test("the paid model only for this turn's photos and files, or thinking", () => 
   expect(needsVision({ ...plain, content: "[Attached image: board.jpg]" }, false)).toBe(true);
   expect(needsVision({ ...plain, content: "explain my journal assignment" }, false)).toBe(false);
   expect(needsVision({ ...plain, content: "solve 2x + 3 = 11" }, false)).toBe(true);
+});
+
+test("web search only for sources, fact checks and news, never schedule questions", () => {
+  expect(needsSearch("can you fact check this claim?")).toBe(true);
+  expect(needsSearch("find me sources on federalism")).toBe(true);
+  expect(needsSearch("what's due this week?")).toBe(false);
+  expect(needsSearch("add my research paper friday")).toBe(false);
 });

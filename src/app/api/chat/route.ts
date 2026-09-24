@@ -1,10 +1,10 @@
-import { needsThinking, streamReply, studentContext, type Turn } from "@/lib/ai";
+import { needsSearch, needsThinking, streamReply, studentContext, type Turn } from "@/lib/ai";
 import { typedPart } from "@/lib/attach";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 60; // free models can reason for a while before answering
 
-// POST { messages: Turn[], timeZone, think?, focus? } → NDJSON stream (see streamReply).
+// POST { messages: Turn[], timeZone, think?, search?, focus? } → NDJSON stream (see streamReply).
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
@@ -54,5 +54,6 @@ export async function POST(request: Request) {
   const think = body?.think === true || needsThinking(typedPart(turns.at(-1)!.content));
   // Optional course focus from the chat page (a course code); studentContext ignores unknown codes.
   const focus = typeof body?.focus === "string" ? body.focus.slice(0, 40) : undefined;
-  return streamReply(await studentContext(supabase, timeZone, focus), turns, think, body?.think === true);
+  const search = body?.search === true || needsSearch(typedPart(turns.at(-1)!.content));
+  return streamReply(await studentContext(supabase, timeZone, focus), turns, think, body?.think === true, search);
 }

@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { ArrowUp, FileText, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
+import { ArrowUp, FileText, Globe, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
@@ -55,7 +55,7 @@ export function ChatInput({
   shortcuts = true,
   className,
 }: {
-  onSend: (text: string, think: boolean, files?: ChatFile[]) => void;
+  onSend: (text: string, think: boolean, files?: ChatFile[], course?: string, search?: boolean) => void;
   busy?: boolean; // an answer is streaming
   shortcuts?: boolean; // off while the empty state already lists them
   focusKey?: number; // bump to focus the input (e.g. ⌘K)
@@ -66,6 +66,8 @@ export function ChatInput({
   const [placeholder, setPlaceholder] = useState(0);
   const [listening, setListening] = useState(false);
   const [think, setThink] = useState(false); // off = Sonnet decides per question
+  const [search, setSearch] = useState(false); // off = only when the question asks for sources or a fact check
+  const [drop, setDrop] = useState<DOMRect | null>(null); // files dragged over the chat: where the overlay goes
   const [files, setFiles] = useState<ChatFile[]>([]);
   const [reading, setReading] = useState(0); // attachments still being prepared
   const picker = useRef<HTMLInputElement>(null);
@@ -106,7 +108,7 @@ export function ChatInput({
     const t = text.trim();
     if ((!t && !files.length) || busy || reading) return;
     rec.current?.stop();
-    onSend(t, think, files.length ? files : undefined);
+    onSend(t, think, files.length ? files : undefined, undefined, search);
     setValue("");
     setFiles([]);
   };
@@ -128,6 +130,25 @@ export function ChatInput({
     }
     field.current?.focus();
   };
+
+  // Files dragged anywhere over the chat (the panel or the Chat page, marked data-chat) show a drop overlay.
+  useEffect(() => {
+    const zone = wrapper.current?.closest("[data-chat]");
+    if (!zone) return;
+    const enter = (e: Event) => {
+      if (!(e as DragEvent).dataTransfer?.types.includes("Files") || !isShown(zone)) return;
+      setDrop(zone.getBoundingClientRect());
+    };
+    const end = () => setDrop(null);
+    zone.addEventListener("dragenter", enter);
+    window.addEventListener("dragend", end);
+    window.addEventListener("drop", end);
+    return () => {
+      zone.removeEventListener("dragenter", enter);
+      window.removeEventListener("dragend", end);
+      window.removeEventListener("drop", end);
+    };
+  }, []);
 
   const toggleDictation = async () => {
     if (listening) return rec.current?.stop();
@@ -158,6 +179,45 @@ export function ChatInput({
 
   return (
     <div ref={wrapper} className={cn("w-full", className)}>
+      <AnimatePresence>
+        {drop && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            style={{ top: drop.top, left: drop.left, width: drop.width, height: drop.height }}
+            className="fixed z-50 p-3"
+            onDragOver={(e) => e.preventDefault()}
+            onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setDrop(null)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDrop(null);
+              void attach([...e.dataTransfer.files]);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.96 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 420, damping: 32 }}
+              className="pointer-events-none grid size-full place-items-center rounded-3xl border-2 border-dashed border-brand bg-brand/10 backdrop-blur-sm"
+            >
+              <span className="flex flex-col items-center gap-3 text-sm font-medium text-brand">
+                <motion.span
+                  animate={still ? undefined : { y: [0, -6, 0] }}
+                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                  className="grid size-14 place-items-center rounded-2xl bg-brand/15"
+                >
+                  <Paperclip className="size-6" aria-hidden="true" />
+                </motion.span>
+                Drop files here to add to chat
+                <span className="text-xs font-normal text-muted-foreground">Photos, PDFs or text · up to {MAX_FILES}</span>
+              </span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <VoiceBeam
         stream={listening ? mic.stream : null}
         active={listening}
@@ -298,6 +358,23 @@ export function ChatInput({
                 e.target.value = "";
               }}
             />
+            {/* Search: look things up on the web and cite sources. Off = only when the question asks for it. */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSearch((v) => !v);
+              }}
+              aria-pressed={search}
+              aria-label="Search the web"
+              title={search ? "Web search on: answers cite their sources" : "Search the web (otherwise only when asked for sources)"}
+              className={cn(
+                "grid size-9 shrink-0 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                search ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              <Globe className="size-4" />
+            </button>
             {/* Think: force careful (slower) answers. Off = Sonnet decides from the question. */}
             <button
               type="button"

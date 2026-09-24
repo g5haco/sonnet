@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ChatFile } from "@/lib/attach";
 import type { Shortcut } from "@/components/chat/shortcuts";
+import { ThoughtChain, type Chain } from "@/components/chat/thought-chain";
 import { CopyAnswer } from "@/components/chat/widgets";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export type ChatMessage = {
   // changes the assistant proposed; nothing is saved until the student confirms
   proposals?: { p: Proposal; status: "pending" | "saving" | "saved" | "skipped" | "error"; error?: string }[];
   cards?: Deck; // flashcards the assistant made
+  chain?: Chain; // assistant only: what it did (steps, reasoning, web search)
   files?: ChatFile[]; // student only: attached photos/files (photos aren't kept in saved chats)
 };
 
@@ -45,7 +47,7 @@ export function ChatPanel({
   messages: ChatMessage[];
   busy: boolean;
   onResolve: (message: number, index: number, accept: boolean, due?: string) => void;
-  onSend: (text: string, think?: boolean, files?: ChatFile[], course?: string) => void;
+  onSend: (text: string, think?: boolean, files?: ChatFile[], course?: string, search?: boolean) => void;
   onClear: () => void;
   onClose: () => void;
   focusKey?: number;
@@ -59,7 +61,7 @@ export function ChatPanel({
   }, [messages]);
 
   return (
-    <aside aria-label="Assistant" className={cn("flex flex-col bg-sidebar", className)}>
+    <aside data-chat aria-label="Assistant" className={cn("flex flex-col bg-sidebar", className)}>
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
         <ThinkingOrb state="breathing" size={20} aria-hidden="true" />
         <h2 className="text-sm font-medium">Assistant</h2>
@@ -168,7 +170,7 @@ export function ChatLog({
             <ThinkingOrb state="breathing" size={20} aria-hidden="true" className="mt-px shrink-0" />
             {m.text}
           </li>
-        ) : !m.text && (m.state === "reading" || m.state === "thinking") ? (
+        ) : !m.chain && !m.text && (m.state === "reading" || m.state === "thinking") ? (
           <li key={m.id} className="flex items-center gap-2.5 text-muted-foreground" aria-busy="true">
             <ThinkingOrb state={STATUS[m.state].orb} size={20} aria-hidden="true" />
             {STATUS[m.state].label}
@@ -176,7 +178,8 @@ export function ChatLog({
         ) : (
           // aria-busy: screen readers announce the finished answer, not every streamed word
           <li key={m.id} className="min-w-0" aria-busy={!!m.state}>
-            <Markdown text={m.text} />
+            {m.chain && <ThoughtChain chain={m.chain} busy={!!m.state} />}
+            {m.text && <Markdown text={m.text} />}
             {m.proposals?.map((item, i) => (
               <ProposalCard key={i} item={item} onResolve={(accept, due) => onResolve(m.id, i, accept, due)} />
             ))}
