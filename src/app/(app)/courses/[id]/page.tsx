@@ -9,7 +9,7 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
   const { supabase } = await requireUser();
   const [settings, course, items, meetings, materials] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
-    supabase.from("courses").select("id, code, name, hue").eq("id", id).maybeSingle(),
+    supabase.from("courses").select("*").eq("id", id).maybeSingle(), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).eq("course_id", id).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).eq("course_id", id).order("starts"),
     supabase

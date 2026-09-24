@@ -12,11 +12,12 @@ import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { WeekStrip } from "@/components/week-strip";
-import { courseColor } from "@/lib/course";
+import { courseColor, gradeLabel } from "@/lib/course";
+import { cn } from "@/lib/utils";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
-type Course = { id: string; code: string; name: string; hue: number };
+type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
 export function Dashboard({
   term,
@@ -120,7 +121,11 @@ export function Dashboard({
             onDelete={remove}
             onAddCourse={courses.length ? undefined : () => create("course")}
           />
-          <Block title="Grades" aside="with Canvas sync" className="order-1">
+          <Block
+            title="Grades"
+            aside={courses.some((c) => c.grade != null) ? "from Canvas" : "with Canvas sync"}
+            className="order-1"
+          >
             {courses.length === 0 ? (
               <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
             ) : (
@@ -132,8 +137,11 @@ export function Dashboard({
                       <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
                       {c.name && <span className="ml-2">{c.name}</span>}
                     </span>
-                    <span className="font-mono text-muted-foreground" aria-label="No grade yet">
-                      –
+                    <span
+                      className={cn("font-mono tabular-nums", c.grade == null && "text-muted-foreground")}
+                      aria-label={c.grade == null ? "No grade yet" : undefined}
+                    >
+                      {gradeLabel(c.grade)}
                     </span>
                   </li>
                 ))}

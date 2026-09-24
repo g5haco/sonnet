@@ -2,7 +2,12 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { HUES } from "./course";
 
-export type CanvasCourse = { id: string | number; name?: string; course_code?: string };
+export type CanvasCourse = {
+  id: string | number;
+  name?: string;
+  course_code?: string;
+  enrollments?: { computed_current_score?: number | null }[]; // with include[]=total_scores
+};
 export type CanvasAssignment = {
   id: string | number;
   course_id: string | number;
@@ -295,7 +300,7 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       const token = decryptCanvasToken(secret.token_encrypted);
       canvasCourses.push(
         ...(await canvasPages<CanvasCourse>(
-          `${config.canvas_base_url}/api/v1/courses?enrollment_type=student&state[]=available&per_page=100`,
+          `${config.canvas_base_url}/api/v1/courses?enrollment_type=student&state[]=available&include[]=total_scores&per_page=100`,
           token,
           fetcher,
         )),
@@ -327,7 +332,12 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
     const existing = current ?? [];
     const courseIds = new Map<string, string>();
     for (const [index, course] of canvasCourses.entries()) {
-      courseIds.set(String(course.id), await getOrCreateCourse(admin, userId, course, index, existing));
+      const id = await getOrCreateCourse(admin, userId, course, index, existing);
+      courseIds.set(String(course.id), id);
+      // Canvas's own current score (weights applied); null when the course hides totals.
+      // A separate write, so a database without migration 0006 still syncs (the error is ignored).
+      const grade = course.enrollments?.find((e) => Number.isFinite(e.computed_current_score))?.computed_current_score;
+      await admin.from("courses").update({ grade: grade ?? null }).eq("id", id);
     }
     // Feed-only users (no token) still get real courses from the " [CODE]" on each feed title.
     for (const event of ics) {

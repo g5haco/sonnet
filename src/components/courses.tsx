@@ -16,7 +16,7 @@ import { TiltCard } from "@/components/tilt-card";
 import { Button } from "@/components/ui/button";
 import { UpNext, useWork } from "@/components/up-next";
 import type { ClassMeeting, Term } from "@/lib/calendar";
-import { courseColor, HUES, meetingLabel, WEEKDAYS } from "@/lib/course";
+import { courseColor, gradeLabel, HUES, meetingLabel, needOnFinal, WEEKDAYS } from "@/lib/course";
 import { progress, type Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +71,7 @@ export function CourseView({
   materials,
   term,
 }: {
-  course: { id: string; code: string; name: string; hue: number };
+  course: { id: string; code: string; name: string; hue: number; grade?: number | null };
   items: Item[];
   meetings: ClassMeeting[];
   materials: Material[];
@@ -95,6 +95,7 @@ export function CourseView({
           <h1 className="font-mono text-2xl font-medium tracking-tight">{course.code}</h1>
           {course.name && <p className="text-sm text-muted-foreground">{course.name}</p>}
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
+            {course.grade != null && <span>grade {gradeLabel(course.grade)}</span>}
             {percent !== null && <span>{percent}% of due work done</span>}
             <span>{s.week === 0 ? "nothing due this week" : `${s.week} due this week`}</span>
             {s.late > 0 && <span className="text-destructive">{s.late} late</span>}
@@ -128,6 +129,9 @@ export function CourseView({
           <Materials course={course} materials={materials} />
         </div>
         <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
+          <Block title="What if" aside={course.grade != null ? "from Canvas" : undefined}>
+            <WhatIf grade={course.grade ?? null} />
+          </Block>
           <Block title="Class times">
             <ClassTimes course={course} meetings={meetings} />
           </Block>
@@ -137,6 +141,57 @@ export function CourseView({
         </div>
       </div>
     </main>
+  );
+}
+
+// "What do I need on the final?": the current grade (Canvas's, or typed in), a goal and the final's weight.
+function WhatIf({ grade }: { grade: number | null }) {
+  const [current, setCurrent] = useState(grade == null ? "" : String(Math.round(grade * 10) / 10));
+  const [target, setTarget] = useState("90");
+  const [weight, setWeight] = useState("20");
+  const [c, t, w] = [current, target, weight].map(Number);
+  const need = current && target && w > 0 && w <= 100 ? needOnFinal(c, t, w) : null;
+  const input = (id: string, text: string, value: string, set: (v: string) => void) => (
+    <label htmlFor={id} className="flex flex-col gap-1">
+      <span className="text-xs text-muted-foreground">{text}</span>
+      <input
+        id={id}
+        type="number"
+        inputMode="decimal"
+        min={0}
+        max={id === "wi-weight" ? 100 : undefined}
+        step="any"
+        value={value}
+        onChange={(e) => set(e.target.value)}
+        className={cn(field, "h-10 px-3 font-mono tabular-nums")}
+      />
+    </label>
+  );
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-3 gap-2">
+        {input("wi-current", "Now %", current, setCurrent)}
+        {input("wi-target", "Goal %", target, setTarget)}
+        {input("wi-weight", "Final %", weight, setWeight)}
+      </div>
+      <p className="text-sm" aria-live="polite">
+        {need === null ? (
+          <span className="text-muted-foreground">
+            {current ? "Enter the final's weight (1–100%)." : "Enter your current grade to see what the final needs."}
+          </span>
+        ) : need <= 0 ? (
+          <>You&apos;re set: even a 0 on the final keeps {t}%.</>
+        ) : need > 100 ? (
+          <span className="text-destructive">
+            You&apos;d need {Math.ceil(need)}% on the final. {t}% is out of reach this way.
+          </span>
+        ) : (
+          <>
+            You need <span className="font-mono font-medium">{Math.ceil(need)}%</span> on the final for {t}%.
+          </>
+        )}
+      </p>
+    </div>
   );
 }
 

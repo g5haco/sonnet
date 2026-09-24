@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { typedPart } from "./attach";
-import { meetingLabel } from "./course";
+import { gradeLabel, meetingLabel } from "./course";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
 // Everyday asks (adding work, syllabus summaries, questions about the schedule) go to free models:
@@ -231,7 +231,7 @@ export function classLines(meetings: ClassRow[], now: number, timeZone: string) 
 export async function studentContext(supabase: SupabaseClient, timeZone: string, focus?: string) {
   const [settings, courses, items, meetings, materials] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
-    supabase.from("courses").select("id, code, name").order("created_at"),
+    supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select("id, title, kind, due, done_at, course_id, description").order("due").limit(300),
     supabase.from("class_meetings").select("id, course_id, weekdays, starts, ends, location").order("starts"),
     supabase.from("materials").select("course_id, kind, name, url").order("created_at"),
@@ -362,7 +362,7 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
     `Now: ${fmt(new Date(now).toISOString(), { dateStyle: "full", timeStyle: "short" })} (${timeZone}).`,
     ...calendarLines(now, timeZone),
     term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
-    `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code)).join("; ") || "none yet"}.`,
+    `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code) + (c.grade != null ? `, current grade ${gradeLabel(c.grade)}` : "")).join("; ") || "none yet"}.`,
     ...((courses.data ?? []).some((c) => c.code === focus)
       ? [`This chat is about ${focus}: answer for that course unless the student asks about something else.`]
       : []),

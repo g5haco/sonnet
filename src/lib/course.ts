@@ -23,3 +23,11 @@ export const meetingLabel = (m: Omit<Meeting, "id">) =>
     .join("/") +
   ` ${m.starts.slice(0, 5)}–${m.ends.slice(0, 5)}` +
   (m.location ? ` · ${m.location}` : "");
+
+// Grade shown as "91.2%", or "–" when there isn't one yet.
+export const gradeLabel = (grade?: number | null) => (grade == null ? "–" : `${Math.round(grade * 10) / 10}%`);
+
+// Score needed on a final worth `weight`% to finish at `target`%, from the current grade (all percents).
+// ponytail: assumes the current grade stands for everything except the final; per-group weights if that's too rough.
+export const needOnFinal = (current: number, target: number, weight: number) =>
+  (target - current * (1 - weight / 100)) / (weight / 100);

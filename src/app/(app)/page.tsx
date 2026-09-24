@@ -7,7 +7,7 @@ export default async function Page() {
 
   const [settings, courses, items, meetings] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
-    supabase.from("courses").select("id, code, name, hue").order("created_at"),
+    supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).order("starts"),
   ]);
