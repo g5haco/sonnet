@@ -87,7 +87,7 @@ Do not reverse these casually.
 1. **Phase 9: real-use pass.** The user uses the app signed in; fix what breaks. Many features were only checked in the preview pane (see Testing).
 2. **Phase 9 polish.** Small UX issues the user reports.
 3. **Deferred ideas** (in `docs/ROADMAP.md`, not scheduled): after-class check-in, "start by" planning, crunch forecast, Sunday reset.
-4. **P1 left over:** set `vercel.json` `regions` next to the Supabase region (asked earlier; no answer yet).
+4. **P1 done:** `vercel.json` `regions` = `pdx1` (Supabase is us-west-2).
 
 ## In Progress / Unfinished Work
 
