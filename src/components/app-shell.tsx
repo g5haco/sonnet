@@ -160,7 +160,8 @@ export function AppShell({
             : ((await res.json().catch(() => null))?.error ?? "Couldn't reach the assistant."),
         );
       // An expired session gets redirected to the login page (HTML), not the answer stream.
-      if (!res.headers.get("content-type")?.includes("ndjson")) throw new Error("Your session ended. Sign in again.");
+      if (res.redirected || res.headers.get("content-type")?.includes("text/html"))
+        throw new Error("Your session ended. Sign in again.");
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       let buffer = "";
       for (;;) {

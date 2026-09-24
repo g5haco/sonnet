@@ -495,7 +495,9 @@ export async function streamReply(
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
-  const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
+  const NDJSON = { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" };
+  // Errors travel in the stream too; without the NDJSON header the client mistakes them for a login redirect.
+  const fail = (message: string) => new Response(encode({ t: "error", v: message }), { headers: NDJSON });
   // Routing reads what the student typed, not the text of files they attached.
   const question = typedPart(turns.at(-1)?.content ?? "");
   const vision = turns.some((t) => t.images?.length);
@@ -548,7 +550,9 @@ export async function streamReply(
         ? "The free AI is busy or out of requests for today. Try again in a minute."
         : status === 401
           ? "The AI key was rejected. Check AI_API_KEY."
-          : "Couldn't reach the AI. Try again in a moment.",
+          : status === 402
+            ? "The OpenRouter account is out of credits. Add credits or set AI_MODEL to free models."
+            : "Couldn't reach the AI. Try again in a moment.",
     );
   }
 
