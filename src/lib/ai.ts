@@ -2,12 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { meetingLabel } from "./course";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
-// Default: OpenRouter free models, tried in order when one is rate-limited (decided 2026-09-23).
+// Default: DeepSeek V4.1 Flash (paid, ~$0.14/M in; 15/15 syllabus dates, all chat checks, first words in ~0.5-1s
+// in the 2026-09-23 comparison with Gemini 3.8 Flash), then free models as fallbacks when it's down.
 // Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
 export const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
 export const MODELS = (
   process.env.AI_MODEL ??
-  "nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free,nvidia/nemotron-3-ultra-550b-a55b:free"
+  "deepseek/deepseek-v4.1-flash,nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free"
 ).split(",");
 
 export type Turn = { role: "user" | "assistant"; content: string };
