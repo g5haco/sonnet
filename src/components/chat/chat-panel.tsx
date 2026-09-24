@@ -9,7 +9,7 @@ import { ProposalCard } from "@/components/chat/proposal-card";
 import { Button } from "@/components/ui/button";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ChatFile } from "@/lib/attach";
-import { SHORTCUTS } from "@/components/chat/shortcuts";
+import type { Shortcut } from "@/components/chat/shortcuts";
 import { CopyAnswer } from "@/components/chat/widgets";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,7 @@ export function ChatPanel({
   onClear,
   onClose,
   focusKey,
+  shortcuts,
   busy,
   onResolve,
   className,
@@ -44,10 +45,11 @@ export function ChatPanel({
   messages: ChatMessage[];
   busy: boolean;
   onResolve: (message: number, index: number, accept: boolean, due?: string) => void;
-  onSend: (text: string, think?: boolean, files?: ChatFile[]) => void;
+  onSend: (text: string, think?: boolean, files?: ChatFile[], course?: string) => void;
   onClear: () => void;
   onClose: () => void;
   focusKey?: number;
+  shortcuts: Shortcut[];
   className?: string;
 }) {
   // Keep the newest words in view while an answer streams.
@@ -92,11 +94,11 @@ export function ChatPanel({
               <p className="mt-1 text-sm text-muted-foreground">Ask about your courses, deadlines and exams.</p>
             </div>
             <ul className="flex w-full flex-col gap-1.5">
-              {SHORTCUTS.map(({ label, prompt, icon: Icon }) => (
+              {shortcuts.slice(0, 5).map(({ label, prompt, icon: Icon, focus }) => (
                 <li key={label}>
                   <button
                     type="button"
-                    onClick={() => onSend(prompt)}
+                    onClick={() => onSend(prompt, false, undefined, focus)}
                     className="flex h-11 w-full items-center gap-3 rounded-xl bg-secondary/60 px-3 text-left text-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Icon className="size-4 text-muted-foreground" aria-hidden="true" />

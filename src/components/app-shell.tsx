@@ -21,6 +21,7 @@ import { withFiles, type ChatFile } from "@/lib/attach";
 import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
+import { shortcutsFor } from "@/components/chat/shortcuts";
 
 type Course = { id: string; code: string; hue: number };
 
@@ -34,7 +35,7 @@ export const useCreate = () => useContext(CreateContext);
 type Assistant = {
   messages: ChatMessage[];
   busy: boolean;
-  send: (text: string, think?: boolean, files?: ChatFile[]) => void;
+  send: (text: string, think?: boolean, files?: ChatFile[], course?: string) => void; // course: focus it first
   clear: () => void;
   resolve: (message: number, index: number, accept: boolean, due?: string) => void;
   focus: string; // course code this chat is about, "" = all courses
@@ -100,7 +101,8 @@ export function AppShell({
   const [chatId, setChatId] = useState<string | null>(null);
   const dirty = useRef(false); // changed since the last save
   const [focus, setFocus] = useState("");
-  const onChatPage = usePathname() === "/chat"; // the page is the assistant there: no panel, no Ask button
+  const path = usePathname();
+  const onChatPage = path === "/chat"; // the page is the assistant there: no panel, no Ask button
   const nextId = useRef(0);
   const inflight = useRef<AbortController | null>(null);
   const { resolvedTheme } = useTheme();
@@ -125,7 +127,8 @@ export function AppShell({
   };
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
-  const send = async (text: string, think = false, files?: ChatFile[]) => {
+  const send = async (text: string, think = false, files?: ChatFile[], course?: string) => {
+    if (course) setFocus(course);
     if (!chatId) setChatId(crypto.randomUUID());
     dirty.current = true;
     const mine = { role: "user" as const, text, files: files?.length ? files : undefined };
@@ -148,7 +151,7 @@ export function AppShell({
         body: JSON.stringify({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           think,
-          focus: focus || undefined,
+          focus: (course ?? focus) || undefined,
           messages: slim(history),
         }),
         signal: ctrl.signal,
@@ -272,6 +275,11 @@ export function AppShell({
       onResolve={resolve}
       onClose={onClose}
       focusKey={focusKey}
+      shortcuts={shortcutsFor(
+        focus || courses.find((c) => path === `/courses/${c.id}`)?.code,
+        schedule.items,
+        now,
+      )}
       className={className}
     />
   );

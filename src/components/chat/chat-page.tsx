@@ -1,7 +1,7 @@
 "use client";
 
 import { BorderBeam } from "border-beam";
-import { History, Layers, MessageCircleQuestion, SquarePen, Trash2 } from "lucide-react";
+import { History, SquarePen, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -11,14 +11,14 @@ import { useAssistant } from "@/components/app-shell";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatLog } from "@/components/chat/chat-panel";
 import { GooeyMenu } from "@/components/gooey-menu";
-import { SHORTCUTS } from "@/components/chat/shortcuts";
+import { shortcutsFor } from "@/components/chat/shortcuts";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { courseColor } from "@/lib/course";
 
 // The assistant as a full page: the same conversation as the side panel, with room to study in it.
 // Border beam (Libraries.dev): always riding the page's input, brighter while the assistant is working.
 export function ChatPage() {
-  const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses } = useAssistant();
+  const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses, schedule } = useAssistant();
   const { resolvedTheme } = useTheme();
   const [more, setMore] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -27,27 +27,12 @@ export function ChatPage() {
     log.current?.scrollTo({ top: log.current.scrollHeight });
   }, [messages]);
 
-  // Ideas for the empty chat, pointed at the focused course (or the first one).
-  const course = focus || courses[0]?.code;
-  const ideas = [
-    SHORTCUTS[0],
-    SHORTCUTS[1],
-    ...(course
-      ? [
-          {
-            label: `Quiz me on ${course}`,
-            prompt: `Quiz me on ${course}: one question at a time, wait for my answer, then tell me if I'm right and why.`,
-            icon: MessageCircleQuestion,
-          },
-          {
-            label: `Flashcards for ${course}`,
-            prompt: `Make flashcards for the key ideas in ${course}.`,
-            icon: Layers,
-          },
-        ]
-      : []),
-    ...SHORTCUTS.slice(2),
-  ];
+  // Ideas for the empty chat, pointed at the focused course (or the one with the next exam, or the first one).
+  const [now] = useState(() => Date.now());
+  const nextExam = schedule.items
+    .filter((i) => i.kind === "exam" && !i.doneAt && Date.parse(i.due) > now)
+    .sort((a, b) => a.due.localeCompare(b.due))[0];
+  const ideas = shortcutsFor(focus || nextExam?.course || courses[0]?.code, schedule.items, now);
   const shown = more ? ideas : ideas.slice(0, 4);
   const title = messages.find((m) => m.role === "user")?.text;
   const hue = courses.find((c) => c.code === focus)?.hue;
@@ -101,11 +86,11 @@ export function ChatPage() {
                 </p>
               </div>
               <ul className="flex max-w-2xl flex-wrap justify-center gap-2">
-                {shown.map(({ label, prompt, icon: Icon }) => (
+                {shown.map(({ label, prompt, icon: Icon, focus: course }) => (
                   <li key={label}>
                     <button
                       type="button"
-                      onClick={() => send(prompt)}
+                      onClick={() => send(prompt, false, undefined, course)}
                       className="flex h-10 items-center gap-2 rounded-full border border-border bg-background px-4 text-sm transition-[background-color,transform] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
                     >
                       <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
