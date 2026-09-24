@@ -184,7 +184,7 @@ export function parseCanvasIcs(text: string): IcsEvent[] {
           due,
           url,
           canvasCourseId: courseId?.[1] ?? courseId?.[2] ?? null,
-          courseCode: code?.[1].trim() ?? null,
+          courseCode: code?.[1].trim().slice(0, 40) ?? null, // courses.code holds at most 40
           assignmentId: assignmentId?.[1] ?? assignmentId?.[2] ?? null,
         });
       }
@@ -377,14 +377,27 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       );
       if (error) throw error;
     }
-    if (config.canvas_ics_url) {
+    // An empty feed is more likely a Canvas hiccup than an empty term: then leave the saved rows alone.
+    if (config.canvas_ics_url && ics.length) {
       // Feed rows that are now covered by the API (or gone from the feed) are duplicates: remove them,
-      // then the "CANVAS" catch-all course if nothing is left in it.
-      const kept = items.filter((i) => i.source === "ics").map((i) => `"${i.external_id.replace(/"/g, '\\"')}"`);
-      let stale = admin.from("items").delete().eq("user_id", userId).eq("source", "ics");
-      if (kept.length) stale = stale.not("external_id", "in", `(${kept.join(",")})`);
-      const { error } = await stale;
+      // then the "CANVAS" catch-all course if nothing is left in it. Deleted by id in chunks so a long
+      // feed can't overflow the request URL.
+      const kept = new Set(items.filter((i) => i.source === "ics").map((i) => i.external_id));
+      const { data: saved, error } = await admin
+        .from("items")
+        .select("id, external_id")
+        .eq("user_id", userId)
+        .eq("source", "ics");
       if (error) throw error;
+      const stale = (saved ?? []).filter((row) => !kept.has(row.external_id)).map((row) => row.id);
+      for (let i = 0; i < stale.length; i += 100) {
+        const { error } = await admin
+          .from("items")
+          .delete()
+          .eq("user_id", userId)
+          .in("id", stale.slice(i, i + 100));
+        if (error) throw error;
+      }
       const catchAll = existing.find((c) => c.code === "CANVAS" && c.canvas_course_id === "calendar");
       if (catchAll) {
         const { count } = await admin

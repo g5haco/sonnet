@@ -336,13 +336,17 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
 function ResetData({ onDone }: { onDone: () => void }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const [tries, setTries] = useState(0); // a failed reset remounts the button, straight back to idle
   const [pending, start] = useTransition();
   const { clear } = useAssistant();
   const router = useRouter();
   const reset = () =>
     start(async () => {
       const r = await resetAllData("RESET"); // the server still requires the word
-      if (r.error) return setError(r.error);
+      if (r.error) {
+        setTries((n) => n + 1);
+        return setError(r.error);
+      }
       clear(); // the open conversation would otherwise be saved again
       toast("All data cleared. Fresh start.");
       onDone();
@@ -369,10 +373,11 @@ function ResetData({ onDone }: { onDone: () => void }) {
           <div className="flex flex-wrap items-center gap-2">
             {/* Four deliberate clicks, each asking again; the last one burns it all down. */}
             <DoubtButton
+              key={tries}
               label="Delete everything"
               confirmations={["Are you sure?", "Every course, every file. Still?", "No undo. Last chance."]}
-              successLabel={pending ? "Deleting…" : "Gone."}
-              resetAfter={2500} // back to idle if the reset fails (on success the page moves on)
+              successLabel="Deleting…"
+              resetAfter={0}
               disabled={pending}
               onConfirm={reset}
               className="rounded-full"
