@@ -126,6 +126,28 @@ test("task questions are routed by phrasing, not one exact sentence", () => {
     "explain photosynthesis",
   ])
     expect(asksTasks(q), q).toBeNull();
+  // review round 2: near-miss task questions (were sent to the model)
+  for (const q of [
+    "How much work do I have this week?",
+    "am i behind on anything",
+    "What's on my plate?",
+    "What's left to do?",
+    "Help me figure out what to do first this week",
+  ])
+    expect(asksTasks(q), q).not.toBeNull();
+  // review round 2: questions about one thing (were wrongly given the canned lists)
+  const names = ["Profile Picture Assignment", "Problem set 3", "Weekly Journal 1", "Introductions", "MATH 142", "POLS 202"];
+  for (const q of [
+    "What does the Profile Picture Assignment require?",
+    "What's the late penalty for Problem set 3?",
+    "What is the Weekly Journal 1 homework about?",
+    "Show me the Introductions assignment details",
+    "Which assignment is worth the most points?",
+    "Any tips for my homework?",
+    "What's due for MATH 142?",
+    "What assignments does POLS 202 have?",
+  ])
+    expect(asksTasks(q, names), q).toBeNull();
   expect(wantsChange("What do I have due this week?")).toBe(false);
   expect(wantsChange("my problem set is due Friday")).toBe(false);
 });
@@ -137,7 +159,7 @@ test("task answers: a one-line lead naming the most urgent thing, then ordered w
     thisWeek: [t("bbb222", "is due tomorrow at 9:00 AM"), t("ccc333", "is due Friday at 11:59 PM")],
   };
   const week = taskAnswer("What's due this week?", tasks);
-  expect(week).toMatch(/^\*\*Start with \[Item aaa111\]\(item:aaa111\)\*\*: it was due 2 days ago\. 1 overdue, 2 due/);
+  expect(week).toMatch(/^\*\*1 overdue, 2 due the rest of this week\.\*\* Start here \(due 2 days ago\): \[Item aaa111\]\(item:aaa111\)\n/);
   expect(week).toMatch(/title: Overdue\naaa111\n[\s\S]*title: Due this week\nbbb222\nccc333\n/);
   expect(taskAnswer("What's overdue?", tasks)).not.toContain("bbb222");
   expect(taskAnswer("What should I work on first this week?", tasks)).toContain("title: Next up");

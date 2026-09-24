@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { startTransition, useOptimistic, useState } from "react";
 import { toast } from "sonner";
 import { deleteItem, setDone } from "@/app/actions";
@@ -203,7 +204,13 @@ export function UpNext({
       )}
       {(open.length > list.length || doneCount > 0) && (
         <p className="mt-auto flex items-center justify-between gap-3 pt-4 font-mono text-xs text-muted-foreground">
-          <span>{open.length > list.length && `+${open.length - list.length} more this term`}</span>
+          {open.length > list.length ? (
+            <Link href="/calendar" className="rounded-sm hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+              +{open.length - list.length} more this term →
+            </Link>
+          ) : (
+            <span />
+          )}
           {doneCount > 0 && (
             <button
               type="button"
