@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { calendarLines, classLines, asksTasks, needsThinking, taskAnswer, toolsFor, toProposal, wantsChange } from "./ai";
+import { calendarLines, classLines, asksTasks, needsThinking, needsVision, taskAnswer, toolsFor, toProposal, wantsChange } from "./ai";
 import { meetingLabel } from "./course";
 
 test("calendar grounding: this week, next week, today, in the student's timezone", () => {
@@ -180,4 +180,13 @@ test("task answers: a one-line lead naming the most urgent thing, then ordered w
   expect(taskAnswer("What should I work on first this week?", tasks)).toContain("title: Next up");
   expect(taskAnswer("What's overdue?", { overdue: [], thisWeek: [] })).toBe("**Nothing overdue.** Enjoy it while it lasts.");
   expect((taskAnswer("What's due this week?", tasks).match(/```work/g) ?? []).length).toBe(2);
+});
+
+test("the paid model only for this turn's photos and files, or thinking", () => {
+  const plain = { role: "user" as const, content: "add bio lab friday" };
+  expect(needsVision(plain, false)).toBe(false);
+  expect(needsVision(plain, true)).toBe(true);
+  expect(needsVision({ ...plain, images: ["data:image/png;base64,AA"] }, false)).toBe(true);
+  expect(needsVision({ ...plain, content: "what's due?\n\n[Attached file: hw.pdf]\nQ1" }, false)).toBe(true);
+  expect(needsVision({ ...plain, content: "[Attached image: board.jpg]" }, false)).toBe(true);
 });

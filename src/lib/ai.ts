@@ -3,17 +3,22 @@ import { typedPart } from "./attach";
 import { meetingLabel } from "./course";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
-// Default: DeepSeek V4.1 Flash (paid, ~$0.14/M in; 15/15 syllabus dates, all chat checks, first words in ~0.5-1s
-// in the 2026-09-23 comparison with Gemini 3.8 Flash), then free models as fallbacks when it's down.
+// Everyday asks (adding work, syllabus summaries, questions about the schedule) go to free models:
+// Nemotron 3 Ultra was the only free model that got both tool calls and syllabus dates right on 2026-09-23;
+// free models go down often, so Qwen is the next try and paid DeepSeek V4.1 Flash (~$0.14/M in) the last resort.
 // Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
 export const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
 export const MODELS = (
-  process.env.AI_MODEL ?? "deepseek/deepseek-v4.1-flash,nvidia/nemotron-3-super-120b-a12b:free,qwen/qwen3.8-27b:free"
+  process.env.AI_MODEL ??
+  "nvidia/nemotron-3-ultra-550b-a55b:free,qwen/qwen3.8-27b:free,deepseek/deepseek-v4.1-flash"
 ).split(",");
 
 export type Turn = { role: "user" | "assistant"; content: string; images?: string[] }; // images: data: URLs
-// Photos in the chat need a model that reads images; DeepSeek doesn't, so those turns go here.
+// Paid, for the turns that need it: photos and files attached to *this* message, and thinking (Think toggle or
+// a tutoring question). Earlier photos don't keep a chat on it.
 export const VISION_MODEL = process.env.AI_VISION_MODEL ?? "google/gemini-3.8-flash";
+export const needsVision = (last: Turn, think: boolean) =>
+  think || !!last.images?.length || typedPart(last.content) !== last.content;
 
 // One non-streamed answer: the reply's text, or null if the key is missing or the call failed.
 export async function complete(request: object): Promise<string | null> {
@@ -519,7 +524,7 @@ export async function streamReply(
     });
   // Routing reads what the student typed, not the text of files they attached.
   const question = typedPart(turns.at(-1)?.content ?? "");
-  const vision = turns.some((t) => t.images?.length);
+  const vision = needsVision(turns.at(-1)!, think);
   if (tasks && asksTasks(question, tasks.names))
     return new Response(encode({ t: "text", v: taskAnswer(question, tasks) }), {
       headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
@@ -536,7 +541,7 @@ export async function streamReply(
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       signal: AbortSignal.timeout(55_000), // route maxDuration is 60s
       body: JSON.stringify({
-        // `models` = OpenRouter fallbacks. Photos go to the vision model, which requires some reasoning.
+        // `models` = OpenRouter fallbacks. The vision model requires some reasoning.
         ...(vision ? { model: VISION_MODEL } : MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
         reasoning: think ? { effort: "low" } : vision ? { effort: "minimal" } : { enabled: false },
         stream: true,
@@ -546,7 +551,8 @@ export async function streamReply(
         messages: [
           { role: "system", content: `${RULES}\n\n${context}${forceCards ? CARDS_HINT : ""}` },
           ...turns.map((t) =>
-            t.images?.length
+            // Text-only models get the "[Attached image: …]" line, not the photo.
+            vision && t.images?.length
               ? {
                   role: t.role,
                   content: [
