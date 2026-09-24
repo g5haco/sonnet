@@ -14,11 +14,15 @@ export const MODELS = (
 ).split(",");
 
 export type Turn = { role: "user" | "assistant"; content: string; images?: string[] }; // images: data: URLs
-// Paid, for the turns that need it: photos and files attached to *this* message, and thinking (Think toggle or
-// a tutoring question). Earlier photos don't keep a chat on it.
+// Paid, for the turns that need it: photos and files attached to *this* message, the Think toggle, and math-style
+// work. Explaining and summarizing stay on the free models (Nemotron 3 Ultra explained an assignment well in
+// testing, 2026-09-23). Earlier photos don't keep a chat on it.
 export const VISION_MODEL = process.env.AI_VISION_MODEL ?? "google/gemini-3.8-flash";
-export const needsVision = (last: Turn, think: boolean) =>
-  think || !!last.images?.length || typedPart(last.content) !== last.content;
+export const needsVision = (last: Turn, toggle: boolean) =>
+  toggle ||
+  !!last.images?.length ||
+  typedPart(last.content) !== last.content ||
+  /\b(solve|prove|derive|calculate)\b/i.test(typedPart(last.content));
 
 // One non-streamed answer: the reply's text, or null if the key is missing or the call failed.
 export async function complete(request: object): Promise<string | null> {
@@ -514,6 +518,7 @@ export async function streamReply(
   }: { text: string; refs: Refs; tasks?: { overdue: Task[]; thisWeek: Task[]; names?: string[] }; read?: boolean },
   turns: Turn[],
   think = false,
+  toggle = false, // the Think toggle (think also turns on by itself for tutoring questions)
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
@@ -524,7 +529,7 @@ export async function streamReply(
     });
   // Routing reads what the student typed, not the text of files they attached.
   const question = typedPart(turns.at(-1)?.content ?? "");
-  const vision = needsVision(turns.at(-1)!, think);
+  const vision = needsVision(turns.at(-1)!, toggle);
   if (tasks && asksTasks(question, tasks.names))
     return new Response(encode({ t: "text", v: taskAnswer(question, tasks) }), {
       headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },

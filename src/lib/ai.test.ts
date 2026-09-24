@@ -189,4 +189,6 @@ test("the paid model only for this turn's photos and files, or thinking", () => 
   expect(needsVision({ ...plain, images: ["data:image/png;base64,AA"] }, false)).toBe(true);
   expect(needsVision({ ...plain, content: "what's due?\n\n[Attached file: hw.pdf]\nQ1" }, false)).toBe(true);
   expect(needsVision({ ...plain, content: "[Attached image: board.jpg]" }, false)).toBe(true);
+  expect(needsVision({ ...plain, content: "explain my journal assignment" }, false)).toBe(false);
+  expect(needsVision({ ...plain, content: "solve 2x + 3 = 11" }, false)).toBe(true);
 });

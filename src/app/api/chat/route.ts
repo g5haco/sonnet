@@ -54,5 +54,5 @@ export async function POST(request: Request) {
   const think = body?.think === true || needsThinking(typedPart(turns.at(-1)!.content));
   // Optional course focus from the chat page (a course code); studentContext ignores unknown codes.
   const focus = typeof body?.focus === "string" ? body.focus.slice(0, 40) : undefined;
-  return streamReply(await studentContext(supabase, timeZone, focus), turns, think);
+  return streamReply(await studentContext(supabase, timeZone, focus), turns, think, body?.think === true);
 }
