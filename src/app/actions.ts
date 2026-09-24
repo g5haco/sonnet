@@ -12,7 +12,7 @@ import {
 } from "@/lib/canvas";
 import { BASE, MODELS } from "@/lib/ai";
 import { extractText } from "@/lib/extract";
-import { parseSyllabusItems, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
+import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -422,18 +422,16 @@ export async function addMaterial(m: {
 export async function readSyllabus(
   materialId: string,
   timeZone: string,
-): Promise<Result & { items?: Draft[]; course?: string }> {
+): Promise<Result & { items?: Draft[]; course?: string; known?: number }> {
   if (!UUID.test(materialId)) return { error: "That file isn't available." };
   const supabase = await createClient();
   const [{ data: m }, { data: term }] = await Promise.all([
-    supabase.from("materials").select("body, courses(code)").eq("id", materialId).maybeSingle(),
+    supabase.from("materials").select("body, course_id, courses(code)").eq("id", materialId).maybeSingle(),
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
   ]);
   if (!m) return { error: "That file isn't available." };
   if (!m.body?.trim())
     return { error: "No text could be read from this file. Scanned PDFs and Word files aren't supported yet." };
-  const key = process.env.AI_API_KEY;
-  if (!key) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
   const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
   let today: string;
   try {
@@ -441,6 +439,22 @@ export async function readSyllabus(
   } catch {
     today = new Date().toISOString().slice(0, 10);
   }
+  const reply = await askSyllabus(syllabusPrompt(course, today, weekLines(term?.term_start, term?.term_weeks)), m.body);
+  if ("error" in reply) return reply;
+  const items = parseSyllabusItems(reply.text, term?.term_start);
+  if (!items.length) return { error: "No dated assignments or exams were found in this file." };
+  // Only what the course doesn't have yet: with Canvas connected that's usually little or nothing.
+  const { data: existing } = await supabase.from("items").select("title, due").eq("course_id", m.course_id);
+  const fresh = items.filter(
+    (d) => !(existing ?? []).some((e) => sameWork({ title: d.title, due: d.date && `${d.date}T12:00:00Z` }, e)),
+  );
+  return { items: fresh, course, known: items.length - fresh.length };
+}
+
+// One non-streamed answer about a syllabus (the paid default model, free ones as fallback).
+async function askSyllabus(system: string, body: string): Promise<{ text: string } | { error: string }> {
+  const key = process.env.AI_API_KEY;
+  if (!key) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
   const ask = () =>
     fetch(`${BASE}/chat/completions`, {
       method: "POST",
@@ -452,20 +466,51 @@ export async function readSyllabus(
         temperature: 0,
         max_tokens: 6000,
         messages: [
-          { role: "system", content: syllabusPrompt(course, today, weekLines(term?.term_start, term?.term_weeks)) },
+          { role: "system", content: system },
           // ponytail: first 40k characters; a longer syllabus would need splitting by section
-          { role: "user", content: m.body.slice(0, 40_000) },
+          { role: "user", content: body.slice(0, 40_000) },
         ],
       }),
     })
       .then((r) => (r.ok ? r.json() : null))
       .catch(() => null);
-  // Free models fail now and then: one quiet retry before giving up.
+  // Models fail now and then: one quiet retry before giving up.
   const reply = (await ask()) ?? (await ask());
-  if (!reply) return { error: "The AI couldn't read it just now. Try again in a minute." };
-  const items = parseSyllabusItems(String(reply.choices?.[0]?.message?.content ?? ""), term?.term_start);
-  if (!items.length) return { error: "No dated assignments or exams were found in this file." };
-  return { items, course };
+  const text = String(reply?.choices?.[0]?.message?.content ?? "").trim();
+  return text ? { text } : { error: "The AI couldn't read it just now. Try again in a minute." };
+}
+
+// The syllabus as a one-page digest (grading, policies, key dates…), kept as the course's "Syllabus summary"
+// note: visible and editable on the course page. A new summary replaces the old one.
+export async function summarizeSyllabus(materialId: string): Promise<Result & { id?: string; body?: string }> {
+  if (!UUID.test(materialId)) return { error: "That file isn't available." };
+  const supabase = await createClient();
+  const { data: m } = await supabase
+    .from("materials")
+    .select("body, course_id, courses(code)")
+    .eq("id", materialId)
+    .maybeSingle();
+  if (!m) return { error: "That file isn't available." };
+  if (!m.body?.trim())
+    return { error: "No text could be read from this file. Scanned PDFs and Word files aren't supported yet." };
+  const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
+  const reply = await askSyllabus(summaryPrompt(course), m.body);
+  if ("error" in reply) return reply;
+  const body = reply.text.replace(/^```(?:markdown)?\s*|\s*```$/g, "").slice(0, 20_000);
+  await supabase
+    .from("materials")
+    .delete()
+    .eq("course_id", m.course_id)
+    .eq("kind", "note")
+    .eq("name", "Syllabus summary");
+  const { data: note, error } = await supabase
+    .from("materials")
+    .insert({ course_id: m.course_id, kind: "note", name: "Syllabus summary", body })
+    .select("id")
+    .single();
+  if (error) return { error: `Couldn't save the summary. ${error.message}` };
+  revalidatePath("/", "layout");
+  return { id: note.id, body };
 }
 
 export async function importSyllabus(
@@ -486,15 +531,10 @@ export async function importSyllabus(
   const supabase = await createClient();
   const { data: m } = await supabase.from("materials").select("course_id").eq("id", materialId).maybeSingle();
   if (!m) return { error: "That file isn't available." };
-  // Skip what the course already has (e.g. from Canvas): same title within a day.
+  // Skip what the course already has (e.g. from Canvas, whose titles run longer).
   const { data: existing } = await supabase.from("items").select("title, due").eq("course_id", m.course_id);
   const fresh = clean.filter(
-    (r) =>
-      !(existing ?? []).some(
-        (e) =>
-          e.title.trim().toLowerCase() === r.title.toLowerCase() &&
-          Math.abs(Date.parse(e.due) - r.due.valueOf()) <= 864e5,
-      ),
+    (r) => !(existing ?? []).some((e) => sameWork({ title: r.title, due: r.due.toISOString() }, e)),
   );
   if (fresh.length) {
     const { error } = await supabase.from("items").upsert(

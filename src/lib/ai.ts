@@ -285,6 +285,7 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
         .from("materials")
         .select("course_id, name, body")
         .ilike("name", "%syllabus%")
+        .neq("name", "Syllabus summary") // the digest note: the syllabus itself is already here
         .not("body", "is", null)
     ).data ?? []
   ).filter((m) => m.course_id !== focusId);

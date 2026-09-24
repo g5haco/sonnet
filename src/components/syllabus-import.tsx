@@ -48,6 +48,7 @@ function Review({
   const toRows = (items: Draft[]) => items.map((d, key) => ({ ...d, key, on: d.date !== null }));
   const [rows, setRows] = useState<Row[] | null>(sample ? toRows(sample.items) : null);
   const [course, setCourse] = useState(sample?.course ?? "");
+  const [known, setKnown] = useState(0); // dated items the course already has (e.g. from Canvas), left out
   const [error, setError] = useState("");
   const [reading, startRead] = useTransition();
   const [saving, startSave] = useTransition();
@@ -58,6 +59,7 @@ function Review({
       const r = await readSyllabus(material.id, Intl.DateTimeFormat().resolvedOptions().timeZone);
       if (r.error) return setError(r.error);
       setCourse(r.course ?? "");
+      setKnown(r.known ?? 0);
       setRows(toRows(r.items ?? []));
     });
   // once, when the window opens
@@ -94,7 +96,7 @@ function Review({
   return (
     <>
       <div className="border-b border-border px-5 pt-5 pb-4 sm:px-6">
-        <DialogTitle className="text-lg font-medium tracking-tight">Import from syllabus</DialogTitle>
+        <DialogTitle className="text-lg font-medium tracking-tight">Dates from the syllabus</DialogTitle>
         <DialogDescription className="mt-1 truncate">
           {course ? `${course} · ` : ""}
           {material.name}
@@ -185,7 +187,19 @@ function Review({
                 )}
               </li>
             ))}
-            {rows.length === 0 && <p className="px-2 py-6 text-sm text-muted-foreground">Nothing left to import.</p>}
+            {rows.length === 0 && (
+              <p className="px-2 py-6 text-sm text-muted-foreground">
+                {known
+                  ? `${course} already has all ${known} dated items from this syllabus. Nothing to add.`
+                  : "Nothing left to add."}
+              </p>
+            )}
+            {rows.length > 0 && known > 0 && (
+              <li className="px-2 pt-2 text-xs text-muted-foreground">
+                {known} more {known === 1 ? "is" : "are"} already in {course} (e.g. from Canvas), so{" "}
+                {known === 1 ? "it isn't" : "they aren't"} listed.
+              </li>
+            )}
           </ul>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseSyllabusItems, weekDate, weekLines } from "./syllabus";
+import { parseSyllabusItems, sameWork, weekDate, weekLines } from "./syllabus";
 
 test("syllabus items: lenient wrapper, strict rows, bad data dropped or flagged", () => {
   const raw = `Here you go:
@@ -53,4 +53,30 @@ test("a reported week beats the model's own (miscounted) date", () => {
   expect(lab.date).toBe("2026-09-25");
   // no semester set: the stated date is all there is
   expect(parseSyllabusItems('[{"title":"Lab 0","date":"2026-09-27","week":1,"day":"Fri"}]')[0].date).toBe("2026-09-27");
+});
+
+test("syllabus items match Canvas items despite Canvas's longer titles", () => {
+  const canvas = {
+    title: "Syllabus Quiz (Due Wednesday, September 23rd by 11:59 PM) [POLS&202 9347]",
+    due: "2026-09-24T06:59:00Z",
+  };
+  expect(sameWork({ title: "Syllabus Quiz", due: "2026-09-23T23:59:00-07:00" }, canvas)).toBe(true);
+  expect(
+    sameWork(
+      { title: "Journal 1 (Help Me Help You!)", due: null },
+      { title: "Journal 1", due: "2026-09-27T00:00:00Z" },
+    ),
+  ).toBe(true);
+  expect(
+    sameWork({ title: "Journal 2", due: "2026-10-04T12:00:00Z" }, { title: "Journal 1", due: "2026-10-04T12:00:00Z" }),
+  ).toBe(false);
+  expect(
+    sameWork({ title: "Midterm", due: "2026-10-28T12:00:00Z" }, { title: "Midterm", due: "2026-12-11T12:00:00Z" }),
+  ).toBe(false);
+});
+
+test("whole-word title match: Journal 1 is in Weekly Journal 1, not in Journal 10", () => {
+  const d = "2026-10-04T12:00:00Z";
+  expect(sameWork({ title: "Journal 1", due: d }, { title: "Weekly Journal 1 (Help Me Help You)", due: d })).toBe(true);
+  expect(sameWork({ title: "Journal 1", due: d }, { title: "Weekly Journal 10", due: d })).toBe(false);
 });

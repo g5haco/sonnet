@@ -1,7 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
+  BookOpenText,
   CalendarPlus,
+  MessageCircle,
   Check,
   FileText,
   FileType,
@@ -15,7 +18,7 @@ import {
 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { addMaterial, deleteMaterial } from "@/app/actions";
+import { addMaterial, deleteMaterial, summarizeSyllabus } from "@/app/actions";
 import { useAssistant, useCreate } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { field, FormError } from "@/components/create-forms";
@@ -23,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { courseColor } from "@/lib/course";
 import { SyllabusImport } from "@/components/syllabus-import";
+import { SummaryDialog } from "@/components/syllabus-summary";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -333,12 +337,35 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   const [importing, setImporting] = useState<{ id: string; name: string } | null>(null);
   const syllabusInput = useRef<HTMLInputElement>(null);
   const busy = sent.filter((s) => s.state === "uploading");
-  // Upload a syllabus, then straight into the review of what it says is due.
-  const importSyllabus = async (files: File[]) => {
+  const { setFocus } = useAssistant();
+  const router = useRouter();
+
+  // The syllabus is the course's reference: its text is the assistant's memory, and a one-page summary (a note)
+  // sits at the top here. Dates are optional: Canvas usually has them already.
+  const summaryNote = materials.find((m) => m.kind === "note" && m.name === "Syllabus summary");
+  const syllabusFile = materials.find((m) => m.kind === "file" && m.readable && /syllabus/i.test(m.name));
+  const hasSyllabus = !!summaryNote || materials.some((m) => /syllabus/i.test(m.name));
+  const [summary, setSummary] = useState<{ open: boolean; loading: boolean; error: string; body: string | null }>({
+    open: false,
+    loading: false,
+    error: "",
+    body: null,
+  });
+  const summarize = async (id: string) => {
+    setSummary({ open: true, loading: true, error: "", body: null });
+    const r = await summarizeSyllabus(id);
+    setSummary({ open: true, loading: false, error: r.error ?? "", body: r.body ?? null });
+  };
+  const addSyllabus = async (files: File[]) => {
     const [first] = await upload(course.id, files.slice(0, 1), true);
     if (!first) return;
     if (!first.readable) return void toast.error("Saved, but no text could be read from it (scanned PDF?).");
-    setImporting(first);
+    await summarize(first.id);
+  };
+  const ask = () => {
+    setSummary((s) => ({ ...s, open: false }));
+    setFocus(course.code); // the chat reads this course's syllabus and materials in full
+    router.push("/chat");
   };
 
   const open = async (m: Material) => {
@@ -352,9 +379,6 @@ export function Materials({ course, materials }: { course: { id: string; code: s
     if (tab) tab.location.href = data.signedUrl;
   };
 
-  // Until the course has a syllabus, importing one is the most useful thing on this page, so it gets a card.
-  const hasSyllabus = materials.some((m) => /syllabus/i.test(m.name));
-
   return (
     <Block
       title="Materials"
@@ -366,7 +390,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
               onClick={() => syllabusInput.current?.click()}
               className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
-              import syllabus
+              new syllabus
             </button>
           )}
           <button
@@ -382,7 +406,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
             accept=".pdf,.txt,.md"
             hidden
             onChange={(e) => {
-              importSyllabus([...(e.target.files ?? [])]);
+              addSyllabus([...(e.target.files ?? [])]);
               e.target.value = "";
             }}
           />
@@ -390,32 +414,75 @@ export function Materials({ course, materials }: { course: { id: string; code: s
       }
     >
       <SyllabusImport material={importing} onClose={() => setImporting(null)} />
-      {!hasSyllabus && (
-        <div
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            importSyllabus([...e.dataTransfer.files]);
-          }}
-          className="mb-4 flex flex-col gap-4 rounded-2xl border border-border bg-secondary p-4 sm:flex-row sm:items-center sm:p-5"
-        >
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-background">
-            <CalendarPlus className="size-5" aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="font-medium">Import the syllabus</p>
-            <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
-              Sonnet finds every deadline and exam in it. You check them, then they land on your calendar, and the
-              assistant can answer questions about the course from it.
-            </p>
-          </div>
-          <Button onClick={() => syllabusInput.current?.click()} className="h-10 shrink-0 rounded-full px-5">
-            <FileUp className="size-4" aria-hidden="true" />
-            Choose syllabus
-          </Button>
+      <SummaryDialog
+        open={summary.open}
+        course={course.code}
+        body={summary.body}
+        loading={summary.loading}
+        error={summary.error}
+        onClose={() => setSummary((s) => ({ ...s, open: false }))}
+        onAsk={ask}
+        onRetry={syllabusFile ? () => summarize(syllabusFile.id) : undefined}
+        onDates={
+          syllabusFile
+            ? () => {
+                setSummary((s) => ({ ...s, open: false }));
+                setImporting(syllabusFile);
+              }
+            : undefined
+        }
+      />
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          addSyllabus([...e.dataTransfer.files]);
+        }}
+        className="mb-4 flex flex-col gap-4 rounded-2xl border border-border bg-secondary p-4 sm:flex-row sm:items-center sm:p-5"
+      >
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-background">
+          <BookOpenText className="size-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">
+            {summaryNote ? "Syllabus summary" : hasSyllabus ? "Syllabus" : "Add the syllabus"}
+          </p>
+          <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
+            {summaryNote
+              ? "Grading, policies and key dates on one page. The assistant knows the whole syllabus, so just ask."
+              : hasSyllabus
+                ? "Get a one-page summary: grading, policies and key dates."
+                : "Sonnet reads it, writes a one-page summary (grading, policies, key dates) and remembers it, so you can ask the assistant anything about the course."}
+          </p>
         </div>
-      )}
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {summaryNote ? (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => setSummary({ open: true, loading: false, error: "", body: summaryNote.body })}
+                className="h-10 rounded-full bg-background px-4"
+              >
+                Open summary
+              </Button>
+              <Button onClick={ask} className="h-10 rounded-full px-5">
+                <MessageCircle className="size-4" aria-hidden="true" />
+                Ask about it
+              </Button>
+            </>
+          ) : hasSyllabus && syllabusFile ? (
+            <Button onClick={() => summarize(syllabusFile.id)} className="h-10 rounded-full px-5">
+              Summarize
+            </Button>
+          ) : (
+            <Button onClick={() => syllabusInput.current?.click()} className="h-10 rounded-full px-5">
+              <FileUp className="size-4" aria-hidden="true" />
+              Choose syllabus
+            </Button>
+          )}
+        </div>
+      </div>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -452,9 +519,11 @@ export function Materials({ course, materials }: { course: { id: string; code: s
                 <span className="font-mono text-xs">uploading…</span>
               </li>
             ))}
-            {materials.map((m) => (
-              <MaterialRow key={m.id} m={m} onOpen={() => open(m)} onImport={() => setImporting(m)} />
-            ))}
+            {materials
+              .filter((m) => m !== summaryNote) // it has its own card above
+              .map((m) => (
+                <MaterialRow key={m.id} m={m} onOpen={() => open(m)} onImport={() => setImporting(m)} />
+              ))}
           </ul>
         )}
       </div>
