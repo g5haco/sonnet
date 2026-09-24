@@ -378,7 +378,10 @@ export const needsThinking = (question: string) =>
 // "I have a quiz Friday" is a change; "what do I have due?" is a question.
 const QUESTION = /^\s*(what|which|when|where|who|how|do|does|did|is|are|am|any|show|list|tell)\b|\?\s*$/i;
 export const wantsChange = (question: string) =>
-  /\b(add|put|move|change|mark|rename|reschedule|schedule|remind|delete|remove|create|update|edit|drop|cancel|check off|push|shift)\b|\bset (my|the|a|an|it|this|that)\b|^\s*(yes|yep|yeah|sure|ok(ay)?|do it|go ahead|confirm)\b/i.test(
+  // "remind me what's due" asks for information; "remind me to…" is a change
+  (/\bremind me (to|about|on|at)\b|\bremind\b(?! me (what|when|which|how|if))/i.test(question) ||
+    /\bset (my|the|a|an|it|this|that)\b|^\s*(yes|yep|yeah|sure|ok(ay)?|do it|go ahead|confirm)\b/i.test(question)) ||
+  /\b(add|put|move|change|mark|rename|reschedule|schedule|delete|remove|create|update|edit|drop|cancel|check off|push|shift)\b/i.test(
     question,
   ) ||
   (!QUESTION.test(question) && /\b(i have|there'?s a)\b/i.test(question));
@@ -394,13 +397,23 @@ export const wantsCards = (question: string) => /\b(flash ?cards?|study cards?|d
 export type Task = { ref: string; title: string; when: string };
 const TASKS =
   /\b(what'?s|what|which|show|list|any|anything)\b.*\b(due|overdue|late|behind|assignments?|homework|deadlines?|tasks?|to-?dos?)\b|\bwhat (should i|to) (work on|do|start)\b|\b(order of urgency|urgent|priorit\w*|(am i|i'?m) behind|how much (work|homework|stuff)|on my plate|left to do|what'?s left)\b/i;
-// Other time frames, questions about one thing's content, and tutoring go to the model.
-const OTHER =
-  /\b(policy|policies|explain|why|how (do|does|did|to|is|are|can|should|would|come)|when is|when'?s|grades?|next week|tomorrow|today|tonight|weekend|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday|require\w*|about|worth|points?|tips?|details?|penalt\w+|rubric|instructions?|mean|help with)\b/i;
+// Allowlist: canned only when every word is task vocabulary. Anything else ("in math", "this semester",
+// "hardest", an item's title) means a different question, so it goes to the model.
+const TASK_WORDS = new Set(
+  (
+    "what whats what's whatre is are am do does i im i'm have has got my me the a an any anything all due overdue late " +
+    "behind this week show list which assignments assignment homework work tasks task todo todos to-do to should on " +
+    "first up in order of urgency urgent most prioritize priority priorities how much stuff left plate help figure " +
+    "out start get please can you tell still open things thing need for now right and deadlines deadline remind it there"
+  ).split(" "),
+);
 export function asksTasks(question: string, names: string[] = []): "overdue" | "week" | null {
-  if (wantsCards(question) || wantsChange(question) || !TASKS.test(question) || OTHER.test(question)) return null;
+  if (wantsCards(question) || wantsChange(question) || !TASKS.test(question)) return null;
   const q = question.toLowerCase();
-  if (names.some((n) => n.trim().length >= 3 && q.includes(n.trim().toLowerCase()))) return null;
+  if (!q.split(/[^a-z'-]+/).every((w) => !w || TASK_WORDS.has(w))) return null;
+  // whole words only: a course named "Art" mustn't catch "start"
+  if (names.some((n) => n.trim().length >= 3 && new RegExp(`\\b${n.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(q)))
+    return null;
   const onlyOverdue = /\b(overdue|late|behind)\b/i.test(question) && !/\b(this week|due|work on|first|next|do|left)\b/i.test(question);
   return onlyOverdue ? "overdue" : "week";
 }

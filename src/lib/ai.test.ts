@@ -148,6 +148,21 @@ test("task questions are routed by phrasing, not one exact sentence", () => {
     "What assignments does POLS 202 have?",
   ])
     expect(asksTasks(q, names), q).toBeNull();
+  // review round 3: nicknames, other time frames, judgement questions → model
+  for (const q of [
+    "What's due in math?",
+    "What's due in chem this week?",
+    "Show me my bio homework",
+    "What's due this semester?",
+    "what's due in the next 3 days",
+    "Which assignment is hardest?",
+    "What's the heaviest thing due this week?",
+  ])
+    expect(asksTasks(q, ["Art"]), q).toBeNull();
+  expect(asksTasks("What should I start first this week?", ["Art"])).toBe("week");
+  expect(asksTasks("Remind me what's due this week")).toBe("week");
+  expect(wantsChange("Remind me what's due this week")).toBe(false);
+  expect(wantsChange("remind me to study friday")).toBe(true);
   expect(wantsChange("What do I have due this week?")).toBe(false);
   expect(wantsChange("my problem set is due Friday")).toBe(false);
 });
