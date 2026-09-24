@@ -122,16 +122,14 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
                 <X className="size-4" />
               </button>
             </header>
-            {/* The ring sweeps once a minute, so it visibly fills every second (the sidebar ring shows the whole
-                session); a new minute remounts it, so it restarts at 0 instead of animating backwards. */}
+            {/* The ring fills over the whole session, a little every second. */}
             <AnimatedCircularProgressBar
-              key={run ? Math.floor(used / 60) : "idle"}
               min={0}
-              max={60}
-              value={run ? used % 60 : 0}
+              max={LENGTH * 60}
+              value={run ? used : 0}
               gaugePrimaryColor="var(--done)"
               gaugeSecondaryColor="color-mix(in oklab, var(--foreground) 10%, transparent)"
-              label="Seconds into this minute"
+              label="Focus time used"
               className="mx-auto size-40"
             >
               <span className="flex flex-col items-center">
