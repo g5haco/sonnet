@@ -1,6 +1,6 @@
 # PROJECT HANDOFF
 
-> Updated 2026-09-23 after Phase 5 was activated and verified live. Automated verification at implementation time: `npm test` 17/17, `npx tsc --noEmit`, `npm run lint`, and `npx next build --webpack` all pass. The user confirmed migration 0005, production secrets, deployment, and the first Canvas sync work. **The code wins over this document** if they disagree. For phase-by-phase status, `docs/ROADMAP.md` is the most current source.
+> Updated end of 2026-09-23 (through commit `3f4cdad`: syllabus summary redesign). Verification then: `npm test` 33/33, `npx tsc --noEmit`, `npm run lint` and a production build pass. The user has added `AI_API_KEY` in Vercel (production chat depends on it). §11, §14–§16 describe the current state; this session's full list is `git log --oneline e907961..HEAD`. **The code wins over this document** if they disagree. For phase-by-phase status, `docs/ROADMAP.md` is the most current source.
 
 ---
 
@@ -27,7 +27,9 @@
 
 **Done in code:** login; courses; items; class times; semester settings; Home; Calendar; Google Calendar subscribe feed; global AI; floating Settings and uploader; per-course materials; and Phase 5 Canvas sync through an access token and/or ICS feed. Canvas includes encrypted token storage, manual and daily sync, status/error reporting, course and assignment upserts, submission scores/state, descriptions for AI context, and a larger Settings window.
 
-**Not built yet / deferred:** AI reading uploaded materials + syllabus import + exam study guides (Phase 6 remainder), real grades (Phase 7), focus timer + heatmap data (Phase 8), and polish/real-use pass (Phase 9) remain; audio/video/YouTube, lecture recording, Quizlet, two-way Google Calendar, auto time-blocking, and XP/badges are deferred.
+**Also done (Phase 6 so far):** text extraction from uploaded PDFs/text files; the AI reads a focused course's materials; **syllabus as reference**: course-page card → upload → one-page "Syllabus summary" note + "Ask about it" chat, syllabus text in every chat's context, optional "Check for dates Canvas missed"; photos/PDFs/text files attached in chat (photos read by a vision model). Plus a polish pass (Sync window, regrouped Settings, Reset all data, chat task answers, Canvas duplicate fix).
+
+**Not built yet / deferred:** reading images and scanned PDFs at upload, exam study guides and context-aware chat shortcuts (Phase 6 remainder), real grades (Phase 7), focus timer + heatmap data (Phase 8), and polish/real-use pass (Phase 9) remain; audio/video/YouTube, lecture recording, Quizlet, two-way Google Calendar, auto time-blocking, and XP/badges are deferred.
 
 **Placeholders still in place:** Grades block ("with Canvas sync"), Study days ("with the focus timer").
 
@@ -178,7 +180,10 @@ Most features after Phase 3 were checked visually with sample data; they were no
 
 ## 11. AI System (single assistant, "Sonnet")
 
-- **Provider/models:** OpenRouter free models, default chain `nvidia/nemotron-3-super-120b-a12b:free` → `qwen/qwen3.8-27b:free` → `nvidia/nemotron-3-ultra-550b-a55b:free` (Gemma dropped: frequent 429). The account showed 1,000 free requests/day and 20/min. Free providers may log prompts.
+- **Provider/models (OpenRouter, paid credits):** default `deepseek/deepseek-v4.1-flash`, then free models as fallback (`AI_MODEL` overrides). Chosen 2026-09-23 over `google/gemini-3.8-flash` after a live comparison on Sonnet's own checks (both 15/15 syllabus dates; DeepSeek ~0.5–1s to first words and ~5× cheaper). Messages with photos go to `VISION_MODEL` = `google/gemini-3.8-flash` (`AI_VISION_MODEL`), which *requires* reasoning (`effort: "minimal"`).
+- **Task questions** ("what's due this week / overdue / what first") are answered on the server with no model call (`asksTasks` allowlist + `taskAnswer`): a one-line lead and ordered work cards. Tools are offered only when asked for: planner tools on change requests (`wantsChange`), `make_flashcards` (forced) on card requests. Routing reads only what was typed (`typedPart`), never attached file text.
+- **Attachments:** photos (shrunk in the browser), PDFs and text files (read in the browser, `src/lib/attach.ts`); up to 3 per message, newest 3 photos per request; saved chats keep names and 4k of text, not photos.
+- **Syllabus memory:** every chat includes syllabus text (materials named "…syllabus…", 24k shared evenly; the "Syllabus summary" note is excluded) and answers policy/grading questions from it.
 - **Reasoning:** off by default (~0.5s to the first word). Auto-on via `needsThinking()` for tutoring asks (explain, why, how do…, solve, study, quiz, compare, outline…) or messages over 280 characters; never for planner edits (add/move/change/mark/…). The **Think** toggle forces it (`effort: "low"`, `max_tokens` 2000).
 - **Context:** the current time in the student's timezone; calendar and class grounding; semester week; courses; work links; optional course focus; and sanitized Canvas assignment descriptions for the focused course or work due within 90 days. Canvas content is explicitly labeled untrusted data, not instructions.
 - **Tools (each becomes a confirm card; nothing auto-saves):** `add_item`, `update_item`, `delete_item`, `add_class_time`, `update_class_time`, `delete_class_time`, `add_course`, `update_course`, `delete_course`, `set_semester`, and `make_flashcards` (a deck shown in chat, never saved).
@@ -230,24 +235,23 @@ Most features after Phase 3 were checked visually with sample data; they were no
 ## 14. Work In Progress
 
 - **Phase 5:** complete. Migration 0005, production secrets, deployment, Canvas credentials, and the first real sync were confirmed working by the user.
-- **Phase 6 (partial):** uploads, links and notes per course work. **AI reading materials, syllabus import and exam study guides have not started.**
-- **Not verified signed in:** the Canvas flow and enlarged Settings window have not been exercised against the user's real account. The user must enter secrets and Canvas credentials themselves.
+- **Phase 6 (most of it done):** text extraction, materials in the AI, chat attachments, and the syllabus reference flow.
+  - **Syllabus (latest, `21d1565` + `3f4cdad`):** the user said Canvas already provides the dates, so the syllabus is a *reference*, not a date import. The Materials block opens with a card: "Add the syllabus" → upload (named "Syllabus · …") → `summarizeSyllabus` writes the course's "Syllabus summary" note (at a glance, grading, policies, key dates, materials; replaced on re-summarize) → `SummaryDialog` (`src/components/syllabus-summary.tsx`) with **Ask about the syllabus** (fresh chat focused on the course) and **Check for dates Canvas missed** (the older review dialog, now listing only items the course lacks via `sameWork` fuzzy titles in `src/lib/syllabus.ts`). A syllabus uploaded earlier shows **Summarize**.
+- **Not verified signed in** (the preview pane can't sign in): the syllabus summary on the user's real POLS course, chat photos with real handwriting, Reset all data, and the Canvas duplicate cleanup after a sync. Ask the user to try them on the live site.
 
 ## 15. Current Immediate Task
 
-**The last finished phase** is Phase 5 Canvas sync (`309e905`, deployed). The user confirmed migrations 0002–0005 are applied, the semester is 11 weeks, both Canvas methods are configured, and the live sync works.
-
-**The immediate next task is Phase 6:** let the AI read uploaded materials, import syllabi through review cards, generate exam study guides, and add context-aware chat shortcuts. Preserve the rule that imports and planner changes require user confirmation.
+The syllabus summary redesign is finished and reviewed (PASS). **Next is the rest of Phase 6**, starting with reading images and scanned PDFs at upload.
 
 ## 16. Next Steps
 
-### P0: Phase 6 materials intelligence
-
-Add sandboxed text extraction, AI access to course materials, syllabus import with explicit review/confirmation, exam study guides, and context-aware chat shortcuts. Start with a short design and preserve the existing privacy and confirm-card boundaries.
+### P0: finish Phase 6
+- Read images and scanned PDFs **at upload** with the vision model and store the text in `materials.body` (like PDFs), so summaries, chat and study features work on photos and scans.
+- Exam study guides from a course's materials.
 
 ### P1
-- The rest of Phase 6: text extraction, the AI reading materials, syllabus import with review cards, exam study guides.
-- Context-aware chat shortcuts.
+- Context-aware chat shortcuts (per page or course).
+- Set `vercel.json` `regions` next to the Supabase region (the user was asked for it).
 
 ### P2
 - Phase 7: grades + what-if.
