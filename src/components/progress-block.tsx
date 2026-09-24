@@ -72,7 +72,7 @@ export function ProgressBlock({
             <span className="ml-1 text-3xl text-muted-foreground">%</span>
           </p>
           <p className="mt-2 font-mono text-xs text-muted-foreground">
-            of due work done
+            of work due by Sunday done
             {p.delta !== 0 && (
               <span className={p.delta > 0 ? "text-done" : "text-destructive"}>
                 {" · "}

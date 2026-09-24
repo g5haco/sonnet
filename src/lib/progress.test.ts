@@ -17,9 +17,9 @@ test("percent, overdue, bars and weekly delta", () => {
   ];
   const p = progress(items, start, 4, new Date(at(16)));
   expect(p.current).toBe(2);
-  expect(p.percent).toBe(66); // 2 of 3 due-so-far done (floored)
+  expect(p.percent).toBe(50); // 2 of 4 due through this week (ends day 20) done
   expect(p.overdue).toBe(1);
-  expect(p.delta).toBe(16);   // day 9: 1 of 2 done (50%) -> 66%
+  expect(p.delta).toBe(17);   // a week ago: 1 of 3 due through that week done (33%) -> 50%
   expect(p.bars).toEqual([
     { total: 1, done: 1 }, { total: 2, done: 1 }, { total: 1, done: 0 }, { total: 0, done: 0 },
   ]);
@@ -29,6 +29,11 @@ test("done counts now even if it was checked after `now` was read", () => {
   const p = progress([item(2, 9)], start, 2, new Date(at(5)));
   expect(p.percent).toBe(100);
   expect(p.overdue).toBe(0);
+});
+
+test("work left later this week keeps it under 100%", () => {
+  // Monday of week 0; the item is due Friday and still open.
+  expect(progress([item(1, 0), item(4, null)], start, 2, start).percent).toBe(50);
 });
 
 test("nothing due yet counts as fully caught up", () => {

@@ -96,7 +96,7 @@ export function CourseView({
           {course.name && <p className="text-sm text-muted-foreground">{course.name}</p>}
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
             {course.grade != null && <span>grade {gradeLabel(course.grade)}</span>}
-            {percent !== null && <span>{percent}% of due work done</span>}
+            {percent !== null && <span>{percent}% of work due by Sunday done</span>}
             <span>{s.week === 0 ? "nothing due this week" : `${s.week} due this week`}</span>
             {s.late > 0 && <span className="text-destructive">{s.late} late</span>}
             {s.examIn && <span>exam in {s.examIn}d</span>}

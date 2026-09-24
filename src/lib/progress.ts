@@ -51,14 +51,15 @@ export function progress(items: Item[], termStart: Date, weeks: number, now: Dat
     bar.total++;
     if (i.doneAt) bar.done++;
   }
-  const percent = percentAt(items, t, Infinity);
+  // Work due through the end of this week counts, so open work later this week keeps it under 100%.
+  const percent = percentAt(items, endOfWeek(t), Infinity);
   const upcoming = items.filter((i) => !i.doneAt && Date.parse(i.due) > t);
   const next = upcoming.sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   return {
     bars,
     current: weekOf(now.toISOString()),
     percent,
-    delta: percent - percentAt(items, t - WEEK, t - WEEK),
+    delta: percent - percentAt(items, endOfWeek(t - WEEK), t - WEEK),
     overdue: items.filter((i) => !i.doneAt && Date.parse(i.due) <= t).length,
     openThisWeek: upcoming.filter((i) => Date.parse(i.due) <= endOfWeek(t)).length,
     // days rounded like Up next's due labels, so both say the same "9d" (never "0d": it's at least tomorrow)
