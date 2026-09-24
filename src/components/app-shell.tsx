@@ -17,6 +17,7 @@ import { SettingsWindow, type Account, type SettingsSection } from "@/components
 import { Sidebar } from "@/components/sidebar";
 import { SyncWindow } from "@/components/sync-window";
 import type { Deck, Proposal } from "@/lib/ai";
+import { withFiles, type ChatFile } from "@/lib/attach";
 import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,7 @@ export const useCreate = () => useContext(CreateContext);
 type Assistant = {
   messages: ChatMessage[];
   busy: boolean;
-  send: (text: string, think?: boolean) => void;
+  send: (text: string, think?: boolean, files?: ChatFile[]) => void;
   clear: () => void;
   resolve: (message: number, index: number, accept: boolean, due?: string) => void;
   focus: string; // course code this chat is about, "" = all courses
@@ -107,16 +108,17 @@ export function AppShell({
   };
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
-  const send = async (text: string, think = false) => {
+  const send = async (text: string, think = false, files?: ChatFile[]) => {
     if (!chatId) setChatId(crypto.randomUUID());
     dirty.current = true;
-    const history = [...messages.filter((m) => m.role !== "note" && m.text), { role: "user" as const, text }];
+    const mine = { role: "user" as const, text, files: files?.length ? files : undefined };
+    const history = [...messages.filter((m) => m.role !== "note" && (m.text || m.files?.length)), mine];
     const answer = (nextId.current += 2);
     const patch = (change: (m: ChatMessage) => ChatMessage) =>
       setMessages((all) => all.map((m) => (m.id === answer ? change(m) : m)));
     setMessages((all) => [
       ...all,
-      { id: answer - 1, role: "user", text },
+      { id: answer - 1, ...mine },
       { id: answer, role: "assistant", text: "", state: "reading" },
     ]);
 
@@ -130,12 +132,23 @@ export function AppShell({
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           think,
           focus: focus || undefined,
-          messages: history.map((m) => ({ role: m.role, content: m.text })),
+          // Attached files' text rides in the turn's content; photos go separately (the route keeps the newest 3).
+          messages: history.map((m) => ({
+            role: m.role,
+            content: withFiles(m.text, m.files),
+            images: m.files?.flatMap((f) => (f.image ? [f.image] : [])),
+          })),
         }),
         signal: ctrl.signal,
       });
       if (!res.ok || !res.body)
-        throw new Error((await res.json().catch(() => null))?.error ?? "Couldn't reach the assistant.");
+        throw new Error(
+          res.status === 413
+            ? "Those files are too big to send together. Try fewer photos."
+            : ((await res.json().catch(() => null))?.error ?? "Couldn't reach the assistant."),
+        );
+      // An expired session gets redirected to the login page (HTML), not the answer stream.
+      if (!res.headers.get("content-type")?.includes("ndjson")) throw new Error("Your session ended. Sign in again.");
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       let buffer = "";
       for (;;) {
@@ -203,10 +216,12 @@ export function AppShell({
   useEffect(() => {
     if (!dirty.current || !chatId || !messages.length || messages.some((m) => m.state)) return;
     dirty.current = false;
-    const title = messages.find((m) => m.role === "user")?.text ?? "";
+    const first = messages.find((m) => m.role === "user");
+    const title = first?.text || first?.files?.map((f) => f.name).join(", ") || "";
     const stored = messages.map((m) => ({
       ...m,
       state: undefined, // dropped by JSON
+      files: m.files?.map((f) => ({ name: f.name, text: f.text })), // photos stay in this session only (too big to store)
       proposals: m.proposals?.map((x) => (x.status === "saving" ? { ...x, status: "pending" as const } : x)),
     }));
     saveChat(chatId, title, focus, stored).then((r) => r.error && console.error("[chat]", r.error));

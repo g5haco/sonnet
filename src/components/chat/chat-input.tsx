@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { ArrowUp, Lightbulb, Mic, Square } from "lucide-react";
+import { ArrowUp, FileText, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
@@ -11,6 +11,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
+import { MAX_FILES, readAttachment, type ChatFile } from "@/lib/attach";
 import { cn, isShown } from "@/lib/utils";
 
 const PLACEHOLDERS = [
@@ -54,7 +55,7 @@ export function ChatInput({
   shortcuts = true,
   className,
 }: {
-  onSend: (text: string, think: boolean) => void;
+  onSend: (text: string, think: boolean, files?: ChatFile[]) => void;
   busy?: boolean; // an answer is streaming
   shortcuts?: boolean; // off while the empty state already lists them
   focusKey?: number; // bump to focus the input (e.g. ⌘K)
@@ -65,6 +66,9 @@ export function ChatInput({
   const [placeholder, setPlaceholder] = useState(0);
   const [listening, setListening] = useState(false);
   const [think, setThink] = useState(false); // off = Sonnet decides per question
+  const [files, setFiles] = useState<ChatFile[]>([]);
+  const [reading, setReading] = useState(0); // attachments still being prepared
+  const picker = useRef<HTMLInputElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const rec = useRef<Recognition | null>(null);
@@ -100,10 +104,29 @@ export function ChatInput({
 
   const send = (text: string) => {
     const t = text.trim();
-    if (!t || busy) return;
+    if ((!t && !files.length) || busy || reading) return;
     rec.current?.stop();
-    onSend(t, think);
+    onSend(t, think, files.length ? files : undefined);
     setValue("");
+    setFiles([]);
+  };
+
+  // Photos, PDFs and text files: prepared here (shrunk / read to text), then sent with the next message.
+  const attach = async (list: File[]) => {
+    const room = MAX_FILES - files.length;
+    if (list.length > room) toast.error(`Up to ${MAX_FILES} files per message.`);
+    for (const file of list.slice(0, Math.max(room, 0))) {
+      setReading((n) => n + 1);
+      try {
+        const ready = await readAttachment(file);
+        setFiles((f) => (f.length < MAX_FILES ? [...f, ready] : f));
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `Couldn't read ${file.name}.`);
+      } finally {
+        setReading((n) => n - 1);
+      }
+    }
+    field.current?.focus();
   };
 
   const toggleDictation = async () => {
@@ -146,7 +169,48 @@ export function ChatInput({
         <div
           className="rounded-3xl bg-secondary transition-shadow focus-within:ring-2 focus-within:ring-ring"
           onClick={() => field.current?.focus()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            void attach([...e.dataTransfer.files]);
+          }}
         >
+          {(files.length > 0 || reading > 0) && (
+            <div className="flex flex-wrap gap-2 px-3 pt-3">
+              {files.map((f, i) => (
+                <span key={i} className="group relative">
+                  {f.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- a local data: URL, nothing to optimize
+                    <img src={f.image} alt={f.name} className="size-14 rounded-xl object-cover ring-1 ring-border" />
+                  ) : (
+                    <span className="flex h-14 max-w-44 items-center gap-2 rounded-xl bg-background px-3 text-xs">
+                      <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      <span className="truncate">{f.name}</span>
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFiles((all) => all.filter((_, j) => j !== i));
+                    }}
+                    aria-label={`Remove ${f.name}`}
+                    className="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-foreground text-background focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ))}
+              {reading > 0 && (
+                <span
+                  aria-busy="true"
+                  className="grid size-14 place-items-center rounded-xl bg-background text-muted-foreground"
+                >
+                  <Paperclip className="size-4 motion-safe:animate-pulse" aria-label="Reading the file" />
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-end gap-1.5 p-2">
             <div className="relative min-w-0 flex-1 self-center">
               <label htmlFor={id} className="sr-only">
@@ -159,6 +223,13 @@ export function ChatInput({
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onFocus={() => setFocused(true)}
+                onPaste={(e) => {
+                  const pasted = [...e.clipboardData.files];
+                  if (pasted.length) {
+                    e.preventDefault();
+                    void attach(pasted); // a screenshot pasted straight into the chat
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -203,6 +274,30 @@ export function ChatInput({
               )}
             </div>
 
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                picker.current?.click();
+              }}
+              disabled={files.length >= MAX_FILES}
+              aria-label="Attach a photo or file"
+              title="Attach photos, PDFs or text files (or paste a screenshot)"
+              className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+            >
+              <Paperclip className="size-4" />
+            </button>
+            <input
+              ref={picker}
+              type="file"
+              multiple
+              accept="image/*,.pdf,.txt,.md"
+              hidden
+              onChange={(e) => {
+                void attach([...(e.target.files ?? [])]);
+                e.target.value = "";
+              }}
+            />
             {/* Think: force careful (slower) answers. Off = Sonnet decides from the question. */}
             <button
               type="button"
@@ -242,14 +337,19 @@ export function ChatInput({
             )}
 
             {/* Metal marks the AI: it brightens once there's something to send. */}
-            <MetalFx variant="circle" preset="silver" theme={theme} strength={value.trim() && !busy ? 1 : 0.35}>
+            <MetalFx
+              variant="circle"
+              preset="silver"
+              theme={theme}
+              strength={(value.trim() || files.length) && !busy && !reading ? 1 : 0.35}
+            >
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   send(value);
                 }}
-                disabled={!value.trim() || busy}
+                disabled={(!value.trim() && !files.length) || busy || reading > 0}
                 aria-label="Send"
                 className="grid size-9 place-items-center rounded-full bg-foreground text-background transition-transform active:scale-95 disabled:bg-accent disabled:text-muted-foreground"
               >

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, SquarePen, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Image as ImageIcon, SquarePen, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
@@ -8,6 +8,7 @@ import { Markdown } from "@/components/chat/markdown";
 import { ProposalCard } from "@/components/chat/proposal-card";
 import { Button } from "@/components/ui/button";
 import type { Deck, Proposal } from "@/lib/ai";
+import type { ChatFile } from "@/lib/attach";
 import { SHORTCUTS } from "@/components/chat/shortcuts";
 import { CopyAnswer } from "@/components/chat/widgets";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export type ChatMessage = {
   // changes the assistant proposed; nothing is saved until the student confirms
   proposals?: { p: Proposal; status: "pending" | "saving" | "saved" | "skipped" | "error"; error?: string }[];
   cards?: Deck; // flashcards the assistant made
+  files?: ChatFile[]; // student only: attached photos/files (photos aren't kept in saved chats)
 };
 
 const STATUS = {
@@ -42,7 +44,7 @@ export function ChatPanel({
   messages: ChatMessage[];
   busy: boolean;
   onResolve: (message: number, index: number, accept: boolean, due?: string) => void;
-  onSend: (text: string, think?: boolean) => void;
+  onSend: (text: string, think?: boolean, files?: ChatFile[]) => void;
   onClear: () => void;
   onClose: () => void;
   focusKey?: number;
@@ -130,11 +132,34 @@ export function ChatLog({
     <ol className={cn("flex flex-col leading-relaxed", roomy ? "gap-8 text-[15px]" : "gap-6 text-sm")}>
       {messages.map((m) =>
         m.role === "user" ? (
-          <li
-            key={m.id}
-            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 whitespace-pre-wrap"
-          >
-            {m.text}
+          <li key={m.id} className="flex max-w-[85%] flex-col items-end gap-1.5 self-end">
+            {!!m.files?.length && (
+              <span className="flex flex-wrap justify-end gap-1.5">
+                {m.files.map((f, i) =>
+                  f.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- a local data: URL, nothing to optimize
+                    <img
+                      key={i}
+                      src={f.image}
+                      alt={f.name}
+                      className="size-20 rounded-xl object-cover ring-1 ring-border"
+                    />
+                  ) : (
+                    <span
+                      key={i}
+                      className="flex h-9 max-w-52 items-center gap-2 rounded-xl bg-secondary px-3 text-xs text-muted-foreground"
+                    >
+                      {/* an image with no data = a photo from a saved chat (not stored) */}
+                      {f.text ? <FileText className="size-4 shrink-0" /> : <ImageIcon className="size-4 shrink-0" />}
+                      <span className="truncate">{f.name}</span>
+                    </span>
+                  ),
+                )}
+              </span>
+            )}
+            {m.text && (
+              <span className="rounded-2xl rounded-br-md bg-secondary px-3.5 py-2 whitespace-pre-wrap">{m.text}</span>
+            )}
           </li>
         ) : m.role === "note" ? (
           <li key={m.id} className="flex items-start gap-2.5 text-muted-foreground">
