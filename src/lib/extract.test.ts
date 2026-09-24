@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { extractText } from "./extract";
 
 // A one-page PDF saying "Midterm Oct 14"; pdf.js tolerates the missing xref table.
@@ -18,5 +18,16 @@ test("extracts text from PDFs and text files, skips other types", async () => {
   expect(await extractText(new TextEncoder().encode("Week 1:   intro\n\n\n\nWeek 2"), "text/plain")).toBe(
     "Week 1: intro\n\nWeek 2",
   );
-  expect(await extractText(new Uint8Array([1, 2]), "image/png")).toBeNull();
+  expect(await extractText(new Uint8Array([1, 2]), "application/msword")).toBeNull();
+});
+
+test("photos go to the vision model as an image", async () => {
+  vi.stubEnv("AI_API_KEY", "k");
+  const fetch = vi.fn(async () => Response.json({ choices: [{ message: { content: "Quiz  Friday" } }] }));
+  vi.stubGlobal("fetch", fetch);
+  expect(await extractText(new Uint8Array([1, 2]), "image/png")).toBe("Quiz Friday");
+  const body = JSON.parse((fetch.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+  expect(body.messages[0].content[1].image_url.url).toBe("data:image/png;base64,AQI=");
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
