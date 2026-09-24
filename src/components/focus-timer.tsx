@@ -1,8 +1,8 @@
 "use client";
 
 import { Timer, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { AnimatePresence, motion, useDragControls, useMotionValue } from "motion/react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { logFocus } from "@/app/actions";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
@@ -48,6 +48,11 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   const [run, setRun] = useState<Run | null>(null);
   const [open, setOpen] = useState(false);
   const [tick, setTick] = useState(0);
+  // Dragged by its header, kept inside the window; the spot is remembered while the app is open.
+  const drag = useDragControls();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const bounds = useRef<HTMLDivElement>(null);
 
   useEffect(() => setRun(load()), []); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
   useEffect(() => {
@@ -82,21 +87,34 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   return (
     <FocusContext.Provider value={{ run, left, open, setOpen }}>
       {children}
+      <div ref={bounds} className="pointer-events-none fixed inset-2 z-40" aria-hidden="true" />
       <AnimatePresence>
         {open && (
           <motion.section
             aria-label="Focus timer"
-            initial={{ opacity: 0, scale: 0.9, y: -6, filter: "blur(4px)" }}
-            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, scale: 0.92, y: -6, filter: "blur(4px)" }}
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.92, filter: "blur(4px)" }}
             transition={SPRING}
+            drag
+            dragListener={false}
+            dragControls={drag}
+            dragConstraints={bounds}
+            dragMomentum={false}
+            dragElastic={0.05}
+            style={{ x, y }}
             className="fixed top-16 right-2 z-50 w-64 origin-top-right rounded-3xl border border-border bg-popover p-4 text-popover-foreground shadow-2xl md:top-4 md:right-auto md:left-[72px] md:origin-top-left"
           >
-            <header className="-mt-1 -mr-1 mb-1 flex items-center justify-between">
+            <header
+              onPointerDown={(e) => drag.start(e)}
+              title="Drag to move"
+              className="-mt-1 -mr-1 mb-1 flex cursor-grab touch-none items-center justify-between select-none active:cursor-grabbing"
+            >
               <h2 className="text-sm font-medium">Focus</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
+                onPointerDown={(e) => e.stopPropagation()}
                 aria-label="Close focus timer"
                 className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
               >
