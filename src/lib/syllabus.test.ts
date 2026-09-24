@@ -46,3 +46,11 @@ test("week + weekday resolve in code from the semester start", () => {
     )[0].date,
   ).toBe("2026-10-04");
 });
+
+test("a reported week beats the model's own (miscounted) date", () => {
+  // review case: "Week 1: Lab 0 due Friday" came back as date 2026-09-27 plus week 1 / Fri
+  const [lab] = parseSyllabusItems('[{"title":"Lab 0","date":"2026-09-27","week":1,"day":"Fri"}]', "2026-09-21");
+  expect(lab.date).toBe("2026-09-25");
+  // no semester set: the stated date is all there is
+  expect(parseSyllabusItems('[{"title":"Lab 0","date":"2026-09-27","week":1,"day":"Fri"}]')[0].date).toBe("2026-09-27");
+});

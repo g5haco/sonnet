@@ -264,14 +264,18 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
       [])
     : [];
   let budget = 30_000;
-  const readings = bodies.flatMap((m) => {
-    const text = m.body!.slice(0, Math.max(budget, 0));
-    budget -= text.length;
-    return text ? [`--- ${m.name} ---\n${text}`] : [];
-  });
+  // syllabus first, so a long lecture file can't crowd it out of the budget
+  const bySyllabus = (m: { name: string }) => (/syllabus/i.test(m.name) ? 0 : 1);
+  const readings = [...bodies]
+    .sort((a, b) => bySyllabus(a) - bySyllabus(b))
+    .flatMap((m) => {
+      const text = m.body!.slice(0, Math.max(budget, 0));
+      budget -= text.length;
+      return text ? [`--- ${m.name} ---\n${text}`] : [];
+    });
   // Syllabi are the course's memory (policies, grading, schedule): every chat gets them, not just a
   // focused one, so "what's the late policy in POLS?" works anywhere. The focused course's is already above.
-  // ponytail: 12k characters per syllabus, 24k in all; search passages instead if students add many courses.
+  // ponytail: 24k characters shared evenly (at most 12k each); search passages instead if students add many courses.
   const syllabi = (
     (
       await supabase
@@ -281,11 +285,12 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
         .not("body", "is", null)
     ).data ?? []
   ).filter((m) => m.course_id !== focusId);
-  let syllabusBudget = 24_000;
-  const syllabusText = syllabi.flatMap((m) => {
-    const text = m.body!.slice(0, Math.min(12_000, Math.max(syllabusBudget, 0)));
-    syllabusBudget -= text.length;
-    return text ? [`--- ${code.get(m.course_id) ?? "?"} · ${m.name} ---\n${text}`] : [];
+  const share = Math.min(12_000, Math.floor(24_000 / Math.max(syllabi.length, 1)));
+  const syllabusText = syllabi.map((m) => {
+    const body = m.body!;
+    const cut =
+      body.length > share ? "\n[…rest not included here: pick this course in the chat to read all of it]" : "";
+    return `--- ${code.get(m.course_id) ?? "?"} · ${m.name} ---\n${body.slice(0, share)}${cut}`;
   });
   const materialList = (materials.data ?? []).map(
     (m) => `- ${code.get(m.course_id) ?? "?"} · ${m.kind} · ${m.name}${m.url ? ` (${m.url})` : ""}`,

@@ -60,7 +60,8 @@ type Sent = { key: string; name: string; state: "uploading" | "done" | "error" }
 // so each shows its own state.
 function useUpload() {
   const [sent, setSent] = useState<Sent[]>([]);
-  const upload = async (course: string, files: File[]) => {
+  // asSyllabus: named "Syllabus · …" so the assistant keeps it in every chat (it finds syllabi by name)
+  const upload = async (course: string, files: File[], asSyllabus = false) => {
     const added: { id: string; name: string; readable: boolean }[] = [];
     const supabase = createClient();
     const { data } = await supabase.auth.getClaims();
@@ -83,7 +84,16 @@ function useUpload() {
       const put = await supabase.storage.from("materials").upload(path, file, { contentType: file.type });
       const r = put.error
         ? { error: `Couldn't upload ${file.name}. ${put.error.message}` }
-        : await addMaterial({ course, kind: "file", name: file.name, path, size: file.size, mime: file.type });
+        : await addMaterial({
+            course,
+            kind: "file",
+            name: asSyllabus && !/syllabus/i.test(file.name) ? `Syllabus · ${file.name}` : file.name,
+            path,
+            size: file.size,
+            // Windows often reports no type for .md/.txt; the extension says what it is
+            mime:
+              file.type || (/\.md$/i.test(file.name) ? "text/markdown" : /\.txt$/i.test(file.name) ? "text/plain" : ""),
+          });
       mark(r.error ? "error" : "done");
       if (r.error) toast.error(r.error);
       else if ("id" in r && r.id) added.push({ id: r.id, name: file.name, readable: !!r.readable });
@@ -325,7 +335,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   const busy = sent.filter((s) => s.state === "uploading");
   // Upload a syllabus, then straight into the review of what it says is due.
   const importSyllabus = async (files: File[]) => {
-    const [first] = await upload(course.id, files.slice(0, 1));
+    const [first] = await upload(course.id, files.slice(0, 1), true);
     if (!first) return;
     if (!first.readable) return void toast.error("Saved, but no text could be read from it (scanned PDF?).");
     setImporting(first);

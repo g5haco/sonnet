@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarPlus, RefreshCw, Trash2 } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { importSyllabus, readSyllabus } from "@/app/actions";
 import { FormError } from "@/components/create-forms";
@@ -61,7 +61,13 @@ function Review({
       setRows(toRows(r.items ?? []));
     });
   // once, when the window opens
-  useEffect(() => void (sample || read()), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // (the ref: dev Strict Mode runs effects twice, and each read is a free-model request)
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || sample) return;
+    started.current = true;
+    read();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const edit = (key: number, patch: Partial<Row>) =>
     setRows((rs) => rs!.map((r) => (r.key === key ? { ...r, ...patch } : r)));

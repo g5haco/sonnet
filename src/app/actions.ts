@@ -484,7 +484,7 @@ export async function importSyllabus(
     .filter((r) => r.title && ["assignment", "exam", "quiz", "reading"].includes(r.kind) && !isNaN(r.due.valueOf()));
   if (!clean.length) return { error: "Give each item a title and a date." };
   const supabase = await createClient();
-  const { data: m } = await supabase.from("materials").select("course_id, name").eq("id", materialId).maybeSingle();
+  const { data: m } = await supabase.from("materials").select("course_id").eq("id", materialId).maybeSingle();
   if (!m) return { error: "That file isn't available." };
   // Skip what the course already has (e.g. from Canvas): same title within a day.
   const { data: existing } = await supabase.from("items").select("title, due").eq("course_id", m.course_id);
@@ -510,12 +510,6 @@ export async function importSyllabus(
     );
     if (error) return { error: `Couldn't import: ${error.message}` };
   }
-  // The assistant keeps every syllabus in its context by name, so make sure this one says so.
-  if (!/syllabus/i.test(m.name))
-    await supabase
-      .from("materials")
-      .update({ name: `Syllabus · ${m.name}`.slice(0, 200) })
-      .eq("id", materialId);
   revalidatePath("/", "layout");
   return { added: fresh.length, skipped: clean.length - fresh.length };
 }
