@@ -34,3 +34,23 @@ For normal feature work, use a lightweight review process by default:
 For tiny changes, skip the reviewer and just implement + verify.
 
 For major milestones or release-critical features, use a full multi-round Gauntlet only when explicitly requested.
+
+## Codebase Navigation
+
+Use Graphify as the primary method for understanding the repository.
+
+Before performing broad Glob, Grep, or exploratory Read operations:
+
+1. Query the Graphify knowledge graph first.
+2. Identify the smallest set of relevant files/symbols.
+3. Read only those files necessary for the task.
+4. Do not recursively explore unrelated parts of the repository.
+
+Use:
+- `graphify query "<question>"` for architecture/subsystem questions
+- `graphify explain "<concept>"` to understand a component or concept
+- `graphify path "<A>" "<B>"` to understand how two parts of the system connect
+
+After significant code changes, update the graph rather than rebuilding it from scratch.
+
+Optimize for minimum context usage while preserving correctness.
