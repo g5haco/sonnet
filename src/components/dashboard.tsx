@@ -14,6 +14,8 @@ import { UpNext, useWork } from "@/components/up-next";
 import { WeekStrip } from "@/components/week-strip";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
+import { FocusBlock } from "@/components/focus";
+import type { FocusSession } from "@/lib/focus";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
@@ -24,6 +26,7 @@ export function Dashboard({
   courses,
   items,
   cards,
+  sessions,
   name,
 }: {
   name: string;
@@ -31,6 +34,7 @@ export function Dashboard({
   courses: Course[];
   items: Item[];
   cards: CourseCard[];
+  sessions: FocusSession[];
 }) {
   const [now] = useState(() => Date.now()); // one clock per render tree
   const { shown, checked, toggle: flipItem, remove } = useWork(items);
@@ -178,9 +182,7 @@ export function Dashboard({
             </Block>
           )}
 
-          <Block title="Study days" aside="with the focus timer" className="order-1">
-            <p className="text-sm text-muted-foreground">Your streak starts the first time you use the focus timer.</p>
-          </Block>
+          <FocusBlock courses={courses} sessions={sessions} now={now} className="order-1" />
         </div>
       </div>
     </main>
