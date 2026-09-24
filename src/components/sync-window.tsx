@@ -234,7 +234,7 @@ function CanvasForm({
 
   return (
     // px-1: room for the focus rings inside the collapsing (overflow-hidden) wrapper
-    <form action={submit} className={cn("grid gap-4 px-1 pb-1", connected && "mt-5 border-t border-border pt-5")}>
+    <form autoComplete="off" action={submit} className={cn("grid gap-4 px-1 pb-1", connected && "mt-5 border-t border-border pt-5")}>
       <div className="grid gap-2">
         <label htmlFor="canvas-base" className={label}>
           Canvas address
@@ -256,10 +256,17 @@ function CanvasForm({
         <input
           id="canvas-token"
           name="token"
-          type="password"
+          // Masked with CSS, not type="password": a password field makes browsers offer saved logins and
+          // pop "Save password?" on submit. The data-* flags keep password-manager extensions off it too.
+          type="text"
           autoComplete="off"
+          spellCheck={false}
+          data-1p-ignore
+          data-lpignore="true"
+          data-bwignore
+          data-form-type="other"
+          className={cn(field, "[-webkit-text-security:disc]")}
           placeholder={connection.tokenConnected ? "Connected. Leave blank to keep it" : "Paste token"}
-          className={field}
         />
         <p className="text-xs text-muted-foreground">Encrypted before it&apos;s stored and never sent back to this screen.</p>
       </div>

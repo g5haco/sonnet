@@ -68,6 +68,9 @@ const TOSS = 150;
    lost your place on it. */
 const MOST = 2;
 const SETTLE_MS = 620;
+/* autoplay: one step every AUTO_MS, eased over AUTO_GLIDE_MS so it reads as a slow turn, not a snap */
+const AUTO_MS = 3500;
+const AUTO_GLIDE_MS = 1400;
 
 /* every card sits at its own angle: numbers that are not a
    pattern, so the ring reads as cards somebody put down */
@@ -158,7 +161,7 @@ export function Carousel({
      Quart-out from wherever the ring currently is to a whole
      position. It reads its start from the live value, so a second
      swipe during one turns the ring further instead of snapping back. */
-  const glide = (to: number) => {
+  const glide = (to: number, ms = SETTLE_MS) => {
     cancelAnimationFrame(raf.current);
     const from = turn.current;
     if (still || from === to) {
@@ -168,7 +171,7 @@ export function Carousel({
     }
     const t0 = performance.now();
     const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / SETTLE_MS);
+      const p = Math.min(1, (now - t0) / ms);
       turn.current = mix(from, to, out(p));
       paint();
       if (p < 1) raf.current = requestAnimationFrame(tick);
@@ -176,7 +179,26 @@ export function Carousel({
     raf.current = requestAnimationFrame(tick);
   };
 
+  /* ── autoplay ────────────────────────────────────────────
+     One card forward every few seconds, forever. It waits while a
+     finger is on the ring and for a beat after any touch or key, so it
+     never fights the hand. Reduced motion keeps it still. */
+  const touched = useRef(0);
+  const glideRef = useRef(glide);
+  useEffect(() => {
+    glideRef.current = glide; // the latest glide (it closes over this render's paint)
+  });
+  useEffect(() => {
+    if (still || n < 2) return;
+    const id = window.setInterval(() => {
+      if (drag.current || performance.now() - touched.current < AUTO_MS) return;
+      glideRef.current(Math.round(turn.current) + 1, AUTO_GLIDE_MS);
+    }, AUTO_MS);
+    return () => window.clearInterval(id);
+  }, [still, n]);
+
   const down = (e: React.PointerEvent) => {
+    touched.current = performance.now();
     cancelAnimationFrame(raf.current);
     drag.current = {
       x0: e.clientX,
@@ -227,6 +249,7 @@ export function Carousel({
   };
 
   const key = (e: React.KeyboardEvent) => {
+    touched.current = performance.now();
     if (e.key === "Enter" && e.target === e.currentTarget) {
       const front = ((Math.round(turn.current) % n) + n) % n;
       return router.push(slides[front].href);

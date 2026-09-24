@@ -53,7 +53,7 @@ export function TermSetup() {
     <Block className="mx-auto mt-[12vh] w-full max-w-sm">
       <h1 className="text-2xl font-medium tracking-tight">When did your semester start?</h1>
       <p className="mt-1 mb-6 text-sm text-muted-foreground">So the weekly bars line up with your real weeks.</p>
-      <form action={submit} className="flex flex-col gap-2">
+      <form autoComplete="off" action={submit} className="flex flex-col gap-2">
         <label htmlFor="start" className={label}>
           First day of classes
         </label>
@@ -81,7 +81,7 @@ export function CourseDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           <DialogTitle>Add a course</DialogTitle>
           <DialogDescription>It gets its own color everywhere.</DialogDescription>
         </DialogHeader>
-        <form action={submit} className="flex flex-col gap-2">
+        <form autoComplete="off" action={submit} className="flex flex-col gap-2">
           <label htmlFor="code" className={label}>
             Course code
           </label>
@@ -135,6 +135,7 @@ export function ItemDialog({
           <DialogDescription>Shows up in Up next and your weekly progress.</DialogDescription>
         </DialogHeader>
         <form
+          autoComplete="off"
           // datetime-local has no timezone; convert here, where the local timezone is known
           action={(f) => {
             f.set("due", new Date(String(f.get("due"))).toISOString());

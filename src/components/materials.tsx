@@ -240,7 +240,7 @@ export function UploadWindow({ open, course, onClose }: { open: boolean; course?
               </div>
 
               {mode && (
-                <form action={save} className="mt-4 flex flex-col gap-2">
+                <form autoComplete="off" action={save} className="mt-4 flex flex-col gap-2">
                   {mode === "link" ? (
                     <input
                       name="url"

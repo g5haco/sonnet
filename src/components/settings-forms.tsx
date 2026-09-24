@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 export function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
   const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Semester saved."));
   return (
-    <form action={submit} className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end sm:gap-3">
+    <form autoComplete="off" action={submit} className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end sm:gap-3">
       <div className="flex flex-col gap-2">
         <label htmlFor="start" className={label}>
           First day of classes
@@ -43,7 +43,7 @@ export function SemesterForm({ start, weeks }: { start: string; weeks: number })
 export function NameForm({ name }: { name: string }) {
   const { pending, error, submit } = useSubmit(saveName, () => toast.success("Saved. Say hi on Home."));
   return (
-    <form action={submit} className="flex flex-col gap-2">
+    <form autoComplete="off" action={submit} className="flex flex-col gap-2">
       <label htmlFor="your-name" className={label}>
         What should Sonnet call you?
       </label>

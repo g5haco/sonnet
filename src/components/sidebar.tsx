@@ -161,8 +161,13 @@ export function Sidebar({
             <span className="text-brand">.</span>
           </Link>
 
-          {/* Fixed height, so opening the rail moves only the chat button and never the links under the pointer. */}
-          <div className={cn("flex h-[86px] items-start", open ? "flex-row gap-4" : "flex-col gap-1.5")}>
+          {/* Stacked when collapsed, side by side when open; the height eases so the links slide up, no gap. */}
+          <div
+            className={cn(
+              "flex items-start transition-[height] duration-200 ease-out motion-reduce:transition-none",
+              open ? "h-10 flex-row gap-4" : "h-[86px] flex-col gap-1.5",
+            )}
+          >
             <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
             <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
               <ChatLink active={onChat} />

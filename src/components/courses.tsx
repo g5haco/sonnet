@@ -177,7 +177,7 @@ function ClassTimes({ course, meetings }: { course: { id: string; code: string }
         </div>
       ))}
       {adding ? (
-        <form action={submit} className="mt-2 flex flex-col gap-2">
+        <form autoComplete="off" action={submit} className="mt-2 flex flex-col gap-2">
           <input type="hidden" name="course" value={course.id} />
           <fieldset className="flex flex-wrap gap-1">
             <legend className="sr-only">Days</legend>
@@ -246,7 +246,7 @@ function CourseEditor({
   const [deleting, startDelete] = useTransition();
 
   return (
-    <form action={submit} className="flex flex-col gap-2">
+    <form autoComplete="off" action={submit} className="flex flex-col gap-2">
       <input type="hidden" name="id" value={course.id} />
       <label htmlFor="code" className={label}>
         Code
