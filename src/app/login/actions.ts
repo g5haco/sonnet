@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type LoginState = { ok: boolean; message: string } | null;
+type LoginState = { ok: boolean; message: string } | null;
 
 // One form, two buttons: "Sign in" (password) or "Email me a link instead".
 export async function signIn(_: LoginState, form: FormData): Promise<LoginState> {

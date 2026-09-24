@@ -7,7 +7,7 @@ import { gradeLabel, meetingLabel } from "./course";
 // Nemotron 3 Ultra was the only free model that got both tool calls and syllabus dates right on 2026-09-23;
 // free models go down often, so Qwen is the next try and paid DeepSeek V4.1 Flash (~$0.14/M in) the last resort.
 // Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
-export const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
+const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
 export const MODELS = (
   process.env.AI_MODEL ??
   "nvidia/nemotron-3-ultra-550b-a55b:free,qwen/qwen3.8-27b:free,deepseek/deepseek-v4.1-flash"
@@ -55,7 +55,7 @@ export type Proposal =
   | { type: "semester"; start: string; weeks: number };
 
 // What the model's short refs point at, resolved server-side (the model never sees full ids).
-export type Refs = {
+type Refs = {
   items: Map<string, { id: string; title: string; course: string }>;
   classes: Map<string, ClassTime & { id: string; course: string }>;
   courses: { id: string; code: string; name: string; items: number }[];
@@ -454,13 +454,13 @@ export const wantsChange = (question: string) =>
 // "what's due this week?". It only gets the tool when the student asks for cards.
 const CARDS_HINT =
   "\n\nMake real, specific cards now: a question or term on the front, the actual answer on the back. Never placeholders like [definition]. With no material text above, use general knowledge of the most likely subject (the focused course, or the student's courses) and name that subject in the deck title.";
-export const wantsCards = (question: string) =>
+const wantsCards = (question: string) =>
   /\b(flash ?cards?|study cards?|deck|cards? (for|on|about|from))\b/i.test(question);
 
 // "What's due this week / what's overdue / what should I work on first" is answered here, not by the model:
 // free models cut the lead off, duplicate the lists and miscount days. Other time frames ("tomorrow",
 // "next week", "Friday") and questions about one thing ("when is my essay due?") still go to the model.
-export type Task = { ref: string; title: string; when: string };
+type Task = { ref: string; title: string; when: string };
 const TASKS =
   /\b(what'?s|what|which|show|list|any|anything)\b.*\b(due|overdue|late|behind|assignments?|homework|deadlines?|tasks?|to-?dos?)\b|\bwhat (should i|to) (work on|do|start)\b|\b(order of urgency|urgent|priorit\w*|(am i|i'?m) behind|how much (work|homework|stuff)|on my plate|left to do|what'?s left)\b/i;
 // Allowlist: canned only when every word is task vocabulary. Anything else ("in math", "this semester",

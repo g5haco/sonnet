@@ -9,7 +9,7 @@ import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-p
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const LENGTH = 25; // minutes per focus session
+const LENGTH = 25; // minutes per focus session
 const KEY = "sonnet-focus"; // the running session survives page changes and reloads
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
 
@@ -22,7 +22,7 @@ type Focus = {
 };
 
 const FocusContext = createContext<Focus>({ run: null, left: LENGTH * 60_000, open: false, setOpen: () => {} });
-export const useFocus = () => useContext(FocusContext);
+const useFocus = () => useContext(FocusContext);
 
 // A session the student walked away from long ago (browser closed, tab slept) is dropped, not logged.
 const load = (): Run | null => {
@@ -40,7 +40,7 @@ const store = (run: Run | null) => {
   } catch {}
 };
 
-export const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).toISOString().slice(14, 19);
+const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).toISOString().slice(14, 19);
 
 // One timer for the whole app (it lives in the shell, so it keeps running on every page). The sidebar button
 // opens a floating panel that stays until closed; a session logs when it finishes, or when stopped after a minute.

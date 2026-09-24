@@ -8,7 +8,7 @@ export type CanvasCourse = {
   course_code?: string;
   enrollments?: { computed_current_score?: number | null }[]; // with include[]=total_scores
 };
-export type CanvasAssignment = {
+type CanvasAssignment = {
   id: string | number;
   course_id: string | number;
   name: string;
@@ -26,7 +26,7 @@ export type CanvasAssignment = {
   } | null;
 };
 
-export type CanvasItem = {
+type CanvasItem = {
   course_id: string;
   source: "canvas" | "ics";
   external_id: string;
@@ -40,7 +40,7 @@ export type CanvasItem = {
   done_at: string | null;
 };
 
-export type CanvasSettings = {
+type CanvasSettings = {
   canvas_base_url: string | null;
   canvas_ics_url: string | null;
   canvas_token_connected: boolean;

@@ -9,7 +9,7 @@ export type CreateKind = "assignment" | "exam" | "course" | "upload";
 // A pill in the menu: an icon, or a color dot (e.g. a course).
 export type MenuItem<K extends string> = { kind: K; label: string; icon?: typeof Plus; color?: string };
 
-export const CREATE: MenuItem<CreateKind>[] = [
+const CREATE: MenuItem<CreateKind>[] = [
   { kind: "assignment", label: "Assignment", icon: FilePlus2 },
   { kind: "exam", label: "Exam", icon: CalendarClock },
   { kind: "course", label: "Course", icon: BookOpen },

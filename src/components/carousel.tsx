@@ -9,7 +9,7 @@ import { clamp, mix, stillness, useSpring } from "@/lib/spring";
    instead of photographs, the count is however many courses there are, and the stage scales down to fit
    its container on narrow screens. A tap opens the card under it; a drag only turns the ring. */
 
-export type Slide = { key: string; href: string; label: string; face: React.ReactNode };
+type Slide = { key: string; href: string; label: string; face: React.ReactNode };
 
 /* ══ Carousel ═════════════════════════════════════════════
    Cards on a turntable that drift at rest, give under the

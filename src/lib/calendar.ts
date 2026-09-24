@@ -15,7 +15,7 @@ export const addDays = (d: Date, n: number) => {
   return x;
 };
 export const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-export const mondayOf = (d: Date) => addDays(startOfDay(d), -((d.getDay() + 6) % 7));
+const mondayOf = (d: Date) => addDays(startOfDay(d), -((d.getDay() + 6) % 7));
 export const parseDay = (key: string) => {
   const [y, m, d] = key.split("-").map(Number);
   return new Date(y, m - 1, d);
