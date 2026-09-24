@@ -334,7 +334,7 @@ export function AppShell({
               chatId,
             }}
           >
-            <FocusProvider courses={courses}>
+            <FocusProvider>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <Sidebar
                 onCreate={create}

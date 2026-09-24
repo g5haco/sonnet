@@ -7,15 +7,13 @@ import { toast } from "sonner";
 import { logFocus } from "@/app/actions";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { Button } from "@/components/ui/button";
-import { courseColor } from "@/lib/course";
 import { cn } from "@/lib/utils";
 
 export const LENGTH = 25; // minutes per focus session
 const KEY = "sonnet-focus"; // the running session survives page changes and reloads
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
 
-type Run = { start: number; course: string };
-type Course = { id: string; code: string; hue: number };
+type Run = { start: number };
 type Focus = {
   run: Run | null;
   left: number; // ms left in the running session
@@ -46,10 +44,9 @@ export const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 
 
 // One timer for the whole app (it lives in the shell, so it keeps running on every page). The sidebar button
 // opens a floating panel that stays until closed; a session logs when it finishes, or when stopped after a minute.
-export function FocusProvider({ courses, children }: { courses: Course[]; children: React.ReactNode }) {
+export function FocusProvider({ children }: { children: React.ReactNode }) {
   const [run, setRun] = useState<Run | null>(null);
   const [open, setOpen] = useState(false);
-  const [course, setCourse] = useState("");
   const [tick, setTick] = useState(0);
 
   useEffect(() => setRun(load()), []); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
@@ -64,7 +61,7 @@ export function FocusProvider({ courses, children }: { courses: Course[]; childr
     setRun(null);
     store(null);
     if (minutes < 1) return;
-    const res = await logFocus({ course: r.course, startedAt: new Date(r.start).toISOString(), minutes });
+    const res = await logFocus({ startedAt: new Date(r.start).toISOString(), minutes });
     if (res.error) toast.error(res.error);
     else toast.success(minutes >= LENGTH ? `${LENGTH} minutes done. Take a break.` : `${minutes} min logged.`);
   };
@@ -75,9 +72,8 @@ export function FocusProvider({ courses, children }: { courses: Course[]; childr
     if (run && over) finish(run, LENGTH); // eslint-disable-line react-hooks/set-state-in-effect
   }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const running = courses.find((c) => c.id === run?.course);
   const start = () => {
-    const r = { start: Date.now(), course };
+    const r = { start: Date.now() };
     setTick(r.start);
     setRun(r);
     store(r);
@@ -118,43 +114,18 @@ export function FocusProvider({ courses, children }: { courses: Course[]; childr
             >
               <span className="flex flex-col items-center">
                 <span className="font-mono text-3xl font-medium tracking-tight tabular-nums">{mmss(left)}</span>
-                <span className="mt-0.5 flex items-center gap-1.5 font-mono text-xs font-normal text-muted-foreground">
-                  {running && <span className="size-2 rounded-full" style={{ background: courseColor(running.hue) }} />}
-                  {run ? (running?.code ?? "focusing") : `${LENGTH} min`}
+                <span className="mt-0.5 font-mono text-xs font-normal text-muted-foreground">
+                  {run ? "focusing" : `${LENGTH} min`}
                 </span>
               </span>
             </AnimatedCircularProgressBar>
-            <div className="mt-4 flex flex-col gap-2">
-              <AnimatePresence initial={false} mode="popLayout">
-                {!run && (
-                  <motion.select
-                    key="course"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 40 }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={SPRING}
-                    aria-label="Course"
-                    value={course}
-                    onChange={(e) => setCourse(e.target.value)}
-                    className="h-10 rounded-full bg-secondary px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="">No course</option>
-                    {courses.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.code}
-                      </option>
-                    ))}
-                  </motion.select>
-                )}
-              </AnimatePresence>
-              <Button
-                variant={run ? "secondary" : "default"}
-                className="h-10 rounded-full transition-[background-color,transform] active:scale-[0.97]"
-                onClick={() => (run ? finish(run, Math.floor((Date.now() - run.start) / 60_000)) : start())}
-              >
-                {run ? "Stop" : `Start ${LENGTH} min`}
-              </Button>
-            </div>
+            <Button
+              variant={run ? "secondary" : "default"}
+              className="mt-4 h-10 w-full rounded-full transition-[background-color,transform] active:scale-[0.97]"
+              onClick={() => (run ? finish(run, Math.floor((Date.now() - run.start) / 60_000)) : start())}
+            >
+              {run ? "Stop" : `Start ${LENGTH} min`}
+            </Button>
           </motion.section>
         )}
       </AnimatePresence>

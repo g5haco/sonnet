@@ -561,15 +561,14 @@ export async function deleteMaterial(id: string): Promise<Result> {
 
 // ---- Focus timer ----
 // One finished (or stopped) focus session; the heatmap and streak on Home read these.
-export async function logFocus(s: { course: string; startedAt: string; minutes: number }): Promise<Result> {
+export async function logFocus(s: { startedAt: string; minutes: number }): Promise<Result> {
   const started = Date.parse(s.startedAt);
   if (!Number.isInteger(s.minutes) || s.minutes < 1 || s.minutes > 240) return { error: "That session's length is off." };
   if (!Number.isFinite(started) || started > Date.now() + 60_000 || started < Date.now() - 2 * 864e5)
     return { error: "That session's time is off." };
-  if (s.course && !UUID.test(s.course)) return { error: "Pick a course from the list." };
   const supabase = await createClient();
   const { error } = await supabase
     .from("focus_sessions")
-    .insert({ course_id: s.course || null, started_at: new Date(started).toISOString(), minutes: s.minutes });
+    .insert({ started_at: new Date(started).toISOString(), minutes: s.minutes });
   return done(error, "save the session");
 }
