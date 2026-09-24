@@ -146,7 +146,7 @@ export function CourseView({
 
 // "What do I need on the final?": the current grade (Canvas's, or typed in), a goal and the final's weight.
 function WhatIf({ grade }: { grade: number | null }) {
-  const [current, setCurrent] = useState(grade == null ? "" : String(Math.round(grade * 10) / 10));
+  const [current, setCurrent] = useState(grade == null ? "" : gradeLabel(grade).slice(0, -1));
   const [target, setTarget] = useState("90");
   const [weight, setWeight] = useState("20");
   const [c, t, w] = [current, target, weight].map(Number);
@@ -159,7 +159,6 @@ function WhatIf({ grade }: { grade: number | null }) {
         type="number"
         inputMode="decimal"
         min={0}
-        max={id === "wi-weight" ? 100 : undefined}
         step="any"
         value={value}
         onChange={(e) => set(e.target.value)}

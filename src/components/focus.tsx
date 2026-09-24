@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const LENGTH = 25; // minutes per focus session
 const WEEKS = 18; // heatmap columns
+const SHADES = ["bg-secondary", "bg-done/35", "bg-done/55", "bg-done/80", "bg-done"]; // heatmap, by level
 const KEY = "sonnet-focus"; // the running session survives page changes and reloads
 
 type Run = { start: number; course: string };
@@ -82,10 +83,7 @@ export function FocusBlock({
     return { key: dayKey(d), label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }), future: d > today };
   });
   const level = (m = 0) => (m === 0 ? 0 : m < 25 ? 1 : m < 60 ? 2 : m < 120 ? 3 : 4);
-  const mmss = (ms: number) => {
-    const s = Math.max(0, Math.ceil(ms / 1000));
-    return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-  };
+  const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).toISOString().slice(14, 19);
   const running = courses.find((c) => c.id === run?.course);
 
   return (
@@ -152,11 +150,7 @@ export function FocusBlock({
             <span
               key={c.key}
               title={c.future ? undefined : `${c.label}: ${m ? `${m} min` : "no focus time"}`}
-              className={cn(
-                "aspect-square min-w-2 rounded-[3px]",
-                c.future ? "bg-transparent" : level(m) === 0 ? "bg-secondary" : "bg-done",
-                ["", "opacity-35", "opacity-55", "opacity-80", ""][level(m)],
-              )}
+              className={cn("aspect-square min-w-2 rounded-[3px]", c.future ? "bg-transparent" : SHADES[level(m)])}
             />
           );
         })}
