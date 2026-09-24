@@ -10,7 +10,9 @@ import {
   syncCanvasUser,
   type CanvasCourse,
 } from "@/lib/canvas";
+import { BASE, MODELS } from "@/lib/ai";
 import { extractText } from "@/lib/extract";
+import { parseSyllabusItems, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -241,7 +243,8 @@ export async function resetAllData(confirm: string): Promise<Result> {
   if (listError) return { error: `Couldn't reset your files. ${listError.message}` };
   const paths: string[] = [];
   for (const entry of top ?? []) {
-    if (entry.id) paths.push(`${userId}/${entry.name}`); // a file (folders have no id)
+    if (entry.id)
+      paths.push(`${userId}/${entry.name}`); // a file (folders have no id)
     else {
       const { data: files } = await bucket.list(`${userId}/${entry.name}`, { limit: 1000 });
       paths.push(...(files ?? []).map((f) => `${userId}/${entry.name}/${f.name}`));
@@ -380,7 +383,7 @@ export async function addMaterial(m: {
   body?: string;
   size?: number;
   mime?: string;
-}): Promise<Result> {
+}): Promise<Result & { id?: string; readable?: boolean }> {
   const name = m.name?.trim().slice(0, 200);
   if (!UUID.test(m.course) || !["file", "link", "note"].includes(m.kind) || !name) return { error: "Give it a name." };
   if (m.kind === "link" && !/^https?:\/\/\S+$/i.test(m.url ?? "")) return { error: "That doesn't look like a link." };
@@ -394,17 +397,127 @@ export async function addMaterial(m: {
     const { data } = await supabase.storage.from("materials").download(m.path!);
     if (data) text = await extractText(new Uint8Array(await data.arrayBuffer()), m.mime ?? data.type).catch(() => null);
   }
-  const { error } = await supabase.from("materials").insert({
-    course_id: m.course,
-    kind: m.kind,
-    name,
-    path: m.kind === "file" ? m.path : null,
-    url: m.kind === "link" ? m.url : null,
-    body: m.kind === "note" ? m.body!.slice(0, 100_000) : text,
-    size: m.size ?? null,
-    mime: m.mime ?? null,
-  });
-  return done(error, "add it");
+  const { data: row, error } = await supabase
+    .from("materials")
+    .insert({
+      course_id: m.course,
+      kind: m.kind,
+      name,
+      path: m.kind === "file" ? m.path : null,
+      url: m.kind === "link" ? m.url : null,
+      body: m.kind === "note" ? m.body!.slice(0, 100_000) : text,
+      size: m.size ?? null,
+      mime: m.mime ?? null,
+    })
+    .select("id")
+    .single();
+  const r = await done(error, "add it");
+  return r.error ? r : { id: row!.id, readable: m.kind === "note" || !!text };
+}
+
+// ---- Syllabus import ----
+// Two steps with the student in between: read (the model lists dated work, nothing saved), then import
+// only what they approved on the review card.
+
+export async function readSyllabus(
+  materialId: string,
+  timeZone: string,
+): Promise<Result & { items?: Draft[]; course?: string }> {
+  if (!UUID.test(materialId)) return { error: "That file isn't available." };
+  const supabase = await createClient();
+  const [{ data: m }, { data: term }] = await Promise.all([
+    supabase.from("materials").select("body, courses(code)").eq("id", materialId).maybeSingle(),
+    supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
+  ]);
+  if (!m) return { error: "That file isn't available." };
+  if (!m.body?.trim())
+    return { error: "No text could be read from this file. Scanned PDFs and Word files aren't supported yet." };
+  const key = process.env.AI_API_KEY;
+  if (!key) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
+  const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
+  let today: string;
+  try {
+    today = new Date().toLocaleDateString("en-CA", { timeZone }); // YYYY-MM-DD
+  } catch {
+    today = new Date().toISOString().slice(0, 10);
+  }
+  const ask = () =>
+    fetch(`${BASE}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(55_000),
+      body: JSON.stringify({
+        ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
+        reasoning: { enabled: false },
+        temperature: 0,
+        max_tokens: 6000,
+        messages: [
+          { role: "system", content: syllabusPrompt(course, today, weekLines(term?.term_start, term?.term_weeks)) },
+          // ponytail: first 40k characters; a longer syllabus would need splitting by section
+          { role: "user", content: m.body.slice(0, 40_000) },
+        ],
+      }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null);
+  // Free models fail now and then: one quiet retry before giving up.
+  const reply = (await ask()) ?? (await ask());
+  if (!reply) return { error: "The AI couldn't read it just now. Try again in a minute." };
+  const items = parseSyllabusItems(String(reply.choices?.[0]?.message?.content ?? ""), term?.term_start);
+  if (!items.length) return { error: "No dated assignments or exams were found in this file." };
+  return { items, course };
+}
+
+export async function importSyllabus(
+  materialId: string,
+  rows: { title: string; kind: string; due: string }[],
+): Promise<Result & { added?: number; skipped?: number }> {
+  if (!UUID.test(materialId) || !Array.isArray(rows) || rows.length > 100) return { error: "Nothing to import." };
+  const clean = rows
+    .map((r) => ({
+      title: String(r.title ?? "")
+        .trim()
+        .slice(0, 200),
+      kind: r.kind,
+      due: new Date(r.due),
+    }))
+    .filter((r) => r.title && ["assignment", "exam", "quiz", "reading"].includes(r.kind) && !isNaN(r.due.valueOf()));
+  if (!clean.length) return { error: "Give each item a title and a date." };
+  const supabase = await createClient();
+  const { data: m } = await supabase.from("materials").select("course_id, name").eq("id", materialId).maybeSingle();
+  if (!m) return { error: "That file isn't available." };
+  // Skip what the course already has (e.g. from Canvas): same title within a day.
+  const { data: existing } = await supabase.from("items").select("title, due").eq("course_id", m.course_id);
+  const fresh = clean.filter(
+    (r) =>
+      !(existing ?? []).some(
+        (e) =>
+          e.title.trim().toLowerCase() === r.title.toLowerCase() &&
+          Math.abs(Date.parse(e.due) - r.due.valueOf()) <= 864e5,
+      ),
+  );
+  if (fresh.length) {
+    const { error } = await supabase.from("items").upsert(
+      fresh.map((r) => ({
+        course_id: m.course_id,
+        kind: r.kind,
+        title: r.title,
+        due: r.due.toISOString(),
+        source: "syllabus",
+        external_id: `${materialId}:${r.title.toLowerCase()}:${r.due.toISOString().slice(0, 10)}`.slice(0, 300),
+      })),
+      { onConflict: "user_id,source,external_id", ignoreDuplicates: true },
+    );
+    if (error) return { error: `Couldn't import: ${error.message}` };
+  }
+  // The assistant keeps every syllabus in its context by name, so make sure this one says so.
+  if (!/syllabus/i.test(m.name))
+    await supabase
+      .from("materials")
+      .update({ name: `Syllabus · ${m.name}`.slice(0, 200) })
+      .eq("id", materialId);
+  revalidatePath("/", "layout");
+  return { added: fresh.length, skipped: clean.length - fresh.length };
 }
 
 export async function deleteMaterial(id: string): Promise<Result> {

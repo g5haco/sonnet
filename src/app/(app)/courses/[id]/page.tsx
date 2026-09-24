@@ -30,7 +30,9 @@ export default async function CoursePage({ params }: PageProps<"/courses/[id]">)
       items={toItems(items.data!, [course.data])}
       meetings={toMeetings(meetings.data!, [course.data])}
       // A file's extracted text is for the assistant only; don't ship it to the page.
-      materials={(materials.data ?? []).map((m) => (m.kind === "note" ? m : { ...m, body: null }))}
+      materials={(materials.data ?? []).map((m) =>
+        m.kind === "note" ? { ...m, readable: !!m.body } : { ...m, body: null, readable: !!m.body },
+      )}
     />
   );
 }

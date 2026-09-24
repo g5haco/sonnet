@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarPlus,
   Check,
   FileText,
   FileType,
@@ -21,6 +22,7 @@ import { field, FormError } from "@/components/create-forms";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { courseColor } from "@/lib/course";
+import { SyllabusImport } from "@/components/syllabus-import";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +36,7 @@ export type Material = {
   size: number | null;
   mime: string | null;
   created_at: string;
+  readable?: boolean; // text was extracted (the text itself stays on the server)
 };
 
 const MAX = 50 * 1024 * 1024; // matches the bucket's limit (migration 0004)
@@ -58,10 +61,14 @@ type Sent = { key: string; name: string; state: "uploading" | "done" | "error" }
 function useUpload() {
   const [sent, setSent] = useState<Sent[]>([]);
   const upload = async (course: string, files: File[]) => {
+    const added: { id: string; name: string; readable: boolean }[] = [];
     const supabase = createClient();
     const { data } = await supabase.auth.getClaims();
     const uid = data?.claims.sub;
-    if (!uid) return void toast.error("Sign in again to upload.");
+    if (!uid) {
+      toast.error("Sign in again to upload.");
+      return added;
+    }
     for (const file of files) {
       const key = crypto.randomUUID();
       const mark = (state: Sent["state"]) => setSent((s) => s.map((x) => (x.key === key ? { ...x, state } : x)));
@@ -79,7 +86,9 @@ function useUpload() {
         : await addMaterial({ course, kind: "file", name: file.name, path, size: file.size, mime: file.type });
       mark(r.error ? "error" : "done");
       if (r.error) toast.error(r.error);
+      else if ("id" in r && r.id) added.push({ id: r.id, name: file.name, readable: !!r.readable });
     }
+    return added;
   };
   return { sent, upload };
 }
@@ -311,7 +320,16 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   const create = useCreate();
   const { sent, upload } = useUpload();
   const [over, setOver] = useState(false);
+  const [importing, setImporting] = useState<{ id: string; name: string } | null>(null);
+  const syllabusInput = useRef<HTMLInputElement>(null);
   const busy = sent.filter((s) => s.state === "uploading");
+  // Upload a syllabus, then straight into the review of what it says is due.
+  const importSyllabus = async (files: File[]) => {
+    const [first] = await upload(course.id, files.slice(0, 1));
+    if (!first) return;
+    if (!first.readable) return void toast.error("Saved, but no text could be read from it (scanned PDF?).");
+    setImporting(first);
+  };
 
   const open = async (m: Material) => {
     if (!m.path) return;
@@ -328,15 +346,35 @@ export function Materials({ course, materials }: { course: { id: string; code: s
     <Block
       title="Materials"
       aside={
-        <button
-          type="button"
-          onClick={() => create("upload", undefined, course.id)}
-          className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          + upload
-        </button>
+        <span className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => syllabusInput.current?.click()}
+            className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            import syllabus
+          </button>
+          <button
+            type="button"
+            onClick={() => create("upload", undefined, course.id)}
+            className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            + upload
+          </button>
+          <input
+            ref={syllabusInput}
+            type="file"
+            accept=".pdf,.txt,.md"
+            hidden
+            onChange={(e) => {
+              importSyllabus([...(e.target.files ?? [])]);
+              e.target.value = "";
+            }}
+          />
+        </span>
       }
     >
+      <SyllabusImport material={importing} onClose={() => setImporting(null)} />
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -374,7 +412,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
               </li>
             ))}
             {materials.map((m) => (
-              <MaterialRow key={m.id} m={m} onOpen={() => open(m)} />
+              <MaterialRow key={m.id} m={m} onOpen={() => open(m)} onImport={() => setImporting(m)} />
             ))}
           </ul>
         )}
@@ -383,7 +421,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   );
 }
 
-function MaterialRow({ m, onOpen }: { m: Material; onOpen: () => void }) {
+function MaterialRow({ m, onOpen, onImport }: { m: Material; onOpen: () => void; onImport: () => void }) {
   const [removing, start] = useTransition();
   const [showNote, setShowNote] = useState(false);
   const meta = [
@@ -416,6 +454,17 @@ function MaterialRow({ m, onOpen }: { m: Material; onOpen: () => void }) {
             <Glyph m={m} />
             <span className="min-w-0 flex-1 truncate text-sm">{m.name}</span>
             <span className="shrink-0 font-mono text-xs text-muted-foreground">{meta}</span>
+          </button>
+        )}
+        {m.readable && m.kind !== "link" && (
+          <button
+            type="button"
+            onClick={onImport}
+            aria-label={`Find dates in ${m.name}`}
+            title="Find due dates and exams in this file"
+            className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-opacity hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+          >
+            <CalendarPlus className="size-4" />
           </button>
         )}
         <button
