@@ -90,6 +90,41 @@ test("Canvas calendar events unfold lines and token assignments win duplicate co
   ).toEqual([]);
 });
 
+test("real Canvas feed titles and calendar links match their API assignment and course", () => {
+  const events = parseCanvasIcs(
+    [
+      "BEGIN:VEVENT",
+      "UID:event-assignment-9",
+      "DTSTART:20260924T065900Z",
+      "SUMMARY:Syllabus Quiz (Due Wednesday\\, September 23rd by 11:59 PM) [POLS&202 9347]",
+      "URL:https://canvas.example.edu/calendar?include_contexts=course_42&month=09&year=2026#assignment_9",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "UID:event-calendar-event-5",
+      "DTSTART:20261028T170000Z",
+      "SUMMARY:In-Class Midterm [POLS&202 9347]",
+      "URL:https://canvas.example.edu/calendar?include_contexts=course_42#calendar_event_5",
+      "END:VEVENT",
+    ].join("\r\n"),
+  );
+  expect(events[0]).toMatchObject({
+    title: "Syllabus Quiz (Due Wednesday, September 23rd by 11:59 PM)",
+    courseCode: "POLS&202 9347",
+    canvasCourseId: "42",
+    assignmentId: "9",
+  });
+  const api = mapCanvasAssignment("pols", {
+    id: 9,
+    course_id: 42,
+    name: events[0].title,
+    due_at: "2026-09-24T06:59:59Z",
+  })!;
+  // the quiz is the API's; the midterm (a calendar event, not an assignment) lands in the real course by its code
+  const mapped = mapIcsEvents(events, new Map(), "fallback", [api], new Map([["pols&202 9347", "pols"]]));
+  expect(mapped).toHaveLength(1);
+  expect(mapped[0]).toMatchObject({ title: "In-Class Midterm", course_id: "pols", kind: "exam" });
+});
+
 test("Canvas tokens are encrypted with authenticated encryption", () => {
   const previous = process.env.CANVAS_ENCRYPTION_KEY;
   process.env.CANVAS_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");

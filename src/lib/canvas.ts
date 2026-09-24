@@ -145,6 +145,8 @@ type IcsEvent = {
   due: string;
   url: string | null;
   canvasCourseId: string | null;
+  courseCode: string | null; // Canvas appends " [POLS&202 9347]" to feed titles
+  assignmentId: string | null;
 };
 
 const unescapeIcs = (value: string) =>
@@ -170,13 +172,20 @@ export function parseCanvasIcs(text: string): IcsEvent[] {
       const due = icsDate(row.DTSTART ?? "");
       if (row.UID && row.SUMMARY && due) {
         const url = row.URL || row.DESCRIPTION?.match(/https?:\/\/\S+/)?.[0]?.replace(/[)>.,]+$/, "") || null;
+        const summary = unescapeIcs(row.SUMMARY).trim();
+        const code = summary.match(/\s*\[([^\]]+)\]$/);
+        // Feed links point at the calendar (…include_contexts=course_42#assignment_9), not the assignment.
+        const courseId = url?.match(/\/courses\/(\d+)|course_(\d+)/);
+        const assignmentId = url?.match(/\/assignments\/(\d+)|assignment_(\d+)/);
         events.push({
           uid: row.UID.slice(0, 300),
-          title: unescapeIcs(row.SUMMARY).slice(0, 200),
+          title: (code ? summary.slice(0, code.index) : summary).slice(0, 200),
           description: row.DESCRIPTION ? unescapeIcs(row.DESCRIPTION).slice(0, 100_000) : null,
           due,
           url,
-          canvasCourseId: url?.match(/\/courses\/(\d+)/)?.[1] ?? null,
+          canvasCourseId: courseId?.[1] ?? courseId?.[2] ?? null,
+          courseCode: code?.[1].trim() ?? null,
+          assignmentId: assignmentId?.[1] ?? assignmentId?.[2] ?? null,
         });
       }
       row = null;
@@ -188,18 +197,27 @@ export function parseCanvasIcs(text: string): IcsEvent[] {
   return events;
 }
 
+// Same title and due within a day (the feed and the API can round due times differently).
 const sameWork = (a: { title: string; due: string }, b: { title: string; due: string }) =>
-  a.title.trim().toLowerCase() === b.title.trim().toLowerCase() && a.due === b.due;
+  a.title.trim().toLowerCase() === b.title.trim().toLowerCase() &&
+  Math.abs(Date.parse(a.due) - Date.parse(b.due)) <= 864e5;
 
 export function mapIcsEvents(
   events: IcsEvent[],
   courses: Map<string, string>,
   fallbackCourseId: string,
   canvasItems: CanvasItem[],
+  codes = new Map<string, string>(), // lowercased course code → local course id
 ): CanvasItem[] {
   return events
+    .filter(
+      (event) => !canvasItems.some((item) => event.assignmentId && item.external_id.endsWith(`:${event.assignmentId}`)),
+    )
     .map((event): CanvasItem => ({
-      course_id: (event.canvasCourseId && courses.get(event.canvasCourseId)) || fallbackCourseId,
+      course_id:
+        (event.canvasCourseId && courses.get(event.canvasCourseId)) ||
+        (event.courseCode && codes.get(event.courseCode.toLowerCase())) ||
+        fallbackCourseId,
       source: "ics",
       external_id: event.uid,
       kind: /\b(exam|midterm|final)\b/i.test(event.title)
@@ -311,8 +329,28 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
     for (const [index, course] of canvasCourses.entries()) {
       courseIds.set(String(course.id), await getOrCreateCourse(admin, userId, course, index, existing));
     }
+    // Feed-only users (no token) still get real courses from the " [CODE]" on each feed title.
+    for (const event of ics) {
+      const known =
+        (event.canvasCourseId && courseIds.has(event.canvasCourseId)) ||
+        existing.some((c) => c.code.toLowerCase() === event.courseCode?.toLowerCase());
+      if (!known && event.courseCode) {
+        const id = await getOrCreateCourse(
+          admin,
+          userId,
+          { id: event.canvasCourseId ?? `ics:${event.courseCode}`, course_code: event.courseCode },
+          existing.length,
+          existing,
+        );
+        if (event.canvasCourseId) courseIds.set(event.canvasCourseId, id);
+      }
+    }
+    const codes = new Map(existing.map((c) => [c.code.toLowerCase(), c.id]));
+    const unplaced = (event: IcsEvent) =>
+      !(event.canvasCourseId && courseIds.has(event.canvasCourseId)) &&
+      !codes.has(event.courseCode?.toLowerCase() ?? "");
     let fallback = existing.find((course) => course.code === "CANVAS")?.id;
-    if (ics.length && !fallback && ics.some((event) => !event.canvasCourseId || !courseIds.has(event.canvasCourseId))) {
+    if (ics.length && !fallback && ics.some(unplaced)) {
       fallback = await getOrCreateCourse(
         admin,
         userId,
@@ -330,7 +368,7 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
     });
     const items = [
       ...tokenItems,
-      ...mapIcsEvents(ics, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems),
+      ...mapIcsEvents(ics, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems, codes),
     ].filter((item) => item.course_id);
     if (items.length) {
       const { error } = await admin.from("items").upsert(
@@ -338,6 +376,23 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         { onConflict: "user_id,source,external_id" },
       );
       if (error) throw error;
+    }
+    if (config.canvas_ics_url) {
+      // Feed rows that are now covered by the API (or gone from the feed) are duplicates: remove them,
+      // then the "CANVAS" catch-all course if nothing is left in it.
+      const kept = items.filter((i) => i.source === "ics").map((i) => `"${i.external_id.replace(/"/g, '\\"')}"`);
+      let stale = admin.from("items").delete().eq("user_id", userId).eq("source", "ics");
+      if (kept.length) stale = stale.not("external_id", "in", `(${kept.join(",")})`);
+      const { error } = await stale;
+      if (error) throw error;
+      const catchAll = existing.find((c) => c.code === "CANVAS" && c.canvas_course_id === "calendar");
+      if (catchAll) {
+        const { count } = await admin
+          .from("items")
+          .select("id", { count: "exact", head: true })
+          .eq("course_id", catchAll.id);
+        if (count === 0) await admin.from("courses").delete().eq("id", catchAll.id).eq("user_id", userId);
+      }
     }
     await admin
       .from("settings")
