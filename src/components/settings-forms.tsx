@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
 import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
+import { DoubtButton } from "@/components/evil-buttons/doubt-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { termGlance } from "@/lib/term";
@@ -314,8 +315,8 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
         </div>
       ) : (
         <p className="rounded-2xl bg-secondary/60 p-5 text-sm text-pretty">
-          No semester yet. Add the first day of classes to turn on weekly progress, the heat map and the Google
-          Calendar feed.
+          No semester yet. Add the first day of classes to turn on weekly progress, the heat map and the Google Calendar
+          feed.
         </p>
       )}
       <div className={group}>
@@ -331,17 +332,16 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
   );
 }
 
-// Deliberately slow: open, read what goes, type RESET. No one-click path.
+// Deliberately slow: open, read what goes, then push through three doubts. No one-click path.
 function ResetData({ onDone }: { onDone: () => void }) {
   const [open, setOpen] = useState(false);
-  const [typed, setTyped] = useState("");
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const { clear } = useAssistant();
   const router = useRouter();
   const reset = () =>
     start(async () => {
-      const r = await resetAllData(typed);
+      const r = await resetAllData("RESET"); // the server still requires the word
       if (r.error) return setError(r.error);
       clear(); // the open conversation would otherwise be saved again
       toast("All data cleared. Fresh start.");
@@ -350,7 +350,6 @@ function ResetData({ onDone }: { onDone: () => void }) {
     });
   const cancel = () => {
     setOpen(false);
-    setTyped("");
     setError("");
   };
 
@@ -360,45 +359,35 @@ function ResetData({ onDone }: { onDone: () => void }) {
         Reset all data
       </h3>
       <p className={help}>
-        Deletes every course with its assignments, exams, class times and materials (uploaded files too), your
-        chats, and your semester dates. Canvas gets disconnected, or its daily sync would bring everything back.
-        Your login and name stay. This can&apos;t be undone.
+        Deletes every course with its assignments, exams, class times and materials (uploaded files too), your chats,
+        and your semester dates. Canvas gets disconnected, or its daily sync would bring everything back. Your login and
+        name stay. This can&apos;t be undone.
       </p>
       {open ? (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            reset();
-          }}
-          className="mt-5 flex flex-col gap-2"
-        >
-          <label htmlFor="reset-confirm" className={label}>
-            Type <span className="font-mono">RESET</span> to confirm
-          </label>
-          <input
-            id="reset-confirm"
-            value={typed}
-            onChange={(e) => setTyped(e.target.value)}
-            autoFocus
-            autoComplete="off"
-            spellCheck={false}
-            className={cn(field, "max-w-xs font-mono")}
-          />
+        <div className="mt-5 flex flex-col gap-2">
           <FormError text={error} />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Four deliberate clicks, each asking again; the last one burns it all down. */}
+            <DoubtButton
+              label="Delete everything"
+              confirmations={["Are you sure?", "Every course, every file. Still?", "No undo. Last chance."]}
+              successLabel={pending ? "Deleting…" : "Gone."}
+              resetAfter={2500} // back to idle if the reset fails (on success the page moves on)
+              disabled={pending}
+              onConfirm={reset}
+              className="rounded-full"
+            />
             <Button
-              type="submit"
-              variant="destructive"
-              disabled={typed !== "RESET" || pending}
-              className="h-10 rounded-full px-5"
+              type="button"
+              variant="ghost"
+              onClick={cancel}
+              disabled={pending}
+              className="h-10 rounded-full px-4"
             >
-              {pending ? "Deleting…" : "Delete everything"}
-            </Button>
-            <Button type="button" variant="ghost" onClick={cancel} className="h-10 rounded-full px-4">
               Cancel
             </Button>
           </div>
-        </form>
+        </div>
       ) : (
         <Button
           variant="outline"
