@@ -497,18 +497,20 @@ export async function summarizeSyllabus(materialId: string): Promise<Result & { 
   const reply = await askSyllabus(summaryPrompt(course), m.body);
   if ("error" in reply) return reply;
   const body = reply.text.replace(/^```(?:markdown)?\s*|\s*```$/g, "").slice(0, 20_000);
-  await supabase
-    .from("materials")
-    .delete()
-    .eq("course_id", m.course_id)
-    .eq("kind", "note")
-    .eq("name", "Syllabus summary");
+  // Save the new one first, then drop older ones: a failed save never leaves the course without a summary.
   const { data: note, error } = await supabase
     .from("materials")
     .insert({ course_id: m.course_id, kind: "note", name: "Syllabus summary", body })
     .select("id")
     .single();
   if (error) return { error: `Couldn't save the summary. ${error.message}` };
+  await supabase
+    .from("materials")
+    .delete()
+    .eq("course_id", m.course_id)
+    .eq("kind", "note")
+    .eq("name", "Syllabus summary")
+    .neq("id", note.id);
   revalidatePath("/", "layout");
   return { id: note.id, body };
 }

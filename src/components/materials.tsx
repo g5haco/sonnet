@@ -337,7 +337,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   const [importing, setImporting] = useState<{ id: string; name: string } | null>(null);
   const syllabusInput = useRef<HTMLInputElement>(null);
   const busy = sent.filter((s) => s.state === "uploading");
-  const { setFocus } = useAssistant();
+  const { setFocus, clear } = useAssistant();
   const router = useRouter();
 
   // The syllabus is the course's reference: its text is the assistant's memory, and a one-page summary (a note)
@@ -364,6 +364,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   };
   const ask = () => {
     setSummary((s) => ({ ...s, open: false }));
+    clear(); // a fresh chat about this course, not a switch mid-conversation
     setFocus(course.code); // the chat reads this course's syllabus and materials in full
     router.push("/chat");
   };

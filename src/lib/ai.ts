@@ -268,7 +268,8 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
     : [];
   let budget = 30_000;
   // syllabus first, so a long lecture file can't crowd it out of the budget
-  const bySyllabus = (m: { name: string }) => (/syllabus/i.test(m.name) ? 0 : 1);
+  // (the real syllabus, not its "Syllabus summary" note, which only repeats it)
+  const bySyllabus = (m: { name: string }) => (/syllabus/i.test(m.name) && m.name !== "Syllabus summary" ? 0 : 1);
   const readings = [...bodies]
     .sort((a, b) => bySyllabus(a) - bySyllabus(b))
     .flatMap((m) => {
