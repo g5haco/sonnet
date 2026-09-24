@@ -7,6 +7,8 @@ export type Item = {
   kind: "assignment" | "exam" | "quiz" | "reading";
   due: string;
   doneAt: string | null;
+  score?: number | null; // points earned, from Canvas once graded
+  points?: number | null; // points possible
 };
 
 const WEEK = 7 * 864e5;

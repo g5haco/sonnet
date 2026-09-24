@@ -11,10 +11,12 @@ type ItemRow = {
   due: string;
   done_at: string | null;
   course_id: string;
+  score?: number | null;
+  points_possible?: number | null;
 };
 type MeetingRow = { id: string; course_id: string; weekdays: number[]; starts: string; ends: string; location: string };
 
-export const ITEM_COLS = "id, title, kind, due, done_at, course_id";
+export const ITEM_COLS = "id, title, kind, due, done_at, course_id, score, points_possible";
 export const MEETING_COLS = "id, course_id, weekdays, starts, ends, location";
 
 export function toItems(rows: ItemRow[], courses: Course[]): Item[] {
@@ -25,6 +27,8 @@ export function toItems(rows: ItemRow[], courses: Course[]): Item[] {
     kind: i.kind,
     due: i.due,
     doneAt: i.done_at,
+    score: i.score ?? null,
+    points: i.points_possible ?? null,
     courseId: i.course_id,
     course: byId.get(i.course_id)?.code ?? "",
     hue: byId.get(i.course_id)?.hue ?? 0,

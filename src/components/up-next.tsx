@@ -185,7 +185,8 @@ export function UpNext({
                       done ? "text-muted-foreground" : due.late ? "text-destructive" : "text-foreground",
                     )}
                   >
-                    {done ? "done" : due.label}
+                    {/* graded work shows its score, e.g. 18/20 */}
+                    {i.score != null ? `${+Number(i.score).toFixed(2)}${i.points ? `/${+Number(i.points).toFixed(2)}` : ""}` : done ? "done" : due.label}
                   </span>
                 </label>
                 {/* always visible on touch; appears on hover/focus with a mouse */}
