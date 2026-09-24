@@ -22,6 +22,7 @@ import type { ClassMeeting } from "@/lib/calendar";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 import { shortcutsFor } from "@/components/chat/shortcuts";
+import { FocusProvider } from "@/components/focus-timer";
 
 type Course = { id: string; code: string; hue: number };
 
@@ -309,6 +310,7 @@ export function AppShell({
               chatId,
             }}
           >
+            <FocusProvider courses={courses}>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <Sidebar
                 onCreate={create}
@@ -398,6 +400,7 @@ export function AppShell({
               course={pick}
               onOpenChange={(o) => !o && setDialog(null)}
             />
+            </FocusProvider>
           </AssistantContext.Provider>
         </SettingsContext.Provider>
       </CreateContext.Provider>

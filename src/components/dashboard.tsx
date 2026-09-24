@@ -182,7 +182,7 @@ export function Dashboard({
             </Block>
           )}
 
-          <FocusBlock courses={courses} sessions={sessions} now={now} className="order-1" />
+          <FocusBlock sessions={sessions} now={now} className="order-1" />
         </div>
       </div>
     </main>

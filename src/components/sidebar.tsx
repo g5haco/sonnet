@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { GooeyMenu, type CreateKind } from "@/components/gooey-menu";
 import { cn } from "@/lib/utils";
+import { FocusButton } from "@/components/focus-timer";
 
 const NAV = [
   { href: "/", label: "Home", icon: House },
@@ -165,12 +166,15 @@ export function Sidebar({
           <div
             className={cn(
               "flex items-start transition-[height] duration-200 ease-out motion-reduce:transition-none",
-              open ? "h-10 flex-row gap-4" : "h-[86px] flex-col gap-1.5",
+              open ? "h-10 flex-row gap-4" : "h-[132px] flex-col gap-1.5",
             )}
           >
             <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
             <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
               <ChatLink active={onChat} />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
+              <FocusButton />
             </motion.div>
           </div>
 
@@ -200,6 +204,7 @@ export function Sidebar({
           sonnet<span className="text-brand">.</span>
         </Link>
         <div className="ml-auto flex items-center gap-2">
+          <FocusButton />
           <ChatLink active={onChat} />
           <GooeyMenu direction="down" open={creating} onOpenChange={setCreating} onPick={onCreate} />
         </div>
