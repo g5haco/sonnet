@@ -64,12 +64,11 @@ export function AnimatedCircularProgressBar({
             style={
               {
                 stroke: gaugeSecondaryColor,
-                "--stroke-percent": 90 - currentPercent,
                 "--offset-factor-secondary": "calc(1 - var(--offset-factor))",
-                strokeDasharray: "calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)",
+                strokeDasharray: `${(90 - currentPercent) * percentPx} ${circumference}`,
                 transform:
                   "rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1)",
-                transition: "all var(--transition-length) ease var(--delay)",
+                transition: "all var(--transition-length) linear var(--delay)",
                 transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
               } as React.CSSProperties
             }
@@ -87,10 +86,10 @@ export function AnimatedCircularProgressBar({
           style={
             {
               stroke: gaugePrimaryColor,
-              "--stroke-percent": currentPercent,
-              strokeDasharray: "calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)",
-              transition: "var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay)",
-              transitionProperty: "stroke-dasharray,transform",
+              // Sonnet: the dash length is computed here (a var()-based calc never redrew when the value changed, so
+              // the fill stayed empty) with one explicit transition, linear so a once-a-second value fills smoothly.
+              strokeDasharray: `${currentPercent * percentPx} ${circumference}`,
+              transition: "stroke-dasharray var(--transition-length) linear var(--delay), transform var(--transition-length) ease var(--delay)",
               transform: "rotate(calc(-90deg + var(--gap-percent) * var(--offset-factor) * var(--percent-to-deg)))",
               transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
             } as React.CSSProperties

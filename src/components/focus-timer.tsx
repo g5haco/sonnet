@@ -73,6 +73,7 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
 
   const left = run ? LENGTH * 60_000 - (Math.max(tick, run.start) - run.start) : LENGTH * 60_000;
   const over = !!run && left <= 0;
+  const used = Math.floor((LENGTH * 60_000 - left) / 1000); // whole seconds into the session
   useEffect(() => {
     if (run && over) finish(run, LENGTH); // eslint-disable-line react-hooks/set-state-in-effect
   }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -121,19 +122,22 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
                 <X className="size-4" />
               </button>
             </header>
+            {/* The ring sweeps once a minute, so it visibly fills every second (the sidebar ring shows the whole
+                session); a new minute remounts it, so it restarts at 0 instead of animating backwards. */}
             <AnimatedCircularProgressBar
+              key={run ? Math.floor(used / 60) : "idle"}
               min={0}
-              max={LENGTH * 60_000}
-              value={LENGTH * 60_000 - left}
+              max={60}
+              value={run ? used % 60 : 0}
               gaugePrimaryColor="var(--done)"
               gaugeSecondaryColor="color-mix(in oklab, var(--foreground) 10%, transparent)"
-              label="Focus time used"
+              label="Seconds into this minute"
               className="mx-auto size-40"
             >
               <span className="flex flex-col items-center">
                 <span className="font-mono text-3xl font-medium tracking-tight tabular-nums">{mmss(left)}</span>
                 <span className="mt-0.5 font-mono text-xs font-normal text-muted-foreground">
-                  {run ? "focusing" : `${LENGTH} min`}
+                  {run ? `min ${Math.min(LENGTH, Math.floor(used / 60) + 1)} of ${LENGTH}` : `${LENGTH} min`}
                 </span>
               </span>
             </AnimatedCircularProgressBar>
