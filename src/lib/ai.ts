@@ -495,7 +495,11 @@ export async function streamReply(
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
-  const fail = (message: string) => new Response(encode({ t: "error", v: message }), { status: 200 });
+  const fail = (message: string) =>
+    new Response(encode({ t: "error", v: message }), {
+      status: 200,
+      headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
+    });
   // Routing reads what the student typed, not the text of files they attached.
   const question = typedPart(turns.at(-1)?.content ?? "");
   const vision = turns.some((t) => t.images?.length);
