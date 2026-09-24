@@ -54,3 +54,46 @@ Use:
 After significant code changes, update the graph rather than rebuilding it from scratch.
 
 Optimize for minimum context usage while preserving correctness.
+
+## Token Efficiency
+
+Optimize for minimal context usage without sacrificing correctness.
+
+### Repository Navigation
+Use Graphify before broad source exploration.
+
+1. Query Graphify to locate relevant subsystems, symbols, dependencies, and execution paths.
+2. Read only the minimum source files necessary.
+3. Avoid broad recursive Glob/Grep/Read operations unless Graphify is insufficient.
+
+### Communication
+Use Caveman-style concise communication.
+
+- No conversational filler.
+- No lengthy preambles.
+- Do not restate my request.
+- Report findings, decisions, blockers, and results directly.
+- Keep explanations concise unless I explicitly request detail.
+
+### Tool Output
+Prefer compressed command/tool output where possible.
+
+For large:
+- test output
+- build logs
+- JSON
+- diffs
+- search results
+- web output
+
+use Caveman compression rather than loading full raw output into context.
+
+Retrieve the original output only when the compressed version is insufficient.
+
+### Context Discipline
+Do not read files merely to "understand the project."
+
+Use:
+- `HANDOFF.md` for current project state and decisions
+- Graphify for code architecture
+- source files only for implementation details required by the current task
