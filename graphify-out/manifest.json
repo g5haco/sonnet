@@ -198,9 +198,9 @@
     "semantic_hash": "381092710b4be005c9b2f36fbef4c762"
   },
   "src/components/courses.tsx": {
-    "mtime": 1790235435.000319,
-    "seen": 1790235440.5349102,
-    "ast_hash": "ec517e590b0bfbc39bbb1b03063ea1e7",
+    "mtime": 1790298649.4765637,
+    "seen": 1790298720.4113262,
+    "ast_hash": "b01070f0ecd749213cada59c46ebc0b2",
     "semantic_hash": ""
   },
   "src/components/create-forms.tsx": {
