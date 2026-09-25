@@ -16,6 +16,8 @@ type CanvasAssignment = {
   due_at?: string | null;
   html_url?: string | null;
   points_possible?: number | null;
+  submission_types?: string[] | null;
+  allowed_attempts?: number | null;
   quiz_id?: string | number | null;
   is_quiz_assignment?: boolean;
   submission?: {
@@ -38,6 +40,9 @@ type CanvasItem = {
   points_possible: number | null;
   score: number | null;
   done_at: string | null;
+  // Token path only (migration 0012). ICS rows leave them out, but a bulk upsert still sends them as null.
+  submission_types?: string[] | null;
+  allowed_attempts?: number | null;
 };
 
 type CanvasSettings = {
@@ -72,6 +77,10 @@ export function mapCanvasAssignment(courseId: string, assignment: CanvasAssignme
     due,
     html_url: assignment.html_url?.slice(0, 2_000) || null,
     points_possible: Number.isFinite(assignment.points_possible) ? assignment.points_possible! : null,
+    submission_types: Array.isArray(assignment.submission_types)
+      ? assignment.submission_types.filter((t) => typeof t === "string").slice(0, 10)
+      : null,
+    allowed_attempts: Number.isInteger(assignment.allowed_attempts) ? assignment.allowed_attempts! : null,
     score: Number.isFinite(submitted?.score) ? submitted!.score! : null,
     done_at: done ? (iso(submitted?.submitted_at) ?? iso(submitted?.graded_at) ?? due) : null,
   };
@@ -391,10 +400,22 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       ...mapIcsEvents(ics, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems, codes),
     ].filter((item) => item.course_id);
     if (items.length) {
-      const { error } = await admin.from("items").upsert(
-        items.map((item) => ({ ...item, user_id: userId })),
-        { onConflict: "user_id,source,external_id" },
-      );
+      const save = (rows: object[]) =>
+        admin.from("items").upsert(
+          rows.map((row) => ({ ...row, user_id: userId })),
+          { onConflict: "user_id,source,external_id" },
+        );
+      let { error } = await save(items);
+      // Before migration 0012 the detail columns don't exist: save everything else.
+      if (error && ["PGRST204", "42703"].includes(error.code))
+        ({ error } = await save(
+          items.map((row) => {
+            const basic = { ...row };
+            delete basic.submission_types;
+            delete basic.allowed_attempts;
+            return basic;
+          }),
+        ));
       if (error) throw error;
     }
     // An empty feed is more likely a Canvas hiccup than an empty term: then leave the saved rows alone.

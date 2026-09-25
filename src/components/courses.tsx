@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { UpNext, useWork } from "@/components/up-next";
+import { WorkView } from "@/components/work-view";
 import type { ClassMeeting, Term } from "@/lib/calendar";
 import { courseColor, gradeLabel, HUES, meetingLabel, needOnFinal, WEEKDAYS } from "@/lib/course";
 import { progress, type Item } from "@/lib/progress";
@@ -82,6 +83,7 @@ export function CourseView({
   const [adding, setAdding] = useState(false);
   const create = useCreate();
   const { shown, checked, toggle, remove } = useWork(items);
+  const [openId, setOpenId] = useState<string | null>(null);
   const s = courseStats(shown, meetings, now);
   const percent = term && progress(shown, new Date(`${term.start}T00:00:00`), term.weeks, new Date(now)).percent;
 
@@ -144,8 +146,11 @@ export function CourseView({
             checked={checked}
             onToggle={toggle}
             onDelete={remove}
+            onOpen={(i) => setOpenId(i.id)}
             empty={`Nothing for ${course.code} yet. Add an assignment or exam with Add.`}
           />
+          {/* reads the live row from `shown`, so Mark as done / Undo updates here and in the list together */}
+          <WorkView item={shown.find((i) => i.id === openId) ?? null} onClose={() => setOpenId(null)} onToggle={toggle} />
           <Materials course={course} materials={materials} />
       </div>
     </main>

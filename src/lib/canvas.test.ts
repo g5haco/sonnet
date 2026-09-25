@@ -18,6 +18,8 @@ test("Canvas assignments become planner items with descriptions, grades and subm
       due_at: "2026-10-02T18:30:00Z",
       html_url: "https://canvas.example.edu/courses/42/assignments/9007199254740993",
       points_possible: 100,
+      submission_types: ["online_upload", "online_text_entry", 7 as unknown as string],
+      allowed_attempts: -1,
       is_quiz_assignment: true,
       submission: { workflow_state: "graded", submitted_at: "2026-10-02T17:00:00Z", score: 91 },
     }),
@@ -31,6 +33,8 @@ test("Canvas assignments become planner items with descriptions, grades and subm
     due: "2026-10-02T18:30:00.000Z",
     html_url: "https://canvas.example.edu/courses/42/assignments/9007199254740993",
     points_possible: 100,
+    submission_types: ["online_upload", "online_text_entry"], // junk dropped
+    allowed_attempts: -1, // unlimited
     score: 91,
     done_at: "2026-10-02T17:00:00.000Z",
   });

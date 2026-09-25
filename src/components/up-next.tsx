@@ -71,6 +71,10 @@ export function useWork(items: Item[]) {
   return { shown, checked, toggle, remove };
 }
 
+// Graded work shows its score, e.g. 18/20.
+export const scoreLabel = (score: number, points?: number | null) =>
+  `${+Number(score).toFixed(2)}${points ? `/${+Number(points).toFixed(2)}` : ""}`;
+
 export function when(due: string, now: number) {
   const days = Math.round((Date.parse(due) - now) / DAY);
   if (days < 0) return { label: `${-days}d late`, late: true };
@@ -93,6 +97,7 @@ export function UpNext({
   onToggle,
   onDelete,
   onAddCourse,
+  onOpen,
   title = "Up next",
   limit = 8,
   empty = "Nothing due. Add an assignment with the + in the sidebar, or wait for Canvas sync.",
@@ -104,6 +109,7 @@ export function UpNext({
   onToggle: (id: string) => void;
   onDelete: (item: Item) => void;
   onAddCourse?: () => void; // set when there are no courses yet
+  onOpen?: (item: Item) => void; // set: the checkbox completes, the rest of the row opens the item (course page)
   title?: string;
   limit?: number;
   empty?: string;
@@ -115,6 +121,20 @@ export function UpNext({
     .filter((i) => showDone || !i.doneAt || checked.has(i.id))
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
   const list = open.slice(0, limit);
+  // Without onOpen (Home) the whole row is a <label>, so a click anywhere checks it off.
+  const Row = onOpen ? "div" : "label";
+  const wrap = (i: Item, body: React.ReactNode) =>
+    onOpen ? (
+      <button
+        type="button"
+        onClick={() => onOpen(i)}
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 self-stretch rounded-md text-left focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {body}
+      </button>
+    ) : (
+      body
+    );
 
   return (
     <Block
@@ -148,7 +168,7 @@ export function UpNext({
               <li key={i.id} className="group flex items-center">
                 {/* min-w-0: otherwise a long title sets the row's minimum width and pushes the due label and
                     delete button out of the card */}
-                <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
+                <Row className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/60">
                   <Checkbox
                     // a real <button>: a <span> checkbox inside <label> toggles twice on Space
                     nativeButton
@@ -158,38 +178,43 @@ export function UpNext({
                     aria-label={i.title}
                     className="size-5 rounded-full transition-transform active:scale-80 data-checked:animate-check-pop data-checked:border-done data-checked:bg-done"
                   />
-                  <span className="min-w-0 flex-1">
-                    {/* Two lines at most (anywhere: even one unbroken word wraps); the full title is on hover. */}
-                    <span
-                      title={i.title}
-                      className={cn(
-                        "line-clamp-2 [overflow-wrap:anywhere] transition-opacity duration-300",
-                        done && "opacity-45",
-                      )}
-                    >
-                      <span className="strike" data-done={done || undefined}>
-                        {i.title}
+                  {wrap(
+                    i,
+                    <>
+                      <span className="min-w-0 flex-1">
+                        {/* Two lines at most (anywhere: even one unbroken word wraps); the full title is on hover. */}
+                        <span
+                          title={i.title}
+                          className={cn(
+                            "line-clamp-2 [overflow-wrap:anywhere] transition-opacity duration-300",
+                            done && "opacity-45",
+                          )}
+                        >
+                          <span className="strike" data-done={done || undefined}>
+                            {i.title}
+                          </span>
+                        </span>
+                        <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                          <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
+                          <span className="truncate">{i.course}</span>
+                          {/* on the meta line, so a long title can't clip it */}
+                          {i.kind === "exam" && (
+                            <span className="shrink-0 rounded-full bg-secondary px-1.5 text-secondary-foreground">exam</span>
+                          )}
+                        </span>
                       </span>
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                      <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
-                      <span className="truncate">{i.course}</span>
-                      {/* on the meta line, so a long title can't clip it */}
-                      {i.kind === "exam" && (
-                        <span className="shrink-0 rounded-full bg-secondary px-1.5 text-secondary-foreground">exam</span>
-                      )}
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "shrink-0 font-mono text-sm tabular-nums",
-                      done ? "text-muted-foreground" : due.late ? "text-destructive" : "text-foreground",
-                    )}
-                  >
-                    {/* graded work shows its score, e.g. 18/20 */}
-                    {i.score != null ? `${+Number(i.score).toFixed(2)}${i.points ? `/${+Number(i.points).toFixed(2)}` : ""}` : done ? "done" : due.label}
-                  </span>
-                </label>
+                      <span
+                        className={cn(
+                          "shrink-0 font-mono text-sm tabular-nums",
+                          done ? "text-muted-foreground" : due.late ? "text-destructive" : "text-foreground",
+                        )}
+                      >
+                        {/* graded work shows its score, e.g. 18/20 */}
+                        {i.score != null ? scoreLabel(i.score, i.points) : done ? "done" : due.label}
+                      </span>
+                    </>,
+                  )}
+                </Row>
                 {/* always visible on touch; appears on hover/focus with a mouse */}
                 <button
                   type="button"
