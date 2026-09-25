@@ -277,7 +277,7 @@ export function Dashboard({
   };
 
   return (
-    <main className="@container flex w-full flex-col px-4 pt-5 pb-24 md:h-dvh md:overflow-y-auto md:px-6 md:pt-7 md:pb-6">
+    <main className="@container flex w-full flex-col px-4 pt-5 pb-24 md:h-dvh md:overflow-y-auto md:px-6 md:pt-7 md:pb-20">
       <header className="mb-6 flex flex-wrap items-start gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1 basis-72">
           <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
@@ -298,8 +298,14 @@ export function Dashboard({
             )}
           </p>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
+            {/* Late work is the one thing Home says first and loudest (calm by default, loud on purpose). */}
+            {overdue > 0 && (
+              <span className="flex items-center gap-1.5 font-medium text-destructive">
+                <span aria-hidden="true" className="size-2 rounded-full bg-destructive" />
+                {overdue} overdue
+              </span>
+            )}
             <span>{dueThisWeek === 0 ? "nothing due this week" : `${dueThisWeek} due this week`}</span>
-            {overdue > 0 && <span className="text-destructive">{overdue} overdue</span>}
             {nextExam && (
               <span>
                 {nextExam.course} exam in {examIn}d

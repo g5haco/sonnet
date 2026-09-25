@@ -181,7 +181,7 @@ export function FocusButton() {
       aria-expanded={open}
       title="Focus timer"
       className={cn(
-        "relative grid size-10 shrink-0 place-items-center rounded-full shadow-[0_6px_18px_rgb(0_0_0/0.18)] transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+        "relative grid size-10 max-md:size-11 shrink-0 place-items-center rounded-full shadow-[0_6px_18px_rgb(0_0_0/0.18)] transition-colors focus-visible:ring-2 focus-visible:ring-ring",
         open ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-accent",
       )}
     >

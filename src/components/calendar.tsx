@@ -170,7 +170,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
             onClick={() => go(-1)}
             aria-label={`Previous ${view}`}
             title="Previous (←)"
-            className="size-9 rounded-full"
+            className="size-9 rounded-full max-md:size-11"
           >
             <ChevronLeft />
           </Button>
@@ -179,7 +179,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
             onClick={() => go(1)}
             aria-label={`Next ${view}`}
             title="Next (→)"
-            className="size-9 rounded-full"
+            className="size-9 rounded-full max-md:size-11"
           >
             <ChevronRight />
           </Button>

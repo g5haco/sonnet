@@ -70,7 +70,7 @@ function MiniMonth({ view, anchor, days, items, now, onPick }: Props) {
             size="icon-sm"
             onClick={() => turn(-1)}
             aria-label="Previous month"
-            className="rounded-full"
+            className="rounded-full max-md:size-11"
           >
             <ChevronLeft />
           </Button>
@@ -79,7 +79,7 @@ function MiniMonth({ view, anchor, days, items, now, onPick }: Props) {
             size="icon-sm"
             onClick={() => turn(1)}
             aria-label="Next month"
-            className="rounded-full"
+            className="rounded-full max-md:size-11"
           >
             <ChevronRight />
           </Button>

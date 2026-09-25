@@ -19,7 +19,7 @@ import { UpNext, useWork } from "@/components/up-next";
 import { WorkView } from "@/components/work-view";
 import type { ClassMeeting, Term } from "@/lib/calendar";
 import { courseColor, gradeLabel, HUES, meetingLabel, needOnFinal, WEEKDAYS } from "@/lib/course";
-import { progress, type Item } from "@/lib/progress";
+import { endOfWeek, progress, type Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 // All courses as tilt cards. A card opens its course; the last tile adds one.
@@ -90,11 +90,12 @@ export function CourseView({
   const router = useRouter();
   const path = usePathname();
   const s = courseStats(shown, meetings, now);
-  const percent = term && progress(shown, new Date(`${term.start}T00:00:00`), term.weeks, new Date(now)).percent;
+  // 0 of 0 due isn't "100% done": show the percent only once something is due by Sunday
+  const percent = term && shown.some((i) => Date.parse(i.due) <= endOfWeek(now)) && progress(shown, new Date(`${term.start}T00:00:00`), term.weeks, new Date(now)).percent;
 
   return (
     <main className="@container mx-auto w-full max-w-6xl px-4 pt-5 pb-24 md:px-6 md:pt-7">
-      <Link href="/courses" className="font-mono text-xs text-muted-foreground hover:text-foreground">
+      <Link href="/courses" className="-my-3 inline-flex min-h-11 items-center font-mono text-xs text-muted-foreground hover:text-foreground">
         ← courses
       </Link>
       <header className="mt-3 mb-5 flex flex-wrap items-start gap-3">
@@ -104,7 +105,7 @@ export function CourseView({
           {course.name && <p className="text-sm text-muted-foreground">{course.name}</p>}
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
             {course.grade != null && <span>grade {gradeLabel(course.grade)}</span>}
-            {percent !== null && <span>{percent}% of work due by Sunday done</span>}
+            {typeof percent === "number" && <span>{percent}% of work due by Sunday done</span>}
             <span>{s.week === 0 ? "nothing due this week" : `${s.week} due this week`}</span>
             {s.late > 0 && <span className="text-destructive">{s.late} late</span>}
             {s.examIn && <span>exam in {s.examIn}d</span>}
@@ -152,7 +153,11 @@ export function CourseView({
             onToggle={toggle}
             onDelete={remove}
             onOpen={(i) => setOpenId(i.id)}
-            empty={`Nothing for ${course.code} yet. Add an assignment or exam with Add.`}
+            empty={
+              shown.length
+                ? `All done for ${course.code}. Nice.`
+                : `Nothing for ${course.code} yet. Add an assignment or exam with Add.`
+            }
           />
           {/* reads the live row from `shown`, so Mark as done / Undo updates here and in the list together */}
           <WorkView

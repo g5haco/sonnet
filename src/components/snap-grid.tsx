@@ -6,7 +6,7 @@ import { COLS, fits, ROWS, WIDGETS, type Layout, type Place, type WidgetId } fro
 import { cn } from "@/lib/utils";
 
 const GAP = 12; // px between cells
-const STACK = 760; // narrower than this (px), widgets stack in one column in layout order
+const STACK = 960; // narrower than this (px), widgets stack in one column in layout order
 const SPRING = { type: "spring", stiffness: 520, damping: 44 } as const; // critically damped: no bounce
 
 type Drag = { id: WidgetId; mode: "move" | "size"; startX: number; startY: number; dx: number; dy: number };
