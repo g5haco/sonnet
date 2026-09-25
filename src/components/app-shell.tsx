@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { addStep, type Chain } from "@/components/chat/thought-chain";
 import { FocusProvider } from "@/components/focus-timer";
-import { DEFAULT_ACTIONS, type ActionId } from "@/lib/home";
 
 type Course = { id: string; code: string; hue: number };
 
@@ -78,36 +77,17 @@ function slim(history: Pick<ChatMessage, "role" | "text" | "files">[]) {
   return turns;
 }
 
-// The sidebar's customizable action buttons, and whether they're being edited (Home's edit mode edits them).
-type SidebarActions = {
-  actions: ActionId[];
-  setActions: (a: ActionId[]) => void;
-  editing: boolean;
-  setEditing: (e: boolean) => void;
-};
-const ActionsContext = createContext<SidebarActions>({
-  actions: [],
-  setActions: () => {},
-  editing: false,
-  setEditing: () => {},
-});
-export const useSidebarActions = () => useContext(ActionsContext);
-
 export function AppShell({
   courses,
   schedule,
   account,
-  actions: savedActions = DEFAULT_ACTIONS,
   children,
 }: {
   courses: Course[];
   schedule: Schedule;
   account: Account;
-  actions?: ActionId[];
   children: React.ReactNode;
 }) {
-  const [actions, setActions] = useState(savedActions);
-  const [editingActions, setEditingActions] = useState(false);
   const [now] = useState(() => Date.now());
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
   const [due, setDue] = useState<string>();
@@ -358,11 +338,7 @@ export function AppShell({
           >
             <FocusProvider>
             <div className="flex min-h-dvh flex-col md:flex-row">
-              <ActionsContext.Provider
-                value={{ actions, setActions, editing: editingActions, setEditing: setEditingActions }}
-              >
               <Sidebar
-                onAsk={openAssistant}
                 onCreate={create}
                 onSettings={() => setSettings("account")}
                 onSync={() => {
@@ -372,7 +348,6 @@ export function AppShell({
                 syncFailed={account.canvas.lastSyncStatus === "error"}
               />
               <div className="min-w-0 flex-1">{children}</div>
-              </ActionsContext.Provider>
               {docked &&
                 !onChatPage &&
                 panel(

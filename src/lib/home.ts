@@ -80,8 +80,7 @@ export function freeSpot(layout: Layout, id: WidgetId): Place | null {
 // A saved layout (settings.home_layout) made safe to render: unknown widgets, repeats, and places that are off
 // the grid or overlap an earlier widget are dropped. Nothing saved, an older format, or nothing usable = the
 // default. An empty list is a real choice and stays empty.
-export function readLayout(saved: unknown): Layout {
-  const raw = (saved as { widgets?: unknown } | null)?.widgets ?? saved; // { widgets, actions }, or the older bare list
+export function readLayout(raw: unknown): Layout {
   if (!Array.isArray(raw)) return DEFAULT_LAYOUT;
   const layout: Layout = [];
   for (const saved of raw) {
@@ -92,18 +91,4 @@ export function readLayout(saved: unknown): Layout {
     if (fits(layout, place)) layout.push(place);
   }
   return raw.length && !layout.length ? DEFAULT_LAYOUT : layout;
-}
-
-// The sidebar's action buttons (the navigation links below them are fixed). Saved next to the widgets, as
-// settings.home_layout = { widgets, actions }.
-export const ACTIONS = ["create", "chat", "timer", "ask", "sync", "upload", "assignment", "exam"] as const;
-export type ActionId = (typeof ACTIONS)[number];
-export const DEFAULT_ACTIONS: ActionId[] = ["create", "chat", "timer"];
-
-// Saved actions made safe: unknown ones and repeats dropped. Nothing saved (or an older save without actions)
-// = the default row. An empty row is a real choice and stays empty.
-export function readActions(saved: unknown): ActionId[] {
-  const raw = (saved as { actions?: unknown } | null)?.actions;
-  if (!Array.isArray(raw)) return DEFAULT_ACTIONS;
-  return raw.filter((a, i): a is ActionId => ACTIONS.includes(a) && raw.indexOf(a) === i);
 }
