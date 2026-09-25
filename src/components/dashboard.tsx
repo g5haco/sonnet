@@ -10,6 +10,7 @@ import { Block } from "@/components/block";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
 import { Onboarding } from "@/components/onboarding";
+import { Tour } from "@/components/tour";
 import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
@@ -341,6 +342,7 @@ export function Dashboard({
           Home is empty. Press Edit to add widgets back.
         </p>
       )}
+      <Tour />
       {/* The widget library: every widget with a live preview (your real data). */}
       <Dialog open={adding} onOpenChange={setAdding}>
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">

@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createCourse, saveCanvasConnection, saveName, saveTerm, syncCanvasNow } from "@/app/actions";
 import { field, FormError, label } from "@/components/create-forms";
+import { TOUR_KEY } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +61,9 @@ export function Onboarding({ name: known = "" }: { name?: string }) {
         if (r.error) return setError(r.error);
         setCourses((all) => all.slice(1)); // saved: a retry won't add it twice
       }
+      try {
+        localStorage.setItem(TOUR_KEY, "1"); // Home plays the feature tour once
+      } catch {}
       const r = await saveTerm(form({ start, weeks }));
       if (r.error) return setError(r.error);
       if (!onCanvas) return;
