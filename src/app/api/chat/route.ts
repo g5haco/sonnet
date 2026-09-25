@@ -59,6 +59,8 @@ export async function POST(request: Request) {
   const item = typeof body?.item === "string" && /^[0-9a-f-]{36}$/i.test(body.item) ? body.item : undefined;
   // A greeting or a thanks needs no course data (and gets no "Reading your courses" step).
   const light = smallTalk(typedPart(turns.at(-1)!.content)) && !turns.at(-1)!.images?.length && !item;
-  const context = light ? lightContext(timeZone) : await studentContext(supabase, timeZone, focus, item);
+  const context = light
+    ? lightContext(timeZone)
+    : await studentContext(supabase, timeZone, focus, item, body?.syllabus === true);
   return streamReply(context, turns, think, body?.think === true, search);
 }

@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { ArrowUp, FileText, Globe, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
+import { ArrowUp, BookOpenText, FileText, Globe, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -81,8 +81,29 @@ export function ChatInput({
   const still = useReducedMotion();
   const dictation = useDictationSupported();
   const mic = useMicrophone();
-  const { item, detach } = useAssistant(); // an "Ask about this" chat's assignment, shown as a chip
-  const Chip = item?.courseId ? "button" : "span"; // opens the assignment when it knows where it lives
+  // What the chat is attached to, shown as a chip: an assignment ("Ask about this") or a syllabus ("Ask about it").
+  const { item, detach, syllabus, detachSyllabus, courses } = useAssistant();
+  const syllabusCourse = !item ? courses.find((c) => c.code === syllabus) : undefined;
+  const attached = item
+    ? {
+        title: item.title,
+        course: item.course,
+        hue: item.hue,
+        icon: FileText,
+        href: item.courseId && `/courses/${item.courseId}?item=${item.id}`,
+        open: "Open the assignment",
+        remove: detach,
+      }
+    : syllabusCourse && {
+        title: "Syllabus",
+        course: syllabusCourse.code,
+        hue: syllabusCourse.hue,
+        icon: BookOpenText,
+        href: `/courses/${syllabusCourse.id}?summary=1`,
+        open: "Open the syllabus summary",
+        remove: detachSyllabus,
+      };
+  const Chip = attached && attached.href ? "button" : "span"; // opens what it names when it knows where that is
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
@@ -241,33 +262,33 @@ export function ChatInput({
             void attach([...e.dataTransfer.files]);
           }}
         >
-          {item && (
+          {attached && (
             <div className="flex px-3 pt-3 text-xs">
               <span className="flex max-w-full min-w-0 items-center gap-1 rounded-full bg-background py-1 pr-1 pl-2.5">
                 <Chip
-                  {...(item.courseId && {
+                  {...(attached.href && {
                     type: "button" as const,
-                    title: "Open the assignment",
+                    title: attached.open,
                     onClick: (e: React.MouseEvent) => {
                       e.stopPropagation();
-                      router.push(`/courses/${item.courseId}?item=${item.id}`);
+                      router.push(attached.href as string);
                     },
                   })}
                   className="flex min-w-0 items-center gap-1.5 rounded-full focus-visible:ring-2 focus-visible:ring-ring [button&]:hover:text-foreground"
                 >
-                  <FileText className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  <span className="truncate font-medium">{item.title}</span>
+                  <attached.icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  <span className="truncate font-medium">{attached.title}</span>
                   <span className="flex shrink-0 items-center gap-1 font-mono text-muted-foreground">
-                    <span className="size-1.5 rounded-full" style={{ background: courseColor(item.hue) }} />
-                    {item.course}
+                    <span className="size-1.5 rounded-full" style={{ background: courseColor(attached.hue) }} />
+                    {attached.course}
                   </span>
                 </Chip>
                 <button
                   type="button"
-                  aria-label={`Stop asking about ${item.title}`}
+                  aria-label={`Stop asking about ${attached.title === "Syllabus" ? `the ${attached.course} syllabus` : attached.title}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    detach();
+                    attached.remove();
                   }}
                   className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 >

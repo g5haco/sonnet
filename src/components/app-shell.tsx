@@ -2,7 +2,7 @@
 
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -52,6 +52,9 @@ type Assistant = {
   item: Item | null; // the assignment an "Ask about this" chat is about (its chip)
   detach: () => void; // remove the chip: it becomes a normal chat
   askAbout: (item: Item) => Promise<void>; // "Ask about this": back to that assignment's chat, or a new one
+  syllabus: string; // course code whose syllabus the chat is about ("Ask about it"), shown as a chip; "" = none
+  askSyllabus: (course: string) => void;
+  detachSyllabus: () => void;
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
 // Any page can open the floating Settings window (e.g. the calendar's "set your semester dates"), closing Sync if open.
@@ -109,6 +112,8 @@ export function AppShell({
   const dirty = useRef(false); // changed since the last save
   const [focus, setFocus] = useState("");
   const [itemId, setItemId] = useState<string | null>(null);
+  const [syllabus, setSyllabus] = useState(""); // not saved: a reopened chat keeps its course focus, not the chip
+  const router = useRouter();
   const item = schedule.items.find((i) => i.id === itemId) ?? null;
   const path = usePathname();
 
@@ -177,6 +182,7 @@ export function AppShell({
           search,
           focus: (course ?? focus) || undefined,
           item: item?.id, // every message, so the assistant always has the assignment's details
+          syllabus: !!syllabus && syllabus === (course ?? focus),
           messages: slim(history),
         }),
         signal: ctrl.signal,
@@ -266,6 +272,7 @@ export function AppShell({
     setMessages([]);
     setChatId(null);
     setItemId(null);
+    setSyllabus("");
   };
   const detach = () => {
     dirty.current = true; // saved without the link, so "Ask about this" starts fresh next time
@@ -274,7 +281,13 @@ export function AppShell({
   // Another course means another subject: the assignment chip goes.
   const changeFocus = (code: string) => {
     if (item && code !== item.course) detach();
+    if (code !== syllabus) setSyllabus("");
     setFocus(code);
+  };
+  // The syllabus chip is the course focus made visible: removing it drops the focus too.
+  const detachSyllabus = () => {
+    setSyllabus("");
+    setFocus("");
   };
 
   // Save once an answer (or a yes/no) settles. Streaming states and in-flight saves aren't stored.
@@ -307,6 +320,7 @@ export function AppShell({
     setMessages(loaded);
     setFocus(r.chat.focus);
     setItemId(r.chat.item_id ?? null);
+    setSyllabus("");
     setChatId(id);
     return true;
   };
@@ -318,7 +332,14 @@ export function AppShell({
     }
     setFocus(i.course); // the course's syllabus and materials come along, as with "Ask about it"
     setItemId(i.id);
-    openAssistant();
+    setSyllabus("");
+    router.push("/chat"); // the full chat page, not the side panel
+  };
+  const askSyllabus = (course: string) => {
+    clear(); // a fresh chat about this course's syllabus, not a switch mid-conversation
+    setFocus(course); // the chat reads the course's syllabus and materials in full
+    setSyllabus(course);
+    router.push("/chat");
   };
 
   // ⌘K / Ctrl+K: straight to the assistant from anywhere. Escape closes the sheet.
@@ -379,6 +400,9 @@ export function AppShell({
               item,
               detach,
               askAbout,
+              syllabus,
+              askSyllabus,
+              detachSyllabus,
             }}
           >
             <FocusProvider>

@@ -318,7 +318,13 @@ export function lightContext(timeZone: string) {
 
 // Everything the assistant knows, rendered as plain text in the student's timezone.
 // item: "Ask about this" (a work item id); its full details go in, and canned due-lists step aside.
-export async function studentContext(supabase: SupabaseClient, timeZone: string, focus?: string, item?: string) {
+export async function studentContext(
+  supabase: SupabaseClient,
+  timeZone: string,
+  focus?: string,
+  item?: string,
+  syllabus = false, // "Ask about it" on the syllabus card
+) {
   const [settings, courses, items, meetings, materials, one] = await Promise.all([
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
@@ -452,7 +458,11 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
           : `Semester: started ${term.term_start}, week ${g.week} of ${term.term_weeks}.`,
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code) + (c.grade != null ? `, current grade ${gradeLabel(c.grade)}` : "")).join("; ") || "none yet"}.`,
     ...((courses.data ?? []).some((c) => c.code === focus)
-      ? [`This chat is about ${focus}: answer for that course unless the student asks about something else.`]
+      ? [
+          syllabus
+            ? `This chat is about ${focus}'s syllabus: answer from its text below and say when the syllabus doesn't cover something.`
+            : `This chat is about ${focus}: answer for that course unless the student asks about something else.`,
+        ]
       : []),
     ...(attached ? [itemContext(attached, code.get(attached.course_id) ?? "?", timeZone)] : []),
     "Weekly class times (local):",
