@@ -57,7 +57,7 @@ Nothing half-built. Follow-ups:
 
 Confirmed:
 - Impeccable still flags `layout-transition` from Sonner's own toast CSS (`[data-sonner-toast]` transitions height); left alone (library behavior).
-- Contrast: `widgets.tsx:105-106` class blocks (`text-black/80` and `/60` on course color) fall below 4.5:1 in light mode on some hues (pre-existing); light `--warning-fill` is 2.28:1 on card (unused so far). Work mix exam/quiz colors are hard-coded kind colors with no approved token.
+- Contrast: light `--warning-fill` is 2.28:1 on card (unused so far). Work mix exam/quiz colors are hard-coded kind colors with no approved token.
 - Local `next build` fails on the untracked `login/course-preview` (useSearchParams without Suspense); tracked code builds.
 - Free AI models are unreliable (429/503); Nemotron slow on long answers.
 - Canvas URL checks are https-only; an https URL to a private IP isn't blocked (low risk on Vercel).
