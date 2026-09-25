@@ -95,7 +95,7 @@ export function WorkView({
   return (
     <Dialog open={!!current} onOpenChange={(open) => !open && onClose()}>
       {/* Big like a page: details on the left, the description scrolls on the right (stacked on phones). */}
-      <DialogContent className="max-h-[90dvh] gap-0 overflow-y-auto rounded-2xl p-0 sm:max-w-5xl md:h-[88dvh] md:grid-cols-[17rem_1fr] md:overflow-hidden">
+      <DialogContent className="max-h-[92dvh] gap-0 overflow-y-auto rounded-2xl p-0 sm:max-w-[max(62vw,min(76rem,calc(100vw-4rem)))] md:h-[92dvh] md:grid-cols-[19rem_1fr] md:overflow-hidden">
         {item && (
           <>
             <div className="flex flex-col gap-4 p-5 md:overflow-y-auto md:border-r md:border-border md:p-6">
@@ -143,7 +143,7 @@ export function WorkView({
             </div>
 
             <div className="flex min-h-0 flex-col gap-4 px-5 pb-6 md:overflow-y-auto md:px-10 md:py-8">
-              <div className="flex max-w-prose flex-col gap-4">
+              <div className="flex max-w-[75ch] flex-col gap-4">
                 {d === undefined ? (
                   <p className="text-sm text-muted-foreground">Loading details…</p>
                 ) : (
