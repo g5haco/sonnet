@@ -167,13 +167,14 @@ export function Dashboard({
         {courses.length === 0 ? (
           <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
         ) : (
-          <ul className="-my-2 grid divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
+          <ul className="-my-2 grid min-w-0 divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
             {courses.map((c) => (
               <li key={c.id} className="flex items-center gap-3 py-2">
                 <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
-                <span className="min-w-0 flex-1 truncate text-sm">
-                  <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
-                  {c.name && <span className="ml-2">{c.name}</span>}
+                {/* Narrow (side column): just the code, bigger. Wide: code and name. */}
+                <span className="min-w-0 flex-1 truncate font-mono text-sm @md:text-xs @md:text-muted-foreground">
+                  {c.code}
+                  {c.name && <span className="ml-2 hidden font-sans text-sm text-foreground @md:inline">{c.name}</span>}
                 </span>
                 <span
                   className={cn("font-mono tabular-nums", c.grade == null && "text-muted-foreground")}

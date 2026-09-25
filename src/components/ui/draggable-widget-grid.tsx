@@ -488,7 +488,7 @@ function Widget({
       <div
         inert={editable}
         className={cn(
-          "flex h-full w-full flex-col overflow-hidden rounded-[var(--widget-radius)] transition-[opacity,box-shadow] duration-300 *:min-h-0 *:flex-1 *:overflow-y-auto *:[scrollbar-color:var(--border)_transparent] *:[scrollbar-width:thin]",
+          "flex h-full w-full flex-col overflow-hidden rounded-[var(--widget-radius)] transition-[opacity,box-shadow] duration-300 *:min-h-0 *:flex-1 *:overflow-x-hidden *:overflow-y-auto *:[scrollbar-color:var(--border)_transparent] *:[scrollbar-width:thin]",
           editable && "opacity-60",
           landed && "ring-2 ring-foreground/30",
         )}
