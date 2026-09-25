@@ -2,13 +2,6 @@
 
 import {
   ArrowLeftRight,
-  BookOpen,
-  CalendarClock,
-  CalendarDays,
-  ChartNoAxesColumn,
-  Grid3x3,
-  GraduationCap,
-  ListTodo,
   Plus,
   RotateCcw,
   X,
@@ -29,8 +22,8 @@ import { WeekStrip } from "@/components/week-strip";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
-import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DraggableWidgetGrid, type WidgetItem } from "@/components/ui/draggable-widget-grid";
 import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
@@ -39,15 +32,6 @@ import { endOfWeek, progress, type Item } from "@/lib/progress";
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
-const ICONS: Record<WidgetId, typeof Plus> = {
-  progress: ChartNoAxesColumn,
-  next: ListTodo,
-  exam: CalendarClock,
-  week: CalendarDays,
-  courses: BookOpen,
-  grades: GraduationCap,
-  focus: Grid3x3,
-};
 
 export function Dashboard({
   term,
@@ -191,9 +175,10 @@ export function Dashboard({
     focus: <FocusBlock sessions={sessions} now={now} />,
   };
   const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
-  const missing: MenuItem<WidgetId>[] = (Object.keys(WIDGETS) as WidgetId[])
-    .filter((id) => !layout.some((w) => w.id === id))
-    .map((id) => ({ kind: id, label: WIDGETS[id], icon: ICONS[id] }));
+  const add = (id: WidgetId, size: "wide" | "sm") => {
+    setLayout((l) => [...l, { id, size }]);
+    setAdding(false);
+  };
 
   const finish = () => {
     setEditing(false);
@@ -249,16 +234,15 @@ export function Dashboard({
                 <RotateCcw aria-hidden="true" />
                 Reset
               </Button>
-              {missing.length > 0 && (
-                <GooeyMenu
-                  direction="down"
-                  label="Add widget"
-                  items={missing}
-                  open={adding}
-                  onOpenChange={setAdding}
-                  onPick={(id) => setLayout((l) => [...l, { id, size: DEFAULT_LAYOUT.find((w) => w.id === id)!.size }])}
-                />
-              )}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setAdding(true)}
+                className="h-10 gap-2 rounded-full px-4"
+              >
+                <Plus aria-hidden="true" />
+                Add widget
+              </Button>
               <Button id="home-done" type="button" onClick={finish} className="h-10 rounded-full px-5 active:scale-[0.97]">
                 Done
               </Button>
@@ -328,6 +312,49 @@ export function Dashboard({
           Home is empty. Press Edit to add widgets back.
         </p>
       )}
+      {/* The widget library: every widget with a live preview (your real data), added to either column. */}
+      <Dialog open={adding} onOpenChange={setAdding}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Widgets</DialogTitle>
+            <DialogDescription>Previews use your real data. Add one to the main or side column.</DialogDescription>
+          </DialogHeader>
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {(Object.keys(WIDGETS) as WidgetId[]).map((id) => {
+              const on = layout.some((w) => w.id === id);
+              return (
+                <li key={id} className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3">
+                  {/* A side-column-width render, shrunk to fit and cut off at the bottom. */}
+                  <div aria-hidden="true" inert className="h-44 overflow-hidden rounded-xl">
+                    <div className="w-80 origin-top-left scale-[0.75]">{view[id]}</div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="mr-auto text-sm font-medium">{WIDGETS[id]}</span>
+                    {on ? (
+                      <span className="font-mono text-xs text-muted-foreground">on Home</span>
+                    ) : (
+                      <>
+                        <Button type="button" size="sm" onClick={() => add(id, "wide")} className="h-8 rounded-full px-3">
+                          Main
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => add(id, "sm")}
+                          className="h-8 rounded-full px-3"
+                        >
+                          Side
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
