@@ -39,8 +39,8 @@ export type WidgetId = keyof typeof WIDGETS;
 export type Place = { id: WidgetId; x: number; y: number; w: number; h: number };
 export type Layout = Place[];
 
-export const minW = (id: WidgetId) => (WIDGETS[id] as Spec).minW ?? 2;
-export const minH = (id: WidgetId) => (WIDGETS[id] as Spec).minH ?? 1;
+const minW = (id: WidgetId) => (WIDGETS[id] as Spec).minW ?? 2;
+const minH = (id: WidgetId) => (WIDGETS[id] as Spec).minH ?? 1;
 
 // The original Home's widgets, filling the grid.
 export const DEFAULT_LAYOUT: Layout = [

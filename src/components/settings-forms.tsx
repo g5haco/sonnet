@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 // Reset-all-data animation pulls in matter-js; load it only when Settings opens.
 const DoubtButton = dynamic(() => import("@/components/evil-buttons/doubt-button"));
 
-export function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
+function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
   const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Semester saved."));
   return (
     <form autoComplete="off" action={submit} className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end sm:gap-3">
@@ -43,7 +43,7 @@ export function SemesterForm({ start, weeks }: { start: string; weeks: number })
 }
 
 // What Home calls you ("Morning, Eric.").
-export function NameForm({ name }: { name: string }) {
+function NameForm({ name }: { name: string }) {
   const { pending, error, submit } = useSubmit(saveName, () => toast.success("Saved. Say hi on Home."));
   return (
     <form autoComplete="off" action={submit} className="flex flex-col gap-2">
@@ -102,7 +102,7 @@ function Mini({ paint, className }: { paint: (typeof PAINT)["light"]; className?
 }
 
 // Light / Dark / System as real radio buttons, drawn as little previews of the app.
-export function ThemePicker() {
+function ThemePicker() {
   const { theme, setTheme } = useTheme();
   const current = theme ?? "system";
   return (
@@ -409,7 +409,7 @@ function ResetData({ onDone }: { onDone: () => void }) {
   );
 }
 
-export function SignOut() {
+function SignOut() {
   const [pending, start] = useTransition();
   return (
     <Button

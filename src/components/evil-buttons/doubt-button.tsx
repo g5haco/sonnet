@@ -7,7 +7,7 @@ import { useAshBurst } from "@/components/evil-buttons/ash-burst-button";
 
 type DoubtState = "idle" | "doubting" | "success";
 
-export interface DoubtButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
+interface DoubtButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
   /** Label shown before any doubt has been cast. Falls back to `label`. */
   children?: React.ReactNode;
   /** Label shown in the idle state when no children are provided. */
@@ -75,7 +75,7 @@ const labelVariants: Variants = {
   exit: { y: -8, opacity: 0 },
 };
 
-export const DoubtButton = React.forwardRef<HTMLButtonElement, DoubtButtonProps>(
+const DoubtButton = React.forwardRef<HTMLButtonElement, DoubtButtonProps>(
   (
     {
       children,

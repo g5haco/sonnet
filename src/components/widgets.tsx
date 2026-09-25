@@ -10,7 +10,7 @@ import { WeekStrip } from "@/components/week-strip";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { FocusDial, useFocus } from "@/components/focus-timer";
 import { motion, useReducedMotion } from "motion/react";
-import { sessions, startOfDay, type Term } from "@/lib/calendar";
+import { addDays, sessions, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey } from "@/lib/course";
 import { streak, studyDays, type FocusSession } from "@/lib/focus";
 import type { Item } from "@/lib/progress";
@@ -152,7 +152,7 @@ export function CalendarWidget({ items, now, w, h }: { items: Item[]; now: numbe
   const start = new Date(first);
   start.setDate(1 - ((first.getDay() + 6) % 7)); // back to Monday
   const weeks = Math.ceil((((first.getDay() + 6) % 7) + new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()) / 7);
-  const days = Array.from({ length: weeks * 7 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+  const days = Array.from({ length: weeks * 7 }, (_, i) => addDays(start, i));
   return (
     <Block title={today.toLocaleDateString(undefined, { month: "long" })} aside={link}>
       {/* The weeks share the widget's height. */}

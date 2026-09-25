@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { typedPart } from "./attach";
 import { gradeLabel, meetingLabel } from "./course";
+import { termGlance } from "./term";
 
 // Any OpenAI-compatible provider works; switching is config, not code.
 // Everyday asks (adding work, syllabus summaries, questions about the schedule) go to free models:
@@ -356,12 +357,18 @@ export async function studentContext(supabase: SupabaseClient, timeZone: string,
   const names = [...open.map((i) => i.title), ...(courses.data ?? []).flatMap((c) => [c.code, c.name ?? ""])];
 
   const term = settings.data;
-  const week = term && Math.floor((now - Date.parse(`${term.term_start}T00:00:00`)) / (7 * 864e5)) + 1;
+  const g = term && termGlance({ start: term.term_start, weeks: term.term_weeks }, new Date(today)); // today = local date, noon UTC
 
   const text = [
     `Now: ${fmt(new Date(now).toISOString(), { dateStyle: "full", timeStyle: "short" })} (${timeZone}).`,
     ...calendarLines(now, timeZone),
-    term ? `Semester: started ${term.term_start}, week ${week} of ${term.term_weeks}.` : "Semester dates: not set.",
+    !term || !g
+      ? "Semester dates: not set."
+      : g.phase === "upcoming"
+        ? `Semester: starts ${term.term_start} (${term.term_weeks} weeks).`
+        : g.phase === "finished"
+          ? `Semester: started ${term.term_start}, ended after ${term.term_weeks} weeks.`
+          : `Semester: started ${term.term_start}, week ${g.week} of ${term.term_weeks}.`,
     `Courses: ${(courses.data ?? []).map((c) => (c.name ? `${c.code} (${c.name})` : c.code) + (c.grade != null ? `, current grade ${gradeLabel(c.grade)}` : "")).join("; ") || "none yet"}.`,
     ...((courses.data ?? []).some((c) => c.code === focus)
       ? [`This chat is about ${focus}: answer for that course unless the student asks about something else.`]

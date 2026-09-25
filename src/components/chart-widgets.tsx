@@ -8,7 +8,7 @@ import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Fit } from "@/components/fit";
 import { when } from "@/components/up-next";
-import { sessions as classSessions, startOfDay, type Term } from "@/lib/calendar";
+import { addDays, sessions as classSessions, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey, gradeLabel } from "@/lib/course";
 import type { FocusSession } from "@/lib/focus";
 import { endOfWeek, type Item } from "@/lib/progress";
@@ -256,7 +256,7 @@ export function SpotlightWidget({
     .filter((i) => i.courseId === course.id && !i.doneAt && Date.parse(i.due) > now)
     .sort((a, b) => a.due.localeCompare(b.due))[0];
   const t0 = new Date(now);
-  const days = Array.from({ length: 7 }, (_, k) => new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + k));
+  const days = Array.from({ length: 7 }, (_, k) => addDays(startOfDay(t0), k));
   const cls = classSessions(
     meetings.filter((m) => m.courseId === course.id),
     days,
@@ -294,7 +294,7 @@ const SHADES = ["bg-foreground/[0.06]", "bg-done/35", "bg-done/55", "bg-done/80"
 // When you actually study: focus minutes by hour of day over the last 7 days.
 export function HoursWidget({ sessions, now }: { sessions: FocusSession[]; now: number }) {
   const today = startOfDay(new Date(now));
-  const days = Array.from({ length: 7 }, (_, k) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + k));
+  const days = Array.from({ length: 7 }, (_, k) => addDays(today, k - 6));
   const grid = new Map<string, number>(); // "day|hour" -> minutes
   for (const s of sessions) {
     const start = Date.parse(s.started_at);
@@ -342,7 +342,7 @@ export function HoursWidget({ sessions, now }: { sessions: FocusSession[]; now: 
 // Open work due per day for the next 14 days: heavy days stand out before they arrive.
 export function LoadWidget({ items, now }: { items: Item[]; now: number }) {
   const today = startOfDay(new Date(now));
-  const days = Array.from({ length: 14 }, (_, k) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + k));
+  const days = Array.from({ length: 14 }, (_, k) => addDays(today, k));
   const counts = days.map((d) => items.filter((i) => !i.doneAt && dayKey(new Date(i.due)) === dayKey(d)).length);
   const max = Math.max(1, ...counts);
   const total = counts.reduce((a, b) => a + b, 0);

@@ -15,6 +15,7 @@ import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { courseColor, gradeLabel } from "@/lib/course";
+import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 import { Fit } from "@/components/fit";
 import { FocusBlock } from "@/components/focus";
@@ -99,7 +100,7 @@ export function Dashboard({
 
   const date = new Date(now);
   const today = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-  const week = Math.min(Math.max(Math.floor((now - termStart.getTime()) / (7 * 864e5)) + 1, 1), term.weeks);
+  const week = Math.min(Math.max(termGlance(term, date).week, 1), term.weeks);
   const hour = date.getHours();
   // A few ways to say hello per time of day, one per date (so it doesn't change on every visit), with your name.
   const n = name.trim().split(/\s+/)[0];
