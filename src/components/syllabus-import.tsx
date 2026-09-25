@@ -3,8 +3,9 @@
 import { CalendarPlus, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { importSyllabus, readSyllabus } from "@/app/actions";
+import { importSyllabus, type readSyllabus } from "@/app/actions";
 import { FormError } from "@/components/create-forms";
+import { slow, useTasks } from "@/components/tasks";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +13,10 @@ import type { Draft, Kind } from "@/lib/syllabus";
 import { cn } from "@/lib/utils";
 
 type Row = Draft & { key: number; on: boolean };
+
+// One reading per file per visit: closing the window mid-read and opening it again (or from the corner card)
+// joins the same request instead of starting another free-model call. Cleared once the dates are added.
+const readings = new Map<string, ReturnType<typeof readSyllabus>>();
 const KINDS: Kind[] = ["assignment", "exam", "quiz", "reading"];
 const cell =
   "h-9 min-w-0 rounded-lg bg-background px-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -20,17 +25,19 @@ const cell =
 // "Add". Rows without a date (the syllabus was vague) stay unticked until the student gives them one.
 export function SyllabusImport({
   material,
+  courseId,
   onClose,
   sample,
 }: {
   material: { id: string; name: string } | null;
+  courseId?: string; // where the corner card leads back to
   onClose: () => void;
   sample?: { items: Draft[]; course: string }; // a finished reading, for local previews (no model call)
 }) {
   return (
     <Dialog open={material !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-3xl">
-        {material && <Review key={material.id} material={material} onClose={onClose} sample={sample} />}
+        {material && <Review key={material.id} material={material} courseId={courseId} onClose={onClose} sample={sample} />}
       </DialogContent>
     </Dialog>
   );
@@ -38,10 +45,12 @@ export function SyllabusImport({
 
 function Review({
   material,
+  courseId,
   onClose,
   sample,
 }: {
   material: { id: string; name: string };
+  courseId?: string;
   onClose: () => void;
   sample?: { items: Draft[]; course: string };
 }) {
@@ -53,11 +62,27 @@ function Review({
   const [reading, startRead] = useTransition();
   const [saving, startSave] = useTransition();
 
+  const track = useTasks();
   const read = () =>
     startRead(async () => {
       setError("");
-      const r = await readSyllabus(material.id, Intl.DateTimeFormat().resolvedOptions().timeZone);
-      if (r.error) return setError(r.error);
+      let reading = readings.get(material.id);
+      if (!reading) {
+        reading = track(
+          "Finding dates in the syllabus",
+          () => slow("readSyllabus", material.id, Intl.DateTimeFormat().resolvedOptions().timeZone),
+          (r) => ({
+            note: `${r.items?.length ?? 0} found. Click to review.`,
+            href: courseId && `/courses/${courseId}?dates=${material.id}`,
+          }),
+        );
+        readings.set(material.id, reading);
+      }
+      const r = await reading;
+      if (r.error) {
+        readings.delete(material.id); // "Try again" makes a fresh request
+        return setError(r.error);
+      }
       setCourse(r.course ?? "");
       setKnown(r.known ?? 0);
       setRows(toRows(r.items ?? []));
@@ -86,6 +111,7 @@ function Review({
         })),
       );
       if (r.error) return setError(r.error);
+      readings.delete(material.id);
       toast.success(
         `Added ${r.added} to ${course}.` +
           (r.skipped ? ` ${r.skipped} ${r.skipped === 1 ? "was" : "were"} already there.` : ""),

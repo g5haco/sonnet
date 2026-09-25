@@ -152,7 +152,7 @@ export function WorkView({
                       (d.source === "canvas" ? (
                         <CanvasHtml html={d.description} base={link ?? undefined} />
                       ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-pretty [overflow-wrap:anywhere]">
+                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-pretty [overflow-wrap:anywhere]">
                           {d.description}
                         </p>
                       ))}

@@ -4,7 +4,8 @@ import { CalendarSync, ChevronDown, Cloud, Copy, ExternalLink, RefreshCw } from 
 import { AnimatePresence, motion } from "motion/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { disconnectCanvas, resetFeed, saveCanvasConnection, syncCanvasNow } from "@/app/actions";
+import { disconnectCanvas, resetFeed, saveCanvasConnection } from "@/app/actions";
+import { slow, useTasks } from "@/components/tasks";
 import { useOpenSettings } from "@/components/app-shell";
 import { field, FormError, label, useSubmit } from "@/components/create-forms";
 import type { Account } from "@/components/settings-forms";
@@ -117,16 +118,22 @@ function NeedsSemester({ what, className }: { what: string; className?: string }
   );
 }
 
+// The sync in flight, if any: reopening the window mid-sync shows it as syncing instead of allowing a second one.
+let running: Promise<unknown> | null = null;
+
 function CanvasService({ connection, hasTerm }: { connection: Account["canvas"]; hasTerm: boolean }) {
   const connected = connection.tokenConnected || Boolean(connection.icsUrl);
   const [editing, setEditing] = useState(false);
   const [pending, startSync] = useTransition();
-  const syncing = pending || connection.lastSyncStatus === "syncing"; // this tab's click, or the server's run
+  const track = useTasks();
+  const syncing = pending || !!running || connection.lastSyncStatus === "syncing"; // this tab's click, or the server's run
+  // Runs in the corner too, so the window can close mid-sync.
   const sync = () =>
     startSync(async () => {
-      const result = await syncCanvasNow();
-      if (result.error) toast.error(result.error);
-      else toast.success(`Canvas synced ${result.count ?? 0} item${result.count === 1 ? "" : "s"}.`);
+      running ??= track("Syncing Canvas", () => slow("syncCanvasNow"), (r) => ({
+        note: `${r.count ?? 0} item${r.count === 1 ? "" : "s"} up to date.`,
+      })).finally(() => (running = null));
+      await running;
     });
   const failed = connection.lastSyncStatus === "error" || Boolean(connection.lastSyncError);
   const status =

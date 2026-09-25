@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { addStep, type Chain } from "@/components/chat/thought-chain";
 import { FocusProvider } from "@/components/focus-timer";
+import { TasksProvider } from "@/components/tasks";
 
 type Course = { id: string; code: string; hue: number };
 
@@ -345,6 +346,7 @@ export function AppShell({
             }}
           >
             <FocusProvider>
+            <TasksProvider>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <Sidebar
                 onCreate={create}
@@ -434,6 +436,7 @@ export function AppShell({
               course={pick}
               onOpenChange={(o) => !o && setDialog(null)}
             />
+            </TasksProvider>
             </FocusProvider>
           </AssistantContext.Provider>
         </SettingsContext.Provider>

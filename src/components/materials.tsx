@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   BookOpenText,
   CalendarPlus,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { addMaterial, deleteMaterial, summarizeSyllabus } from "@/app/actions";
+import { addMaterial, deleteMaterial } from "@/app/actions";
 import { useAssistant, useCreate } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { field, FormError } from "@/components/create-forms";
@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { courseColor } from "@/lib/course";
 import { SyllabusImport } from "@/components/syllabus-import";
 import { SummaryDialog } from "@/components/syllabus-summary";
+import { slow, useTasks } from "@/components/tasks";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -64,23 +65,32 @@ type Sent = { key: string; name: string; state: "uploading" | "done" | "error" }
 // so each shows its own state.
 function useUpload() {
   const [sent, setSent] = useState<Sent[]>([]);
+  const track = useTasks();
   // asSyllabus: named "Syllabus · …" so the assistant keeps it in every chat (it finds syllabi by name)
   const upload = async (course: string, files: File[], asSyllabus = false) => {
+    if (!files.length) return [];
+    // Reading text out of a file (photos get transcribed) can be slow: it runs in the corner too.
+    const r = await track(
+      files.length === 1 ? `Uploading ${files[0].name}` : `Uploading ${files.length} files`,
+      () => send(course, files, asSyllabus),
+      (r) => ({ note: r.added.length === files.length ? "Added." : `${r.added.length} of ${files.length} added.` }),
+    );
+    return r.added ?? [];
+  };
+  const send = async (course: string, files: File[], asSyllabus: boolean) => {
     const added: { id: string; name: string; readable: boolean }[] = [];
+    const failed: string[] = []; // reported once, on the corner card
     const supabase = createClient();
     const { data } = await supabase.auth.getClaims();
     const uid = data?.claims.sub;
-    if (!uid) {
-      toast.error("Sign in again to upload.");
-      return added;
-    }
+    if (!uid) return { added, error: "Sign in again to upload." };
     for (const file of files) {
       const key = crypto.randomUUID();
       const mark = (state: Sent["state"]) => setSent((s) => s.map((x) => (x.key === key ? { ...x, state } : x)));
       setSent((s) => [...s, { key, name: file.name, state: "uploading" }]);
       if (file.size > MAX) {
         mark("error");
-        toast.error(`${file.name} is over 50 MB.`);
+        failed.push(`${file.name} is over 50 MB.`);
         continue;
       }
       // Storage keys: stick to safe characters; the real name is kept in the row.
@@ -88,7 +98,7 @@ function useUpload() {
       const put = await supabase.storage.from("materials").upload(path, file, { contentType: file.type });
       const r = put.error
         ? { error: `Couldn't upload ${file.name}. ${put.error.message}` }
-        : await addMaterial({
+        : await slow("addMaterial", {
             course,
             kind: "file",
             name: asSyllabus && !/syllabus/i.test(file.name) ? `Syllabus · ${file.name}` : file.name,
@@ -99,10 +109,10 @@ function useUpload() {
               file.type || (/\.md$/i.test(file.name) ? "text/markdown" : /\.txt$/i.test(file.name) ? "text/plain" : ""),
           });
       mark(r.error ? "error" : "done");
-      if (r.error) toast.error(r.error);
+      if (r.error) failed.push(r.error);
       else if ("id" in r && r.id) added.push({ id: r.id, name: file.name, readable: !!r.readable });
     }
-    return added;
+    return { added, error: failed.join(" ") || undefined };
   };
   return { sent, upload };
 }
@@ -351,11 +361,22 @@ export function Materials({ course, materials }: { course: { id: string; code: s
     error: "",
     body: null,
   });
+  const track = useTasks();
   const summarize = async (id: string) => {
     setSummary({ open: true, loading: true, error: "", body: null });
-    const r = await summarizeSyllabus(id);
-    setSummary({ open: true, loading: false, error: r.error ?? "", body: r.body ?? null });
+    const r = await track(`Summarizing the ${course.code} syllabus`, () => slow("summarizeSyllabus", id), () => ({
+      note: "Ready. Click to open.",
+      href: `/courses/${course.id}?summary=1`,
+    }));
+    // s.open: if the window was closed meanwhile, it stays closed (the corner card says it's ready)
+    setSummary((s) => ({ open: s.open, loading: false, error: r.error ?? "", body: r.body ?? null }));
   };
+  // Arriving from a corner card: ?summary=1 opens the saved summary, ?dates=<file> the dates review.
+  const params = useSearchParams();
+  const path = usePathname();
+  const fromCard = params.get("summary") === "1" && summaryNote;
+  const datesFile = materials.find((m) => m.id === params.get("dates"));
+  const clearLink = () => (params.has("summary") || params.has("dates")) && router.replace(path, { scroll: false });
   const addSyllabus = async (files: File[]) => {
     const [first] = await upload(course.id, files.slice(0, 1), true);
     if (!first) return;
@@ -364,6 +385,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
   };
   const ask = () => {
     setSummary((s) => ({ ...s, open: false }));
+    clearLink();
     clear(); // a fresh chat about this course, not a switch mid-conversation
     setFocus(course.code); // the chat reads this course's syllabus and materials in full
     router.push("/chat");
@@ -414,20 +436,31 @@ export function Materials({ course, materials }: { course: { id: string; code: s
         </span>
       }
     >
-      <SyllabusImport material={importing} onClose={() => setImporting(null)} />
+      <SyllabusImport
+        material={importing ?? datesFile ?? null}
+        courseId={course.id}
+        onClose={() => {
+          setImporting(null);
+          clearLink();
+        }}
+      />
       <SummaryDialog
-        open={summary.open}
+        open={summary.open || !!fromCard}
         course={course.code}
-        body={summary.body}
-        loading={summary.loading}
+        body={!summary.open && fromCard ? fromCard.body : summary.body}
+        loading={summary.open && summary.loading}
         error={summary.error}
-        onClose={() => setSummary((s) => ({ ...s, open: false }))}
+        onClose={() => {
+          setSummary((s) => ({ ...s, open: false }));
+          clearLink();
+        }}
         onAsk={ask}
         onRetry={syllabusFile ? () => summarize(syllabusFile.id) : undefined}
         onDates={
           syllabusFile
             ? () => {
                 setSummary((s) => ({ ...s, open: false }));
+                clearLink();
                 setImporting(syllabusFile);
               }
             : undefined
