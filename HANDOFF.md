@@ -60,8 +60,7 @@ Confirmed:
 
 ## Current Priorities
 
-1. Signed-in check of this session's Home changes on real data (next task).
-2. Pick from ROADMAP's unscheduled ideas with the user.
+1. Pick from ROADMAP's unscheduled ideas with the user.
 
 ## Important Constraints / User Intent
 
@@ -78,7 +77,7 @@ Confirmed:
 - **Automated:** `npm test` 48 passing (incl. `charts.test.ts`, `sample.test.ts`, updated `home.test.ts`). `npx tsc --noEmit` clean (incl. previews). `npm run lint` clean.
 - **Preview-verified (signed out, local, sample data):** four EvilCharts widgets render (no console errors); library previews show real vs sample correctly (incl. week-1 term); Courses widget at 3×2 and 2×2 fits; Courses list on phone; calendar toolbar on phone; month/week views.
 - **Reviewer sub-agents:** widgets + polish (findings fixed: DST bucketing, ring overflow); sample previews (no issues).
-- **Not tested signed in:** new widgets on real data, light theme for the charts, the widget library with a real account, Courses widget at small sizes on the live site.
+- **Signed-in check (user, live site, 2026-09-25):** new chart widgets on real data, light/dark, widget library previews, Courses at small sizes: all work.
 - **Preview gotcha:** a hidden pane freezes animations (e.g. the view-switch pill looks stuck); page intro animation needs ~8s before measuring.
 
 ## Relevant Architecture Context
@@ -93,10 +92,7 @@ Confirmed:
 
 ## Next Recommended Task
 
-**Signed-in check of this session's Home changes.**
-- **Goal:** on the live site (user signs in; Claude may not enter passwords), open Edit → Add widget and confirm previews show real data or labeled samples; add Workload radar, Grade rings, Done vs due, Work mix and check them with real courses in dark and light; resize Courses to 2×2/3×2.
-- **Why next:** everything this session was verified only in the local preview with made-up data.
-- **Done when:** each works on real data or its bug is fixed and pushed; this file's Testing section updated.
+**Pick the next feature with the user** from ROADMAP's unscheduled ideas (after-class check-in, "start by" planning, crunch forecast, Sunday reset) or the follow-ups above (grade goals needs a migration; ask first).
 
 ## Suggested New-Session Prompt
 
