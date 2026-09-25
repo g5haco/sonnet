@@ -85,12 +85,12 @@
   --accent-foreground: oklch(0.2 0.005 260);
   --brand: var(--primary);
   --brand-foreground: var(--primary-foreground);
-  --done: oklch(0.52 0.13 150);
-  --warning: oklch(0.54 0.12 65);
+  --done: oklch(0.52 0.14 160);
+  --warning: oklch(0.55 0.14 60);
   --warning-fill: oklch(0.72 0.14 78);
   --highlight: oklch(0.88 0.1 90 / 60%);
-  --course-l: 0.64;
-  --course-c: 0.12;
+  --course-l: 0.58;
+  --course-c: 0.17;
   --event: 20%; /* how much course color washes into calendar event fills */
   --destructive: oklch(0.55 0.19 30);
   --border: oklch(0.9 0.003 260);
@@ -129,11 +129,11 @@
   --muted-foreground: oklch(0.71 0 0);
   --accent: oklch(0.27 0 0);
   --accent-foreground: oklch(0.94 0.004 90);
-  --done: oklch(0.76 0.14 150);
-  --warning: oklch(0.82 0.13 80);
+  --done: oklch(0.74 0.17 160);
+  --warning: oklch(0.8 0.16 70);
   --highlight: oklch(0.8 0.12 85 / 24%);
-  --course-l: 0.74;
-  --course-c: 0.11;
+  --course-l: 0.7;
+  --course-c: 0.17;
   --event: 30%;
   --destructive: oklch(0.7 0.17 32);
   --border: oklch(1 0 0 / 7%);
@@ -148,7 +148,7 @@
 /* Course tag / status label: 16% tint, same-hue text pulled toward the ink (lighter in dark, darker in light), thin
    same-hue border. Set --chip to a course color or a status token. oklab so the near-neutral ink doesn't shift the hue. */
 @utility chip {
-  border: 1px solid color-mix(in oklab, var(--chip) 50%, transparent);
+  border: 1px solid color-mix(in oklab, var(--chip) 60%, transparent);
   background: color-mix(in oklab, var(--chip) 16%, transparent);
   color: color-mix(in oklab, var(--chip) 60%, var(--foreground));
 }
