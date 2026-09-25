@@ -17,6 +17,9 @@ Works: login/sign-up, onboarding + tour, Home widget grid (32 widgets), courses,
 
 ## Completed This Session
 
+- **Paper & Ink palette + IBM Plex (2026-09-25):** tokens in `globals.css` (warm paper / ink-navy surfaces, ink-blue `--primary` = `--brand`, new `--warning`, `--warning-fill`, `--highlight`); course hues `75,125,185,215,290,320,350,45`; selected nav = ink icon on `primary/12` pill; focus rings get a 2px background gap (base rule on `[class*="focus-visible:ring"]`); `link` utility for text links; status colors done=green, today/tmrw=marigold, late=vermilion, else muted; charts flat (no gradients). Fonts: IBM Plex Sans (body), Plex Serif (`--font-heading`, dialog titles), Plex Mono (readouts). Impeccable findings fixed: cyan palette, overused Geist, cramped padding (magic-link button `py-3`), sidebar height transition → `grid-template-rows`.
+- **Audit batch:** Home stacks below 960px, overdue leads the header, 44px phone targets, Ask-button lane, honest course summary; chat toasts lifted above the composer.
+
 - **"Term" wording:** every user-visible "semester" → "term" (Settings section/toasts, Home nudge, calendar rail, sync window, action errors, proposal card). Code identifiers (`"semester"` settings section, `set_semester` tool), model-facing prompt text, and onboarding's Semester/Quarter choice deliberately unchanged.
 - **Four EvilCharts widgets** (user-approved new dep `recharts`): Workload radar (open work ahead per course, needs ≥3 courses), Grade rings (radial per graded course, capped at 100%, own legend list), Done vs due (per term week so far, DST-safe bucketing), Work mix (open work by kind). Code: `components/evil-widgets.tsx`, data helpers `lib/charts.ts` (+ test). Vendored registry code in `components/evilcharts/` (registry `@evilcharts` in `components.json`); two local edits there: legend `flex-wrap`, removed unused import. Loaded with `next/dynamic` so Recharts only ships when one is on the grid.
 - **Widget library previews** (Edit → Add widget): previews get a fixed-height frame so charts draw; if a widget's real render hits its empty state, a second render from `lib/sample.ts` shows instead with a "sample" badge. Mechanism: the widget map is now `render(data)` in `dashboard.tsx`; empty states carry a `data-empty` attribute; CSS `peer-has-data-empty` swaps. Sample data has its own term (5 weeks in) so week charts work even in a real first week. Never shown on Home itself.
@@ -27,6 +30,9 @@ Works: login/sign-up, onboarding + tour, Home widget grid (32 widgets), courses,
 ## Important Decisions
 
 Do not reverse these casually.
+
+- **Palette is "Paper & Ink"** (user-approved; spec in this session). Color may only mean you/now, a course, a status, or the one primary action. Aliases (`--brand`, `--chart-1/2`, `--sidebar-*`, `--warning-fill`) live in `:root` only (`.dark` is on `<html>`). Existing courses keep their old stored hues; only new courses/the picker use the new list.
+- **Build path:** code-first (`.impeccable/config.json`). `PRODUCT.md` refreshed (platform, positioning, SaaS planned-undecided).
 
 - **Changes need approval:** the AI never saves without a confirm card. Model choice is config (`AI_MODEL`, `AI_VISION_MODEL`); free models by default.
 - **Slow work uses `/api/tasks`, not Server Actions** (Server Actions run one at a time per tab and would block check-offs). New slow calls go in the `TASKS` map in `app/api/tasks/route.ts`, called with `slow()`, wrapped in `useTasks()`. Task cards are Sonner toasts, bottom middle.
@@ -50,6 +56,9 @@ Nothing half-built. Follow-ups:
 ## Known Bugs / Issues
 
 Confirmed:
+- Impeccable still flags `layout-transition` from Sonner's own toast CSS (`[data-sonner-toast]` transitions height); left alone (library behavior).
+- Contrast: `widgets.tsx:105-106` class blocks (`text-black/80` and `/60` on course color) fall below 4.5:1 in light mode on some hues (pre-existing); light `--warning-fill` is 2.28:1 on card (unused so far). Work mix exam/quiz colors are hard-coded kind colors with no approved token.
+- Local `next build` fails on the untracked `login/course-preview` (useSearchParams without Suspense); tracked code builds.
 - Free AI models are unreliable (429/503); Nemotron slow on long answers.
 - Canvas URL checks are https-only; an https URL to a private IP isn't blocked (low risk on Vercel).
 - Home stacks into one column below 960px of content width; on short laptops (≈750px tall) grid cells get small; tour flag is per browser; a failed layout save keeps the unsaved layout until reload; magic link works only in the same browser.

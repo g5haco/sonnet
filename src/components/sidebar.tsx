@@ -44,10 +44,10 @@ function NavLink({
       aria-label={open ? undefined : link.label}
       className={cn(
         "group/link flex h-10 items-center gap-3 rounded-xl px-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-        active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+        active ? "bg-primary/12 text-foreground dark:bg-primary/18" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
       )}
     >
-      <Icon className="size-5 shrink-0" aria-hidden="true" />
+      <Icon className={cn("size-5 shrink-0", active && "text-primary")} aria-hidden="true" />
       <motion.span
         initial={false}
         animate={{ opacity: open ? 1 : 0, display: open ? "inline-block" : "none" }}
@@ -164,20 +164,23 @@ export function Sidebar({
             <span className="text-brand">.</span>
           </Link>
 
-          {/* Stacked when collapsed, side by side when open; the height eases so the links slide up, no gap. */}
+          {/* Stacked when collapsed, side by side when open; the row track eases (grid-template-rows, not height) so
+              the links slide up, no gap. */}
           <div
             className={cn(
-              "flex items-start transition-[height] duration-200 ease-out motion-reduce:transition-none",
-              open ? "h-10 flex-row gap-4" : "h-[132px] flex-col gap-1.5",
+              "grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
+              open ? "grid-rows-[40px]" : "grid-rows-[132px]",
             )}
           >
-            <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
-            <motion.div layout transition={SPRING}>
-              <ChatLink active={onChat} />
-            </motion.div>
-            <motion.div layout transition={SPRING}>
-              <FocusButton />
-            </motion.div>
+            <div className={cn("flex items-start", open ? "flex-row gap-4" : "flex-col gap-1.5")}>
+              <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
+              <motion.div layout transition={SPRING}>
+                <ChatLink active={onChat} />
+              </motion.div>
+              <motion.div layout transition={SPRING}>
+                <FocusButton />
+              </motion.div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">

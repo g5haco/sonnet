@@ -571,7 +571,7 @@ function SessionBlock({
         <p className="font-mono text-xs text-muted-foreground">Every {meetingLabel(m)}</p>
         <Link
           href={m.courseId ? `/courses/${m.courseId}` : "/courses"}
-          className="mt-1 text-sm underline underline-offset-4 hover:text-foreground"
+          className="mt-1 text-sm link"
         >
           Edit class times
         </Link>

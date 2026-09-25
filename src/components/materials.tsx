@@ -237,7 +237,7 @@ export function UploadWindow({ open, course, onClose }: { open: boolean; course?
                   <button
                     type="button"
                     onClick={() => browse(ACCEPT)}
-                    className="font-medium text-foreground underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                    className="font-medium link focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     browse your files
                   </button>{" "}

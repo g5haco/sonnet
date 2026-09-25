@@ -77,10 +77,10 @@ export const scoreLabel = (score: number, points?: number | null) =>
 
 export function when(due: string, now: number) {
   const days = Math.round((Date.parse(due) - now) / DAY);
-  if (days < 0) return { label: `${-days}d late`, late: true };
-  if (days === 0) return { label: "today", late: false };
-  if (days === 1) return { label: "tmrw", late: false };
-  return { label: `${days}d`, late: false };
+  if (days < 0) return { label: `${-days}d late`, late: true, soon: false };
+  if (days === 0) return { label: "today", late: false, soon: true };
+  if (days === 1) return { label: "tmrw", late: false, soon: true };
+  return { label: `${days}d`, late: false, soon: false };
 }
 
 function headline(open: Item[], now: number) {
@@ -206,7 +206,7 @@ export function UpNext({
                       <span
                         className={cn(
                           "shrink-0 font-mono text-sm tabular-nums",
-                          done ? "text-muted-foreground" : due.late ? "text-destructive" : "text-foreground",
+                          done ? "text-done" : due.late ? "text-destructive" : due.soon ? "text-warning" : "text-muted-foreground",
                         )}
                       >
                         {/* graded work shows its score, e.g. 18/20 */}

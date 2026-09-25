@@ -110,7 +110,7 @@ function NeedsSemester({ what, className }: { what: string; className?: string }
       <button
         type="button"
         onClick={() => openSettings("semester")}
-        className="text-foreground underline underline-offset-4"
+        className="link"
       >
         Set them
       </button>

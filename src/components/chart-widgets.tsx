@@ -391,7 +391,7 @@ export function OnTimeWidget({ items, now, term }: { items: Item[]; now: number;
               <span
                 key={k}
                 title={`Week ${k + 1}`}
-                className={cn("flex-1 rounded-[2px]", w === "late" ? "bg-amber-400/80" : w === "ok" ? "bg-foreground/30" : "bg-foreground/10")}
+                className={cn("flex-1 rounded-[2px]", w === "late" ? "bg-destructive/80" : w === "ok" ? "bg-foreground/30" : "bg-foreground/10")}
               />
             ))}
           </div>

@@ -505,10 +505,8 @@ const StrokeGradient = ({ id, dataKey, config }: StyleProps) => {
 /** Radial color gradient used for the radar's filled area, fading toward the edge. */
 const FillGradient = ({ id, dataKey, config }: StyleProps) => {
   const colorsCount = getColorsCount(config[dataKey] ?? {});
-  const opacities =
-    colorsCount === 1
-      ? [0.8, 0.3]
-      : Array.from({ length: colorsCount }, (_, i) => (i === 0 ? 0.8 : 0.3));
+  // Sonnet edit: flat fill (no gradients on chart colors); was 0.8 at the center fading to 0.3.
+  const opacities = Array.from({ length: Math.max(colorsCount, 2) }, () => 0.3);
 
   return (
     <radialGradient id={`${id}-radar-fill-${dataKey}`} cx="50%" cy="50%" r="50%">

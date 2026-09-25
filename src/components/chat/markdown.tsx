@@ -91,7 +91,7 @@ const components: Components = {
     if (scheme === "course") return <CourseLink id={href.slice(7)}>{children}</CourseLink>;
     if (scheme === "class") return <ClassLink refId={ref}>{children}</ClassLink>;
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium link">
         {children}
       </a>
     );

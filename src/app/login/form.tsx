@@ -85,7 +85,7 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
           {pending ? "One sec…" : mode === "up" ? "Create account" : "Sign in"}
         </Button>
         {mode === "in" && (
-          <Button type="submit" name="intent" value="link" variant="ghost" disabled={pending} className="h-11 rounded-full">
+          <Button type="submit" name="intent" value="link" variant="ghost" disabled={pending} className="h-11 rounded-full py-3">
             Email me a link instead
           </Button>
         )}
@@ -98,7 +98,7 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
         {mode === "up" ? "Already have an account? " : "New here? "}
         <Link
           href={mode === "up" ? "/login" : "/login?mode=signup"}
-          className="-my-3 inline-flex min-h-11 items-center font-medium text-foreground underline-offset-4 hover:underline"
+          className="-my-3 inline-flex min-h-11 items-center font-medium link"
         >
           {mode === "up" ? "Sign in" : "Create an account"}
         </Link>

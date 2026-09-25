@@ -290,7 +290,7 @@ export function Dashboard({
                 <button
                   type="button"
                   onClick={() => openSettings("semester")}
-                  className="text-foreground underline underline-offset-4 hover:text-brand"
+                  className="link"
                 >
                   set your real term length
                 </button>

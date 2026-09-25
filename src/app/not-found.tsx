@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="space-y-3">
         <p className="text-muted-foreground text-sm">404</p>
         <h1 className="text-2xl font-semibold">This page doesn&apos;t exist</h1>
-        <Link href="/" className="text-sm underline underline-offset-4">
+        <Link href="/" className="text-sm link">
           Back to Home
         </Link>
       </div>

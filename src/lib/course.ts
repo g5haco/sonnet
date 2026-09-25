@@ -1,6 +1,6 @@
 // Course colors share one lightness/chroma (theme tokens); only the hue varies.
 // Hues stay >= 40deg from destructive (25), done (150) and brand (205-220) so a course never reads as a status.
-export const HUES = [65, 290, 335, 100, 255, 305, 80, 350];
+export const HUES = [75, 125, 185, 215, 290, 320, 350, 45];
 
 export const courseColor = (hue: number) => `oklch(var(--course-l) var(--course-c) ${hue})`;
 

@@ -18,7 +18,7 @@ export function ItemDetails({ item, now, onToggle }: { item: Item; now: number; 
         {item.course} · {item.kind}
       </p>
       <p className="text-base leading-snug font-medium">{item.title}</p>
-      <p className={late ? "text-destructive" : "text-muted-foreground"}>
+      <p className={item.doneAt ? "text-done" : late ? "text-destructive" : "text-muted-foreground"}>
         {item.doneAt ? "Done. Was due " : late ? "Overdue. Was due " : "Due "}
         {due.toLocaleString(undefined, {
           weekday: "short",

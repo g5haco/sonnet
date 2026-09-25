@@ -80,7 +80,7 @@ export function PaceWidget({ items, term, now }: { items: Item[]; term: Term; no
   const data = paceByWeek(items, term, now);
   const config = {
     due: { label: "Due", colors: color("var(--muted-foreground)") },
-    done: { label: "Done", colors: color("var(--brand)") },
+    done: { label: "Done", colors: color("var(--done)") },
   } satisfies ChartConfig;
   return (
     <Block title="Done vs due" aside="per week">
@@ -89,8 +89,8 @@ export function PaceWidget({ items, term, now }: { items: Item[]; term: Term; no
       ) : (
         <EvilAreaChart className={chart} config={config} data={data} curveType="monotone">
           <EvilAreaChart.XAxis dataKey="week" interval="preserveStartEnd" />
-          <EvilAreaChart.Area dataKey="due" variant="gradient" strokeVariant="dashed" />
-          <EvilAreaChart.Area dataKey="done" variant="gradient" />
+          <EvilAreaChart.Area dataKey="due" variant="solid" strokeVariant="dashed" />
+          <EvilAreaChart.Area dataKey="done" variant="solid" />
           <EvilAreaChart.Tooltip />
         </EvilAreaChart>
       )}

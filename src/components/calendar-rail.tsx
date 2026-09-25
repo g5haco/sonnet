@@ -142,7 +142,7 @@ function Semester({ term, items, now, days, view, onPick }: Props) {
         <h2 className="mb-1 pl-1 text-sm font-medium">Term</h2>
         <p className="pl-1 text-sm text-muted-foreground">
           Set your term dates in{" "}
-          <button type="button" onClick={() => openSettings()} className="text-foreground underline underline-offset-4">
+          <button type="button" onClick={() => openSettings()} className="link">
             Settings
           </button>{" "}
           to see which weeks are heavy.
@@ -228,7 +228,7 @@ function Classes({ meetings }: { meetings: ClassMeeting[] }) {
       {byCourse.length === 0 ? (
         <p className="pl-1 text-sm text-muted-foreground">
           No class times yet.{" "}
-          <Link href="/courses" className="text-foreground underline underline-offset-4">
+          <Link href="/courses" className="link">
             Add them on a course
           </Link>
           .
