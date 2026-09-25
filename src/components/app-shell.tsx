@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
-import { loadChat, saveChat } from "@/app/actions";
+import { loadChat, saveChat, syncCanvasNow } from "@/app/actions";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
@@ -106,6 +106,14 @@ export function AppShell({
   const dirty = useRef(false); // changed since the last save
   const [focus, setFocus] = useState("");
   const path = usePathname();
+
+  // Canvas catch-up: the Vercel Hobby cron only runs daily, so opening the app syncs when the last sync is over
+  // an hour old. Quiet on purpose; the action refreshes the page's data when it's done.
+  const { baseUrl, lastSyncAt, lastSyncStatus } = account.canvas;
+  useEffect(() => {
+    const stale = !lastSyncAt || Date.now() - Date.parse(lastSyncAt) > 60 * 60_000;
+    if (baseUrl && stale && lastSyncStatus !== "syncing") void syncCanvasNow();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- once per app load
   const onChatPage = path === "/chat"; // the page is the assistant there: no panel, no Ask button
   const nextId = useRef(0);
   const inflight = useRef<AbortController | null>(null);
