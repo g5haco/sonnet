@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Minus, Plus, RotateCcw, X } from "lucide-react";
+import { Plus, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
-import { COLS, DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { DEFAULT_LAYOUT, freeSpot, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
@@ -121,7 +121,7 @@ export function Dashboard({
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   const examIn = nextExam && Math.ceil((Date.parse(nextExam.due) - now) / 864e5);
 
-  const wide = (id: WidgetId) => (layout.find((w) => w.id === id)?.w ?? 12) >= 6;
+  const wide = (id: WidgetId) => (layout.find((w) => w.id === id)?.w ?? 12) >= 4;
   const view: Record<WidgetId, ReactNode> = {
     progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
     next: (
@@ -228,15 +228,13 @@ export function Dashboard({
     countdown: <CountdownWidget items={shown} />,
     clear: <ClearWidget items={shown} now={now} />,
   };
-  // A new widget goes in below everything, at its default width.
+  // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {
-    setLayout((l) => [...l, { id, x: 0, y: Math.max(0, ...l.map((p) => p.y)) + 1, w: WIDGETS[id].w }]);
+    const spot = freeSpot(layout, id);
+    if (!spot) return void toast(`No room for ${WIDGETS[id].label}. Remove or shrink a widget first.`);
+    setLayout((l) => [...l, spot]);
     setAdding(false);
   };
-  const change = (id: WidgetId, f: (p: Layout[number]) => Partial<Layout[number]>) =>
-    setLayout((l) => l.map((p) => (p.id === id ? { ...p, ...f(p) } : p)));
-  const pill =
-    "grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 disabled:opacity-40";
 
   const finish = () => {
     setEditing(false);
@@ -250,7 +248,7 @@ export function Dashboard({
   };
 
   return (
-    <main className="@container w-full px-4 pt-5 pb-24 md:px-6 md:pt-7">
+    <main className="@container flex w-full flex-col px-4 pt-5 pb-24 md:h-dvh md:overflow-y-auto md:px-6 md:pt-7 md:pb-6">
       <header className="mb-6 flex flex-wrap items-start gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1 basis-72">
           <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
@@ -324,78 +322,19 @@ export function Dashboard({
         onChange={setLayout}
         editable={editing}
         render={(id) => view[id]}
-        controls={(id, stacked) => {
-          const p = layout.find((q) => q.id === id)!;
-          const order = [...layout].sort((a, b) => a.y - b.y || a.x - b.x);
-          const i = order.indexOf(p);
-          // Stacked (phones): move up or down by trading places with the neighbour.
-          const swap = (j: number) => {
-            const q = order[j];
-            setLayout((l) =>
-              l.map((r) =>
-                r.id === p.id
-                  ? { ...r, x: Math.min(q.x, COLS - r.w), y: q.y }
-                  : r.id === q.id
-                    ? { ...r, x: Math.min(p.x, COLS - r.w), y: p.y }
-                    : r,
-              ),
-            );
-          };
-          return (
-            <>
-              <button
-                type="button"
-                aria-label={`Remove ${WIDGETS[id].label}`}
-                onClick={() => {
-                  setLayout((l) => l.filter((x) => x.id !== id));
-                  document.getElementById("home-done")?.focus(); // the button is about to disappear
-                }}
-                className={cn(pill, "absolute top-2 left-2 z-10")}
-              >
-                <X className="size-4" aria-hidden="true" />
-              </button>
-              <div className="absolute top-2 right-2 z-10 flex gap-1">
-                {stacked ? (
-                  <>
-                    <button type="button" aria-label={`Move ${WIDGETS[id].label} up`} disabled={i === 0} onClick={() => swap(i - 1)} className={pill}>
-                      <ArrowUp className="size-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Move ${WIDGETS[id].label} down`}
-                      disabled={i === order.length - 1}
-                      onClick={() => swap(i + 1)}
-                      className={pill}
-                    >
-                      <ArrowDown className="size-4" aria-hidden="true" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      aria-label={`Make ${WIDGETS[id].label} narrower`}
-                      disabled={p.w <= WIDGETS[id].min}
-                      onClick={() => change(id, (q) => ({ w: q.w - 1 }))}
-                      className={pill}
-                    >
-                      <Minus className="size-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Make ${WIDGETS[id].label} wider`}
-                      disabled={p.w >= COLS}
-                      onClick={() => change(id, (q) => ({ w: q.w + 1, x: Math.min(q.x, COLS - q.w - 1) }))}
-                      className={pill}
-                    >
-                      <Plus className="size-4" aria-hidden="true" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </>
-          );
-        }}
+        controls={(id) => (
+          <button
+            type="button"
+            aria-label={`Remove ${WIDGETS[id].label}`}
+            onClick={() => {
+              setLayout((l) => l.filter((x) => x.id !== id));
+              document.getElementById("home-done")?.focus(); // the button is about to disappear
+            }}
+            className="absolute top-2 left-2 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        )}
       />
       {layout.length === 0 && !editing && (
         <p className="rounded-2xl border border-dashed border-foreground/15 p-6 text-sm text-muted-foreground">
@@ -407,7 +346,7 @@ export function Dashboard({
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Widgets</DialogTitle>
-            <DialogDescription>Previews use your real data. Added widgets go at the bottom; drag them anywhere.</DialogDescription>
+            <DialogDescription>Previews use your real data. A new widget takes the first free space; drag it anywhere.</DialogDescription>
           </DialogHeader>
           <ul className="grid gap-4 sm:grid-cols-2">
             {(Object.keys(WIDGETS) as WidgetId[]).map((id) => {
