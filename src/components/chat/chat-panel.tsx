@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight, FileText, Image as ImageIcon, SquarePen, X }
 import { useEffect, useRef, useState } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
-import { Markdown } from "@/components/chat/markdown";
+import dynamic from "next/dynamic";
+
 import { ProposalCard } from "@/components/chat/proposal-card";
 import { Button } from "@/components/ui/button";
 import type { Deck, Proposal } from "@/lib/ai";
@@ -13,6 +14,9 @@ import type { Shortcut } from "@/components/chat/shortcuts";
 import { ThoughtChain, type Chain } from "@/components/chat/thought-chain";
 import { CopyAnswer } from "@/components/chat/widgets";
 import { cn } from "@/lib/utils";
+
+// react-markdown + remark-gfm stay out of the shared app bundle.
+const Markdown = dynamic(() => import("@/components/chat/markdown").then((m) => m.Markdown));
 
 export type ChatMessage = {
   id: number;

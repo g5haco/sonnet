@@ -2,6 +2,7 @@
 
 import { CalendarDays, Check, CircleUser, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useTransition } from "react";
@@ -9,11 +10,13 @@ import { toast } from "sonner";
 import { resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
 import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
-import { DoubtButton } from "@/components/evil-buttons/doubt-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
+
+// Reset-all-data animation pulls in matter-js; load it only when Settings opens.
+const DoubtButton = dynamic(() => import("@/components/evil-buttons/doubt-button"));
 
 export function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
   const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Semester saved."));

@@ -1,10 +1,14 @@
 "use client";
 
 import { CalendarSearch, MessageCircle, RefreshCw } from "lucide-react";
-import { Markdown } from "@/components/chat/markdown";
+import dynamic from "next/dynamic";
+
 import { FormError } from "@/components/create-forms";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+
+// react-markdown + remark-gfm stay out of the shared app bundle.
+const Markdown = dynamic(() => import("@/components/chat/markdown").then((m) => m.Markdown));
 
 // The syllabus as one page: what the AI read (grading, policies, key dates…). Kept as the course's
 // "Syllabus summary" note; the full syllabus stays in the assistant's memory for anything the summary skips.
