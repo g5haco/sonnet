@@ -19,9 +19,16 @@ type Focus = {
   left: number; // ms left in the running session
   open: boolean;
   setOpen: (open: boolean) => void;
+  toggle: () => void; // start a session, or stop (and log) the running one
 };
 
-const FocusContext = createContext<Focus>({ run: null, left: LENGTH * 60_000, open: false, setOpen: () => {} });
+const FocusContext = createContext<Focus>({
+  run: null,
+  left: LENGTH * 60_000,
+  open: false,
+  setOpen: () => {},
+  toggle: () => {},
+});
 const useFocus = () => useContext(FocusContext);
 
 // A session the student walked away from long ago (browser closed, tab slept) is dropped, not logged.
@@ -73,12 +80,12 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
 
   const left = run ? LENGTH * 60_000 - (Math.max(tick, run.start) - run.start) : LENGTH * 60_000;
   const over = !!run && left <= 0;
-  const used = Math.floor((LENGTH * 60_000 - left) / 1000); // whole seconds into the session
   useEffect(() => {
     if (run && over) finish(run, LENGTH); // eslint-disable-line react-hooks/set-state-in-effect
   }, [over]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const start = () => {
+  const toggle = () => {
+    if (run) return finish(run, Math.floor((Date.now() - run.start) / 60_000));
     const r = { start: Date.now() };
     setTick(r.start);
     setRun(r);
@@ -86,7 +93,7 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <FocusContext.Provider value={{ run, left, open, setOpen }}>
+    <FocusContext.Provider value={{ run, left, open, setOpen, toggle }}>
       {children}
       <div ref={bounds} className="pointer-events-none fixed inset-2 z-40" aria-hidden="true" />
       <AnimatePresence>
@@ -122,34 +129,45 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
                 <X className="size-4" />
               </button>
             </header>
-            {/* The ring fills over the whole session, a little every second. */}
-            <AnimatedCircularProgressBar
-              min={0}
-              max={LENGTH * 60}
-              value={run ? used : 0}
-              gaugePrimaryColor="var(--done)"
-              gaugeSecondaryColor="color-mix(in oklab, var(--foreground) 10%, transparent)"
-              label="Focus time used"
-              className="mx-auto size-40"
-            >
-              <span className="flex flex-col items-center">
-                <span className="font-mono text-3xl font-medium tracking-tight tabular-nums">{mmss(left)}</span>
-                <span className="mt-0.5 font-mono text-xs font-normal text-muted-foreground">
-                  {run ? `min ${Math.min(LENGTH, Math.floor(used / 60) + 1)} of ${LENGTH}` : `${LENGTH} min`}
-                </span>
-              </span>
-            </AnimatedCircularProgressBar>
-            <Button
-              variant={run ? "secondary" : "default"}
-              className="mt-4 h-10 w-full rounded-full transition-[background-color,transform] active:scale-[0.97]"
-              onClick={() => (run ? finish(run, Math.floor((Date.now() - run.start) / 60_000)) : start())}
-            >
-              {run ? "Stop" : `Start ${LENGTH} min`}
-            </Button>
+            <FocusDial />
           </motion.section>
         )}
       </AnimatePresence>
     </FocusContext.Provider>
+  );
+}
+
+// The ring and Start/Stop, shared by the floating panel and Home's Focus timer widget: both drive the one timer.
+export function FocusDial({ className }: { className?: string }) {
+  const { run, left, toggle } = useFocus();
+  const used = Math.floor((LENGTH * 60_000 - left) / 1000); // whole seconds into the session
+  return (
+    <div className={className}>
+      {/* The ring fills over the whole session, a little every second. */}
+      <AnimatedCircularProgressBar
+        min={0}
+        max={LENGTH * 60}
+        value={run ? used : 0}
+        gaugePrimaryColor="var(--done)"
+        gaugeSecondaryColor="color-mix(in oklab, var(--foreground) 10%, transparent)"
+        label="Focus time used"
+        className="mx-auto size-40"
+      >
+        <span className="flex flex-col items-center">
+          <span className="font-mono text-3xl font-medium tracking-tight tabular-nums">{mmss(left)}</span>
+          <span className="mt-0.5 font-mono text-xs font-normal text-muted-foreground">
+            {run ? `min ${Math.min(LENGTH, Math.floor(used / 60) + 1)} of ${LENGTH}` : `${LENGTH} min`}
+          </span>
+        </span>
+      </AnimatedCircularProgressBar>
+      <Button
+        variant={run ? "secondary" : "default"}
+        className="mt-4 h-10 w-full rounded-full transition-[background-color,transform] active:scale-[0.97]"
+        onClick={toggle}
+      >
+        {run ? "Stop" : `Start ${LENGTH} min`}
+      </Button>
+    </div>
   );
 }
 

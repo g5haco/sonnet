@@ -22,6 +22,15 @@ import { WeekStrip } from "@/components/week-strip";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
+import {
+  AskWidget,
+  CalendarWidget,
+  ClassesWidget,
+  MaterialsWidget,
+  StreakWidget,
+  TimerWidget,
+  type RecentMaterial,
+} from "@/components/widgets";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DraggableWidgetGrid, type WidgetItem } from "@/components/ui/draggable-widget-grid";
@@ -39,6 +48,7 @@ export function Dashboard({
   items,
   cards,
   sessions,
+  materials = [],
   name,
   layout: saved = DEFAULT_LAYOUT,
 }: {
@@ -49,6 +59,7 @@ export function Dashboard({
   items: Item[];
   cards: CourseCard[];
   sessions: FocusSession[];
+  materials?: RecentMaterial[];
 }) {
   const [now] = useState(() => Date.now()); // one clock per render tree
   const { shown, checked, toggle: flipItem, remove } = useWork(items);
@@ -98,6 +109,7 @@ export function Dashboard({
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   const examIn = nextExam && Math.ceil((Date.parse(nextExam.due) - now) / 864e5);
 
+  const wide = (id: WidgetId) => layout.find((w) => w.id === id)?.size !== "sm";
   const view: Record<WidgetId, ReactNode> = {
     progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
     next: (
@@ -173,6 +185,24 @@ export function Dashboard({
       </Block>
     ),
     focus: <FocusBlock sessions={sessions} now={now} />,
+    timer: <TimerWidget />,
+    classes: <ClassesWidget term={term} now={now} wide={wide("classes")} />,
+    calendar: <CalendarWidget items={shown} now={now} wide={wide("calendar")} />,
+    today: (
+      <UpNext
+        title="Due today"
+        limit={20}
+        items={shown.filter((i) => (checked.has(i.id) || !i.doneAt) && Date.parse(i.due) >= now && Date.parse(i.due) - now < 864e5)}
+        now={now}
+        checked={checked}
+        onToggle={toggle}
+        onDelete={remove}
+        empty="Nothing due in the next 24 hours."
+      />
+    ),
+    streak: <StreakWidget sessions={sessions} now={now} />,
+    materials: <MaterialsWidget materials={materials} courses={courses} />,
+    ask: <AskWidget items={shown} now={now} />,
   };
   const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
   const add = (id: WidgetId, size: "wide" | "sm") => {

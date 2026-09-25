@@ -48,6 +48,7 @@ type Assistant = {
   schedule: Schedule;
   open: (id: string) => Promise<void>; // reopen a saved chat
   chatId: string | null;
+  show: () => void; // open the assistant panel (or focus it on /chat)
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
 // Any page can open the floating Settings window (e.g. the calendar's "set your semester dates"), closing Sync if open.
@@ -332,6 +333,7 @@ export function AppShell({
               schedule,
               open,
               chatId,
+              show: openAssistant,
             }}
           >
             <FocusProvider>

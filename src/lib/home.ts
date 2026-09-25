@@ -10,6 +10,13 @@ export const WIDGETS = {
   week: "This week",
   courses: "Courses",
   focus: "Study days",
+  timer: "Focus timer",
+  classes: "Today's classes",
+  calendar: "Calendar",
+  today: "Due today",
+  streak: "Streak",
+  materials: "Recent materials",
+  ask: "Ask about…",
 } as const;
 
 export type WidgetId = keyof typeof WIDGETS;

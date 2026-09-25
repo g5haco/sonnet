@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/supabase/server";
 export default async function Page() {
   const { supabase, name } = await requireUser();
 
-  const [settings, courses, items, meetings, focus] = await Promise.all([
+  const [settings, courses, items, meetings, focus, materials] = await Promise.all([
     supabase.from("settings").select("*").maybeSingle(), // "*": home_layout only exists after migration 0008
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).order("due"),
@@ -17,6 +17,8 @@ export default async function Page() {
       .select("started_at, minutes")
       .order("started_at", { ascending: false })
       .limit(1000), // ponytail: newest 1000 sessions cover the 18-week heatmap; filter by date if they don't
+    // The Recent materials widget: newest 5 across courses.
+    supabase.from("materials").select("id, kind, name, course_id").order("created_at", { ascending: false }).limit(5),
   ]);
   const error = settings.error ?? courses.error ?? items.error ?? meetings.error;
   if (error) throw new Error(`Couldn't load your dashboard: ${error.message}`);
@@ -30,6 +32,7 @@ export default async function Page() {
       courses={courses.data!}
       items={all}
       sessions={focus.data ?? []}
+      materials={materials.data ?? []}
       cards={toCards(courses.data!, all, toMeetings(meetings.data!, courses.data!))}
     />
   );
