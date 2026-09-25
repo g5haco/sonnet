@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import { readActions } from "@/lib/home";
 import { ITEM_COLS, MEETING_COLS, toItems, toMeetings } from "@/lib/rows";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 // which floats over whatever page is open.
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const supabase = await createClient();
-  const [courses, items, meetings, settings, canvas, auth] = await Promise.all([
+  const [courses, items, meetings, settings, canvas, auth, home] = await Promise.all([
     supabase.from("courses").select("id, code, name, hue").order("created_at"),
     supabase.from("items").select(ITEM_COLS).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).order("starts"),
@@ -21,6 +22,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       )
       .maybeSingle(),
     supabase.auth.getClaims(),
+    // The sidebar's actions live in home_layout; before migration 0008 this fails and the default row shows.
+    supabase.from("settings").select("home_layout").maybeSingle(),
   ]);
   const c = courses.data ?? [];
   const claims = auth.data?.claims;
@@ -28,6 +31,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <AppShell
       courses={c}
+      actions={readActions(home.data?.home_layout)}
       schedule={{ items: toItems(items.data ?? [], c), meetings: toMeetings(meetings.data ?? [], c) }}
       account={{
         email: String(claims?.email ?? ""),

@@ -14,7 +14,7 @@ import { complete, MODELS } from "@/lib/ai";
 import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
-import { readLayout } from "@/lib/home";
+import { readActions, readLayout } from "@/lib/home";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -116,9 +116,10 @@ export async function deleteMeeting(id: string): Promise<Result> {
   return done(error, "remove the class time");
 }
 
-// Home's widget layout. Before migration 0008 the column doesn't exist, so say that instead of a schema error.
-export async function saveHomeLayout(raw: unknown): Promise<Result> {
-  const layout = readLayout(raw);
+// Home's widget layout and the sidebar's actions, one column. Before migration 0008 it doesn't exist, so say
+// that instead of a schema error.
+export async function saveHomeLayout(raw: { widgets: unknown; actions: unknown }): Promise<Result> {
+  const layout = { widgets: readLayout(raw?.widgets), actions: readActions(raw) };
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const { error } = await supabase

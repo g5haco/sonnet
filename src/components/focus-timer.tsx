@@ -62,6 +62,18 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   const bounds = useRef<HTMLDivElement>(null);
 
   useEffect(() => setRun(load()), []); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
+  // Alt+T opens or closes the timer from anywhere, so it stays reachable if its sidebar button is removed.
+  useEffect(() => {
+    const keys = (e: KeyboardEvent) => {
+      const typing = (e.target as HTMLElement).closest?.("input, textarea, select, [contenteditable]");
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === "KeyT" && !e.repeat && !typing) {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    document.addEventListener("keydown", keys);
+    return () => document.removeEventListener("keydown", keys);
+  }, []);
   useEffect(() => {
     if (!run) return;
     setTick(Date.now()); // eslint-disable-line react-hooks/set-state-in-effect

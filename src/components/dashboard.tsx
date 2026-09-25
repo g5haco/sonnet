@@ -2,10 +2,10 @@
 
 import { Plus, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 import { saveHomeLayout } from "@/app/actions";
-import { useCreate, useOpenSettings } from "@/components/app-shell";
+import { useCreate, useOpenSettings, useSidebarActions } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
@@ -45,7 +45,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
-import { DEFAULT_LAYOUT, freeSpot, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { DEFAULT_ACTIONS, DEFAULT_LAYOUT, freeSpot, WIDGETS, type ActionId, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
@@ -79,7 +79,19 @@ export function Dashboard({
   const openSettings = useOpenSettings();
   // Home is a widget grid you arrange in edit mode; Done saves the layout to settings.home_layout.
   const [layout, setLayout] = useState(saved);
-  const [lastSaved, setLastSaved] = useState(saved);
+  // Home's edit mode also edits the sidebar's action buttons; Done saves both together.
+  const sidebar = useSidebarActions();
+  const { setEditing: setEditingActions, setActions } = sidebar;
+  const before = useRef<ActionId[] | null>(null); // the actions when editing started, until Done
+  // Leaving Home mid-edit ends editing and drops the unsaved sidebar changes.
+  useEffect(() => {
+    const edits = before;
+    return () => {
+      if (edits.current) setActions(edits.current);
+      setEditingActions(false);
+    };
+  }, [setActions, setEditingActions]);
+  const [lastSaved, setLastSaved] = useState(() => JSON.stringify({ widgets: saved, actions: sidebar.actions }));
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
   const [saving, startSave] = useTransition();
@@ -238,12 +250,15 @@ export function Dashboard({
 
   const finish = () => {
     setEditing(false);
+    setEditingActions(false);
+    before.current = null;
     setAdding(false);
-    if (JSON.stringify(layout) === JSON.stringify(lastSaved)) return;
+    const next = { widgets: layout, actions: sidebar.actions };
+    if (JSON.stringify(next) === lastSaved) return;
     startSave(async () => {
-      const r = await saveHomeLayout(layout);
+      const r = await saveHomeLayout(next);
       if (r.error) return void toast.error(r.error);
-      setLastSaved(layout);
+      setLastSaved(JSON.stringify(next));
     });
   };
 
@@ -284,7 +299,10 @@ export function Dashboard({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setLayout(DEFAULT_LAYOUT)}
+                onClick={() => {
+                  setLayout(DEFAULT_LAYOUT);
+                  sidebar.setActions(DEFAULT_ACTIONS);
+                }}
                 className="h-10 gap-2 rounded-full px-4 text-muted-foreground"
               >
                 <RotateCcw aria-hidden="true" />
@@ -308,7 +326,11 @@ export function Dashboard({
               type="button"
               variant="secondary"
               disabled={saving}
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditing(true);
+                setEditingActions(true);
+                before.current = sidebar.actions;
+              }}
               className="h-10 rounded-full px-5 active:scale-[0.97]"
             >
               {saving ? "Saving…" : "Edit"}
