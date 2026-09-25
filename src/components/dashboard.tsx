@@ -30,9 +30,9 @@ import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
 import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
 import { Button } from "@/components/ui/button";
-import { DraggableWidgetGrid, SPANS, type WidgetItem } from "@/components/ui/draggable-widget-grid";
+import { DraggableWidgetGrid, SPANS, type WidgetItem, type WidgetSize } from "@/components/ui/draggable-widget-grid";
 import type { FocusSession } from "@/lib/focus";
-import { DEFAULT_LAYOUT, SIZES, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
@@ -138,6 +138,7 @@ export function Dashboard({
         }
         className="overflow-hidden"
       >
+        <div className="grid flex-1 place-items-center">
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">Your courses will spin here once you add one.</p>
         ) : (
@@ -153,6 +154,7 @@ export function Dashboard({
             }))}
           />
         )}
+        </div>
       </Block>
     ),
     grades: (
@@ -186,10 +188,10 @@ export function Dashboard({
     ),
     focus: <FocusBlock sessions={sessions} now={now} />,
   };
-  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
+  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id].label }));
   const missing: MenuItem<WidgetId>[] = (Object.keys(WIDGETS) as WidgetId[])
     .filter((id) => !layout.some((w) => w.id === id))
-    .map((id) => ({ kind: id, label: WIDGETS[id], icon: ICONS[id] }));
+    .map((id) => ({ kind: id, label: WIDGETS[id].label, icon: ICONS[id] }));
 
   const finish = () => {
     setEditing(false);
@@ -292,13 +294,13 @@ export function Dashboard({
             >
               <X className="size-4" aria-hidden="true" />
             </button>
-            {columns > 1 && (
+            {columns > 1 && WIDGETS[w.id as WidgetId].sizes.length > 1 && (
               <div
                 role="group"
                 aria-label={`${w.label} size`}
                 className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-0.5 rounded-full bg-popover p-1 shadow-sm ring-1 ring-foreground/10"
               >
-                {SIZES.map((size) => (
+                {(WIDGETS[w.id as WidgetId].sizes as WidgetSize[]).map((size) => (
                   <button
                     key={size}
                     type="button"
