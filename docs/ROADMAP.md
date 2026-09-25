@@ -27,7 +27,7 @@ Done in Phase 9 (2026-09-24):
 - Tried and removed at your request: customizable sidebar buttons.
 
 Still to do in Phase 9:
-- Real-use pass signed in: Canvas grades and scores, focus sessions, web search, photo transcription, study-guide chips, and everything above (all verified only in the signed-out preview).
+- ~~Real-use pass signed in~~: done 2026-09-25, user confirmed everything works on the live site.
 - ~~Production polish~~ done 2026-09-24: login title/canonical/OG + Twitter card, generated social image, custom 404, robots.txt + sitemap (only /login public; app pages noindex), proxy lets crawlers reach them. Source maps stay off (Next default). Bundle: matter-js (Reset animation) and react-markdown now lazy-load, shared app JS 336 → 219 KB gzipped.
 - Say "term" instead of "semester" in Settings and Home's nudge.
 - Dashboard polish beyond Home (calendar, courses list).

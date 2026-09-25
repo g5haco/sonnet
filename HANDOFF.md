@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-09-25, through commit `8232342`. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
+> Updated 2026-09-25, through commit `b40cf3f`. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
 
 ## Project Summary
 
@@ -15,7 +15,7 @@ Works (see ROADMAP for phases 0–8): login/sign-up/Google, onboarding + tour, H
 
 **All migrations 0001–0013 are applied** (user confirmed). No pre-migration fallbacks remain in code.
 
-Most of this session's features were verified only in the signed-out local preview or by tests; see Testing.
+The user ran the signed-in real-use pass on the live site (2026-09-25): everything works.
 
 ## Completed This Session
 
@@ -65,9 +65,8 @@ Confirmed:
 
 ## Current Priorities
 
-1. **Signed-in real-use pass** of this session's work (next task below).
-2. "Term" wording in Settings and Home's nudge.
-3. Polish Calendar and Courses list pages.
+1. "Term" wording in Settings and Home's nudge (next task below).
+2. Polish Calendar and Courses list pages.
 
 ## Important Constraints / User Intent
 
@@ -83,7 +82,7 @@ Confirmed:
 
 - **Automated:** `npm test` 45 passing (incl. `itemContext`, `smallTalk`, remove-class-day proposals, Canvas mapping + cross-origin paging). `npx tsc --noEmit` clean except local `cal-preview`. `npm run lint` clean. `npm audit` 0 vulnerabilities; Semgrep 1 finding (fixed).
 - **Preview-verified (signed out, local):** work view open/close/size (desktop 1600/2560, phone), task toast error state and position, docked chat input stacking, Ask-about-this chip + starters + ×, Reset button lazy load, OG/robots/sitemap routes.
-- **Not tested signed in:** real assistant answers (Ask about this, small talk, general help/code), `/api/tasks` flows (summary, dates, sync, uploads) and their toasts, Canvas descriptions in the work view, sync after 0010/0012, day-off removal + Undo, reopening a saved assignment chat, syllabus chip.
+- **Signed in (live, 2026-09-25):** user confirmed all flows work.
 - **Preview gotcha:** hidden pane freezes animations; stale HMR errors linger in the console after fixes.
 
 ## Relevant Architecture Context
@@ -99,11 +98,8 @@ Confirmed:
 
 ## Next Recommended Task
 
-**Signed-in real-use pass of this session's features.**
-- **Goal:** on the live site (or localhost signed in), exercise: Ask about this ("when is this due and what do I submit?" → correct, no clarifying question; reopen shows history), ICS-only item chat (no invented details), syllabus Ask about it (chip), small talk vs code request, syllabus summary closed mid-run (toast → click opens it), dates import, Canvas sync (still saves after 0010; details fill after 0012), uploads, "no class next Monday" → all classes → Undo, work view descriptions/images.
-- **Why next:** almost everything shipped this session is only preview- or test-verified; real data and live models are the risk.
-- **Done when:** each flow works or its bug is fixed and pushed; findings noted in ROADMAP; HANDOFF testing section updated.
+**"Term" wording.** User-facing "semester" strings (Settings section/form/toasts, Home's short-term nudge, calendar rail heading, sync window, actions.ts errors, proposal card label) → "term", matching onboarding. Keep code identifiers and the `set_semester` tool name. Done when no user-visible "semester" remains and tests pass.
 
 ## Suggested New-Session Prompt
 
-"Read `CLAUDE.md` and `HANDOFF.md`. Use Graphify before broad source exploration and read only the minimum relevant files. If the handoff conflicts with the code, trust the code and note what's stale. Then continue with the Next Recommended Task: the signed-in real-use pass."
+"Read `CLAUDE.md` and `HANDOFF.md`. Use Graphify before broad source exploration and read only the minimum relevant files. If the handoff conflicts with the code, trust the code and note what's stale. Then continue with the Next Recommended Task."
