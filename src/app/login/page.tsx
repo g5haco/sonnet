@@ -24,19 +24,25 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         : null;
 
   return (
-    <main className="grid min-h-dvh place-items-center p-4">
-      <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl bg-card md:grid-cols-2">
-        {/* The pitch: hidden on phones, where the form is the whole page. */}
-        <section className="hidden flex-col justify-between gap-12 bg-secondary/50 p-10 md:flex">
+    <main className="relative isolate grid min-h-dvh place-items-center overflow-hidden p-4">
+      {/* Backdrop: a blurred, dimmed meadow at dusk (generated). Decorative only. */}
+      <div
+        aria-hidden="true"
+        className="absolute -inset-10 -z-10 scale-105 bg-[url(/login/meadow.webp)] bg-cover bg-center blur-sm brightness-[0.6]"
+      />
+      <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl bg-card shadow-2xl md:grid-cols-2">
+        {/* The pitch: hidden on phones, where the form is the whole page. Always the dark theme, since it sits on a
+            dark abstract backdrop (generated). */}
+        <section className="dark hidden flex-col justify-between gap-12 bg-[url(/login/abstract.webp)] bg-cover bg-center p-10 text-foreground md:flex">
           <p className="font-mono text-lg font-medium tracking-tight">
-            sonnet<span className="text-brand">.</span>
+            sonnet<span className="text-foreground">.</span>
           </p>
           <div>
             <h2 className="text-3xl font-medium tracking-tight text-balance">All your classes, one calm place.</h2>
             <ul className="mt-8 flex flex-col gap-5">
               {POINTS.map(([title, text]) => (
                 <li key={title} className="flex gap-3">
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true" />
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground" aria-hidden="true" />
                   <span className="text-sm">
                     <span className="font-medium">{title}.</span>{" "}
                     <span className="text-muted-foreground">{text}</span>
