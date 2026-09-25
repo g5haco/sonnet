@@ -84,7 +84,7 @@ export function Dashboard({
   const [adding, setAdding] = useState(false);
   const [saving, startSave] = useTransition();
 
-  if (!term) return <Onboarding />;
+  if (!term) return <Onboarding name={name} />;
   const termStart = new Date(`${term.start}T00:00:00`);
 
   // Checking off the last thing due this week earns the "week cleared" moment.
