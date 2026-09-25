@@ -10,10 +10,15 @@ import { TOUR_KEY } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Name", "Semester", "Canvas", "Courses", "Done"];
+const STEPS = ["Name", "Term", "Canvas", "Courses", "Done"];
+// Quarters run about 11 weeks (10 of classes plus finals), semesters about 16. The number stays editable.
+const KINDS = [
+  ["Quarter", "11"],
+  ["Semester", "16"],
+] as const;
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// First run: name, semester dates, Canvas, courses, then a finish line. Nothing saves until "Go to Home",
+// First run: name, term dates, Canvas, courses, then a finish line. Nothing saves until "Go to Home",
 // because saving the semester is what swaps this screen for Home. Canvas connects after the semester (its
 // settings live on that row) and its first sync runs in the background with a toast.
 export function Onboarding({ name: known = "" }: { name?: string }) {
@@ -23,7 +28,7 @@ export function Onboarding({ name: known = "" }: { name?: string }) {
   const onCanvas = Boolean(canvas.baseUrl.trim() && (canvas.token.trim() || canvas.icsUrl.trim()));
   const [dir, setDir] = useState(1);
   const [start, setStart] = useState("");
-  const [weeks, setWeeks] = useState("16");
+  const [weeks, setWeeks] = useState("11");
   const [courses, setCourses] = useState<{ code: string; name: string }[]>([]);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -142,14 +147,29 @@ export function Onboarding({ name: known = "" }: { name?: string }) {
 
               {step === 1 && (
                 <>
-                  <h1 className="text-2xl font-medium tracking-tight">When does your semester run?</h1>
+                  <h1 className="text-2xl font-medium tracking-tight">When does your term run?</h1>
                   <p className="mb-4 text-sm text-muted-foreground">So the weekly bars line up with your real weeks.</p>
+                  <div role="radiogroup" aria-label="Term type" className="mb-2 grid grid-cols-2 gap-2">
+                    {KINDS.map(([kind, n]) => (
+                      <button
+                        key={kind}
+                        type="button"
+                        role="radio"
+                        aria-checked={weeks === n}
+                        onClick={() => setWeeks(n)}
+                        className="flex h-14 flex-col items-start justify-center rounded-2xl border border-border px-4 text-left transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring aria-checked:border-foreground aria-checked:bg-secondary"
+                      >
+                        <span className="text-sm font-medium">{kind}</span>
+                        <span className="font-mono text-xs text-muted-foreground">{n} weeks</span>
+                      </button>
+                    ))}
+                  </div>
                   <label htmlFor="start" className={label}>
                     First day of classes
                   </label>
                   <input id="start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={field} />
                   <label htmlFor="weeks" className={cn(label, "mt-2")}>
-                    Weeks in the semester
+                    Weeks in the term <span className="font-normal text-muted-foreground">(counting finals)</span>
                   </label>
                   <input
                     id="weeks"
