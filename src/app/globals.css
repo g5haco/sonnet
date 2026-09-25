@@ -158,6 +158,11 @@
   ::selection {
     background: var(--highlight);
   }
+  /* Every scrollbar: thin, a muted-ink thumb on no track, instead of the browser default. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent) transparent;
+  }
   /* Focus: every focus-visible ring gets a 2px gap in the page color (Paper & Ink). Base layer, so an explicit
      ring-offset-* utility still wins. */
   [class*="focus-visible:ring"]:focus-visible {
