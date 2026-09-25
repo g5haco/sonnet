@@ -14,7 +14,7 @@ test("a saved layout keeps valid places and drops unknown, repeated, off-grid, t
     { id: "focus", x: 10, y: 4, w: 2, h: 2 },
     { id: "weather", x: 0, y: 0, w: 3, h: 2 },
     { id: "next", x: 8, y: 0, w: 6, h: 2 }, // off the right edge
-    { id: "courses", x: 0, y: 0, w: 2, h: 2 }, // smaller than it can go
+    { id: "courses", x: 0, y: 0, w: 1, h: 2 }, // smaller than it can go
     { id: "exam", x: 10, y: 3, w: 2, h: 2 }, // overlaps focus
     { id: "week", x: 0, y: 0, w: 3, h: 2 }, // the old This week widget: now the Calendar
     { id: "focus", x: 0, y: 3, w: 2, h: 2 },
