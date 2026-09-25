@@ -37,7 +37,7 @@ Everything works on the live site (user's signed-in check, 2026-09-25): auth, on
 
 Do not reverse these casually.
 
-- **Palette = Paper & Ink.** Color may only mean: you/now (primary), a course, a status, the one primary action. Everything else stays neutral. Marigold as text only via `--warning`; bright marigold is fill only. No chart gradients.
+- **Palette = Midnight Study** (replaced Paper & Ink, user-approved exact values, `globals.css`). Shell is monochrome (chroma-0 dark greys, off-white text); color only for courses, status, data. `--primary` (= `--brand`) is off-white in dark / ink in light: primary button, "now"/today markers. Theme follows system. Course hues `35,80,115,150,195,250,295,350` at L/C 0.74/0.11 dark, 0.64/0.12 light. `chip` utility (16% tint, same-hue text, 50% border via `--chip`) used only on Up next course code + status labels and chat WorkCard late label. No chart gradients.
 - **Token aliases live in `:root` only** (`--brand`, `--chart-1/2`, `--sidebar-*`, `--warning-fill`): next-themes puts `.dark` on `<html>`, so they resolve against dark values. Don't re-add them to `.dark`.
 - **"Due soon" = today/tmrw buckets** of the existing `when()` (≈36h by its rounding), not a new 48h rule, so a "2d" label never has two colors. User was told; change only if asked.
 - **Existing courses keep their stored hues**; only new courses and the picker use the new list. Saving settings still works (no radio checked → no hue sent).

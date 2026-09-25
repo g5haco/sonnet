@@ -71,8 +71,8 @@ function NameForm({ name }: { name: string }) {
 // Each preview paints its own theme whatever the app is in now, so the colors are fixed here
 // (the neutral surfaces from globals.css: background, sidebar/card, accent, foreground).
 const PAINT = {
-  light: { bg: "oklch(0.985 0.006 85)", rail: "oklch(0.965 0.008 85)", line: "oklch(0.915 0.01 85)", ink: "oklch(0.22 0.015 260)" },
-  dark: { bg: "oklch(0.17 0.01 260)", rail: "oklch(0.19 0.011 260)", line: "oklch(0.29 0.013 260)", ink: "oklch(0.93 0.012 85)" },
+  light: { bg: "oklch(0.975 0.002 260)", rail: "oklch(0.96 0.003 260)", line: "oklch(0.935 0.004 260)", ink: "oklch(0.2 0.005 260)" },
+  dark: { bg: "oklch(0.18 0 0)", rail: "oklch(0.195 0 0)", line: "oklch(0.27 0 0)", ink: "oklch(0.94 0.004 90)" },
 };
 const THEMES = [
   { id: "light", label: "Light" },

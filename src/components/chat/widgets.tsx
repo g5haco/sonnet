@@ -140,8 +140,9 @@ export function WorkCard({ text }: { text: string }) {
               <span
                 className={cn(
                   "shrink-0 font-mono text-sm tabular-nums",
-                  done ? "text-muted-foreground" : due.late && "text-destructive",
+                  done ? "text-muted-foreground" : due.late && "chip rounded-full px-1.5",
                 )}
+                style={!done && due.late ? ({ "--chip": "var(--destructive)" } as React.CSSProperties) : undefined}
               >
                 {done ? "done" : due.label}
               </span>

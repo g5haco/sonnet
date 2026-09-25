@@ -64,45 +64,45 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paper & Ink: warm paper surfaces, ink text, and color only where it means something:
-   --primary (= --brand) = "you, now" and the one primary action; --done / --warning / --destructive = status
-   (finished / due soon / late); course colors = oklch(var(--course-l) var(--course-c) <hue per course>), paired
-   with the course code. Marigold is text only as --warning; --warning-fill and --highlight are fills. */
+/* Midnight Study: the app shell is monochrome; the student's life is colorful. Color only means a course
+   (oklch(var(--course-l) var(--course-c) <hue>)), a status (--done finished / --warning due soon / --destructive late),
+   or data. --primary (= --brand) is ink-on-paper: off-white in dark, ink in light; it also marks "now" / today.
+   --warning-fill and --highlight are fills. */
 :root {
-  --background: oklch(0.985 0.006 85);
-  --foreground: oklch(0.22 0.015 260);
-  --card: oklch(0.965 0.008 85);
-  --card-foreground: oklch(0.22 0.015 260);
-  --popover: oklch(0.995 0.004 85);
-  --popover-foreground: oklch(0.22 0.015 260);
-  --primary: oklch(0.44 0.12 258);
-  --primary-foreground: oklch(0.985 0.006 85);
-  --secondary: oklch(0.93 0.012 258);
-  --secondary-foreground: oklch(0.22 0.015 260);
-  --muted: oklch(0.935 0.009 85);
-  --muted-foreground: oklch(0.47 0.012 260);
-  --accent: oklch(0.915 0.01 85);
-  --accent-foreground: oklch(0.22 0.015 260);
+  --background: oklch(0.975 0.002 260);
+  --foreground: oklch(0.2 0.005 260);
+  --card: oklch(0.995 0.001 260);
+  --card-foreground: oklch(0.2 0.005 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.005 260);
+  --primary: oklch(0.21 0.005 260);
+  --primary-foreground: oklch(0.98 0.003 90);
+  --secondary: oklch(0.94 0.003 260);
+  --secondary-foreground: oklch(0.2 0.005 260);
+  --muted: oklch(0.95 0.003 260);
+  --muted-foreground: oklch(0.49 0.006 260);
+  --accent: oklch(0.935 0.004 260);
+  --accent-foreground: oklch(0.2 0.005 260);
   --brand: var(--primary);
   --brand-foreground: var(--primary-foreground);
-  --done: oklch(0.5 0.12 155);
-  --warning: oklch(0.52 0.11 70);
+  --done: oklch(0.52 0.13 150);
+  --warning: oklch(0.54 0.12 65);
   --warning-fill: oklch(0.72 0.14 78);
-  --highlight: oklch(0.72 0.14 78 / 28%);
-  --course-l: 0.6;
-  --course-c: 0.15;
+  --highlight: oklch(0.88 0.1 90 / 60%);
+  --course-l: 0.64;
+  --course-c: 0.12;
   --event: 20%; /* how much course color washes into calendar event fills */
-  --destructive: oklch(0.54 0.19 30);
-  --border: oklch(0.3 0.02 85 / 11%);
-  --input: oklch(0.3 0.02 85 / 18%);
-  --ring: oklch(0.5 0.13 258);
+  --destructive: oklch(0.55 0.19 30);
+  --border: oklch(0.9 0.003 260);
+  --input: oklch(0.64 0.004 260);
+  --ring: oklch(0.3 0.005 260);
   --chart-1: var(--primary);
   --chart-2: var(--done);
   --chart-3: oklch(0.45 0 0);
   --chart-4: oklch(0.7 0 0);
   --chart-5: oklch(0.85 0 0);
   --radius: 0.75rem;
-  --sidebar: oklch(0.965 0.008 85);
+  --sidebar: oklch(0.96 0.003 260);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
@@ -115,34 +115,42 @@
 /* Aliases (--brand, --chart-1/2, --sidebar-*) and --warning-fill live in :root only: next-themes puts .dark on <html>,
    the same element, so they resolve against the dark values. */
 .dark {
-  --background: oklch(0.17 0.01 260);
-  --foreground: oklch(0.93 0.012 85);
-  --card: oklch(0.205 0.012 260);
-  --card-foreground: oklch(0.93 0.012 85);
-  --popover: oklch(0.235 0.013 260);
-  --popover-foreground: oklch(0.93 0.012 85);
-  --primary: oklch(0.78 0.1 255);
-  --primary-foreground: oklch(0.18 0.03 258);
-  --secondary: oklch(0.28 0.02 258);
-  --secondary-foreground: oklch(0.93 0.012 85);
-  --muted: oklch(0.26 0.012 260);
-  --muted-foreground: oklch(0.72 0.012 85);
-  --accent: oklch(0.29 0.013 260);
-  --accent-foreground: oklch(0.93 0.012 85);
-  --done: oklch(0.77 0.14 155);
-  --warning: oklch(0.82 0.12 78);
-  --highlight: oklch(0.72 0.14 78 / 22%);
-  --course-l: 0.76;
-  --course-c: 0.13;
+  --background: oklch(0.18 0 0);
+  --foreground: oklch(0.94 0.004 90);
+  --card: oklch(0.21 0 0);
+  --card-foreground: oklch(0.94 0.004 90);
+  --popover: oklch(0.225 0.005 260);
+  --popover-foreground: oklch(0.94 0.004 90);
+  --primary: oklch(0.93 0.006 90);
+  --primary-foreground: oklch(0.18 0.004 260);
+  --secondary: oklch(0.26 0.005 260);
+  --secondary-foreground: oklch(0.94 0.004 90);
+  --muted: oklch(0.245 0.004 260);
+  --muted-foreground: oklch(0.71 0 0);
+  --accent: oklch(0.27 0 0);
+  --accent-foreground: oklch(0.94 0.004 90);
+  --done: oklch(0.76 0.14 150);
+  --warning: oklch(0.82 0.13 80);
+  --highlight: oklch(0.8 0.12 85 / 24%);
+  --course-l: 0.74;
+  --course-c: 0.11;
   --event: 30%;
-  --destructive: oklch(0.71 0.17 30);
-  --border: oklch(0.95 0.01 85 / 9%);
-  --input: oklch(0.95 0.01 85 / 14%);
-  --ring: oklch(0.8 0.1 255);
+  --destructive: oklch(0.7 0.17 32);
+  --border: oklch(1 0 0 / 7%);
+  --input: oklch(1 0 0 / 35%);
+  --ring: oklch(0.8 0.006 90);
   --chart-3: oklch(0.7 0 0);
   --chart-4: oklch(0.45 0 0);
   --chart-5: oklch(0.3 0 0);
-  --sidebar: oklch(0.19 0.011 260);
+  --sidebar: oklch(0.195 0 0);
+}
+
+/* Course tag / status label: 16% tint, same-hue text pulled toward the ink (lighter in dark, darker in light), thin
+   same-hue border. Set --chip to a course color or a status token. oklab so the near-neutral ink doesn't shift the hue. */
+@utility chip {
+  border: 1px solid color-mix(in oklab, var(--chip) 50%, transparent);
+  background: color-mix(in oklab, var(--chip) 16%, transparent);
+  color: color-mix(in oklab, var(--chip) 60%, var(--foreground));
 }
 
 @layer base {

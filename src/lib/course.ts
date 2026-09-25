@@ -1,6 +1,7 @@
 // Course colors share one lightness/chroma (theme tokens); only the hue varies.
-// Hues stay >= 40deg from destructive (25), done (150) and brand (205-220) so a course never reads as a status.
-export const HUES = [75, 125, 185, 215, 290, 320, 350, 45];
+// Eight hues 45deg apart. Amber (80) and green (150) share hues with --warning / --done: status is always a word or icon
+// (or a chip), course identity always a dot/bar/block, so form tells them apart, not hue alone.
+export const HUES = [35, 80, 115, 150, 195, 250, 295, 350];
 
 export const courseColor = (hue: number) => `oklch(var(--course-l) var(--course-c) ${hue})`;
 

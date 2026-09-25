@@ -164,6 +164,7 @@ export function UpNext({
           {list.map((i) => {
             const done = !!i.doneAt;
             const due = when(i.due, now);
+            const status = done ? "done" : due.late ? "destructive" : due.soon ? "warning" : null;
             return (
               <li key={i.id} className="group flex items-center">
                 {/* min-w-0: otherwise a long title sets the row's minimum width and pushes the due label and
@@ -195,8 +196,9 @@ export function UpNext({
                           </span>
                         </span>
                         <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                          <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
-                          <span className="truncate">{i.course}</span>
+                          <span className="chip truncate rounded-full px-1.5" style={{ "--chip": courseColor(i.hue) } as React.CSSProperties}>
+                            {i.course}
+                          </span>
                           {/* on the meta line, so a long title can't clip it */}
                           {i.kind === "exam" && (
                             <span className="shrink-0 rounded-full bg-secondary px-1.5 text-secondary-foreground">exam</span>
@@ -206,8 +208,9 @@ export function UpNext({
                       <span
                         className={cn(
                           "shrink-0 font-mono text-sm tabular-nums",
-                          done ? "text-done" : due.late ? "text-destructive" : due.soon ? "text-warning" : "text-muted-foreground",
+                          status ? "chip rounded-full px-1.5" : "text-muted-foreground",
                         )}
+                        style={status ? ({ "--chip": `var(--${status})` } as React.CSSProperties) : undefined}
                       >
                         {/* graded work shows its score, e.g. 18/20 */}
                         {i.score != null ? scoreLabel(i.score, i.points) : done ? "done" : due.label}
