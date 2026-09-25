@@ -83,6 +83,9 @@ test("planner tools only for change requests", () => {
   expect(wantsChange("add an essay for POLS 202 due friday")).toBe(true);
   expect(wantsChange("I have a quiz on thursday")).toBe(true);
   expect(wantsChange("yes")).toBe(true);
+  expect(wantsChange("My math is everyday from 1:30pm to 2:20pm")).toBe(true);
+  expect(wantsChange("chem lab is on Tuesdays 2-4")).toBe(true);
+  expect(wantsChange("When is my math class?")).toBe(false);
 });
 
 test("task questions get no tools; flashcards only when asked", () => {

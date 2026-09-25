@@ -185,7 +185,12 @@ export function ProposalCard({ item, onResolve }: { item: Entry; onResolve: (acc
         </>
       )}
       {(p.type === "add_class" || p.type === "update_class") && (
-        <Week anchor={startOfDay(new Date())} klass={p} skipClass={p.type === "update_class" ? p.id : undefined} />
+        <Week
+          anchor={startOfDay(new Date())}
+          klass={p}
+          skipClass={p.type === "update_class" ? p.id : undefined}
+          saved={status === "saved"}
+        />
       )}
 
       {open ? (
@@ -307,12 +312,14 @@ function Week({
   skipItem,
   skipClass,
   timed,
+  saved,
 }: {
   anchor: Date;
   pin?: Date | null; // where the item lands; null until the student picks a time
   klass?: ClassTime & { course: string };
   skipItem?: string; // the item being moved, so it isn't drawn twice
   skipClass?: string; // the class time being changed
+  saved?: boolean; // once saved, the class is in the schedule too, so it would "overlap" itself
   timed?: boolean;
 }) {
   const { schedule } = useAssistant();
@@ -339,7 +346,7 @@ function Week({
 
   // The fit, in words.
   let line: React.ReactNode = null;
-  if (klass) {
+  if (klass && !saved) {
     const clash = fresh.flatMap((f) => classes.filter((c) => overlap(f, c)).map((c) => ({ f, c })))[0];
     line = clash ? (
       <span className="text-destructive">

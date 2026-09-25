@@ -456,7 +456,11 @@ export const wantsChange = (question: string) =>
   /\b(add|put|move|change|mark|rename|reschedule|schedule|delete|remove|create|update|edit|drop|cancel|check off|push|shift)\b/i.test(
     question,
   ) ||
-  (!QUESTION.test(question) && /\b(i have|there'?s a)\b/i.test(question));
+  (!QUESTION.test(question) &&
+    // "I have a quiz Friday"; "My math is every day from 1:30pm to 2:20pm" (a statement with a clock time or a repeating day)
+    /\b(i have|there'?s a|every ?day|weekdays|(mon|tues|wednes|thurs|fri|satur|sun)days|\d{1,2}(:\d{2})? ?[ap]m|\d{1,2}:\d{2})\b/i.test(
+      question,
+    ));
 // Same for the deck: a model offered make_flashcards as its only tool calls it for anything, even
 // "what's due this week?". It only gets the tool when the student asks for cards.
 const CARDS_HINT =
@@ -610,6 +614,9 @@ export async function streamReply(
         let thinking = false;
         let sent = false; // any answer text yet?
         let retried = false;
+        // Free models sometimes write a tool call as text ({"ops":[...]}). A reply that opens with a
+        // JSON object is held back, retried once, and never shown.
+        let held = "";
         const sources = new Map<string, string>(); // url -> title, from web search citations
         if (search) out.enqueue(encode({ t: "search", v: question.slice(0, 200) }));
         const calls: { name: string; args: string }[] = []; // tool calls arrive in pieces
@@ -621,6 +628,7 @@ export async function streamReply(
               const again = !sent && !calls.length && !retried ? await open() : null;
               if (!again?.ok || !again.body) break;
               retried = true;
+              held = "";
               reader = again.body.pipeThrough(new TextDecoderStream()).getReader();
               buffer = "";
               continue;
@@ -660,8 +668,15 @@ export async function streamReply(
                 if (a?.type === "url_citation" && /^https?:\/\//.test(a.url_citation?.url ?? ""))
                   sources.set(a.url_citation.url, String(a.url_citation.title ?? "").slice(0, 200));
               if (delta.content) {
-                sent = true;
-                out.enqueue(encode({ t: "text", v: delta.content }));
+                if (!sent) {
+                  held += delta.content;
+                  // Blank, or looks like JSON: keep holding.
+                  if (held.trim() && !/^\s*\{\s*("|$)/.test(held)) {
+                    out.enqueue(encode({ t: "text", v: held }));
+                    held = "";
+                    sent = true;
+                  }
+                } else out.enqueue(encode({ t: "text", v: delta.content }));
               }
               for (const tc of delta.tool_calls ?? []) {
                 const call = (calls[tc.index ?? 0] ??= { name: "", args: "" });
