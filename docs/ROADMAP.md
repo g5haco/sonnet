@@ -16,7 +16,21 @@ Specs: [v1](superpowers/specs/2026-09-22-student-hub-design.md) · [v1.5 shell, 
 | 8   | **Focus & heatmap**             | Pomodoro timer that fills the study heatmap and streak                                                                                                                                              | —                                                                                         | ✅ Done: global focus timer in the sidebar (animated ring panel), minutes per course, 18-week heatmap + streak on Home                                                                                                  |
 | 9   | **Polish**                      | Phone layout pass, a week of real daily use + fixes                                                                                                                                                 | Feedback                                                                                  | Ongoing                                                                                                                               |
 
-**Now: Phase 9 — polish and a real-use pass.** Done so far: course page What-if and settings moved into a popover and a dialog; Home is a widget grid you arrange in edit mode (drag, resize, remove, add back), saved per user (migration 0008). Next: a widget library and new widgets, then customizable sidebar actions. Also added in Phase 8: the chat's thought chain (steps, reasoning, web search with sources) and drag-and-drop files.
+**Now: Phase 9 — polish and a real-use pass.**
+
+Done in Phase 9 (2026-09-24):
+- **Home**: a 12×6 grid of square cells that fits the screen; drag widgets anywhere, resize from a corner, a widget library with live previews, 25 widgets that fill their size (charts stretch, lists spread, fixed designs scale). Saved per user (migration 0008). Grade trend needs migration 0009.
+- **Course page**: What-if in a popover; Course settings window (name, code, color, class times, delete); work and materials full width.
+- **Sign in / sign up**: two-panel page, sign-up mode, Continue with Google (Google provider must be enabled in Supabase).
+- **Onboarding**: a floating 4-step window (name, term as quarter or semester, Canvas, done), then a one-time 5-slide feature tour.
+- **Canvas**: opening the app syncs when the last sync is over an hour old (the Vercel Hobby cron stays daily).
+- Tried and removed at your request: customizable sidebar buttons.
+
+Still to do in Phase 9:
+- Real-use pass signed in: Canvas grades and scores, focus sessions, web search, photo transcription, study-guide chips, and everything above (all verified only in the signed-out preview).
+- Production polish: page titles and descriptions, social preview image, custom 404, robots.txt and sitemap, favicon check, alt text, console errors, bundle size, source maps, exposed debug settings.
+- Say "term" instead of "semester" in Settings and Home's nudge.
+- Dashboard polish beyond Home (calendar, courses list).
 
 ### Added before Phase 5 (from your feedback)
 
@@ -49,4 +63,4 @@ Nothing was dropped; phases were reordered (your choice: shell → AI → calend
 
 ## Later (SaaS step and extras)
 
-Audio / video / YouTube uploads with transcription, lecture recording, multi-user sign-up, landing page (taste-skill), Stripe, real email provider (Resend) + custom sign-in email, Canvas OAuth developer key, two-way Google Calendar, auto time-blocking.
+Audio / video / YouTube uploads with transcription, lecture recording, landing page (taste-skill), Stripe, real email provider (Resend) + custom sign-in email, Canvas OAuth developer key, two-way Google Calendar, auto time-blocking.
