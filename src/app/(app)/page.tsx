@@ -7,11 +7,10 @@ export default async function Page() {
   const { supabase, name } = await requireUser();
 
   const [settings, courses, items, meetings, focus, materials, history] = await Promise.all([
-    supabase.from("settings").select("*").maybeSingle(), // "*": home_layout only exists after migration 0008
+    supabase.from("settings").select("*").maybeSingle(),
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).order("starts"),
-    // Extra: before migration 0007 this fails and Home shows an empty heatmap.
     supabase
       .from("focus_sessions")
       .select("started_at, minutes, course_id")
@@ -19,7 +18,7 @@ export default async function Page() {
       .limit(1000), // ponytail: newest 1000 sessions cover the 18-week heatmap; filter by date if they don't
     // The Recent materials widget: newest 5 across courses.
     supabase.from("materials").select("id, kind, name, course_id").order("created_at", { ascending: false }).limit(5),
-    // Grade trend points, newest 2000; before migration 0009 this fails and the widget says so.
+    // Grade trend points, newest 2000.
     supabase.from("grade_history").select("course_id, day, grade").order("day", { ascending: false }).limit(2000),
   ]);
   const error = settings.error ?? courses.error ?? items.error ?? meetings.error;
@@ -35,7 +34,7 @@ export default async function Page() {
       items={all}
       sessions={focus.data ?? []}
       materials={materials.data ?? []}
-      history={history.error ? null : history.data}
+      history={history.data ?? []}
       cards={toCards(courses.data!, all, toMeetings(meetings.data!, courses.data!))}
     />
   );

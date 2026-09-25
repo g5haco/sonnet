@@ -6,9 +6,7 @@ import { courseColor } from "@/lib/course";
 import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
-const KIND: Record<Item["kind"], string> = { assignment: "assignment", exam: "exam", quiz: "quiz", reading: "reading" };
-
-// What a work item is and when it's due, with its one action (done / not done) and the way to its course.
+// What a work item is and when it's due, with its one action (done / not done) and a way into the assignment.
 // Shown in popovers: calendar chips, and item links and lists in the assistant's answers.
 export function ItemDetails({ item, now, onToggle }: { item: Item; now: number; onToggle: (id: string) => void }) {
   const due = new Date(item.due);
@@ -17,7 +15,7 @@ export function ItemDetails({ item, now, onToggle }: { item: Item; now: number; 
     <>
       <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
         <span className="size-2 rounded-full" style={{ background: courseColor(item.hue) }} />
-        {item.course} · {KIND[item.kind]}
+        {item.course} · {item.kind}
       </p>
       <p className="text-base leading-snug font-medium">{item.title}</p>
       <p className={late ? "text-destructive" : "text-muted-foreground"}>

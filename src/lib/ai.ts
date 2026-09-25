@@ -266,8 +266,8 @@ export type AttachedItem = {
   html_url?: string | null;
   points_possible?: number | null;
   score?: number | null;
-  submission_types?: string[] | null; // migration 0012
-  allowed_attempts?: number | null; // migration 0012
+  submission_types?: string[] | null;
+  allowed_attempts?: number | null;
 };
 
 // "Ask about this": the one assignment the chat is about, every field Sonnet has, and plainly what it lacks.
@@ -329,9 +329,9 @@ export async function studentContext(
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select("id, title, kind, due, done_at, course_id, description").order("due").limit(300),
-    supabase.from("class_meetings").select("*").order("starts"), // "*": skip_dates exists only after migration 0011
+    supabase.from("class_meetings").select("id, course_id, weekdays, starts, ends, location, skip_dates").order("starts"),
     supabase.from("materials").select("course_id, kind, name, url").order("created_at"),
-    // "*": submission_types / allowed_attempts exist only after migration 0012. RLS keeps it to the student's own.
+    // RLS keeps it to the student's own.
     item ? supabase.from("items").select("*").eq("id", item).maybeSingle() : null,
   ]);
   const attached = (one?.data ?? null) as (AttachedItem & { course_id: string }) | null;

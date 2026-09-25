@@ -40,7 +40,7 @@ type CanvasItem = {
   points_possible: number | null;
   score: number | null;
   done_at: string | null;
-  // Token path only (migration 0012). ICS rows leave them out, but a bulk upsert still sends them as null.
+  // Token path only; ICS rows leave them out (a bulk upsert sends them as null).
   submission_types?: string[] | null;
   allowed_attempts?: number | null;
 };
@@ -349,10 +349,9 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       const id = await getOrCreateCourse(admin, userId, course, index, existing);
       courseIds.set(String(course.id), id);
       // Canvas's own current score (weights applied); null when the course hides totals.
-      // A separate write, so a database without migration 0006 still syncs (the error is ignored).
       const grade = course.enrollments?.find((e) => Number.isFinite(e.computed_current_score))?.computed_current_score;
       await admin.from("courses").update({ grade: grade ?? null }).eq("id", id);
-      // Today's point on the Grade trend (one per course per day). Ignored before migration 0009.
+      // Today's point on the Grade trend (one per course per day).
       if (grade != null)
         await admin
           .from("grade_history")
@@ -400,22 +399,10 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       ...mapIcsEvents(ics, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems, codes),
     ].filter((item) => item.course_id);
     if (items.length) {
-      const save = (rows: object[]) =>
-        admin.from("items").upsert(
-          rows.map((row) => ({ ...row, user_id: userId })),
-          { onConflict: "user_id,source,external_id" },
-        );
-      let { error } = await save(items);
-      // Before migration 0012 the detail columns don't exist: save everything else.
-      if (error && ["PGRST204", "42703"].includes(error.code))
-        ({ error } = await save(
-          items.map((row) => {
-            const basic = { ...row };
-            delete basic.submission_types;
-            delete basic.allowed_attempts;
-            return basic;
-          }),
-        ));
+      const { error } = await admin.from("items").upsert(
+        items.map((item) => ({ ...item, user_id: userId })),
+        { onConflict: "user_id,source,external_id" },
+      );
       if (error) throw error;
     }
     // An empty feed is more likely a Canvas hiccup than an empty term: then leave the saved rows alone.

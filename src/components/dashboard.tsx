@@ -61,7 +61,7 @@ export function Dashboard({
   cards,
   sessions,
   materials = [],
-  history = null,
+  history = [],
   name,
   layout: saved = DEFAULT_LAYOUT,
 }: {
@@ -73,7 +73,7 @@ export function Dashboard({
   cards: CourseCard[];
   sessions: FocusSession[];
   materials?: RecentMaterial[];
-  history?: GradePoint[] | null;
+  history?: GradePoint[];
 }) {
   const [now] = useState(() => Date.now()); // one clock per render tree
   const { shown, checked, toggle: flipItem, remove } = useWork(items);

@@ -118,7 +118,6 @@ export async function setClassDayOff(ids: string[], date: string, off: boolean):
   const { data, error } = await supabase.from("class_meetings").select("*").in("id", ids);
   if (error) return done(error, "find those class times");
   if (!data?.length) return { error: "Those class times are gone." };
-  if (!("skip_dates" in data[0])) return { error: "Run migration 0011 in Supabase first." };
   for (const m of data) {
     const rest = ((m.skip_dates ?? []) as string[]).filter((d) => d !== date);
     const skip = off ? [...rest, date].sort() : rest;
@@ -134,7 +133,7 @@ export async function deleteMeeting(id: string): Promise<Result> {
   return done(error, "remove the class time");
 }
 
-// Home's widget layout. Before migration 0008 the column doesn't exist, so say that instead of a schema error.
+// Home's widget layout.
 export async function saveHomeLayout(raw: unknown): Promise<Result> {
   const layout = readLayout(raw);
   const supabase = await createClient();
@@ -143,7 +142,6 @@ export async function saveHomeLayout(raw: unknown): Promise<Result> {
     .from("settings")
     .update({ home_layout: layout })
     .eq("user_id", data?.claims.sub ?? "");
-  if (error?.message.includes("home_layout")) return { error: "Saving layouts needs migration 0008 in Supabase." };
   return done(error, "save your Home layout");
 }
 

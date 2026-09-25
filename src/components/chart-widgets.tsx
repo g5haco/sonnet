@@ -33,9 +33,9 @@ const graded = (courses: Course[]) => courses.filter((c): c is Course & { grade:
 const hm = (min: number) => (min < 60 ? `${min}m` : `${Math.floor(min / 60)}h ${min % 60 ? `${min % 60}m` : ""}`.trim());
 
 // Each course's grade over time, one line per course, from the grade Canvas sync records daily.
-export function TrendWidget({ courses, history }: { courses: Course[]; history: GradePoint[] | null }) {
+export function TrendWidget({ courses, history }: { courses: Course[]; history: GradePoint[] }) {
   const lines = courses
-    .map((c) => ({ c, pts: (history ?? []).filter((p) => p.course_id === c.id).sort((a, b) => a.day.localeCompare(b.day)) }))
+    .map((c) => ({ c, pts: history.filter((p) => p.course_id === c.id).sort((a, b) => a.day.localeCompare(b.day)) }))
     .filter((l) => l.pts.length > 0);
   const days = [...new Set(lines.flatMap((l) => l.pts.map((p) => p.day)))].sort();
   const grades = lines.flatMap((l) => l.pts.map((p) => Number(p.grade)));
@@ -45,9 +45,7 @@ export function TrendWidget({ courses, history }: { courses: Course[]; history: 
 
   return (
     <Block title="Grade trend" aside={days.length > 1 ? `since ${new Date(`${days[0]}T00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : undefined}>
-      {history === null ? (
-        <Empty>Grade trends start once migration 0009 is in and Canvas syncs.</Empty>
-      ) : days.length < 2 ? (
+      {days.length < 2 ? (
         <Empty>Each daily Canvas sync adds a point. The lines appear after syncs on two different days.</Empty>
       ) : (
         <>

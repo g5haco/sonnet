@@ -17,8 +17,7 @@ type ItemRow = {
 type MeetingRow = { id: string; course_id: string; weekdays: number[]; starts: string; ends: string; location: string; skip_dates?: string[] };
 
 export const ITEM_COLS = "id, title, kind, due, done_at, course_id, score, points_possible";
-// "*", not a column list: skip_dates (migration 0011) is simply absent before the migration runs.
-export const MEETING_COLS = "*";
+export const MEETING_COLS = "id, course_id, weekdays, starts, ends, location, skip_dates";
 
 export function toItems(rows: ItemRow[], courses: Course[]): Item[] {
   const byId = new Map(courses.map((c) => [c.id, c]));
