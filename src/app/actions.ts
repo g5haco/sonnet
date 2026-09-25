@@ -110,6 +110,19 @@ export async function updateMeeting(
   return done(error, "save the class time");
 }
 
+// One day off for a weekly class ("no class next Monday"): the date joins the class time's skip_dates.
+export async function removeClassDay(id: string, date: string): Promise<Result> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Pick a day." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("class_meetings").select("*").eq("id", id).maybeSingle();
+  if (error) return done(error, "find that class time");
+  if (!data) return { error: "That class time is gone." };
+  if (!("skip_dates" in data)) return { error: "Run migration 0011 in Supabase first." };
+  const skip = [...new Set([...(data.skip_dates ?? []), date])].sort();
+  const { error: saveError } = await supabase.from("class_meetings").update({ skip_dates: skip }).eq("id", id);
+  return done(saveError, "remove that day");
+}
+
 export async function deleteMeeting(id: string): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase.from("class_meetings").delete().eq("id", id);

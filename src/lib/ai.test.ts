@@ -73,6 +73,15 @@ test("tool calls become checked proposals: a room change keeps the rest of the c
   expect(
     call("add_class_time", { course: "pols202", days: ["Tuesday", "thu"], starts: "9:00", ends: "10:15" }),
   ).toMatchObject({ type: "add_class", courseId: "c1", weekdays: [2, 4], starts: "09:00", ends: "10:15" });
+  expect(call("remove_class_day", { ref: "class:4d5e6f", date: "2026-09-28" })).toEqual({
+    type: "remove_class_day",
+    id: "4d5e6f-full",
+    course: "POLS 202",
+    date: "2026-09-28",
+    starts: "10:30",
+    ends: "12:20",
+  });
+  expect(call("remove_class_day", { ref: "class:4d5e6f", date: "2026-09-29" })).toBeNull(); // a Tuesday: no class
   expect(call("delete_item", { ref: "ffffff" })).toBeNull(); // unknown ref
   expect(call("set_semester", { start: "2026-08-24", weeks: 40 })).toBeNull(); // out of range
 });
@@ -86,6 +95,7 @@ test("planner tools only for change requests", () => {
   expect(wantsChange("My math is everyday from 1:30pm to 2:20pm")).toBe(true);
   expect(wantsChange("chem lab is on Tuesdays 2-4")).toBe(true);
   expect(wantsChange("When is my math class?")).toBe(false);
+  expect(wantsChange("No class next monday")).toBe(true);
 });
 
 test("task questions get no tools; flashcards only when asked", () => {

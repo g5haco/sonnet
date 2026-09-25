@@ -37,6 +37,9 @@ test("class sessions land on their weekdays, only inside the semester", () => {
     ["2026-09-21", 10, 30, 12],
     ["2026-09-23", 10, 30, 12],
   ]);
+  // A day removed from the schedule is left out; the rest of the week stays.
+  const off = sessions([{ ...pols, skip_dates: ["2026-09-21"] }], range("week", wed), null);
+  expect(off.map((s) => dayKey(s.start))).toEqual(["2026-09-23"]);
   // Semester ends Dec 13 (16 weeks from Aug 24): nothing the week after.
   expect(sessions([pols], range("week", new Date(2026, 11, 16)), { start: "2026-08-24", weeks: 16 })).toEqual([]);
 });

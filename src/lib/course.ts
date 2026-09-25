@@ -11,7 +11,7 @@ export const nextHue = (taken: number[]) => HUES.find((h) => !taken.includes(h))
 export const dayKey = (d: Date) => d.toLocaleDateString("en-CA");
 
 // Weekly class time. Postgres `time` comes back as "HH:MM:SS"; weekdays use 0 = Sunday like Date.getDay().
-export type Meeting = { id: string; weekdays: number[]; starts: string; ends: string; location: string };
+export type Meeting = { id: string; weekdays: number[]; starts: string; ends: string; location: string; skip_dates?: string[] };
 
 export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

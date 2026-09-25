@@ -58,7 +58,7 @@ export function sessions(meetings: ClassMeeting[], days: Date[], term: Term | nu
     from && until && (d < from || d >= until)
       ? []
       : meetings
-          .filter((m) => m.weekdays.includes(d.getDay()))
+          .filter((m) => m.weekdays.includes(d.getDay()) && !m.skip_dates?.includes(dayKey(d)))
           .map((m) => ({ key: `${m.id}-${dayKey(d)}`, meeting: m, start: at(d, m.starts), end: at(d, m.ends) })),
   );
 }
@@ -138,6 +138,7 @@ export function toIcs(feed: Feed, now: Date) {
       `RRULE:FREQ=WEEKLY;BYDAY=${m.weekdays.map((d) => BYDAY[d]).join(",")};UNTIL=${last}T235959`,
       `SUMMARY:${ics(`${code.get(m.course_id) ?? "Class"} class`)}`,
       ...(m.location ? [`LOCATION:${ics(m.location)}`] : []),
+      ...(m.skip_dates ?? []).map((d) => `EXDATE:${floating(new Date(`${d}T00:00:00Z`), m.starts)}`),
     );
   }
   // Deadlines are moments, not blocks: no DTEND means the event ends when it starts.

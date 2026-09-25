@@ -11,6 +11,7 @@ import {
   deleteCourse,
   deleteItem,
   deleteMeeting,
+  removeClassDay,
   saveTerm,
   updateCourse,
   updateItem,
@@ -62,6 +63,8 @@ export function applyProposal(p: Proposal, courses: { id: string; code: string }
       return updateMeeting(p.id, { weekdays: p.weekdays, starts: p.starts, ends: p.ends, location: p.location });
     case "delete_class":
       return deleteMeeting(p.id);
+    case "remove_class_day":
+      return removeClassDay(p.id, p.date);
     case "add_course":
       return createCourse(form({ code: p.code, name: p.name }));
     case "update_course":
@@ -81,6 +84,7 @@ const VERB: Record<Proposal["type"], [string, string]> = {
   add_class: ["Class time", "Add class time"],
   update_class: ["Class time", "Save"],
   delete_class: ["Remove class time", "Remove"],
+  remove_class_day: ["Remove from schedule", "Remove"],
   add_course: ["New course", "Add course"],
   update_course: ["Course", "Save"],
   delete_course: ["Delete course", "Delete"],
@@ -253,6 +257,19 @@ function Body({ p, current }: { p: Proposal; current?: string }) {
     case "add_class":
     case "delete_class":
       return <p className={cn(title, "font-mono text-base")}>{meetingLabel(p)}</p>;
+    case "remove_class_day":
+      return (
+        <>
+          <p className={title}>
+            {parseDay(p.date).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}
+            <span className="font-mono text-base text-muted-foreground">
+              {" "}
+              {p.starts}–{p.ends}
+            </span>
+          </p>
+          <p className={detail}>Just this day. The weekly class time stays.</p>
+        </>
+      );
     case "update_class":
       return (
         <>
