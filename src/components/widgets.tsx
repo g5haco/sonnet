@@ -5,6 +5,7 @@ import { FileText, Link2, StickyNote } from "lucide-react";
 import Link from "next/link";
 import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
+import { Fit } from "@/components/fit";
 import { WeekStrip } from "@/components/week-strip";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { FocusDial, useFocus } from "@/components/focus-timer";
@@ -22,7 +23,9 @@ const inMinutes = (ms: number) => (ms < 60 * 60_000 ? `${Math.max(1, Math.round(
 export function TimerWidget() {
   return (
     <Block title="Focus timer">
-      <FocusDial className="mx-auto w-full max-w-64" />
+      <Fit>
+        <FocusDial className="w-60" />
+      </Fit>
     </Block>
   );
 }
@@ -38,8 +41,11 @@ export function ClassesWidget({ term, now, wide }: { term: Term | null; now: num
     return (
       <Block title="Today's classes">
         {!next ? (
-          <p className="text-sm text-muted-foreground">{today.length ? "Done with classes for today." : empty}</p>
+          <p className="m-auto text-center text-sm text-balance text-muted-foreground">
+            {today.length ? "Done with classes for today." : empty}
+          </p>
         ) : (
+          <Fit>
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3">
               <span className="mt-2 size-2.5 shrink-0 rounded-full" style={{ background: courseColor(next.meeting.hue) }} />
@@ -60,6 +66,7 @@ export function ClassesWidget({ term, now, wide }: { term: Term | null; now: num
                 </p>
               ))}
           </div>
+          </Fit>
         )}
       </Block>
     );
@@ -75,7 +82,7 @@ export function ClassesWidget({ term, now, wide }: { term: Term | null; now: num
       <div
         role="img"
         aria-label={today.map((s) => `${s.meeting.course} ${clock(s.start)} to ${clock(s.end)}`).join(", ")}
-        className="relative h-16 rounded-lg bg-secondary"
+        className="relative min-h-16 flex-1 rounded-lg bg-secondary"
       >
         {today.map((s) => (
           <div
@@ -116,11 +123,15 @@ export function CalendarWidget({ items, now, w, h }: { items: Item[]; now: numbe
     const open = list.filter((i) => !i.doneAt).length;
     return (
       <Link href="/calendar" className="flex flex-col rounded-2xl bg-card p-4 hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring">
-        <span className="font-mono text-xs text-brand">
-          {today.toLocaleDateString(undefined, { weekday: "short" }).toUpperCase()}
-        </span>
-        <span className="font-mono text-4xl leading-tight font-medium tabular-nums">{today.getDate()}</span>
-        <span className="mt-auto font-mono text-xs text-muted-foreground">{open ? `${open} due` : "nothing due"}</span>
+        <Fit>
+          <span className="flex flex-col items-center">
+            <span className="font-mono text-xs text-brand">
+              {today.toLocaleDateString(undefined, { weekday: "short" }).toUpperCase()}
+            </span>
+            <span className="font-mono text-4xl leading-tight font-medium tabular-nums">{today.getDate()}</span>
+          </span>
+        </Fit>
+        <span className="text-center font-mono text-xs text-muted-foreground">{open ? `${open} due` : "nothing due"}</span>
         {h > 1 && (
           <ul className="mt-3 flex flex-col gap-1.5 text-sm">
             {list.map((i) => (
@@ -192,7 +203,11 @@ export function StreakWidget({ sessions: list, now }: { sessions: FocusSession[]
   const { run } = useFocus();
   const still = useReducedMotion();
   return (
-    <Block title="Streak" aside={run ? "focusing now" : undefined}>
+    <Block
+      title="Streak"
+      aside={run ? "focusing now" : minutes ? `${minutes} min today` : n ? "focus today" : "start the timer"}
+    >
+      <Fit>
       <p className="flex items-baseline gap-2">
         {/* Breathes gently while a focus session runs. */}
         <motion.span
@@ -204,9 +219,7 @@ export function StreakWidget({ sessions: list, now }: { sessions: FocusSession[]
         </motion.span>
         <span className="text-sm text-muted-foreground">{n === 1 ? "day" : "days"} in a row</span>
       </p>
-      <p className="mt-2 font-mono text-xs text-muted-foreground">
-        {minutes ? `${minutes} min focused today` : n ? "Focus today to keep it going." : "Start the timer to begin one."}
-      </p>
+      </Fit>
     </Block>
   );
 }
@@ -225,9 +238,9 @@ export function MaterialsWidget({
   return (
     <Block title="Recent materials">
       {materials.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Slides, readings and notes you upload show up here.</p>
+        <p className="m-auto text-center text-sm text-balance text-muted-foreground">Slides, readings and notes you upload show up here.</p>
       ) : (
-        <ul className="-mx-2 flex flex-col">
+        <ul className="-mx-2 flex flex-1 flex-col justify-evenly">
           {materials.map((m) => {
             const c = courses.find((x) => x.id === m.course_id);
             const Icon = KIND_ICON[m.kind];
@@ -261,10 +274,10 @@ export function AskWidget({ items, now }: { items: Item[]; now: number }) {
   const exam = items
     .filter((i) => i.kind === "exam" && !i.doneAt && Date.parse(i.due) > now)
     .sort((x, y) => x.due.localeCompare(y.due))[0];
-  const chips = shortcutsFor(exam?.course, items, now).slice(0, 4);
+  const chips = shortcutsFor(exam?.course, items, now); // all of them: the tiles share whatever space there is
   return (
     <Block title="Ask about…" aside={exam?.course}>
-      <ul className="flex flex-wrap gap-2">
+      <ul className="grid flex-1 auto-rows-[minmax(2.25rem,1fr)] grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-2">
         {chips.map((c) => (
           <li key={c.label}>
             <button
@@ -274,10 +287,10 @@ export function AskWidget({ items, now }: { items: Item[]; now: number }) {
                 a.send(c.prompt, false, undefined, c.focus);
                 a.show();
               }}
-              className="flex h-9 items-center gap-2 rounded-full bg-secondary px-3.5 text-sm transition-[background-color,transform] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] disabled:opacity-50"
+              className="flex size-full items-center gap-2 rounded-xl bg-secondary px-3.5 text-left text-sm transition-[background-color,transform] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] disabled:opacity-50"
             >
               <c.icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="max-w-56 truncate">{c.label}</span>
+              <span className="line-clamp-2">{c.label}</span>
             </button>
           </li>
         ))}

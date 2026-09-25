@@ -15,6 +15,7 @@ import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
+import { Fit } from "@/components/fit";
 import { FocusBlock } from "@/components/focus";
 import {
   AskWidget,
@@ -146,7 +147,7 @@ export function Dashboard({
         }
         className="overflow-hidden"
       >
-        <div className="grid flex-1 place-items-center">
+        <Fit>
         {cards.length === 0 ? (
           <p className="text-sm text-muted-foreground">Your courses will spin here once you add one.</p>
         ) : (
@@ -162,7 +163,7 @@ export function Dashboard({
             }))}
           />
         )}
-        </div>
+        </Fit>
       </Block>
     ),
     grades: (

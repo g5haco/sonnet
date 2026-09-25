@@ -34,8 +34,9 @@ export function FocusBlock({
   return (
     <Block title="Study days" aside={inRow ? `${inRow}-day streak` : undefined} className={className}>
       <div
-        className="grid grid-flow-col grid-rows-7 gap-[3px] overflow-x-auto"
-        style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))` }}
+        className="grid min-h-0 flex-1 grid-flow-col gap-[3px] overflow-x-auto"
+        // the 7 day rows share the widget's height
+        style={{ gridTemplateColumns: `repeat(${WEEKS}, minmax(0, 1fr))`, gridTemplateRows: "repeat(7, minmax(0.5rem, 1fr))" }}
         role="img"
         aria-label={`Focus minutes per day, last ${WEEKS} weeks. ${inRow}-day streak.`}
       >
@@ -45,7 +46,7 @@ export function FocusBlock({
             <span
               key={c.key}
               title={c.future ? undefined : `${c.label}: ${m ? `${m} min` : "no focus time"}`}
-              className={cn("aspect-square min-w-2 rounded-[3px]", c.future ? "bg-transparent" : SHADES[level(m)])}
+              className={cn("min-h-2 min-w-2 rounded-[3px]", c.future ? "bg-transparent" : SHADES[level(m)])}
             />
           );
         })}

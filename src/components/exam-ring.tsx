@@ -1,4 +1,5 @@
 import { Block } from "@/components/block";
+import { Fit } from "@/components/fit";
 import type { Item } from "@/lib/progress";
 import { courseColor } from "@/lib/course";
 
@@ -13,7 +14,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
   if (!exam) {
     return (
       <Block title="Next exam" className={className}>
-        <p className="text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
+        <p className="m-auto text-center text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
       </Block>
     );
   }
@@ -27,7 +28,9 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
 
   return (
     <Block title="Next exam" aside={days <= 3 ? "crunch time" : "plenty of runway"} className={className}>
-      <div className="relative mx-auto aspect-square w-full max-w-44">
+      {/* The ring grows with the widget. */}
+      <Fit>
+      <div className="relative size-44">
         <svg viewBox="0 0 200 200" className="size-full -rotate-90" aria-hidden="true">
           {Array.from({ length: TICKS }, (_, i) => {
             const a = (i / TICKS) * 2 * Math.PI;
@@ -56,6 +59,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
           <span className="text-lg text-muted-foreground">h</span>
         </p>
       </div>
+      </Fit>
       <p className="mt-4 flex items-center gap-2 text-sm">
         {/* only the title gives way to a long name; the dot, course and date keep their shape */}
         <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(exam.hue) }} />

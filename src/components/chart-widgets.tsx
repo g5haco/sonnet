@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Fragment, useEffect, useState } from "react";
 import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
+import { Fit } from "@/components/fit";
 import { when } from "@/components/up-next";
 import { sessions as classSessions, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey, gradeLabel } from "@/lib/course";
@@ -22,7 +23,9 @@ const Big = ({ children, unit }: { children: React.ReactNode; unit?: string }) =
     {unit && <span className="ml-1.5 text-sm font-normal tracking-normal text-muted-foreground">{unit}</span>}
   </p>
 );
-const Empty = ({ children }: { children: React.ReactNode }) => <p className="text-sm text-muted-foreground">{children}</p>;
+const Empty = ({ children }: { children: React.ReactNode }) => (
+  <p className="m-auto max-w-72 text-center text-sm text-balance text-muted-foreground">{children}</p>
+);
 const Dot = ({ hue }: { hue: number }) => (
   <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(hue) }} aria-hidden="true" />
 );
@@ -104,7 +107,7 @@ export function GradeBarsWidget({ courses }: { courses: Course[] }) {
       ) : (
         <>
           <Big unit="average">{gradeLabel(avg)}</Big>
-          <ul className="mt-4 flex flex-col gap-2.5">
+          <ul className="mt-4 flex flex-1 flex-col justify-evenly gap-2.5">
             {list.map((c) => (
               <li key={c.id} className="grid grid-cols-[5.5rem_1fr_3.5rem] items-center gap-3 font-mono text-xs">
                 <span className="truncate">{c.code}</span>
@@ -172,7 +175,7 @@ export function GapsWidget({ courses }: { courses: Course[] }) {
       {list.length === 0 ? (
         <Empty>Once Canvas syncs grades, this shows how close each course is to the next letter.</Empty>
       ) : (
-        <ul className="flex flex-col gap-2 text-sm">
+        <ul className="flex flex-1 flex-col justify-evenly gap-2 text-sm">
           {list.map(({ c, up, gap, cushion }) => (
             <li key={c.id} className="flex items-center gap-2">
               <Dot hue={c.hue} />
@@ -205,7 +208,7 @@ export function ExamsWidget({ items, now }: { items: Item[]; now: number }) {
       {list.length === 0 ? (
         <Empty>No exams in the next 30 days.</Empty>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-1 flex-col justify-evenly gap-3">
           {list.map((i) => {
             const days = Math.ceil((Date.parse(i.due) - now) / 864e5);
             return (
@@ -268,10 +271,10 @@ export function SpotlightWidget({
         <span className="truncate font-mono text-xl font-medium">{course.code}</span>
         {course.grade != null && <span className="ml-auto font-mono text-sm tabular-nums">{gradeLabel(course.grade)}</span>}
       </p>
-      <dl className="mt-3 flex flex-col gap-1.5 text-sm">
+      <dl className="mt-3 flex flex-1 flex-col justify-evenly gap-1.5 text-sm">
         <div className="flex gap-2">
           <dt className="w-12 shrink-0 font-mono text-xs leading-5 text-muted-foreground">next</dt>
-          <dd className="min-w-0 truncate">{next ? `${next.title} · ${when(next.due, now)}` : "nothing due"}</dd>
+          <dd className="min-w-0 truncate">{next ? `${next.title} · ${when(next.due, now).label}` : "nothing due"}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-12 shrink-0 font-mono text-xs leading-5 text-muted-foreground">class</dt>
@@ -308,19 +311,19 @@ export function HoursWidget({ sessions, now }: { sessions: FocusSession[]; now: 
     <Block title="Study hours" aside="last 7 days">
       <Big unit="focused">{hm(total)}</Big>
       <div
-        className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-[3px]"
+        className="mt-4 grid flex-1 grid-cols-[auto_minmax(0,1fr)] grid-rows-[repeat(7,minmax(0.5rem,1fr))_auto] gap-x-3 gap-y-[3px]"
         role="img"
         aria-label={`Focus minutes by hour of day, last 7 days: ${hm(total)} in total.`}
       >
         {days.map((d, r) => (
           <Fragment key={r}>
-            <span className={cn("font-mono text-xs", r === 6 ? "text-foreground" : "text-muted-foreground")}>
+            <span className={cn("self-center font-mono text-xs", r === 6 ? "text-foreground" : "text-muted-foreground")}>
               {r === 6 ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" })}
             </span>
             <span className="grid grid-cols-[repeat(24,minmax(0,1fr))] gap-[3px]">
               {Array.from({ length: 24 }, (_, h) => {
                 const m = grid.get(`${dayKey(d)}|${h}`);
-                return <span key={h} title={m ? `${m} min` : undefined} className={cn("aspect-square rounded-[2px]", SHADES[level(m)])} />;
+                return <span key={h} title={m ? `${m} min` : undefined} className={cn("min-h-2 rounded-[2px]", SHADES[level(m)])} />;
               })}
             </span>
           </Fragment>
@@ -385,7 +388,7 @@ export function OnTimeWidget({ items, now, term }: { items: Item[]; now: number;
       ) : (
         <>
           <Big unit="on time">{rate}%</Big>
-          <div className="mt-4 flex h-6 gap-[3px]" role="img" aria-label={`${weeks.filter((w) => w === "late").length} weeks had late work.`}>
+          <div className="mt-4 flex min-h-6 flex-1 gap-[3px]" role="img" aria-label={`${weeks.filter((w) => w === "late").length} weeks had late work.`}>
             {weeks.map((w, k) => (
               <span
                 key={k}
@@ -414,9 +417,9 @@ export function SplitWidget({ sessions, courses }: { sessions: FocusSession[]; c
       ) : (
         <>
           <Big>{hm(total)}</Big>
-          <div className="mt-4 flex h-1.5 gap-[3px]" role="img" aria-label={per.map((x) => `${x.c.code} ${hm(x.min)}`).join(", ")}>
+          <div className="mt-4 flex min-h-1.5 flex-1 gap-[3px]" role="img" aria-label={per.map((x) => `${x.c.code} ${hm(x.min)}`).join(", ")}>
             {per.map((x) => (
-              <span key={x.c.id} className="h-full rounded-full" style={{ width: `${(x.min / total) * 100}%`, background: courseColor(x.c.hue) }} />
+              <span key={x.c.id} className="h-full rounded-lg" style={{ width: `${(x.min / total) * 100}%`, background: courseColor(x.c.hue) }} />
             ))}
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 font-mono text-xs">
@@ -482,6 +485,7 @@ export function CountdownWidget({ items }: { items: Item[] }) {
   ];
   return (
     <Block title="Next deadline">
+      <Fit>
       <p className="font-mono text-3xl font-medium tabular-nums" aria-label={`${parts.map(([n, u]) => `${n}${u}`).join(" ")} left`}>
         {parts
           .filter(([n], k) => n > 0 || k >= 2)
@@ -497,6 +501,7 @@ export function CountdownWidget({ items }: { items: Item[] }) {
             </span>
           ))}
       </p>
+      </Fit>
       <p className="mt-2 flex items-center gap-2 text-sm">
         <Dot hue={next.hue} />
         <span className="truncate">{next.title}</span>
@@ -519,9 +524,9 @@ export function ClearWidget({ items, now }: { items: Item[]; now: number }) {
       ) : (
         <>
           <Big>{clear ? "Cleared" : `${Math.round(pct * 100)}%`}</Big>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-foreground/10" role="img" aria-label={`${done} of ${week.length} done this week`}>
+          <div className="mt-4 min-h-2 flex-1 overflow-hidden rounded-xl bg-foreground/10" role="img" aria-label={`${done} of ${week.length} done this week`}>
             <motion.div
-              className={cn("h-full rounded-full", clear ? "bg-done" : "bg-brand")}
+              className={cn("h-full rounded-xl", clear ? "bg-done" : "bg-brand")}
               initial={false}
               animate={{ width: `${pct * 100}%` }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

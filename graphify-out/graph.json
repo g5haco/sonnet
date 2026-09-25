@@ -38,13 +38,65 @@
   },
   "nodes": [
     {
+      "id": "src_components_course_card_coursecard",
+      "label": "CourseCard",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "coursecard",
+      "source_file": "src/components/course-card.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_components_create_forms_course",
+      "label": "Course",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "course",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L101"
+    },
+    {
+      "id": "src_components_dashboard_course",
+      "label": "Course",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "course",
+      "source_file": "src/components/dashboard.tsx",
+      "source_location": "L51"
+    },
+    {
+      "id": "src_components_dashboard_term",
+      "label": "Term",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "term",
+      "source_file": "src/components/dashboard.tsx",
+      "source_location": "L50"
+    },
+    {
       "id": "src_components_materials_material",
       "label": "Material",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "material",
       "source_file": "src/components/materials.tsx",
@@ -57,7 +109,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "sent",
       "source_file": "src/components/materials.tsx",
@@ -70,7 +122,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "account",
       "source_file": "src/components/settings-forms.tsx",
@@ -83,7 +135,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "row",
       "source_file": "src/components/syllabus-import.tsx",
@@ -96,37 +148,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "tone",
       "source_file": "src/components/sync-window.tsx",
       "source_location": "L15"
     },
     {
-      "id": "src_components_focus_timer_focus",
-      "label": "Focus",
+      "id": "src_lib_progress_item",
+      "label": "Item",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "focus",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_components_focus_timer_run",
-      "label": "Run",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
-      "file_type": "code",
-      "norm_label": "run",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L16"
+      "norm_label": "item",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L1"
     },
     {
       "id": "src_components_evil_buttons_ash_burst_button_ashsim",
@@ -174,7 +213,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "course",
       "source_file": "src/components/chart-widgets.tsx",
@@ -187,37 +226,63 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "gradepoint",
       "source_file": "src/components/chart-widgets.tsx",
       "source_location": "L17"
     },
     {
-      "id": "src_components_dashboard_course",
-      "label": "Course",
+      "id": "src_components_focus_timer_focus",
+      "label": "Focus",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "course",
-      "source_file": "src/components/dashboard.tsx",
-      "source_location": "L52"
+      "norm_label": "focus",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L17"
     },
     {
-      "id": "src_components_dashboard_term",
-      "label": "Term",
+      "id": "src_components_focus_timer_run",
+      "label": "Run",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "term",
-      "source_file": "src/components/dashboard.tsx",
-      "source_location": "L51"
+      "norm_label": "run",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_components_widgets_recentmaterial",
+      "label": "RecentMaterial",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "recentmaterial",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L214"
+    },
+    {
+      "id": "src_lib_focus_focussession",
+      "label": "FocusSession",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "focussession",
+      "source_file": "src/lib/focus.ts",
+      "source_location": "L3"
     },
     {
       "id": "src_components_carousel_slide",
@@ -244,19 +309,6 @@
       "norm_label": "spot",
       "source_file": "src/components/carousel.tsx",
       "source_location": "L82"
-    },
-    {
-      "id": "src_lib_progress_item",
-      "label": "Item",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "item",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_lib_ai_classrow",
@@ -467,19 +519,6 @@
       "source_location": "L5"
     },
     {
-      "id": "src_components_create_forms_course",
-      "label": "Course",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "course",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L101"
-    },
-    {
       "id": "src_components_chat_markdown_hnode",
       "label": "HNode",
       "_callable": true,
@@ -504,58 +543,6 @@
       "norm_label": "mdnode",
       "source_file": "src/components/chat/markdown.tsx",
       "source_location": "L12"
-    },
-    {
-      "id": "src_components_calendar_gridprops",
-      "label": "GridProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "gridprops",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L303"
-    },
-    {
-      "id": "src_components_calendar_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L62"
-    },
-    {
-      "id": "src_components_gooey_menu_createkind",
-      "label": "CreateKind",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "createkind",
-      "source_file": "src/components/gooey-menu.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "src_components_gooey_menu_menuitem",
-      "label": "MenuItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "menuitem",
-      "source_file": "src/components/gooey-menu.tsx",
-      "source_location": "L10"
     },
     {
       "id": "src_lib_canvas_canvasassignment",
@@ -857,30 +844,69 @@
       "source_location": "L5"
     },
     {
+      "id": "src_components_calendar_gridprops",
+      "label": "GridProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "gridprops",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L303"
+    },
+    {
+      "id": "src_components_calendar_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L62"
+    },
+    {
       "id": "src_components_calendar_rail_props",
       "label": "Props",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "src/components/calendar-rail.tsx",
       "source_location": "L14"
     },
     {
-      "id": "src_components_widgets_recentmaterial",
-      "label": "RecentMaterial",
+      "id": "src_components_gooey_menu_createkind",
+      "label": "CreateKind",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "recentmaterial",
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L209"
+      "norm_label": "createkind",
+      "source_file": "src/components/gooey-menu.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_components_gooey_menu_menuitem",
+      "label": "MenuItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "menuitem",
+      "source_file": "src/components/gooey-menu.tsx",
+      "source_location": "L10"
     },
     {
       "id": "src_lib_calendar_classmeeting",
@@ -889,7 +915,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "classmeeting",
       "source_file": "src/lib/calendar.ts",
@@ -902,7 +928,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "feed",
       "source_file": "src/lib/calendar.ts",
@@ -915,7 +941,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "session",
       "source_file": "src/lib/calendar.ts",
@@ -928,7 +954,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "term",
       "source_file": "src/lib/calendar.ts",
@@ -941,7 +967,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "view",
       "source_file": "src/lib/calendar.ts",
@@ -954,37 +980,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "meeting",
       "source_file": "src/lib/course.ts",
       "source_location": "L14"
-    },
-    {
-      "id": "src_lib_focus_focussession",
-      "label": "FocusSession",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "focussession",
-      "source_file": "src/lib/focus.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "src_components_course_card_coursecard",
-      "label": "CourseCard",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "coursecard",
-      "source_file": "src/components/course-card.tsx",
-      "source_location": "L5"
     },
     {
       "id": "src_components_evil_buttons_doubt_button_doubtbuttonprops",
@@ -1013,16 +1013,160 @@
       "source_location": "L8"
     },
     {
+      "id": "src_components_app_shell_usecreate",
+      "label": "useCreate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "usecreate()",
+      "source_file": "src/components/app-shell.tsx",
+      "source_location": "L34"
+    },
+    {
+      "id": "src_components_block_block",
+      "label": "Block()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "block()",
+      "source_file": "src/components/block.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_components_chart_widgets_clearwidget",
+      "label": "ClearWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "clearwidget()",
+      "source_file": "src/components/chart-widgets.tsx",
+      "source_location": "L509"
+    },
+    {
+      "id": "src_components_course_card_courseface",
+      "label": "CourseFace()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "courseface()",
+      "source_file": "src/components/course-card.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_components_courses_coursesgrid",
+      "label": "CoursesGrid()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "coursesgrid()",
+      "source_file": "src/components/courses.tsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_components_courses_courseview",
+      "label": "CourseView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "courseview()",
+      "source_file": "src/components/courses.tsx",
+      "source_location": "L69"
+    },
+    {
+      "id": "src_components_create_forms_coursedialog",
+      "label": "CourseDialog()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "coursedialog()",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L72"
+    },
+    {
       "id": "src_components_create_forms_formerror",
       "label": "FormError()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "formerror()",
       "source_file": "src/components/create-forms.tsx",
       "source_location": "L41"
+    },
+    {
+      "id": "src_components_create_forms_submit",
+      "label": "Submit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "submit()",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_components_create_forms_termsetup",
+      "label": "TermSetup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "termsetup()",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L50"
+    },
+    {
+      "id": "src_components_create_forms_usesubmit",
+      "label": "useSubmit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "usesubmit()",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_components_dashboard_dashboard",
+      "label": "Dashboard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard()",
+      "source_file": "src/components/dashboard.tsx",
+      "source_location": "L54"
+    },
+    {
+      "id": "src_components_exam_ring_examring",
+      "label": "ExamRing()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "examring()",
+      "source_file": "src/components/exam-ring.tsx",
+      "source_location": "L8"
     },
     {
       "id": "src_components_materials_glyph",
@@ -1030,7 +1174,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "glyph()",
       "source_file": "src/components/materials.tsx",
@@ -1042,23 +1186,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "materialrow()",
       "source_file": "src/components/materials.tsx",
       "source_location": "L535"
-    },
-    {
-      "id": "src_components_materials_materials",
-      "label": "Materials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "materials.tsx",
-      "file_type": "code",
-      "norm_label": "materials()",
-      "source_file": "src/components/materials.tsx",
-      "source_location": "L333"
     },
     {
       "id": "src_components_materials_megabytes",
@@ -1066,35 +1198,107 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "megabytes()",
       "source_file": "src/components/materials.tsx",
       "source_location": "L58"
     },
     {
-      "id": "src_components_materials_uploadwindow",
-      "label": "UploadWindow()",
+      "id": "src_components_progress_block_count",
+      "label": "Count()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "uploadwindow()",
-      "source_file": "src/components/materials.tsx",
-      "source_location": "L121"
+      "norm_label": "count()",
+      "source_file": "src/components/progress-block.tsx",
+      "source_location": "L11"
     },
     {
-      "id": "src_components_materials_useupload",
-      "label": "useUpload()",
+      "id": "src_components_progress_block_progressblock",
+      "label": "ProgressBlock()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "useupload()",
-      "source_file": "src/components/materials.tsx",
-      "source_location": "L65"
+      "norm_label": "progressblock()",
+      "source_file": "src/components/progress-block.tsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "src_components_settings_forms_day",
+      "label": "day()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "day()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L264"
+    },
+    {
+      "id": "src_components_settings_forms_mini",
+      "label": "Mini()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "mini()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L81"
+    },
+    {
+      "id": "src_components_settings_forms_nameform",
+      "label": "NameForm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "nameform()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_components_settings_forms_semesterform",
+      "label": "SemesterForm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "semesterform()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_components_settings_forms_semestersettings",
+      "label": "SemesterSettings()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "semestersettings()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L267"
+    },
+    {
+      "id": "src_components_settings_forms_themepicker",
+      "label": "ThemePicker()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "themepicker()",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L102"
     },
     {
       "id": "src_components_syllabus_import_syllabusimport",
@@ -1102,7 +1306,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "syllabusimport()",
       "source_file": "src/components/syllabus-import.tsx",
@@ -1114,7 +1318,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "summarydialog()",
       "source_file": "src/components/syllabus-summary.tsx",
@@ -1126,7 +1330,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "service()",
       "source_file": "src/components/sync-window.tsx",
@@ -1138,83 +1342,119 @@
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "status()",
       "source_file": "src/components/sync-window.tsx",
       "source_location": "L24"
     },
     {
-      "id": "src_lib_supabase_client_createclient",
-      "label": "createClient()",
+      "id": "src_components_up_next_headline",
+      "label": "headline()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "createclient()",
-      "source_file": "src/lib/supabase/client.ts",
-      "source_location": "L3"
+      "norm_label": "headline()",
+      "source_file": "src/components/up-next.tsx",
+      "source_location": "L82"
     },
     {
-      "id": "src_components_focus_timer_focusbutton",
-      "label": "FocusButton()",
+      "id": "src_components_up_next_upnext",
+      "label": "UpNext()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "focusbutton()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L175"
+      "norm_label": "upnext()",
+      "source_file": "src/components/up-next.tsx",
+      "source_location": "L89"
     },
     {
-      "id": "src_components_focus_timer_focusprovider",
-      "label": "FocusProvider()",
+      "id": "src_components_up_next_usework",
+      "label": "useWork()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "focusprovider()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L54"
+      "norm_label": "usework()",
+      "source_file": "src/components/up-next.tsx",
+      "source_location": "L19"
     },
     {
-      "id": "src_components_focus_timer_load",
-      "label": "load()",
+      "id": "src_lib_progress_endofweek",
+      "label": "endOfWeek()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "load()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L35"
+      "norm_label": "endofweek()",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L17"
     },
     {
-      "id": "src_components_focus_timer_mmss",
-      "label": "mmss()",
+      "id": "src_lib_progress_percentat",
+      "label": "percentAt()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "mmss()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L50"
+      "norm_label": "percentat()",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L26"
     },
     {
-      "id": "src_components_focus_timer_store",
-      "label": "store()",
+      "id": "src_lib_progress_progress",
+      "label": "progress()",
       "_callable": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 0,
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "store()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L43"
+      "norm_label": "progress()",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L44"
+    },
+    {
+      "id": "src_lib_progress_test_at",
+      "label": "at()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "at()",
+      "source_file": "src/lib/progress.test.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_lib_progress_test_item",
+      "label": "item()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "item()",
+      "source_file": "src/lib/progress.test.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_progress_verdict",
+      "label": "verdict()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "verdict()",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L34"
     },
     {
       "id": "src_components_evil_buttons_ash_burst_button_createashsimulation",
@@ -1289,40 +1529,16 @@
       "source_location": "L73"
     },
     {
-      "id": "src_components_app_shell_usecreate",
-      "label": "useCreate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "usecreate()",
-      "source_file": "src/components/app-shell.tsx",
-      "source_location": "L34"
-    },
-    {
       "id": "src_components_chart_widgets_big",
       "label": "Big()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "big()",
       "source_file": "src/components/chart-widgets.tsx",
       "source_location": "L19"
-    },
-    {
-      "id": "src_components_chart_widgets_clearwidget",
-      "label": "ClearWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "clearwidget()",
-      "source_file": "src/components/chart-widgets.tsx",
-      "source_location": "L509"
     },
     {
       "id": "src_components_chart_widgets_countdownwidget",
@@ -1330,7 +1546,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "countdownwidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1342,7 +1558,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "dot()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1354,7 +1570,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "empty()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1366,7 +1582,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "examswidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1378,7 +1594,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "gapswidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1390,7 +1606,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "gradebarswidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1402,7 +1618,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "graded()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1414,7 +1630,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "hm()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1426,7 +1642,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "hourswidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1438,7 +1654,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "ontimewidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1450,7 +1666,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "roll()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1462,7 +1678,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "scoreswidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -1474,95 +1690,143 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "splitwidget()",
       "source_file": "src/components/chart-widgets.tsx",
       "source_location": "L404"
     },
     {
-      "id": "src_components_courses_courseview",
-      "label": "CourseView()",
+      "id": "src_components_chart_widgets_trendwidget",
+      "label": "TrendWidget()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "courseview()",
+      "norm_label": "trendwidget()",
+      "source_file": "src/components/chart-widgets.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_components_courses_whatif",
+      "label": "WhatIf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "whatif()",
       "source_file": "src/components/courses.tsx",
-      "source_location": "L69"
+      "source_location": "L164"
     },
     {
-      "id": "src_components_dashboard_dashboard",
-      "label": "Dashboard()",
+      "id": "src_components_create_forms_itemdialog",
+      "label": "ItemDialog()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "dashboard()",
-      "source_file": "src/components/dashboard.tsx",
-      "source_location": "L55"
+      "norm_label": "itemdialog()",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L103"
     },
     {
-      "id": "src_components_exam_ring_examring",
-      "label": "ExamRing()",
+      "id": "src_components_focus_focusblock",
+      "label": "FocusBlock()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "examring()",
-      "source_file": "src/components/exam-ring.tsx",
-      "source_location": "L8"
+      "norm_label": "focusblock()",
+      "source_file": "src/components/focus.tsx",
+      "source_location": "L12"
     },
     {
-      "id": "src_components_progress_block_progressblock",
-      "label": "ProgressBlock()",
+      "id": "src_components_focus_timer_focusbutton",
+      "label": "FocusButton()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "progressblock()",
-      "source_file": "src/components/progress-block.tsx",
-      "source_location": "L30"
+      "norm_label": "focusbutton()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L175"
     },
     {
-      "id": "src_components_up_next_headline",
-      "label": "headline()",
+      "id": "src_components_focus_timer_focusdial",
+      "label": "FocusDial()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "headline()",
-      "source_file": "src/components/up-next.tsx",
-      "source_location": "L82"
+      "norm_label": "focusdial()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L141"
     },
     {
-      "id": "src_components_up_next_upnext",
-      "label": "UpNext()",
+      "id": "src_components_focus_timer_focusprovider",
+      "label": "FocusProvider()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "upnext()",
-      "source_file": "src/components/up-next.tsx",
-      "source_location": "L89"
+      "norm_label": "focusprovider()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L54"
     },
     {
-      "id": "src_components_up_next_usework",
-      "label": "useWork()",
+      "id": "src_components_focus_timer_load",
+      "label": "load()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "usework()",
-      "source_file": "src/components/up-next.tsx",
-      "source_location": "L19"
+      "norm_label": "load()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L35"
+    },
+    {
+      "id": "src_components_focus_timer_mmss",
+      "label": "mmss()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "mmss()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L50"
+    },
+    {
+      "id": "src_components_focus_timer_store",
+      "label": "store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "store()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_components_focus_timer_usefocus",
+      "label": "useFocus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "usefocus()",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L32"
     },
     {
       "id": "src_components_week_strip_weekstrip",
@@ -1570,11 +1834,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "weekstrip()",
       "source_file": "src/components/week-strip.tsx",
       "source_location": "L8"
+    },
+    {
+      "id": "src_components_widgets_calendarwidget",
+      "label": "CalendarWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "calendarwidget()",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L105"
     },
     {
       "id": "src_components_widgets_materialswidget",
@@ -1582,11 +1858,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "materialswidget()",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L213"
+      "source_location": "L218"
+    },
+    {
+      "id": "src_components_widgets_streakwidget",
+      "label": "StreakWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "streakwidget()",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L187"
+    },
+    {
+      "id": "src_components_widgets_timerwidget",
+      "label": "TimerWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "timerwidget()",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L22"
     },
     {
       "id": "src_lib_course_coursecolor",
@@ -1594,47 +1894,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "coursecolor()",
       "source_file": "src/lib/course.ts",
       "source_location": "L5"
     },
     {
-      "id": "src_lib_progress_endofweek",
-      "label": "endOfWeek()",
+      "id": "src_lib_course_daykey",
+      "label": "dayKey()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "endofweek()",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L17"
+      "norm_label": "daykey()",
+      "source_file": "src/lib/course.ts",
+      "source_location": "L11"
     },
     {
-      "id": "src_lib_progress_percentat",
-      "label": "percentAt()",
+      "id": "src_lib_course_gradelabel",
+      "label": "gradeLabel()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "percentat()",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L26"
+      "norm_label": "gradelabel()",
+      "source_file": "src/lib/course.ts",
+      "source_location": "L28"
     },
     {
-      "id": "src_lib_progress_progress",
-      "label": "progress()",
+      "id": "src_lib_course_needonfinal",
+      "label": "needOnFinal()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "progress()",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L44"
+      "norm_label": "needonfinal()",
+      "source_file": "src/lib/course.ts",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_lib_focus_streak",
+      "label": "streak()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "streak()",
+      "source_file": "src/lib/focus.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_lib_focus_studydays",
+      "label": "studyDays()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "studydays()",
+      "source_file": "src/lib/focus.ts",
+      "source_location": "L6"
     },
     {
       "id": "src_components_carousel_card",
@@ -1769,66 +2093,6 @@
       "source_location": "L46"
     },
     {
-      "id": "src_components_block_block",
-      "label": "Block()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "block()",
-      "source_file": "src/components/block.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "src_components_progress_block_count",
-      "label": "Count()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "count()",
-      "source_file": "src/components/progress-block.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_lib_progress_test_at",
-      "label": "at()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "at()",
-      "source_file": "src/lib/progress.test.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "src_lib_progress_test_item",
-      "label": "item()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "item()",
-      "source_file": "src/lib/progress.test.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_lib_progress_verdict",
-      "label": "verdict()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "verdict()",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L34"
-    },
-    {
       "id": "src_lib_ai_calendarlines",
       "label": "calendarLines()",
       "_callable": true,
@@ -1958,7 +2222,7 @@
       "file_type": "code",
       "norm_label": "fits()",
       "source_file": "src/lib/home.ts",
-      "source_location": "L59"
+      "source_location": "L60"
     },
     {
       "id": "src_lib_home_freespot",
@@ -1970,7 +2234,7 @@
       "file_type": "code",
       "norm_label": "freespot()",
       "source_file": "src/lib/home.ts",
-      "source_location": "L69"
+      "source_location": "L70"
     },
     {
       "id": "src_lib_home_minh",
@@ -2006,7 +2270,7 @@
       "file_type": "code",
       "norm_label": "overlaps()",
       "source_file": "src/lib/home.ts",
-      "source_location": "L56"
+      "source_location": "L57"
     },
     {
       "id": "src_app_actions_addmaterial",
@@ -2681,138 +2945,6 @@
       "source_location": "L75"
     },
     {
-      "id": "src_components_create_forms_coursedialog",
-      "label": "CourseDialog()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "coursedialog()",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L72"
-    },
-    {
-      "id": "src_components_create_forms_itemdialog",
-      "label": "ItemDialog()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "itemdialog()",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L103"
-    },
-    {
-      "id": "src_components_create_forms_submit",
-      "label": "Submit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "submit()",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_components_create_forms_termsetup",
-      "label": "TermSetup()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "termsetup()",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L50"
-    },
-    {
-      "id": "src_components_create_forms_usesubmit",
-      "label": "useSubmit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "usesubmit()",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_components_settings_forms_day",
-      "label": "day()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "day()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L264"
-    },
-    {
-      "id": "src_components_settings_forms_mini",
-      "label": "Mini()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "mini()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L81"
-    },
-    {
-      "id": "src_components_settings_forms_nameform",
-      "label": "NameForm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "nameform()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_components_settings_forms_semesterform",
-      "label": "SemesterForm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "semesterform()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_components_settings_forms_semestersettings",
-      "label": "SemesterSettings()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "semestersettings()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L267"
-    },
-    {
-      "id": "src_components_settings_forms_themepicker",
-      "label": "ThemePicker()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "themepicker()",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L102"
-    },
-    {
       "id": "src_components_app_shell_useassistant",
       "label": "useAssistant()",
       "_callable": true,
@@ -3041,6 +3173,42 @@
       "source_location": "L13"
     },
     {
+      "id": "src_components_materials_materials",
+      "label": "Materials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "chat/widgets.tsx",
+      "file_type": "code",
+      "norm_label": "materials()",
+      "source_file": "src/components/materials.tsx",
+      "source_location": "L333"
+    },
+    {
+      "id": "src_components_materials_uploadwindow",
+      "label": "UploadWindow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "chat/widgets.tsx",
+      "file_type": "code",
+      "norm_label": "uploadwindow()",
+      "source_file": "src/components/materials.tsx",
+      "source_location": "L121"
+    },
+    {
+      "id": "src_components_materials_useupload",
+      "label": "useUpload()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "chat/widgets.tsx",
+      "file_type": "code",
+      "norm_label": "useupload()",
+      "source_file": "src/components/materials.tsx",
+      "source_location": "L65"
+    },
+    {
       "id": "src_components_settings_forms_resetdata",
       "label": "ResetData()",
       "_callable": true,
@@ -3074,7 +3242,7 @@
       "file_type": "code",
       "norm_label": "askwidget()",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L254"
+      "source_location": "L259"
     },
     {
       "id": "src_lib_course_meetinglabel",
@@ -3089,232 +3257,16 @@
       "source_location": "L19"
     },
     {
-      "id": "src_components_calendar_calendar",
-      "label": "Calendar()",
+      "id": "src_lib_supabase_client_createclient",
+      "label": "createClient()",
       "_callable": true,
       "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
+      "community": 2,
+      "community_name": "chat/widgets.tsx",
       "file_type": "code",
-      "norm_label": "calendar()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L74"
-    },
-    {
-      "id": "src_components_calendar_clock",
-      "label": "clock()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "clock()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L57"
-    },
-    {
-      "id": "src_components_calendar_empty",
-      "label": "Empty()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "empty()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L720"
-    },
-    {
-      "id": "src_components_calendar_hhmm",
-      "label": "hhmm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "hhmm()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L60"
-    },
-    {
-      "id": "src_components_calendar_itemchip",
-      "label": "ItemChip()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "itemchip()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L584"
-    },
-    {
-      "id": "src_components_calendar_longday",
-      "label": "longDay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "longday()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L58"
-    },
-    {
-      "id": "src_components_calendar_minutes",
-      "label": "minutes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "minutes()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "src_components_calendar_monthgrid",
-      "label": "MonthGrid()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "monthgrid()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L641"
-    },
-    {
-      "id": "src_components_calendar_noop",
-      "label": "noop()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "noop()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L70"
-    },
-    {
-      "id": "src_components_calendar_sessionblock",
-      "label": "SessionBlock()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "sessionblock()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L525"
-    },
-    {
-      "id": "src_components_calendar_timegrid",
-      "label": "TimeGrid()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "timegrid()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L313"
-    },
-    {
-      "id": "src_components_calendar_tint",
-      "label": "tint()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "tint()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L55"
-    },
-    {
-      "id": "src_components_calendar_viewswitch",
-      "label": "ViewSwitch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "viewswitch()",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L269"
-    },
-    {
-      "id": "src_components_gooey_menu_gooeymenu",
-      "label": "GooeyMenu()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "gooeymenu()",
-      "source_file": "src/components/gooey-menu.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_components_sidebar_chatlink",
-      "label": "ChatLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "chatlink()",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L99"
-    },
-    {
-      "id": "src_components_sidebar_navlink",
-      "label": "NavLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "navlink()",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_components_sidebar_sidebar",
-      "label": "Sidebar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "sidebar()",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L117"
-    },
-    {
-      "id": "src_components_sidebar_windowbutton",
-      "label": "WindowButton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "windowbutton()",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L61"
-    },
-    {
-      "id": "src_lib_calendar_lanes",
-      "label": "lanes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "lanes()",
-      "source_file": "src/lib/calendar.ts",
-      "source_location": "L67"
+      "norm_label": "createclient()",
+      "source_file": "src/lib/supabase/client.ts",
+      "source_location": "L3"
     },
     {
       "id": "src_app_actions_synccanvasnow",
@@ -3710,7 +3662,7 @@
       "file_type": "code",
       "norm_label": "readlayout()",
       "source_file": "src/lib/home.ts",
-      "source_location": "L82"
+      "source_location": "L83"
     },
     {
       "id": "src_lib_rows_tocards",
@@ -4006,7 +3958,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "get()",
       "source_file": "src/app/api/cal/[token]/route.ts",
@@ -4018,11 +3970,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "useopensettings()",
       "source_file": "src/components/app-shell.tsx",
       "source_location": "L56"
+    },
+    {
+      "id": "src_components_calendar_calendar",
+      "label": "Calendar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "calendar()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L74"
     },
     {
       "id": "src_components_calendar_calendarbody",
@@ -4030,11 +3994,107 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "calendarbody()",
       "source_file": "src/components/calendar.tsx",
       "source_location": "L83"
+    },
+    {
+      "id": "src_components_calendar_clock",
+      "label": "clock()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "clock()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L57"
+    },
+    {
+      "id": "src_components_calendar_empty",
+      "label": "Empty()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "empty()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L720"
+    },
+    {
+      "id": "src_components_calendar_hhmm",
+      "label": "hhmm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "hhmm()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L60"
+    },
+    {
+      "id": "src_components_calendar_itemchip",
+      "label": "ItemChip()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "itemchip()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L584"
+    },
+    {
+      "id": "src_components_calendar_longday",
+      "label": "longDay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "longday()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L58"
+    },
+    {
+      "id": "src_components_calendar_minutes",
+      "label": "minutes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "minutes()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "src_components_calendar_monthgrid",
+      "label": "MonthGrid()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "monthgrid()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L641"
+    },
+    {
+      "id": "src_components_calendar_noop",
+      "label": "noop()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "noop()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L70"
     },
     {
       "id": "src_components_calendar_rail_calendarrail",
@@ -4042,7 +4102,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "calendarrail()",
       "source_file": "src/components/calendar-rail.tsx",
@@ -4054,7 +4114,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "minimonth()",
       "source_file": "src/components/calendar-rail.tsx",
@@ -4066,11 +4126,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "semester()",
       "source_file": "src/components/calendar-rail.tsx",
       "source_location": "L137"
+    },
+    {
+      "id": "src_components_calendar_sessionblock",
+      "label": "SessionBlock()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "sessionblock()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L525"
+    },
+    {
+      "id": "src_components_calendar_timegrid",
+      "label": "TimeGrid()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "timegrid()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L313"
+    },
+    {
+      "id": "src_components_calendar_tint",
+      "label": "tint()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "tint()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L55"
+    },
+    {
+      "id": "src_components_calendar_viewswitch",
+      "label": "ViewSwitch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "viewswitch()",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L269"
     },
     {
       "id": "src_components_chart_widgets_loadwidget",
@@ -4078,7 +4186,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "loadwidget()",
       "source_file": "src/components/chart-widgets.tsx",
@@ -4090,47 +4198,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "coursestats()",
       "source_file": "src/components/course-card.tsx",
       "source_location": "L15"
     },
     {
-      "id": "src_components_focus_focusblock",
-      "label": "FocusBlock()",
+      "id": "src_components_gooey_menu_gooeymenu",
+      "label": "GooeyMenu()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "focusblock()",
-      "source_file": "src/components/focus.tsx",
-      "source_location": "L12"
+      "norm_label": "gooeymenu()",
+      "source_file": "src/components/gooey-menu.tsx",
+      "source_location": "L33"
     },
     {
-      "id": "src_components_focus_timer_focusdial",
-      "label": "FocusDial()",
+      "id": "src_components_sidebar_chatlink",
+      "label": "ChatLink()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "focusdial()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L141"
+      "norm_label": "chatlink()",
+      "source_file": "src/components/sidebar.tsx",
+      "source_location": "L99"
     },
     {
-      "id": "src_components_focus_timer_usefocus",
-      "label": "useFocus()",
+      "id": "src_components_sidebar_navlink",
+      "label": "NavLink()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "usefocus()",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L32"
+      "norm_label": "navlink()",
+      "source_file": "src/components/sidebar.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_components_sidebar_sidebar",
+      "label": "Sidebar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "sidebar()",
+      "source_file": "src/components/sidebar.tsx",
+      "source_location": "L117"
+    },
+    {
+      "id": "src_components_sidebar_windowbutton",
+      "label": "WindowButton()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "windowbutton()",
+      "source_file": "src/components/sidebar.tsx",
+      "source_location": "L61"
     },
     {
       "id": "src_components_sync_window_feedlink",
@@ -4138,7 +4270,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "feedlink()",
       "source_file": "src/components/sync-window.tsx",
@@ -4150,22 +4282,10 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "needssemester()",
       "source_file": "src/components/sync-window.tsx",
-      "source_location": "L104"
-    },
-    {
-      "id": "src_components_widgets_calendarwidget",
-      "label": "CalendarWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "calendarwidget()",
-      "source_file": "src/components/widgets.tsx",
       "source_location": "L104"
     },
     {
@@ -4174,11 +4294,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "classeswidget()",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "id": "src_components_widgets_clock",
@@ -4186,11 +4306,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "clock()",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "id": "src_components_widgets_inminutes",
@@ -4198,35 +4318,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "inminutes()",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_components_widgets_streakwidget",
-      "label": "StreakWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "streakwidget()",
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L182"
-    },
-    {
-      "id": "src_components_widgets_timerwidget",
-      "label": "TimerWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "timerwidget()",
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L21"
+      "source_location": "L19"
     },
     {
       "id": "src_lib_calendar_adddays",
@@ -4234,7 +4330,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "adddays()",
       "source_file": "src/lib/calendar.ts",
@@ -4246,7 +4342,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "at()",
       "source_file": "src/lib/calendar.ts",
@@ -4258,7 +4354,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "floating()",
       "source_file": "src/lib/calendar.ts",
@@ -4270,11 +4366,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "ics()",
       "source_file": "src/lib/calendar.ts",
       "source_location": "L103"
+    },
+    {
+      "id": "src_lib_calendar_lanes",
+      "label": "lanes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "lanes()",
+      "source_file": "src/lib/calendar.ts",
+      "source_location": "L67"
     },
     {
       "id": "src_lib_calendar_mondayof",
@@ -4282,7 +4390,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "mondayof()",
       "source_file": "src/lib/calendar.ts",
@@ -4294,7 +4402,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "parseday()",
       "source_file": "src/lib/calendar.ts",
@@ -4306,7 +4414,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "range()",
       "source_file": "src/lib/calendar.ts",
@@ -4318,7 +4426,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "sessions()",
       "source_file": "src/lib/calendar.ts",
@@ -4330,7 +4438,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "startofday()",
       "source_file": "src/lib/calendar.ts",
@@ -4342,7 +4450,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "step()",
       "source_file": "src/lib/calendar.ts",
@@ -4354,7 +4462,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "keys()",
       "source_file": "src/lib/calendar.test.ts",
@@ -4366,7 +4474,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "title()",
       "source_file": "src/lib/calendar.ts",
@@ -4378,7 +4486,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "toics()",
       "source_file": "src/lib/calendar.ts",
@@ -4390,47 +4498,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "utc()",
       "source_file": "src/lib/calendar.ts",
       "source_location": "L104"
-    },
-    {
-      "id": "src_lib_course_daykey",
-      "label": "dayKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "daykey()",
-      "source_file": "src/lib/course.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_lib_focus_streak",
-      "label": "streak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "streak()",
-      "source_file": "src/lib/focus.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_lib_focus_studydays",
-      "label": "studyDays()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "studydays()",
-      "source_file": "src/lib/focus.ts",
-      "source_location": "L6"
     },
     {
       "id": "src_lib_term_termglance",
@@ -4438,7 +4510,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "termglance()",
       "source_file": "src/lib/term.ts",
@@ -4450,83 +4522,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "on()",
       "source_file": "src/lib/term.test.ts",
       "source_location": "L5"
-    },
-    {
-      "id": "src_components_chart_widgets_trendwidget",
-      "label": "TrendWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "trendwidget()",
-      "source_file": "src/components/chart-widgets.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_components_course_card_courseface",
-      "label": "CourseFace()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "courseface()",
-      "source_file": "src/components/course-card.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_components_courses_coursesgrid",
-      "label": "CoursesGrid()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "coursesgrid()",
-      "source_file": "src/components/courses.tsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "src_components_courses_whatif",
-      "label": "WhatIf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "whatif()",
-      "source_file": "src/components/courses.tsx",
-      "source_location": "L164"
-    },
-    {
-      "id": "src_lib_course_gradelabel",
-      "label": "gradeLabel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "gradelabel()",
-      "source_file": "src/lib/course.ts",
-      "source_location": "L28"
-    },
-    {
-      "id": "src_lib_course_needonfinal",
-      "label": "needOnFinal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "needonfinal()",
-      "source_file": "src/lib/course.ts",
-      "source_location": "L32"
     },
     {
       "id": "src_components_evil_buttons_ash_burst_button_useashburst",
@@ -4721,22 +4721,143 @@
       "source_location": "L43"
     },
     {
+      "id": "src_app_login_form",
+      "label": "form.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "form.tsx",
+      "source_file": "src/app/login/form.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_block",
+      "label": "block.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "block.tsx",
+      "source_file": "src/components/block.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_course_card",
+      "label": "course-card.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "course-card.tsx",
+      "source_file": "src/components/course-card.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_courses",
+      "label": "courses.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "courses.tsx",
+      "source_file": "src/components/courses.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_courses_add",
+      "label": "ADD",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "add",
+      "source_file": "src/components/courses.tsx",
+      "source_location": "L62"
+    },
+    {
+      "id": "src_components_create_forms",
+      "label": "create-forms.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "create-forms.tsx",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_create_forms_field",
       "label": "field",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "field",
       "source_file": "src/components/create-forms.tsx",
       "source_location": "L12"
     },
     {
+      "id": "src_components_create_forms_label",
+      "label": "label",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "label",
+      "source_file": "src/components/create-forms.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_components_dashboard",
+      "label": "dashboard.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard.tsx",
+      "source_file": "src/components/dashboard.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_exam_ring",
+      "label": "exam-ring.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "exam-ring.tsx",
+      "source_file": "src/components/exam-ring.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_item_details",
+      "label": "item-details.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "item-details.tsx",
+      "source_file": "src/components/item-details.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_item_details_kind",
+      "label": "KIND",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "kind",
+      "source_file": "src/components/item-details.tsx",
+      "source_location": "L9"
+    },
+    {
       "id": "src_components_materials",
       "label": "materials.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "materials.tsx",
       "source_file": "src/components/materials.tsx",
@@ -4747,18 +4868,73 @@
       "label": "TILES",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "tiles",
       "source_file": "src/components/materials.tsx",
       "source_location": "L110"
     },
     {
+      "id": "src_components_progress_block",
+      "label": "progress-block.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "progress-block.tsx",
+      "source_file": "src/components/progress-block.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_settings_forms",
+      "label": "settings-forms.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "settings-forms.tsx",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_settings_forms_paint",
+      "label": "PAINT",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "paint",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L70"
+    },
+    {
+      "id": "src_components_settings_forms_sections",
+      "label": "SECTIONS",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "sections",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L167"
+    },
+    {
+      "id": "src_components_settings_forms_themes",
+      "label": "THEMES",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "themes",
+      "source_file": "src/components/settings-forms.tsx",
+      "source_location": "L74"
+    },
+    {
       "id": "src_components_syllabus_import",
       "label": "syllabus-import.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "syllabus-import.tsx",
       "source_file": "src/components/syllabus-import.tsx",
@@ -4769,7 +4945,7 @@
       "label": "KINDS",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "kinds",
       "source_file": "src/components/syllabus-import.tsx",
@@ -4780,7 +4956,7 @@
       "label": "syllabus-summary.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "syllabus-summary.tsx",
       "source_file": "src/components/syllabus-summary.tsx",
@@ -4791,10 +4967,76 @@
       "label": "sync-window.tsx",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
       "norm_label": "sync-window.tsx",
       "source_file": "src/components/sync-window.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_up_next",
+      "label": "up-next.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "up-next.tsx",
+      "source_file": "src/components/up-next.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_week_strip",
+      "label": "week-strip.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "week-strip.tsx",
+      "source_file": "src/components/week-strip.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_progress",
+      "label": "progress.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "progress.ts",
+      "source_file": "src/lib/progress.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_progress_test",
+      "label": "progress.test.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "progress.test.ts",
+      "source_file": "src/lib/progress.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_progress_test_start",
+      "label": "start",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "start",
+      "source_file": "src/lib/progress.test.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_lib_utils",
+      "label": "utils.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "utils.ts",
+      "source_file": "src/lib/utils.ts",
       "source_location": "L1"
     },
     {
@@ -4802,55 +5044,33 @@
       "label": "lucide-react",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "concept",
       "norm_label": "lucide-react",
       "source_file": "package.json",
       "source_location": "L20"
     },
     {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "package.json",
+      "source_location": "L26"
+    },
+    {
       "id": "ref_sonner",
       "label": "sonner",
       "_origin": "ast",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "file_type": "concept",
       "norm_label": "sonner",
       "source_file": "package.json",
       "source_location": "L31"
-    },
-    {
-      "id": "src_components_focus_timer",
-      "label": "focus-timer.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
-      "file_type": "code",
-      "norm_label": "focus-timer.tsx",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_focus_timer_focuscontext",
-      "label": "FocusContext",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
-      "file_type": "code",
-      "norm_label": "focuscontext",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L25"
-    },
-    {
-      "id": "src_components_focus_timer_spring",
-      "label": "SPRING",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
-      "file_type": "code",
-      "norm_label": "spring",
-      "source_file": "src/components/focus-timer.tsx",
-      "source_location": "L14"
     },
     {
       "id": "src_components_evil_buttons_ash_burst_button",
@@ -4901,7 +5121,7 @@
       "label": "chart-widgets.tsx",
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "chart-widgets.tsx",
       "source_file": "src/components/chart-widgets.tsx",
@@ -4912,7 +5132,7 @@
       "label": "CUTOFFS",
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "cutoffs",
       "source_file": "src/components/chart-widgets.tsx",
@@ -4923,21 +5143,142 @@
       "label": "SHADES",
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
       "norm_label": "shades",
       "source_file": "src/components/chart-widgets.tsx",
       "source_location": "L289"
     },
     {
-      "id": "src_components_dashboard",
-      "label": "dashboard.tsx",
+      "id": "src_components_focus",
+      "label": "focus.tsx",
       "_origin": "ast",
       "community": 11,
-      "community_name": "dashboard.tsx",
+      "community_name": "chart-widgets.tsx",
       "file_type": "code",
-      "norm_label": "dashboard.tsx",
-      "source_file": "src/components/dashboard.tsx",
+      "norm_label": "focus.tsx",
+      "source_file": "src/components/focus.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_focus_shades",
+      "label": "SHADES",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "shades",
+      "source_file": "src/components/focus.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_components_focus_timer",
+      "label": "focus-timer.tsx",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "focus-timer.tsx",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_focus_timer_focuscontext",
+      "label": "FocusContext",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "focuscontext",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_components_focus_timer_spring",
+      "label": "SPRING",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "spring",
+      "source_file": "src/components/focus-timer.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_components_widgets",
+      "label": "components/widgets.tsx",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "components/widgets.tsx",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_widgets_kind_icon",
+      "label": "KIND_ICON",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "kind_icon",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L215"
+    },
+    {
+      "id": "src_lib_course",
+      "label": "course.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "course.ts",
+      "source_file": "src/lib/course.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_course_test",
+      "label": "course.test.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "course.test.ts",
+      "source_file": "src/lib/course.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_course_weekdays",
+      "label": "WEEKDAYS",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "weekdays",
+      "source_file": "src/lib/course.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_lib_focus",
+      "label": "focus.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "focus.ts",
+      "source_file": "src/lib/focus.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_focus_test",
+      "label": "focus.test.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
+      "file_type": "code",
+      "norm_label": "focus.test.ts",
+      "source_file": "src/lib/focus.test.ts",
       "source_location": "L1"
     },
     {
@@ -4994,160 +5335,6 @@
       "norm_label": "spring.ts",
       "source_file": "src/lib/spring.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "src_app_login_form",
-      "label": "form.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "form.tsx",
-      "source_file": "src/app/login/form.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_block",
-      "label": "block.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "block.tsx",
-      "source_file": "src/components/block.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_course_card",
-      "label": "course-card.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "course-card.tsx",
-      "source_file": "src/components/course-card.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_exam_ring",
-      "label": "exam-ring.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "exam-ring.tsx",
-      "source_file": "src/components/exam-ring.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_item_details",
-      "label": "item-details.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "item-details.tsx",
-      "source_file": "src/components/item-details.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_item_details_kind",
-      "label": "KIND",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "kind",
-      "source_file": "src/components/item-details.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_components_progress_block",
-      "label": "progress-block.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "progress-block.tsx",
-      "source_file": "src/components/progress-block.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_up_next",
-      "label": "up-next.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "up-next.tsx",
-      "source_file": "src/components/up-next.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_week_strip",
-      "label": "week-strip.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "week-strip.tsx",
-      "source_file": "src/components/week-strip.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_progress",
-      "label": "progress.ts",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "progress.ts",
-      "source_file": "src/lib/progress.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_progress_test",
-      "label": "progress.test.ts",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "progress.test.ts",
-      "source_file": "src/lib/progress.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_progress_test_start",
-      "label": "start",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "start",
-      "source_file": "src/lib/progress.test.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "src_lib_utils",
-      "label": "utils.ts",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "code",
-      "norm_label": "utils.ts",
-      "source_file": "src/lib/utils.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "utils.ts",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "package.json",
-      "source_location": "L26"
     },
     {
       "id": "src_lib_ai",
@@ -5436,72 +5623,6 @@
       "source_location": "L34"
     },
     {
-      "id": "src_components_create_forms",
-      "label": "create-forms.tsx",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "create-forms.tsx",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_create_forms_label",
-      "label": "label",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "label",
-      "source_file": "src/components/create-forms.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_components_settings_forms",
-      "label": "settings-forms.tsx",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "settings-forms.tsx",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_settings_forms_paint",
-      "label": "PAINT",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "paint",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L70"
-    },
-    {
-      "id": "src_components_settings_forms_sections",
-      "label": "SECTIONS",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "sections",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L167"
-    },
-    {
-      "id": "src_components_settings_forms_themes",
-      "label": "THEMES",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "file_type": "code",
-      "norm_label": "themes",
-      "source_file": "src/components/settings-forms.tsx",
-      "source_location": "L74"
-    },
-    {
       "id": "package_devdependencies",
       "label": "devDependencies",
       "_origin": "ast",
@@ -5731,116 +5852,6 @@
       "norm_label": "0006_course_grade.sql",
       "source_file": "supabase/migrations/0006_course_grade.sql",
       "source_location": null
-    },
-    {
-      "id": "src_components_calendar",
-      "label": "calendar.tsx",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "calendar.tsx",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_calendar_add",
-      "label": "ADD",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "add",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L48"
-    },
-    {
-      "id": "src_components_calendar_ease",
-      "label": "EASE",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "ease",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_components_calendar_page",
-      "label": "PAGE",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "page",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L262"
-    },
-    {
-      "id": "src_components_calendar_views",
-      "label": "VIEWS",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "views",
-      "source_file": "src/components/calendar.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_components_gooey_menu",
-      "label": "gooey-menu.tsx",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "gooey-menu.tsx",
-      "source_file": "src/components/gooey-menu.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_gooey_menu_create",
-      "label": "CREATE",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "create",
-      "source_file": "src/components/gooey-menu.tsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_components_sidebar",
-      "label": "sidebar.tsx",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "sidebar.tsx",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_sidebar_nav",
-      "label": "NAV",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "code",
-      "norm_label": "nav",
-      "source_file": "src/components/sidebar.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "ref_liquid_gooey",
-      "label": "liquid-gooey",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "calendar.tsx",
-      "file_type": "concept",
-      "norm_label": "liquid-gooey",
-      "source_file": "package.json",
-      "source_location": "L19"
     },
     {
       "id": "public_class_meetings",
@@ -6870,18 +6881,62 @@
       "label": "[token]/route.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "[token]/route.ts",
       "source_file": "src/app/api/cal/[token]/route.ts",
       "source_location": "L1"
     },
     {
+      "id": "src_components_calendar",
+      "label": "calendar.tsx",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "calendar.tsx",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_calendar_add",
+      "label": "ADD",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "add",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L48"
+    },
+    {
+      "id": "src_components_calendar_ease",
+      "label": "EASE",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "ease",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_components_calendar_page",
+      "label": "PAGE",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "page",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L262"
+    },
+    {
       "id": "src_components_calendar_rail",
       "label": "calendar-rail.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "calendar-rail.tsx",
       "source_file": "src/components/calendar-rail.tsx",
@@ -6892,62 +6947,73 @@
       "label": "LEVELS",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "levels",
       "source_file": "src/components/calendar-rail.tsx",
       "source_location": "L136"
     },
     {
-      "id": "src_components_focus",
-      "label": "focus.tsx",
+      "id": "src_components_calendar_views",
+      "label": "VIEWS",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "focus.tsx",
-      "source_file": "src/components/focus.tsx",
+      "norm_label": "views",
+      "source_file": "src/components/calendar.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_components_gooey_menu",
+      "label": "gooey-menu.tsx",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "code",
+      "norm_label": "gooey-menu.tsx",
+      "source_file": "src/components/gooey-menu.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_focus_shades",
-      "label": "SHADES",
+      "id": "src_components_gooey_menu_create",
+      "label": "CREATE",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "shades",
-      "source_file": "src/components/focus.tsx",
-      "source_location": "L9"
+      "norm_label": "create",
+      "source_file": "src/components/gooey-menu.tsx",
+      "source_location": "L12"
     },
     {
-      "id": "src_components_widgets",
-      "label": "components/widgets.tsx",
+      "id": "src_components_sidebar",
+      "label": "sidebar.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "components/widgets.tsx",
-      "source_file": "src/components/widgets.tsx",
+      "norm_label": "sidebar.tsx",
+      "source_file": "src/components/sidebar.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_widgets_kind_icon",
-      "label": "KIND_ICON",
+      "id": "src_components_sidebar_nav",
+      "label": "NAV",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
-      "norm_label": "kind_icon",
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L210"
+      "norm_label": "nav",
+      "source_file": "src/components/sidebar.tsx",
+      "source_location": "L15"
     },
     {
       "id": "src_lib_calendar",
       "label": "calendar.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "calendar.ts",
       "source_file": "src/lib/calendar.ts",
@@ -6958,7 +7024,7 @@
       "label": "BYDAY",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "byday",
       "source_file": "src/lib/calendar.ts",
@@ -6969,7 +7035,7 @@
       "label": "LABEL",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "label",
       "source_file": "src/lib/calendar.ts",
@@ -6980,7 +7046,7 @@
       "label": "calendar.test.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "calendar.test.ts",
       "source_file": "src/lib/calendar.test.ts",
@@ -6991,62 +7057,18 @@
       "label": "wed",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "wed",
       "source_file": "src/lib/calendar.test.ts",
       "source_location": "L6"
     },
     {
-      "id": "src_lib_course",
-      "label": "course.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "course.ts",
-      "source_file": "src/lib/course.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_course_weekdays",
-      "label": "WEEKDAYS",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "weekdays",
-      "source_file": "src/lib/course.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_lib_focus",
-      "label": "focus.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "focus.ts",
-      "source_file": "src/lib/focus.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_focus_test",
-      "label": "focus.test.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "components/widgets.tsx",
-      "file_type": "code",
-      "norm_label": "focus.test.ts",
-      "source_file": "src/lib/focus.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_lib_term",
       "label": "term.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "term.ts",
       "source_file": "src/lib/term.ts",
@@ -7057,7 +7079,7 @@
       "label": "term.test.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "term.test.ts",
       "source_file": "src/lib/term.test.ts",
@@ -7068,7 +7090,7 @@
       "label": "term",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "code",
       "norm_label": "term",
       "source_file": "src/lib/term.test.ts",
@@ -7079,11 +7101,22 @@
       "label": "RFC-5545",
       "_origin": "ast",
       "community": 5,
-      "community_name": "components/widgets.tsx",
+      "community_name": "calendar.tsx",
       "file_type": "concept",
       "norm_label": "rfc-5545",
       "source_file": "src/lib/calendar.ts",
       "source_location": "L91"
+    },
+    {
+      "id": "ref_liquid_gooey",
+      "label": "liquid-gooey",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "calendar.tsx",
+      "file_type": "concept",
+      "norm_label": "liquid-gooey",
+      "source_file": "package.json",
+      "source_location": "L19"
     },
     {
       "id": "supabase_migrations_0005_canvas_sync_sql_public_items",
@@ -7194,39 +7227,6 @@
       "norm_label": "0008_home_layout.sql",
       "source_file": "supabase/migrations/0008_home_layout.sql",
       "source_location": null
-    },
-    {
-      "id": "src_components_courses",
-      "label": "courses.tsx",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "courses.tsx",
-      "source_file": "src/components/courses.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_courses_add",
-      "label": "ADD",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "add",
-      "source_file": "src/components/courses.tsx",
-      "source_location": "L62"
-    },
-    {
-      "id": "src_lib_course_test",
-      "label": "course.test.ts",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "file_type": "code",
-      "norm_label": "course.test.ts",
-      "source_file": "src/lib/course.test.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_components_evil_buttons_doubt_button",
@@ -8307,33 +8307,33 @@
       "source_location": "L5"
     },
     {
+      "id": "src_lib_utils_cn",
+      "label": "cn()",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "contributor": null,
+      "file_type": "code",
+      "norm_label": "cn()",
+      "source_file": "docs/superpowers/plans/2026-09-22-phase-0-foundation.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
       "id": "handoff_ask_about_syllabus",
       "label": "Ask about the syllabus (fresh focused chat)",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "contributor": null,
       "file_type": "concept",
       "norm_label": "ask about the syllabus (fresh focused chat)",
       "source_file": "HANDOFF.md",
       "source_location": "\u00a714",
-      "source_url": null
-    },
-    {
-      "id": "src_lib_utils_cn",
-      "label": "cn()",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 13,
-      "community_name": "utils.ts",
-      "contributor": null,
-      "file_type": "code",
-      "norm_label": "cn()",
-      "source_file": "docs/superpowers/plans/2026-09-22-phase-0-foundation.md",
-      "source_location": null,
       "source_url": null
     },
     {
@@ -9219,11 +9219,47 @@
       "source_url": null
     },
     {
+      "id": "src_components_ui_button",
+      "label": "src_components_ui_button",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_button",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "src_components_ui_button_button",
+      "label": "src_components_ui_button_button",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_button_button",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "src_components_ui_button_buttonvariants",
+      "label": "src_components_ui_button_buttonvariants",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_button_buttonvariants",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "src_components_ui_checkbox",
       "label": "src_components_ui_checkbox",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_checkbox",
@@ -9235,7 +9271,7 @@
       "label": "src_components_ui_checkbox_checkbox",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_checkbox_checkbox",
@@ -9247,7 +9283,7 @@
       "label": "src_components_ui_dialog",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_dialog",
@@ -9259,7 +9295,7 @@
       "label": "src_components_ui_dialog_dialog",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_dialog_dialog",
@@ -9271,7 +9307,7 @@
       "label": "src_components_ui_dialog_dialogcontent",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_dialog_dialogcontent",
@@ -9283,10 +9319,22 @@
       "label": "src_components_ui_dialog_dialogdescription",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_dialog_dialogdescription",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "src_components_ui_dialog_dialogheader",
+      "label": "src_components_ui_dialog_dialogheader",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_dialog_dialogheader",
       "source_file": "",
       "type": "external"
     },
@@ -9295,7 +9343,7 @@
       "label": "src_components_ui_dialog_dialogtitle",
       "_origin": "semantic",
       "community": 0,
-      "community_name": "materials.tsx",
+      "community_name": "dashboard.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_dialog_dialogtitle",
@@ -9303,11 +9351,47 @@
       "type": "external"
     },
     {
+      "id": "src_components_ui_popover_popoverdescription",
+      "label": "src_components_ui_popover_popoverdescription",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_popover_popoverdescription",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "src_components_ui_popover_popoverheader",
+      "label": "src_components_ui_popover_popoverheader",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_popover_popoverheader",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "src_components_ui_popover_popovertitle",
+      "label": "src_components_ui_popover_popovertitle",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "dashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_components_ui_popover_popovertitle",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "src_components_ui_animated_circular_progress_bar",
       "label": "src_components_ui_animated_circular_progress_bar",
       "_origin": "semantic",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_animated_circular_progress_bar",
@@ -9318,59 +9402,11 @@
       "id": "src_components_ui_animated_circular_progress_bar_animatedcircularprogressbar",
       "label": "src_components_ui_animated_circular_progress_bar_animatedcircularprogressbar",
       "_origin": "semantic",
-      "community": 1,
-      "community_name": "focus-timer.tsx",
+      "community": 11,
+      "community_name": "chart-widgets.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_animated_circular_progress_bar_animatedcircularprogressbar",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_button",
-      "label": "src_components_ui_button",
-      "_origin": "semantic",
-      "community": 13,
-      "community_name": "utils.ts",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_button",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_button_button",
-      "label": "src_components_ui_button_button",
-      "_origin": "semantic",
-      "community": 13,
-      "community_name": "utils.ts",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_button_button",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_button_buttonvariants",
-      "label": "src_components_ui_button_buttonvariants",
-      "_origin": "semantic",
-      "community": 13,
-      "community_name": "utils.ts",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_button_buttonvariants",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_dialog_dialogheader",
-      "label": "src_components_ui_dialog_dialogheader",
-      "_origin": "semantic",
-      "community": 17,
-      "community_name": "settings-forms.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_dialog_dialogheader",
       "source_file": "",
       "type": "external"
     },
@@ -9563,42 +9599,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "src_components_ui_draggable_widget_grid_spans",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_popover_popoverdescription",
-      "label": "src_components_ui_popover_popoverdescription",
-      "_origin": "semantic",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_popover_popoverdescription",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_popover_popoverheader",
-      "label": "src_components_ui_popover_popoverheader",
-      "_origin": "semantic",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_popover_popoverheader",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_components_ui_popover_popovertitle",
-      "label": "src_components_ui_popover_popovertitle",
-      "_origin": "semantic",
-      "community": 57,
-      "community_name": "courses.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_components_ui_popover_popovertitle",
       "source_file": "",
       "type": "external"
     }
@@ -12709,7 +12709,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L117",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -12721,7 +12721,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L181",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -12733,7 +12733,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L191",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -12745,7 +12745,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L233",
+      "source_location": "L232",
       "weight": 1.0
     },
     {
@@ -12757,7 +12757,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L244",
+      "source_location": "L243",
       "weight": 1.0
     },
     {
@@ -12769,7 +12769,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L77",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -12781,7 +12781,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L78",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -12793,7 +12793,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L79",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -12805,7 +12805,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L93",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -13513,7 +13513,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/up-next.tsx",
-      "source_location": "L145",
+      "source_location": "L146",
       "weight": 1.0
     },
     {
@@ -13525,7 +13525,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/up-next.tsx",
-      "source_location": "L174",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -13585,7 +13585,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L255",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -13597,7 +13597,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L259",
+      "source_location": "L264",
       "weight": 1.0
     },
     {
@@ -13609,7 +13609,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L106",
+      "source_location": "L107",
       "weight": 1.0
     },
     {
@@ -13621,7 +13621,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -13633,7 +13633,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -13645,7 +13645,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -13657,7 +13657,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -13669,7 +13669,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -13681,7 +13681,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -13693,7 +13693,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -13705,7 +13705,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -13717,7 +13717,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L239",
+      "source_location": "L244",
       "weight": 1.0
     },
     {
@@ -13729,7 +13729,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L183",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -13741,7 +13741,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L185",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -13753,7 +13753,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L186",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -13765,7 +13765,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L187",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -14389,7 +14389,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -14401,7 +14401,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -14413,7 +14413,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -14425,7 +14425,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -14437,7 +14437,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -14449,7 +14449,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L75",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -14461,7 +14461,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/home.ts",
-      "source_location": "L89",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -18751,7 +18751,7 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_components_week_strip_weekstrip",
+      "target": "src_lib_course_coursecolor",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18763,18 +18763,6 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_lib_course_coursecolor",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/dashboard.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_dashboard",
       "target": "src_lib_course_gradelabel",
       "relation": "imports",
       "_origin": "ast",
@@ -18782,7 +18770,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L17",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -18794,7 +18782,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L18",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -18806,7 +18794,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L19",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -18818,7 +18806,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18830,7 +18818,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18842,7 +18830,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18854,7 +18842,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18866,7 +18854,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18878,7 +18866,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18890,7 +18878,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -18902,7 +18890,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18914,7 +18902,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18926,7 +18914,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18938,7 +18926,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18950,7 +18938,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18962,7 +18950,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18974,7 +18962,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18986,7 +18974,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -18998,7 +18986,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -19010,7 +18998,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -19022,7 +19010,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -19034,7 +19022,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -19046,7 +19034,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -19058,7 +19046,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -19070,7 +19058,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -19082,7 +19070,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -19094,7 +19082,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -19106,7 +19094,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -19118,7 +19106,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -19130,7 +19118,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L46",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -19142,7 +19130,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L47",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -19154,7 +19142,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -19166,7 +19154,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -19178,7 +19166,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -19190,7 +19178,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -19202,7 +19190,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -19214,7 +19202,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -19226,7 +19214,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -19238,7 +19226,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -20827,6 +20815,30 @@
     },
     {
       "source": "src_components_widgets",
+      "target": "src_components_focus_timer_focusdial",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_widgets",
+      "target": "src_components_focus_timer_usefocus",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_widgets",
       "target": "src_lib_calendar_sessions",
       "relation": "imports",
       "_origin": "ast",
@@ -20834,7 +20846,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -20846,7 +20858,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -20858,7 +20870,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -20870,7 +20882,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -20882,7 +20894,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -20894,7 +20906,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -20906,7 +20918,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -20918,7 +20930,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -20930,7 +20942,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -20942,7 +20954,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -20971,7 +20983,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_components_chat_shortcuts_shortcutsfor",
+      "target": "src_components_week_strip_weekstrip",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20983,19 +20995,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_components_focus_timer_focusdial",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_widgets",
-      "target": "src_components_focus_timer_usefocus",
+      "target": "src_components_chat_shortcuts_shortcutsfor",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24422,7 +24422,7 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_components_week_strip",
+      "target": "src_lib_course",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24434,7 +24434,7 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_lib_course",
+      "target": "src_lib_utils",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24446,7 +24446,7 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_lib_utils",
+      "target": "src_components_focus",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24458,7 +24458,7 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_components_focus",
+      "target": "src_components_widgets",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24470,18 +24470,6 @@
     },
     {
       "source": "src_components_dashboard",
-      "target": "src_components_widgets",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/dashboard.tsx",
-      "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_dashboard",
       "target": "src_components_chart_widgets",
       "relation": "imports_from",
       "_origin": "ast",
@@ -24489,7 +24477,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L29",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -24525,7 +24513,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -24537,7 +24525,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -24549,7 +24537,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L46",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -24561,7 +24549,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L47",
+      "source_location": "L46",
       "type_only": true,
       "weight": 1.0
     },
@@ -24574,7 +24562,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -24586,7 +24574,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -26084,7 +26072,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "ref_motion",
+      "target": "src_components_focus_timer",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26096,7 +26084,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_lib_calendar",
+      "target": "ref_motion",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26108,7 +26096,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_lib_course",
+      "target": "src_lib_calendar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26120,7 +26108,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_lib_focus",
+      "target": "src_lib_course",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26132,7 +26120,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_lib_progress",
+      "target": "src_lib_focus",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26140,6 +26128,18 @@
       "context": "import",
       "source_file": "src/components/widgets.tsx",
       "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_widgets",
+      "target": "src_lib_progress",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L15",
       "type_only": true,
       "weight": 1.0
     },
@@ -26152,7 +26152,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -26205,7 +26205,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_components_chat_shortcuts",
+      "target": "src_components_week_strip",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -26217,7 +26217,7 @@
     },
     {
       "source": "src_components_widgets",
-      "target": "src_components_focus_timer",
+      "target": "src_components_chat_shortcuts",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -29717,7 +29717,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L51",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -29728,7 +29728,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L52",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -29739,7 +29739,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/dashboard.tsx",
-      "source_location": "L55",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -30751,23 +30751,12 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L104",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
       "source": "src_components_widgets",
       "target": "src_components_widgets_clock",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_widgets",
-      "target": "src_components_widgets_inminutes",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -30784,7 +30773,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L182",
+      "source_location": "L187",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_widgets",
+      "target": "src_components_widgets_inminutes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -30795,18 +30795,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L209",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_widgets",
-      "target": "src_components_widgets_timerwidget",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/widgets.tsx",
-      "source_location": "L21",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
@@ -30817,7 +30806,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L210",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -30828,7 +30817,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L213",
+      "source_location": "L218",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_widgets",
+      "target": "src_components_widgets_timerwidget",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/widgets.tsx",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -30839,7 +30839,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L254",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -30850,7 +30850,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/widgets.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -32005,7 +32005,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/home.ts",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
@@ -32016,7 +32016,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/home.ts",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -32027,7 +32027,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/home.ts",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -32049,7 +32049,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/home.ts",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -33956,5 +33956,5 @@
       "source_file": "HANDOFF.md"
     }
   ],
-  "built_at_commit": "0c7c22f49952110c6b5cb7549eec853861f00410"
+  "built_at_commit": "2a9abf1f40b473eccf991838fb495455e9f8f6e7"
 }

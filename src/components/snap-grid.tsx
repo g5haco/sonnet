@@ -159,11 +159,12 @@ export function SnapGrid({
                   commit(e.shiftKey ? { ...p, w: p.w + dx, h: p.h + dy } : { ...p, x: p.x + dx, y: p.y + dy });
                 }}
               >
-                {/* Fixed size: content that's taller scrolls inside the widget. */}
+                {/* Fixed size: content that's taller scrolls inside the widget. Tighter padding than elsewhere, so small
+                    widgets keep their room for content. */}
                 <div
                   inert={editable}
                   className={cn(
-                    "h-full overflow-hidden rounded-2xl transition-opacity *:h-full *:overflow-x-hidden *:overflow-y-auto *:[scrollbar-color:var(--border)_transparent] *:[scrollbar-width:thin]",
+                    "h-full overflow-hidden rounded-2xl transition-opacity *:h-full *:p-4! *:[&>header]:mb-2! *:overflow-x-hidden *:overflow-y-auto *:[scrollbar-color:var(--border)_transparent] *:[scrollbar-width:thin]",
                     editable && "opacity-60",
                   )}
                 >
