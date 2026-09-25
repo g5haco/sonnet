@@ -161,7 +161,7 @@ export function AppShell({
         role: "assistant",
         text: "",
         state: "reading",
-        chain: { steps: ["Reading your courses"], reasoning: "", started: Date.now() },
+        chain: { steps: [], reasoning: "", started: Date.now() }, // steps arrive as the server does them
       },
     ]);
 
@@ -199,12 +199,13 @@ export function AppShell({
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
           const e = JSON.parse(line) as {
-            t: "think" | "reason" | "search" | "sources" | "text" | "propose" | "cards" | "error";
+            t: "read" | "think" | "reason" | "search" | "sources" | "text" | "propose" | "cards" | "error";
             v?: string | Proposal[] | Deck | Chain["sources"];
           };
           // Every event also moves the thought chain along (see ThoughtChain).
           const step = (m: ChatMessage, s: string) => m.chain && addStep(m.chain, s);
-          if (e.t === "think")
+          if (e.t === "read") patch((m) => ({ ...m, chain: step(m, "Reading your courses") }));
+          else if (e.t === "think")
             patch((m) => ({ ...m, state: m.text ? m.state : "thinking", chain: step(m, "Thinking it through") }));
           else if (e.t === "reason")
             patch((m) => ({ ...m, chain: m.chain && { ...m.chain, reasoning: m.chain.reasoning + e.v } }));

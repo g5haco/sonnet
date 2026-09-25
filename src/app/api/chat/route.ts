@@ -1,4 +1,4 @@
-import { needsSearch, needsThinking, streamReply, studentContext, type Turn } from "@/lib/ai";
+import { lightContext, needsSearch, needsThinking, smallTalk, streamReply, studentContext, type Turn } from "@/lib/ai";
 import { typedPart } from "@/lib/attach";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
           photos -= images.length;
           return {
             role: m.role,
-            content: m.content.slice(0, m.role === "user" ? 125_000 : 8_000),
+            content: m.content.slice(0, m.role === "user" ? 125_000 : 16_000), // answers can be whole programs now
             ...(images.length ? { images } : {}),
           };
         })
@@ -57,5 +57,8 @@ export async function POST(request: Request) {
   const search = body?.search === true || needsSearch(typedPart(turns.at(-1)!.content));
   // Optional attached work item ("Ask about this"): its id, loaded under the student's own RLS.
   const item = typeof body?.item === "string" && /^[0-9a-f-]{36}$/i.test(body.item) ? body.item : undefined;
-  return streamReply(await studentContext(supabase, timeZone, focus, item), turns, think, body?.think === true, search);
+  // A greeting or a thanks needs no course data (and gets no "Reading your courses" step).
+  const light = smallTalk(typedPart(turns.at(-1)!.content)) && !turns.at(-1)!.images?.length && !item;
+  const context = light ? lightContext(timeZone) : await studentContext(supabase, timeZone, focus, item);
+  return streamReply(context, turns, think, body?.think === true, search);
 }
