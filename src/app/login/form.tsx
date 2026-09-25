@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { google, signIn, signUp } from "./actions";
+import { signIn, signUp } from "./actions";
 
 const field =
   "h-11 rounded-full bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm";
@@ -25,16 +25,29 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
 
   return (
     <div className="flex flex-col gap-4">
-      <form action={google}>
+      {/* Google sign-in isn't set up yet (Supabase provider + OAuth). The button stays as a preview; the
+          `google` action is kept for when it is. */}
+      <div className="relative">
         <Button
-          type="submit"
+          type="button"
           variant="secondary"
-          className="h-11 w-full gap-2.5 rounded-full transition-transform active:scale-[0.97]"
+          disabled
+          aria-describedby="google-off"
+          className="h-11 w-full gap-2.5 rounded-full grayscale"
         >
           {G}
           Continue with Google
         </Button>
-      </form>
+        <span
+          aria-hidden="true"
+          className="absolute -top-2.5 -right-1 rotate-6 rounded-full bg-warning-fill px-2 py-0.5 font-mono text-[11px] font-medium text-[oklch(0.2_0_0)] shadow-sm"
+        >
+          soon
+        </span>
+      </div>
+      <p id="google-off" className="-mt-2 text-center font-mono text-xs text-muted-foreground">
+        Google sign-in is still in the oven. Email works great in the meantime.
+      </p>
 
       <p className="flex items-center gap-3 font-mono text-xs text-muted-foreground" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />
