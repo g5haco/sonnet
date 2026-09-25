@@ -227,7 +227,7 @@ export function ChatInput({
         className="rounded-3xl"
       >
         <div
-          className="rounded-3xl bg-secondary transition-shadow focus-within:ring-2 focus-within:ring-ring"
+          className="@container rounded-3xl bg-secondary transition-shadow focus-within:ring-2 focus-within:ring-ring"
           onClick={() => field.current?.focus()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -271,8 +271,9 @@ export function ChatInput({
               )}
             </div>
           )}
-          <div className="flex items-end gap-1.5 p-2">
-            <div className="relative min-w-0 flex-1 self-center">
+          {/* Narrow (the docked assistant): the text gets the whole width and the buttons sit on a row below. */}
+          <div className="flex items-end gap-1.5 p-2 @max-md:flex-wrap">
+            <div className="relative min-w-0 flex-1 self-center @max-md:basis-full">
               <label htmlFor={id} className="sr-only">
                 Ask about your courses
               </label>
@@ -296,7 +297,7 @@ export function ChatInput({
                     send(value);
                   }
                 }}
-                className="block max-h-40 min-h-9 w-full resize-none bg-transparent px-2 py-2 text-base outline-none [field-sizing:content] md:text-sm"
+                className="block max-h-40 min-h-9 w-full resize-none bg-transparent px-2 py-2 text-base outline-none [field-sizing:content] [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] md:text-sm"
               />
               {/* Animated placeholder: one example question at a time, letters blurring in. */}
               {!value && (
@@ -413,6 +414,7 @@ export function ChatInput({
               </button>
             )}
 
+            <span aria-hidden="true" className="hidden flex-1 @max-md:block" />
             {/* Metal marks the AI: it brightens once there's something to send. */}
             <MetalFx
               variant="circle"
