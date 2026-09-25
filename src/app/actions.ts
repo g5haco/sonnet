@@ -110,17 +110,22 @@ export async function updateMeeting(
   return done(error, "save the class time");
 }
 
-// One day off for a weekly class ("no class next Monday"): the date joins the class time's skip_dates.
-export async function removeClassDay(id: string, date: string): Promise<Result> {
+// A day off for weekly classes ("no class next Monday"): the date joins (off) or leaves (undo) each
+// class time's skip_dates.
+export async function setClassDayOff(ids: string[], date: string, off: boolean): Promise<Result> {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Pick a day." };
   const supabase = await createClient();
-  const { data, error } = await supabase.from("class_meetings").select("*").eq("id", id).maybeSingle();
-  if (error) return done(error, "find that class time");
-  if (!data) return { error: "That class time is gone." };
-  if (!("skip_dates" in data)) return { error: "Run migration 0011 in Supabase first." };
-  const skip = [...new Set([...(data.skip_dates ?? []), date])].sort();
-  const { error: saveError } = await supabase.from("class_meetings").update({ skip_dates: skip }).eq("id", id);
-  return done(saveError, "remove that day");
+  const { data, error } = await supabase.from("class_meetings").select("*").in("id", ids);
+  if (error) return done(error, "find those class times");
+  if (!data?.length) return { error: "Those class times are gone." };
+  if (!("skip_dates" in data[0])) return { error: "Run migration 0011 in Supabase first." };
+  for (const m of data) {
+    const rest = ((m.skip_dates ?? []) as string[]).filter((d) => d !== date);
+    const skip = off ? [...rest, date].sort() : rest;
+    const { error: saveError } = await supabase.from("class_meetings").update({ skip_dates: skip }).eq("id", m.id);
+    if (saveError) return done(saveError, off ? "remove that day" : "put that day back");
+  }
+  return done(null, "");
 }
 
 export async function deleteMeeting(id: string): Promise<Result> {

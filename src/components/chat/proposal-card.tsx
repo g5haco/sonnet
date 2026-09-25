@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { MetalBadge } from "metal-fx";
 import { useTheme } from "next-themes";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   createCourse,
   createItem,
@@ -11,7 +12,7 @@ import {
   deleteCourse,
   deleteItem,
   deleteMeeting,
-  removeClassDay,
+  setClassDayOff,
   saveTerm,
   updateCourse,
   updateItem,
@@ -64,7 +65,7 @@ export function applyProposal(p: Proposal, courses: { id: string; code: string }
     case "delete_class":
       return deleteMeeting(p.id);
     case "remove_class_day":
-      return removeClassDay(p.id, p.date);
+      return setClassDayOff((p.classes ?? []).map((c) => c.id), p.date, true); // ?? []: cards saved before the list
     case "add_course":
       return createCourse(form({ code: p.code, name: p.name }));
     case "update_course":
@@ -105,6 +106,15 @@ export function ProposalCard({ item, onResolve }: { item: Entry; onResolve: (acc
   const timed = kind === "exam" || kind === "quiz";
   const [time, setTime] = useState(() => (dated && !(timed && dated.endsWith("23:59")) ? dated.slice(11, 16) : ""));
   const due = dated && time ? `${dated.slice(0, 10)}T${time}` : undefined;
+  // A saved day off can be put back from its card.
+  const [undo, setUndo] = useState<"idle" | "busy" | "done">("idle");
+  const putBack = async () => {
+    if (p.type !== "remove_class_day") return;
+    setUndo("busy");
+    const r = await setClassDayOff((p.classes ?? []).map((c) => c.id), p.date, false);
+    if (r.error) toast.error(r.error);
+    setUndo(r.error ? "idle" : "done");
+  };
   const code =
     "course" in p
       ? p.course
@@ -112,7 +122,9 @@ export function ProposalCard({ item, onResolve }: { item: Entry; onResolve: (acc
         ? current?.course
         : p.type === "update_course" || p.type === "delete_course"
           ? p.code
-          : undefined;
+          : p.type === "remove_class_day" && p.classes?.length === 1
+            ? p.classes[0].course
+            : undefined;
   const hue = courses.find((c) => code && squash(c.code) === squash(code))?.hue;
   const open = status === "pending" || status === "saving";
   const [label, button] = VERB[p.type];
@@ -230,8 +242,25 @@ export function ProposalCard({ item, onResolve }: { item: Entry; onResolve: (acc
           )}
           role="status"
         >
-          {status === "saved" && <Check className="size-4" />}
-          {status === "saved" ? "Saved" : status === "skipped" ? "Skipped" : item.error}
+          {status === "saved" && undo !== "done" && <Check className="size-4" />}
+          {status === "saved"
+            ? undo === "done"
+              ? "Undone. Back on your schedule."
+              : "Saved"
+            : status === "skipped"
+              ? "Skipped"
+              : item.error}
+          {status === "saved" && p.type === "remove_class_day" && undo !== "done" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={undo === "busy"}
+              onClick={putBack}
+              className="ml-auto h-8 rounded-full px-3 text-foreground"
+            >
+              {undo === "busy" ? "Undoing…" : "Undo"}
+            </Button>
+          )}
         </p>
       )}
     </div>
@@ -262,12 +291,15 @@ function Body({ p, current }: { p: Proposal; current?: string }) {
         <>
           <p className={title}>
             {parseDay(p.date).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}
-            <span className="font-mono text-base text-muted-foreground">
-              {" "}
-              {p.starts}–{p.ends}
-            </span>
           </p>
-          <p className={detail}>Just this day. The weekly class time stays.</p>
+          <ul className="mt-1 space-y-0.5 font-mono">
+            {(p.classes ?? []).map((c) => (
+              <li key={c.id}>
+                {c.course} <span className="text-muted-foreground">{c.starts}–{c.ends}</span>
+              </li>
+            ))}
+          </ul>
+          <p className={detail}>Just this day. The weekly class times stay.</p>
         </>
       );
     case "update_class":

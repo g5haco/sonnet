@@ -75,13 +75,16 @@ test("tool calls become checked proposals: a room change keeps the rest of the c
   ).toMatchObject({ type: "add_class", courseId: "c1", weekdays: [2, 4], starts: "09:00", ends: "10:15" });
   expect(call("remove_class_day", { ref: "class:4d5e6f", date: "2026-09-28" })).toEqual({
     type: "remove_class_day",
-    id: "4d5e6f-full",
-    course: "POLS 202",
     date: "2026-09-28",
-    starts: "10:30",
-    ends: "12:20",
+    classes: [{ id: "4d5e6f-full", course: "POLS 202", starts: "10:30", ends: "12:20" }],
   });
   expect(call("remove_class_day", { ref: "class:4d5e6f", date: "2026-09-29" })).toBeNull(); // a Tuesday: no class
+  // "No class Monday" (no ref) means every class that meets that day.
+  refs.classes.set("777777", { id: "math-full", course: "MATH 142", weekdays: [1, 2, 3, 4, 5], starts: "13:30:00", ends: "14:20:00", location: "" });
+  expect(call("remove_class_day", { date: "2026-09-28" })).toMatchObject({
+    classes: [{ id: "4d5e6f-full" }, { id: "math-full" }],
+  });
+  expect(call("remove_class_day", { date: "2026-09-29" })).toMatchObject({ classes: [{ id: "math-full" }] });
   expect(call("delete_item", { ref: "ffffff" })).toBeNull(); // unknown ref
   expect(call("set_semester", { start: "2026-08-24", weeks: 40 })).toBeNull(); // out of range
 });

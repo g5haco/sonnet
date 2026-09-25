@@ -50,7 +50,7 @@ export type Proposal =
   | ({ type: "add_class"; courseId: string; course: string } & ClassTime)
   | ({ type: "update_class"; id: string; course: string; was: ClassTime } & ClassTime)
   | ({ type: "delete_class"; id: string; course: string } & ClassTime)
-  | { type: "remove_class_day"; id: string; course: string; date: string; starts: string; ends: string }
+  | { type: "remove_class_day"; date: string; classes: { id: string; course: string; starts: string; ends: string }[] }
   | { type: "add_course"; code: string; name: string }
   | { type: "update_course"; id: string; was: string; code: string; name: string }
   | { type: "delete_course"; id: string; code: string; items: number }
@@ -119,9 +119,12 @@ const TOOLS = [
   fn("delete_class_time", "Propose removing a weekly class time.", { ref: REF("class:") }, ["ref"]),
   fn(
     "remove_class_day",
-    'Propose removing one day\'s class from the schedule ("no class next Monday"). The weekly class time stays.',
-    { ref: REF("class:"), date: { type: "string", description: "YYYY-MM-DD, a day that class meets (see Upcoming classes)" } },
-    ["ref", "date"],
+    'Propose taking classes off the schedule for one date; the weekly class times stay. "No class next Monday" means every class that day: leave out ref. Pass ref only when one class is named ("no POLS on Monday").',
+    {
+      date: { type: "string", description: "YYYY-MM-DD (see Upcoming classes)" },
+      ref: { ...REF("class:"), description: "Only when one class is named; omit for the whole day" },
+    },
+    ["date"],
   ),
   fn(
     "add_course",
@@ -816,12 +819,17 @@ export function toProposal(call: { name: string; args: string }, refs: Refs): Pr
       };
     }
     case "remove_class_day": {
-      const m = refs.classes.get(ref(a.ref));
       const date = str(a.date);
-      // Only a real day that class meets.
-      if (!m || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-      if (!m.weekdays.includes(new Date(`${date}T12:00:00Z`).getUTCDay())) return null;
-      return { type: "remove_class_day", id: m.id, course: m.course, date, starts: m.starts.slice(0, 5), ends: m.ends.slice(0, 5) };
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+      // One named class, or every class that day. Only classes that really meet on that weekday.
+      const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+      const named = a.ref ? refs.classes.get(ref(a.ref)) : undefined;
+      if (a.ref && !named) return null;
+      const classes = (named ? [named] : [...refs.classes.values()])
+        .filter((m) => m.weekdays.includes(weekday))
+        .sort((x, y) => x.starts.localeCompare(y.starts))
+        .map((m) => ({ id: m.id, course: m.course, starts: m.starts.slice(0, 5), ends: m.ends.slice(0, 5) }));
+      return classes.length ? { type: "remove_class_day", date, classes } : null;
     }
     case "add_course": {
       const code = str(a.code)?.slice(0, 40);
