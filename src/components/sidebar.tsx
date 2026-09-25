@@ -98,20 +98,23 @@ function WindowButton({
 
 // Chat's one entry point sits with the "+": beside it on the open rail and the phone bar, under it on the
 // collapsed rail. (Ctrl+K and the Ask button still open the side panel.)
-function ChatLink({ active, onNavigate }: { active: boolean; onNavigate?: () => void }) {
+// `wide`: on the open rail it fills the gap between "+" and the timer and shows its label.
+function ChatLink({ active, onNavigate, wide }: { active: boolean; onNavigate?: () => void; wide?: boolean }) {
   return (
     <Link
       href="/chat"
       onClick={onNavigate}
-      aria-label="Chat"
+      aria-label={wide ? undefined : "Chat"}
       title="Chat"
       aria-current={active ? "page" : undefined}
       className={cn(
-        "grid size-10 max-md:size-11 shrink-0 place-items-center rounded-full shadow-[0_6px_18px_rgb(0_0_0/0.18)] transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+        "shrink-0 items-center rounded-full shadow-[0_6px_18px_rgb(0_0_0/0.18)] transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+        wide ? "flex h-10 w-full justify-center gap-2 px-4 text-sm font-medium" : "grid size-10 max-md:size-11 place-items-center",
         active ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-accent",
       )}
     >
       <MessageCircle className="size-5" aria-hidden="true" />
+      {wide && "Chat"}
     </Link>
   );
 }
@@ -174,8 +177,8 @@ export function Sidebar({
           >
             <div className={cn("flex items-start", open ? "flex-row gap-4" : "flex-col gap-1.5")}>
               <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
-              <motion.div layout transition={SPRING}>
-                <ChatLink active={onChat} />
+              <motion.div layout transition={SPRING} className={cn(open && "flex-1")}>
+                <ChatLink active={onChat} wide={open} />
               </motion.div>
               <motion.div layout transition={SPRING}>
                 <FocusButton />

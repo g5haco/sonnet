@@ -46,7 +46,7 @@ export function CourseFace({ course, now, compact }: { course: CourseCard; now: 
     <div
       className="flex h-full flex-col p-4 text-[oklch(0.2_0_0)] select-none sm:p-5"
       style={{
-        background: `linear-gradient(165deg, oklch(0.82 0.11 ${course.hue}), oklch(0.7 0.13 ${course.hue}))`,
+        background: `linear-gradient(165deg, oklch(0.82 0.15 ${course.hue}), oklch(0.72 0.17 ${course.hue}))`,
       }}
     >
       <p className={cn("font-mono leading-tight font-semibold tracking-tight", compact ? "text-xl" : "text-lg")}>
