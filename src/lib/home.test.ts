@@ -8,7 +8,7 @@ test("missing or unreadable layouts fall back to the default", () => {
   expect(readLayout([{ id: "gone", size: "sm" }])).toEqual(DEFAULT_LAYOUT);
 });
 
-test("a saved layout keeps its order, drops unknown ids and repeats, and fixes sizes a widget can't take", () => {
+test("a saved layout keeps its order, drops unknown ids and repeats, and maps sizes to a column", () => {
   const saved = [
     { id: "focus", size: "wide" },
     { id: "weather", size: "sm" },
@@ -20,8 +20,8 @@ test("a saved layout keeps its order, drops unknown ids and repeats, and fixes s
   ];
   expect(readLayout(saved)).toEqual([
     { id: "focus", size: "wide" },
-    { id: "next", size: "lg" },
-    { id: "week", size: "wide" },
+    { id: "next", size: "wide" },
+    { id: "week", size: "sm" },
     { id: "exam", size: "sm" },
   ]);
 });

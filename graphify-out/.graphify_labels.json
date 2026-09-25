@@ -1,9 +1,9 @@
 {
   "0": "settings-forms.tsx",
   "1": "focus-timer.tsx",
-  "2": "eslint.config.mjs",
+  "2": "doubt-button.tsx",
   "3": "canvas.ts",
-  "4": "next",
+  "4": "rows.ts",
   "5": "calendar.tsx",
   "6": "compilerOptions",
   "7": "dependencies",
@@ -55,5 +55,6 @@
   "53": "scripts",
   "54": "ai.test.ts",
   "55": "public.settings",
-  "56": "0008_home_layout.sql"
+  "56": "0008_home_layout.sql",
+  "57": "@supabase/ssr"
 }

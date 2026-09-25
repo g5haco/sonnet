@@ -210,9 +210,9 @@
     "semantic_hash": "2c61bfad89def9d2af60c3a589634e2f"
   },
   "src/components/dashboard.tsx": {
-    "mtime": 1790301946.973378,
-    "seen": 1790301987.4991643,
-    "ast_hash": "326013a6ef46cade3706d59cb74c5761",
+    "mtime": 1790302783.795392,
+    "seen": 1790302813.6571338,
+    "ast_hash": "3502e1843e39fe5822661b96a67088a3",
     "semantic_hash": ""
   },
   "src/components/exam-ring.tsx": {
@@ -606,15 +606,15 @@
     "semantic_hash": ""
   },
   "src/lib/home.test.ts": {
-    "mtime": 1790301609.0274732,
-    "seen": 1790301987.4991643,
-    "ast_hash": "ae02bf4673e6d45306315e5cb93a868d",
+    "mtime": 1790302709.8130147,
+    "seen": 1790302813.6571338,
+    "ast_hash": "d5fba6cc695239361916f1fc85f4c84e",
     "semantic_hash": ""
   },
   "src/lib/home.ts": {
-    "mtime": 1790301608.9737446,
-    "seen": 1790301987.4991643,
-    "ast_hash": "6a8c01c8c14c29c5e810ff3dbcc3258b",
+    "mtime": 1790302783.853075,
+    "seen": 1790302813.6571338,
+    "ast_hash": "15cc393ec999d0957d9f9ca68672eceb",
     "semantic_hash": ""
   },
   "supabase/migrations/0008_home_layout.sql": {

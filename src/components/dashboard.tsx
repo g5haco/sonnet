@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   BookOpen,
   CalendarClock,
   CalendarDays,
@@ -30,7 +31,7 @@ import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
 import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
 import { Button } from "@/components/ui/button";
-import { DraggableWidgetGrid, SPANS, type WidgetItem, type WidgetSize } from "@/components/ui/draggable-widget-grid";
+import { DraggableWidgetGrid, type WidgetItem } from "@/components/ui/draggable-widget-grid";
 import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
@@ -188,10 +189,10 @@ export function Dashboard({
     ),
     focus: <FocusBlock sessions={sessions} now={now} />,
   };
-  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id].label }));
+  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
   const missing: MenuItem<WidgetId>[] = (Object.keys(WIDGETS) as WidgetId[])
     .filter((id) => !layout.some((w) => w.id === id))
-    .map((id) => ({ kind: id, label: WIDGETS[id].label, icon: ICONS[id] }));
+    .map((id) => ({ kind: id, label: WIDGETS[id], icon: ICONS[id] }));
 
   const finish = () => {
     setEditing(false);
@@ -275,47 +276,52 @@ export function Dashboard({
         </div>
       </header>
 
-      <DraggableWidgetGrid
-        items={items_}
-        editable={editing}
-        rowHeight={320}
-        onChange={(next) => setLayout(next.map(({ id, size }) => ({ id: id as WidgetId, size })))}
-        renderItem={(w) => view[w.id as WidgetId]}
-        controls={(w, columns) => (
-          <>
-            <button
-              type="button"
-              aria-label={`Remove ${w.label}`}
-              onClick={() => {
-                setLayout((l) => l.filter((x) => x.id !== w.id));
-                document.getElementById("home-done")?.focus(); // the button is about to disappear
-              }}
-              className="absolute -top-2.5 -left-2.5 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
-            >
-              <X className="size-4" aria-hidden="true" />
-            </button>
-            {columns > 1 && WIDGETS[w.id as WidgetId].sizes.length > 1 && (
-              <div
-                role="group"
-                aria-label={`${w.label} size`}
-                className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-0.5 rounded-full bg-popover p-1 shadow-sm ring-1 ring-foreground/10"
-              >
-                {(WIDGETS[w.id as WidgetId].sizes as WidgetSize[]).map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    aria-pressed={w.size === size}
-                    onClick={() => setLayout((l) => l.map((x) => (x.id === w.id ? { ...x, size } : x)))}
-                    className="h-7 rounded-full px-2 font-mono text-xs tabular-nums text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-foreground aria-pressed:text-background"
-                  >
-                    {SPANS[size].col}×{SPANS[size].row}
-                  </button>
-                ))}
-              </div>
+      {/* Two independent columns, each widget at its natural height (as before the grid). In edit mode widgets
+          drag within their column and a button moves one to the other column. Stacked on phones. */}
+      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
+        {(["wide", "sm"] as const).map((col) => (
+          <DraggableWidgetGrid
+            key={col}
+            className={col === "wide" ? "min-w-0 flex-1" : "@3xl:w-80 @3xl:shrink-0"}
+            maxColumns={1}
+            items={items_.filter((w) => w.size === col)}
+            editable={editing}
+            onChange={(next) =>
+              setLayout((l) => [
+                ...next.map(({ id }) => ({ id: id as WidgetId, size: col })),
+                ...l.filter((x) => x.size !== col),
+              ])
+            }
+            renderItem={(w) => view[w.id as WidgetId]}
+            controls={(w) => (
+              <>
+                <button
+                  type="button"
+                  aria-label={`Remove ${w.label}`}
+                  onClick={() => {
+                    setLayout((l) => l.filter((x) => x.id !== w.id));
+                    document.getElementById("home-done")?.focus(); // the button is about to disappear
+                  }}
+                  className="absolute -top-2.5 -left-2.5 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Move ${w.label} to the ${col === "wide" ? "side" : "main"} column`}
+                  title={`Move to the ${col === "wide" ? "side" : "main"} column`}
+                  onClick={() =>
+                    setLayout((l) => l.map((x) => (x.id === w.id ? { ...x, size: col === "wide" ? "sm" : "wide" } : x)))
+                  }
+                  className="absolute -top-2.5 -right-2.5 z-10 hidden size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 @3xl:grid"
+                >
+                  <ArrowLeftRight className="size-4" aria-hidden="true" />
+                </button>
+              </>
             )}
-          </>
-        )}
-      />
+          />
+        ))}
+      </div>
       {layout.length === 0 && !editing && (
         <p className="rounded-2xl border border-dashed border-foreground/15 p-6 text-sm text-muted-foreground">
           Home is empty. Press Edit to add widgets back.

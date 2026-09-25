@@ -548,7 +548,8 @@ export function DraggableWidgetGrid({
     const measure = () => {
       const width = el.getBoundingClientRect().width;
       if (width < 1) return;
-      const columns = width < ONE_COLUMN ? 1 : Math.max(2, Math.min(maxColumns, Math.round(width / cellSize)));
+      const columns =
+        width < ONE_COLUMN || maxColumns === 1 ? 1 : Math.max(2, Math.min(maxColumns, Math.round(width / cellSize)));
       const unit = (width - gap * (columns - 1)) / columns;
       setMetrics((was) => (was.columns === columns && Math.abs(was.unit - unit) < 0.5 ? was : { unit, columns }));
     };
