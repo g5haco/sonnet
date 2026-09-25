@@ -279,3 +279,8 @@
     transform: translateY(var(--lift, 4px)) rotate(var(--sway, 1deg));
   }
 }
+
+/* On /chat the composer sits at the bottom middle, where task toasts land: lift them above it. */
+body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
+  bottom: 10rem;
+}
