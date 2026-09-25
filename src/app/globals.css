@@ -163,6 +163,14 @@
   html {
     @apply font-sans;
   }
+  /* iOS zooms into any field under 16px when it's focused. */
+  @media (max-width: 767px) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
+  }
   ::selection {
     background: var(--highlight);
   }

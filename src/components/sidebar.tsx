@@ -199,7 +199,9 @@ export function Sidebar({
       </div>
 
       {/* Phones: a top bar with the menu and Create; the menu opens full screen. */}
-      <div className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-border bg-background/90 px-2 backdrop-blur md:hidden">
+      <div
+        style={{ top: "var(--vvtop, 0px)" }}
+        className="sticky z-40 flex h-14 items-center gap-2 border-b border-border bg-background/90 px-2 backdrop-blur md:hidden">
         <button
           type="button"
           onClick={() => setMenu(true)}

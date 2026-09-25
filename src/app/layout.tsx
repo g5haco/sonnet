@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
@@ -7,6 +7,9 @@ import "./globals.css";
 const plexSans = IBM_Plex_Sans({ variable: "--font-plex-sans", subsets: ["latin"] });
 const plexSerif = IBM_Plex_Serif({ variable: "--font-plex-serif", subsets: ["latin"], weight: ["400", "500"] });
 const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
+
+// Android Chrome: the keyboard shrinks the page instead of covering it (iOS is handled in app-shell).
+export const viewport: Viewport = { interactiveWidget: "resizes-content" };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ericwei.me"),

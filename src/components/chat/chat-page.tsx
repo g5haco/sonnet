@@ -38,7 +38,10 @@ export function ChatPage() {
   const hue = courses.find((c) => c.code === focus)?.hue;
 
   return (
-    <main data-chat className="flex h-[calc(100dvh-3.5rem)] flex-col md:h-dvh">
+    <main
+      data-chat
+      className="flex h-[calc(var(--vvh,100dvh)-3.5rem)] translate-y-(--vvtop) flex-col md:h-dvh md:translate-y-0"
+    >
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 md:px-6">
         {/* Which course the chat is about: the same gooey menu as Create, one pill per course. */}
         <GooeyMenu

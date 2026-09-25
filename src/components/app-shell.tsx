@@ -83,6 +83,30 @@ function slim(history: Pick<ChatMessage, "role" | "text" | "files">[]) {
   return turns;
 }
 
+// The phone keyboard doesn't shrink the page on iOS: it pans the visible area up instead, pushing the top bar and
+// the chat header off screen. So the visible area's height and offset go in --vvh / --vvtop, and the phone top bar,
+// the /chat page and the assistant sheet size themselves to it (ChatGPT-style: everything stays above the
+// keyboard). Skipped while pinch-zoomed, where following the zoomed area would look broken.
+function useVisibleViewport() {
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const set = () => {
+      if (Math.abs(vv.scale - 1) > 0.01) return;
+      const s = document.documentElement.style;
+      s.setProperty("--vvh", `${vv.height}px`);
+      s.setProperty("--vvtop", `${vv.offsetTop}px`);
+    };
+    set();
+    vv.addEventListener("resize", set);
+    vv.addEventListener("scroll", set);
+    return () => {
+      vv.removeEventListener("resize", set);
+      vv.removeEventListener("scroll", set);
+    };
+  }, []);
+}
+
 export function AppShell({
   courses,
   schedule,
@@ -95,6 +119,7 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [now] = useState(() => Date.now());
+  useVisibleViewport();
   const [dialog, setDialog] = useState<"course" | Item["kind"] | null>(null);
   const [due, setDue] = useState<string>();
   const [pick, setPick] = useState<string>();
@@ -452,7 +477,10 @@ export function AppShell({
 
             <AnimatePresence>
               {sheet && (
-                <div className="fixed inset-0 z-50 xl:hidden">
+                <div
+                  className="fixed inset-x-0 z-50 xl:hidden"
+                  style={{ top: "var(--vvtop, 0px)", height: "var(--vvh, 100dvh)" }}
+                >
                   <motion.div
                     className="absolute inset-0 bg-black/40"
                     initial={{ opacity: 0 }}
@@ -467,7 +495,7 @@ export function AppShell({
                     exit={{ x: "100%" }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    {panel(() => setSheet(false), "h-dvh w-full border-l border-border")}
+                    {panel(() => setSheet(false), "h-full w-full border-l border-border")}
                   </motion.div>
                 </div>
               )}
