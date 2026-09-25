@@ -24,7 +24,15 @@ export function Fit({ children, max = 3, className }: { children: React.ReactNod
   }, [max]);
 
   return (
-    <div ref={box} className={cn("grid min-h-0 flex-1 place-items-center overflow-hidden", className)}>
+    // One track the size of the box (minmax 0), so a design bigger than the box is centered in it, not hung
+    // from the top, and the scale shrinks it around that center.
+    <div
+      ref={box}
+      className={cn(
+        "grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] place-items-center overflow-hidden",
+        className,
+      )}
+    >
       <div ref={inner} className="w-max" style={{ transform: `scale(${scale})` }}>
         {children}
       </div>

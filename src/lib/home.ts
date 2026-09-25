@@ -11,7 +11,7 @@ export const WIDGETS = {
   next: { label: "Up next", w: 5, h: 4, minW: 3, minH: 2 },
   grades: { label: "Grades", w: 3, h: 4, minH: 2 },
   exam: { label: "Next exam", w: 2, h: 2, minH: 2 },
-  courses: { label: "Courses", w: 4, h: 3, minW: 3, minH: 3 }, // the carousel needs the room
+  courses: { label: "Courses", w: 4, h: 3, minW: 2, minH: 2 }, // the carousel scales down to fit
   focus: { label: "Study days", w: 2, h: 2 },
   timer: { label: "Focus timer", w: 2, h: 2, minH: 2 },
   classes: { label: "Today's classes", w: 4, h: 1 },
