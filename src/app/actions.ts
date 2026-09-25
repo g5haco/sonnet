@@ -374,14 +374,18 @@ export async function saveChat(
   const kept = messages.slice(-100);
   if (JSON.stringify(kept).length > 400_000) return { error: "That chat is too long to save." };
   const supabase = await createClient();
-  const row = { id, title: title.slice(0, 120), focus: focus.slice(0, 40), messages: kept, updated_at: new Date().toISOString() };
-  let { error } = await supabase.from("chats").upsert({ ...row, item_id: item });
-  // Before migration 0013 there's no item_id column: save the chat without its assignment link.
-  if (error && ["PGRST204", "42703"].includes(error.code)) ({ error } = await supabase.from("chats").upsert(row));
+  const { error } = await supabase.from("chats").upsert({
+    id,
+    title: title.slice(0, 120),
+    focus: focus.slice(0, 40),
+    messages: kept,
+    item_id: item,
+    updated_at: new Date().toISOString(),
+  });
   return error ? { error: `Couldn't save the chat. ${error.message}` } : {};
 }
 
-// The newest chat about this work item, so "Ask about this" returns to it. None before migration 0013.
+// The newest chat about this work item, so "Ask about this" returns to it.
 export async function itemChat(item: string) {
   if (!UUID.test(item)) return null;
   const supabase = await createClient();
@@ -408,10 +412,9 @@ export async function listChats() {
 export async function loadChat(id: string) {
   if (!UUID.test(id)) return { error: "Bad chat." };
   const supabase = await createClient();
-  // "*": item_id exists only after migration 0013
-  const { data, error } = await supabase.from("chats").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase.from("chats").select("id, focus, messages, item_id").eq("id", id).maybeSingle();
   if (error || !data) return { error: "Couldn't open that chat." };
-  return { chat: data as { id: string; focus: string; messages: unknown[]; item_id?: string | null } };
+  return { chat: data as { id: string; focus: string; messages: unknown[]; item_id: string | null } };
 }
 
 export async function deleteChat(id: string): Promise<Result> {

@@ -327,7 +327,7 @@ export function AppShell({
 
   const askAbout = async (i: Item) => {
     if (itemId !== i.id) {
-      const saved = await itemChat(i.id); // always null before migration 0013: a fresh chat each time
+      const saved = await itemChat(i.id);
       if (!saved || !(await open(saved))) clear();
     }
     setFocus(i.course); // the course's syllabus and materials come along, as with "Ask about it"
