@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, FilePlus2, FileUp, Plus } from "lucide-react";
+import { Calculator, CalendarClock, FilePlus2, FileUp, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -14,6 +14,8 @@ import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
 import { Materials, type Material } from "@/components/materials";
 import { TiltCard } from "@/components/tilt-card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { UpNext, useWork } from "@/components/up-next";
 import type { ClassMeeting, Term } from "@/lib/calendar";
 import { courseColor, gradeLabel, HUES, meetingLabel, needOnFinal, WEEKDAYS } from "@/lib/course";
@@ -89,9 +91,9 @@ export function CourseView({
       <Link href="/courses" className="font-mono text-xs text-muted-foreground hover:text-foreground">
         ← courses
       </Link>
-      <header className="mt-3 mb-5 flex items-start gap-3">
+      <header className="mt-3 mb-5 flex flex-wrap items-start gap-3">
         <span className="mt-2.5 size-3 shrink-0 rounded-full" style={{ background: courseColor(course.hue) }} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-56">
           <h1 className="font-mono text-2xl font-medium tracking-tight">{course.code}</h1>
           {course.name && <p className="text-sm text-muted-foreground">{course.name}</p>}
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
@@ -103,15 +105,35 @@ export function CourseView({
             {s.nextClass && <span>next class {s.nextClass}</span>}
           </p>
         </div>
-        <GooeyMenu
-          direction="down"
-          label="Add"
-          tone="primary"
-          items={ADD}
-          open={adding}
-          onOpenChange={setAdding}
-          onPick={(kind) => create(kind, undefined, course.id)}
-        />
+        <div className="ml-auto flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger
+              render={<Button variant="secondary" className="h-10 gap-2 rounded-full px-4 active:scale-[0.97]" />}
+            >
+              <Calculator aria-hidden="true" />
+              What if
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 gap-4 rounded-2xl p-4">
+              <PopoverHeader>
+                <PopoverTitle>What do I need on the final?</PopoverTitle>
+                <PopoverDescription>
+                  {course.grade != null ? "Starts from your Canvas grade." : "Type your current grade to start."}
+                </PopoverDescription>
+              </PopoverHeader>
+              <WhatIf grade={course.grade ?? null} />
+            </PopoverContent>
+          </Popover>
+          <CourseSettings course={course} items={items.length} />
+          <GooeyMenu
+            direction="down"
+            label="Add"
+            tone="primary"
+            items={ADD}
+            open={adding}
+            onOpenChange={setAdding}
+            onPick={(kind) => create(kind, undefined, course.id)}
+          />
+        </div>
       </header>
 
       <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
@@ -129,14 +151,8 @@ export function CourseView({
           <Materials course={course} materials={materials} />
         </div>
         <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
-          <Block title="What if" aside={course.grade != null ? "from Canvas" : undefined}>
-            <WhatIf grade={course.grade ?? null} />
-          </Block>
           <Block title="Class times">
             <ClassTimes course={course} meetings={meetings} />
-          </Block>
-          <Block title="Course">
-            <CourseEditor course={course} items={items.length} />
           </Block>
         </div>
       </div>
@@ -286,8 +302,9 @@ function ClassTimes({ course, meetings }: { course: { id: string; code: string }
   );
 }
 
-// Name, code and color. Deleting takes a second, explicit click because it takes the course's work with it.
-function CourseEditor({
+// A settings button whose dialog edits name, code and color. Deleting takes a second, explicit click
+// because it takes the course's work with it.
+function CourseSettings({
   course,
   items,
 }: {
@@ -295,73 +312,95 @@ function CourseEditor({
   items: number;
 }) {
   const router = useRouter();
-  const { pending, error, submit } = useSubmit(updateCourse, () => toast.success(`${course.code} saved.`));
+  const [open, setOpen] = useState(false);
+  const { pending, error, submit } = useSubmit(updateCourse, () => {
+    setOpen(false);
+    toast.success(`${course.code} saved.`);
+  });
   const [confirming, setConfirming] = useState(false);
   const [deleting, startDelete] = useTransition();
 
   return (
-    <form autoComplete="off" action={submit} className="flex flex-col gap-2">
-      <input type="hidden" name="id" value={course.id} />
-      <label htmlFor="code" className={label}>
-        Code
-      </label>
-      <input
-        id="code"
-        name="code"
-        required
-        maxLength={40}
-        defaultValue={course.code}
-        className={cn(field, "font-mono")}
-      />
-      <label htmlFor="name" className={cn(label, "mt-2")}>
-        Name <span className="font-normal text-muted-foreground">(optional)</span>
-      </label>
-      <input id="name" name="name" maxLength={120} defaultValue={course.name} className={field} />
-      <fieldset className="mt-2">
-        <legend className={cn(label, "mb-2")}>Color</legend>
-        <div className="flex flex-wrap gap-2">
-          {HUES.map((h) => (
-            <label
-              key={h}
-              className="grid size-9 cursor-pointer place-items-center rounded-full has-checked:ring-2 has-checked:ring-foreground has-focus-visible:ring-2 has-focus-visible:ring-ring"
-            >
-              <input type="radio" name="hue" value={h} defaultChecked={h === course.hue} className="sr-only" />
-              <span className="size-6 rounded-full" style={{ background: courseColor(h) }} />
-              <span className="sr-only">Hue {h}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="submit" disabled={pending} className="h-10 rounded-full px-5 active:scale-[0.97]">
-          {pending ? "Saving…" : "Save"}
-        </Button>
-        {confirming ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={deleting}
-            onClick={() =>
-              startDelete(async () => {
-                const r = await deleteCourse(course.id);
-                if (r.error) return void toast.error(r.error);
-                toast(`Deleted ${course.code}.`);
-                router.push("/courses");
-              })
-            }
-            onBlur={() => setConfirming(false)}
-            autoFocus
-            className="h-10 rounded-full px-4"
-          >
-            {deleting ? "Deleting…" : `Delete it and ${items} item${items === 1 ? "" : "s"}`}
-          </Button>
-        ) : (
-          <Button type="button" variant="ghost" onClick={() => setConfirming(true)} className="h-10 rounded-full px-4">
-            Delete course
-          </Button>
-        )}
-      </div>
-      <FormError text={error} />
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button
+        type="button"
+        variant="secondary"
+        aria-label="Course settings"
+        title="Course settings"
+        onClick={() => setOpen(true)}
+        className="size-10 rounded-full active:scale-[0.95]"
+      >
+        <Settings2 aria-hidden="true" />
+      </Button>
+      <DialogContent className="rounded-2xl sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Course settings</DialogTitle>
+          <DialogDescription>How {course.code} shows up everywhere in Sonnet.</DialogDescription>
+        </DialogHeader>
+        <form autoComplete="off" action={submit} className="flex flex-col gap-2">
+          <input type="hidden" name="id" value={course.id} />
+          <label htmlFor="code" className={label}>
+            Code
+          </label>
+          <input
+            id="code"
+            name="code"
+            required
+            maxLength={40}
+            defaultValue={course.code}
+            className={cn(field, "font-mono")}
+          />
+          <label htmlFor="name" className={cn(label, "mt-2")}>
+            Name <span className="font-normal text-muted-foreground">(optional)</span>
+          </label>
+          <input id="name" name="name" maxLength={120} defaultValue={course.name} className={field} />
+          <fieldset className="mt-2">
+            <legend className={cn(label, "mb-2")}>Color</legend>
+            <div className="flex flex-wrap gap-2">
+              {HUES.map((h) => (
+                <label
+                  key={h}
+                  className="grid size-9 cursor-pointer place-items-center rounded-full has-checked:ring-2 has-checked:ring-foreground has-focus-visible:ring-2 has-focus-visible:ring-ring"
+                >
+                  <input type="radio" name="hue" value={h} defaultChecked={h === course.hue} className="sr-only" />
+                  <span className="size-6 rounded-full" style={{ background: courseColor(h) }} />
+                  <span className="sr-only">Hue {h}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="submit" disabled={pending} className="h-10 rounded-full px-5 active:scale-[0.97]">
+              {pending ? "Saving…" : "Save"}
+            </Button>
+            {confirming ? (
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={deleting}
+                onClick={() =>
+                  startDelete(async () => {
+                    const r = await deleteCourse(course.id);
+                    if (r.error) return void toast.error(r.error);
+                    toast(`Deleted ${course.code}.`);
+                    router.push("/courses");
+                  })
+                }
+                onBlur={() => setConfirming(false)}
+                autoFocus
+                className="h-10 rounded-full px-4"
+              >
+                {deleting ? "Deleting…" : `Delete it and ${items} item${items === 1 ? "" : "s"}`}
+              </Button>
+            ) : (
+              <Button type="button" variant="ghost" onClick={() => setConfirming(true)} className="h-10 rounded-full px-4">
+                Delete course
+              </Button>
+            )}
+          </div>
+          <FormError text={error} />
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
