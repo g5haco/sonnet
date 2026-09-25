@@ -10,7 +10,7 @@ import { WeekStrip } from "@/components/week-strip";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { FocusDial, useFocus } from "@/components/focus-timer";
 import { motion, useReducedMotion } from "motion/react";
-import { addDays, sessions, startOfDay, type Term } from "@/lib/calendar";
+import { addDays, sessions, startOfDay, type ClassMeeting, type Term } from "@/lib/calendar";
 import { courseColor, dayKey } from "@/lib/course";
 import { streak, studyDays, type FocusSession } from "@/lib/focus";
 import type { Item } from "@/lib/progress";
@@ -31,8 +31,19 @@ export function TimerWidget() {
 }
 
 // Today's classes. Narrow: the next one and how soon. Wide: the day as a timeline with a "now" line.
-export function ClassesWidget({ term, now, wide }: { term: Term | null; now: number; wide: boolean }) {
-  const { meetings } = useAssistant().schedule;
+export function ClassesWidget({
+  term,
+  now,
+  wide,
+  meetings: given,
+}: {
+  term: Term | null;
+  now: number;
+  wide: boolean;
+  meetings?: ClassMeeting[]; // the widget library's sample set; otherwise your schedule
+}) {
+  const schedule = useAssistant().schedule.meetings;
+  const meetings = given ?? schedule;
   const today = sessions(meetings, [startOfDay(new Date(now))], term).sort((a, b) => +a.start - +b.start);
   const next = today.find((s) => +s.end > now);
   const empty = meetings.length === 0 ? "Add class times on a course page to see them here." : "No classes today.";
@@ -41,7 +52,7 @@ export function ClassesWidget({ term, now, wide }: { term: Term | null; now: num
     return (
       <Block title="Today's classes">
         {!next ? (
-          <p className="m-auto text-center text-sm text-balance text-muted-foreground">
+          <p data-empty={meetings.length === 0 || undefined} className="m-auto text-center text-sm text-balance text-muted-foreground">
             {today.length ? "Done with classes for today." : empty}
           </p>
         ) : (
@@ -238,7 +249,7 @@ export function MaterialsWidget({
   return (
     <Block title="Recent materials">
       {materials.length === 0 ? (
-        <p className="m-auto text-center text-sm text-balance text-muted-foreground">Slides, readings and notes you upload show up here.</p>
+        <p data-empty className="m-auto text-center text-sm text-balance text-muted-foreground">Slides, readings and notes you upload show up here.</p>
       ) : (
         <ul className="-mx-2 flex flex-1 flex-col justify-evenly">
           {materials.map((m) => {
@@ -278,8 +289,8 @@ export function AskWidget({ items, now }: { items: Item[]; now: number }) {
   return (
     <Block title="Ask about…" aside={exam?.course}>
       <ul className="grid flex-1 auto-rows-[minmax(2.25rem,1fr)] grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-2">
-        {chips.map((c) => (
-          <li key={c.label}>
+        {chips.map((c, k) => (
+          <li key={`${k}-${c.label}`}>
             <button
               type="button"
               disabled={a.busy}

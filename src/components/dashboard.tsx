@@ -15,7 +15,8 @@ import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { courseColor, gradeLabel } from "@/lib/course";
-import type { Term } from "@/lib/calendar";
+import type { ClassMeeting, Term } from "@/lib/calendar";
+import { sampleData } from "@/lib/sample";
 import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 import { Fit } from "@/components/fit";
@@ -57,6 +58,9 @@ const RadarWidget = dynamic(() => import("@/components/evil-widgets").then((m) =
 const RingsWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.RingsWidget));
 const PaceWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.PaceWidget));
 const MixWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.MixWidget));
+
+// A side-column-width render (w-80) at 3/4 scale, as tall as the h-44 frame, so charts get a real height.
+const PREVIEW = "flex h-[235px] w-80 origin-top-left scale-[0.75] flex-col *:flex-1";
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
@@ -132,8 +136,16 @@ export function Dashboard({
 
   const at = (id: WidgetId) => layout.find((w) => w.id === id) ?? { w: 12, h: 6 };
   const wide = (id: WidgetId) => at(id).w >= 4;
-  const view: Record<WidgetId, ReactNode> = {
-    progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
+  // Every widget, drawn from one set of data: yours on Home, or the sample set in the widget library.
+  type Data = Pick<Parameters<typeof Dashboard>[0], "courses" | "cards" | "sessions"> & {
+    shown: Item[];
+    materials: RecentMaterial[];
+    history: GradePoint[];
+    meetings?: ClassMeeting[];
+    term: Term;
+  };
+  const render = ({ shown, courses, cards, sessions, materials, history, meetings, term }: Data): Record<WidgetId, ReactNode> => ({
+    progress: <ProgressBlock items={shown} now={now} termStart={new Date(`${term.start}T00:00:00`)} weeks={term.weeks} />,
     next: (
       <UpNext
         items={shown}
@@ -158,7 +170,7 @@ export function Dashboard({
       >
         <Fit>
         {cards.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Your courses will spin here once you add one.</p>
+          <p data-empty className="text-sm text-muted-foreground">Your courses will spin here once you add one.</p>
         ) : (
           <Carousel
             label="Your courses"
@@ -182,7 +194,7 @@ export function Dashboard({
         className="@container"
       >
         {courses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
+          <p data-empty className="text-sm text-muted-foreground">Your courses will line up here.</p>
         ) : (
           <ul className="-my-2 grid min-w-0 flex-1 auto-rows-[minmax(2.5rem,1fr)] divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
             {courses.map((c) => (
@@ -207,7 +219,7 @@ export function Dashboard({
     ),
     focus: <FocusBlock sessions={sessions} now={now} />,
     timer: <TimerWidget />,
-    classes: <ClassesWidget term={term} now={now} wide={wide("classes")} />,
+    classes: <ClassesWidget term={term} now={now} wide={wide("classes")} meetings={meetings} />,
     calendar: <CalendarWidget items={shown} now={now} w={at("calendar").w} h={at("calendar").h} />,
     today: (
       <UpNext
@@ -240,7 +252,11 @@ export function Dashboard({
     rings: <RingsWidget courses={courses} />,
     pace: <PaceWidget items={shown} term={term} now={now} />,
     mix: <MixWidget items={shown} now={now} />,
-  };
+  });
+  const view = render({ shown, courses, cards, sessions, materials, history, term });
+  // Library previews: a widget with nothing real to show yet (its empty state) swaps to the sample render.
+  const fake = adding ? sampleData(now) : null;
+  const sample = fake && render({ ...fake, shown: fake.items });
   // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {
     const spot = freeSpot(layout, id);
@@ -360,7 +376,7 @@ export function Dashboard({
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Widgets</DialogTitle>
-            <DialogDescription>Previews use your real data. A new widget takes the first free space; drag it anywhere.</DialogDescription>
+            <DialogDescription>Previews use your real data, or sample data until you have some. A new widget takes the first free space; drag it anywhere.</DialogDescription>
           </DialogHeader>
           <ul className="grid gap-4 sm:grid-cols-2">
             {(Object.keys(WIDGETS) as WidgetId[]).map((id) => {
@@ -368,8 +384,13 @@ export function Dashboard({
               return (
                 <li key={id} className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3">
                   {/* A side-column-width render, shrunk to fit and cut off at the bottom. */}
-                  <div aria-hidden="true" inert className="h-44 overflow-hidden rounded-xl">
-                    <div className="w-80 origin-top-left scale-[0.75]">{view[id]}</div>
+                  {/* If your data leaves it empty (peer-has), the sample render shows instead, labeled. */}
+                  <div aria-hidden="true" inert className="relative h-44 overflow-hidden rounded-xl">
+                    <div className={cn(PREVIEW, "peer has-data-empty:hidden")}>{view[id]}</div>
+                    <div className={cn(PREVIEW, "hidden peer-has-data-empty:flex")}>{sample?.[id]}</div>
+                    <span className="absolute top-2 right-2 hidden rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px] text-muted-foreground peer-has-data-empty:block">
+                      sample
+                    </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="mr-auto text-sm font-medium">{WIDGETS[id].label}</span>

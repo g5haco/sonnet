@@ -14,7 +14,7 @@ export function ExamRing({ items, now, className }: { items: Item[]; now: number
   if (!exam) {
     return (
       <Block title="Next exam" className={className}>
-        <p className="m-auto text-center text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
+        <p data-empty className="m-auto text-center text-sm text-muted-foreground">No exams on the horizon. Enjoy it.</p>
       </Block>
     );
   }

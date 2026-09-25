@@ -146,7 +146,7 @@ export function UpNext({
       className={className}
     >
       {list.length === 0 ? (
-        <div className="m-auto flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
+        <div data-empty className="m-auto flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
           {onAddCourse ? (
             <>
               <p>Start with a course. Assignments and exams hang off it.</p>

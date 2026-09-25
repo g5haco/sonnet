@@ -24,7 +24,7 @@ const Big = ({ children, unit }: { children: React.ReactNode; unit?: string }) =
   </p>
 );
 const Empty = ({ children }: { children: React.ReactNode }) => (
-  <p className="m-auto max-w-72 text-center text-sm text-balance text-muted-foreground">{children}</p>
+  <p data-empty className="m-auto max-w-72 text-center text-sm text-balance text-muted-foreground">{children}</p>
 );
 const Dot = ({ hue }: { hue: number }) => (
   <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(hue) }} aria-hidden="true" />

@@ -52,7 +52,7 @@ export function FocusBlock({
         })}
       </div>
       {sessions.length === 0 && (
-        <p className="mt-3 text-sm text-muted-foreground">Each focus session fills in a day. Start one with the timer in the sidebar.</p>
+        <p data-empty className="mt-3 text-sm text-muted-foreground">Each focus session fills in a day. Start one with the timer in the sidebar.</p>
       )}
     </Block>
   );

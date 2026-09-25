@@ -31,6 +31,7 @@ The user ran the signed-in real-use pass on the live site (2026-09-25): everythi
 - **UI:** docked chat input stacks (text full width, buttons below) via container query; descriptions 15px.
 - **EvilCharts widgets (Recharts, new dep):** Workload radar, Grade rings, Done vs due, Work mix (`evil-widgets.tsx`, data in `lib/charts.ts`). Vendored registry code in `components/evilcharts/` (`@evilcharts` registry in `components.json`); loaded via `next/dynamic` so Recharts only ships when one is on the grid. Config keys must be CSS-safe (course codes have spaces → keyed `c0…`).
 - **Polish:** Courses list is two columns on phones (smaller card padding/number); calendar toolbar's view switch + Add span the row when it wraps.
+- **Widget library previews:** fixed-height frames (charts draw), and a widget whose real data hits its empty state (`data-empty` marker) previews with `lib/sample.ts` data instead, labeled "sample" (CSS `peer-has-data-empty`, no per-widget checks). New empty states must carry `data-empty`.
 - **"Term" wording** everywhere users see it (code names still say semester).
 - **Cleanups (chisle/ponytail audits):** term week from `termGlance` everywhere, `addDays` for day ranges, unused exports/variants/props removed, all migration fallbacks removed.
 

@@ -16,7 +16,7 @@ import type { Item } from "@/lib/progress";
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
 const Empty = ({ children }: { children: React.ReactNode }) => (
-  <p className="m-auto max-w-72 text-center text-sm text-balance text-muted-foreground">{children}</p>
+  <p data-empty className="m-auto max-w-72 text-center text-sm text-balance text-muted-foreground">{children}</p>
 );
 const color = (c: string) => ({ light: [c], dark: [c] });
 const chart = "aspect-auto min-h-0 w-full flex-1";
