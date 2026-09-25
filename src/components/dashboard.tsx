@@ -9,7 +9,7 @@ import { useCreate, useOpenSettings } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
-import { TermSetup } from "@/components/create-forms";
+import { Onboarding } from "@/components/onboarding";
 import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
@@ -84,7 +84,7 @@ export function Dashboard({
   const [adding, setAdding] = useState(false);
   const [saving, startSave] = useTransition();
 
-  if (!term) return <TermSetup />;
+  if (!term) return <Onboarding />;
   const termStart = new Date(`${term.start}T00:00:00`);
 
   // Checking off the last thing due this week earns the "week cleared" moment.

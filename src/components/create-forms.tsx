@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { createCourse, createItem, saveTerm } from "@/app/actions";
-import { Block } from "@/components/block";
+import { createCourse, createItem } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { courseColor, dayKey } from "@/lib/course";
@@ -47,28 +46,6 @@ export function FormError({ text }: { text: string }) {
 }
 
 // First run: the progress bars need to know when week 1 was.
-export function TermSetup() {
-  const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Semester set. Now add a course."));
-  return (
-    <Block className="mx-auto mt-[12vh] w-full max-w-sm">
-      <h1 className="text-2xl font-medium tracking-tight">When did your semester start?</h1>
-      <p className="mt-1 mb-6 text-sm text-muted-foreground">So the weekly bars line up with your real weeks.</p>
-      <form autoComplete="off" action={submit} className="flex flex-col gap-2">
-        <label htmlFor="start" className={label}>
-          First day of classes
-        </label>
-        <input id="start" name="start" type="date" required className={field} />
-        <label htmlFor="weeks" className={`${label} mt-2`}>
-          Weeks in the semester
-        </label>
-        <input id="weeks" name="weeks" type="number" min={1} max={30} defaultValue={16} required className={field} />
-        <Submit pending={pending}>Start the semester</Submit>
-        <FormError text={error} />
-      </form>
-    </Block>
-  );
-}
-
 export function CourseDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { pending, error, submit } = useSubmit(createCourse, () => {
     onOpenChange(false);
