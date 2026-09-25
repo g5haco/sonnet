@@ -13,7 +13,7 @@
 
 Everything works on the live site (user's signed-in check, 2026-09-25): auth, onboarding + tour, Home widget grid (32 widgets, library with real/sample previews), courses, work items, class times, calendar, Google Calendar feed, Canvas sync, materials + syllabus import, grades + what-if, focus timer, assistant (confirm cards, web search, Ask about this), task toasts via `/api/tasks`. Migrations 0001–0013 applied.
 
-**New visual identity shipped this session:** "Paper & Ink" palette + IBM Plex type (live on `main`). Not yet checked signed in on the live site.
+**New visual identity shipped this session:** "Paper & Ink" palette + IBM Plex type (live on `main`). User confirmed signed in on the live site (2026-09-25): everything works.
 
 ## Completed This Session
 
@@ -73,9 +73,8 @@ Confirmed:
 
 ## Current Priorities
 
-1. Signed-in check of Paper & Ink + Plex on the live site (light and dark, every page).
-2. Decide the Work mix kind colors with the user.
-3. Further Phase 9 polish the user points at (they review screenshots and ask for specific fixes).
+1. Decide the Work mix kind colors with the user.
+2. Further Phase 9 polish the user points at (they review screenshots and ask for specific fixes).
 
 ## Important Constraints / User Intent
 
@@ -93,7 +92,7 @@ Confirmed:
 - **Automated:** `npm test` 48 passing; `npx tsc --noEmit` clean; `npm run lint` clean; `npm run build` passes (with the untracked course-preview excluded).
 - **Impeccable detector** (bundled CLI, Edge, production build on :3100): only the Sonner `layout-transition` remains. Contrast computed for all token pairs (text ≥5.0:1, focus ring ≥5.5:1, nav icon ≥5.9:1).
 - **Preview-verified locally (signed out, sample data):** palette light/dark, focus-ring gap, Plex loading, Home stacking at 900px, overdue header, course-page wording, sidebar grid-rows transition (interpolates 132→40px, 200ms ease-out), scrollbars.
-- **Not verified:** anything signed in on the live site after the palette/font/scrollbar changes; real `/chat` toast position; Safari.
+- **Signed-in live check:** user confirmed everything works (2026-09-25). Not verified: Safari.
 - **Preview gotcha:** a hidden browser pane throttles rAF and freezes animations; wait ~8s for intro animations.
 
 ## Relevant Architecture Context
