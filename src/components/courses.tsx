@@ -7,7 +7,6 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createMeeting, deleteCourse, deleteMeeting, updateCourse } from "@/app/actions";
 import { useCreate } from "@/components/app-shell";
-import { Block } from "@/components/block";
 import { CourseFace, courseStats, type CourseCard } from "@/components/course-card";
 import { field, FormError, label, useSubmit } from "@/components/create-forms";
 import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
@@ -136,8 +135,7 @@ export function CourseView({
         </div>
       </header>
 
-      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
+      <div className="flex flex-col gap-3">
           <UpNext
             title="Work"
             limit={100}
@@ -149,12 +147,6 @@ export function CourseView({
             empty={`Nothing for ${course.code} yet. Add an assignment or exam with Add.`}
           />
           <Materials course={course} materials={materials} />
-        </div>
-        <div className="flex flex-col gap-3 @3xl:w-80 @3xl:shrink-0">
-          <Block title="Class times">
-            <ClassTimes course={course} meetings={meetings} />
-          </Block>
-        </div>
       </div>
     </main>
   );
@@ -402,7 +394,7 @@ function CourseSettings({
           </div>
           <FormError text={error} />
         </form>
-        {/* Class times here too, next to the course's other details (their own form, so outside the one above). */}
+        {/* Class times live here, with the course's other details (their own form, so outside the one above). */}
         <section className="border-t border-border pt-4">
           <h3 className={cn(label, "mb-2")}>Class times</h3>
           <ClassTimes course={course} meetings={meetings} />
