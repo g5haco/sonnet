@@ -50,12 +50,11 @@ Do not reverse these casually.
 - **Honest UI:** real data or a clear empty state; the only exception is the widget library's labeled "sample" previews. **Empty states must carry `data-empty`** or previews won't fall back.
 - **EvilCharts config keys become CSS variable names** → keep them CSS-safe (Grade rings uses `c0…`).
 - **Chart widgets stay lazy** (`next/dynamic`); hand-drawn SVG widgets in `chart-widgets.tsx` stay as-is (user choice).
-- **Kept on purpose:** `evil-buttons/`, `spring.ts`, `cn`.
+- **Work mix kinds are neutral:** exam = ink 80%, quiz = ink 30% (`evil-widgets.tsx`), user choice. **Kept on purpose:** `evil-buttons/`, `spring.ts`, `cn`.
 
 ## In Progress / Unfinished Work
 
 Nothing half-built. Open decisions/follow-ups:
-- **Work mix exam/quiz colors** (`evil-widgets.tsx:108-109`) are hard-coded `oklch(0.7 0.15 25)` / `oklch(0.75 0.13 80)`: item kinds aren't an allowed color meaning and exam-red reads as "late". Needs a user decision (e.g. neutral shades).
 - **Course faces** (`course-card.tsx`) keep their own light gradient with near-black ink (compliant, but a gradient; Impeccable flags cyan/purple "gradient backgrounds" on preview pages with hues 185/215/290).
 - Later/ask first: grade goals (migration), Google sign-in setup (Supabase provider + OAuth + redirect URLs), saving the syllabus chip (migration). A `DESIGN.md` via `/impeccable document` would help before any SaaS landing page.
 
@@ -73,8 +72,7 @@ Confirmed:
 
 ## Current Priorities
 
-1. Decide the Work mix kind colors with the user.
-2. Further Phase 9 polish the user points at (they review screenshots and ask for specific fixes).
+1. Further Phase 9 polish the user points at (they review screenshots and ask for specific fixes).
 
 ## Important Constraints / User Intent
 

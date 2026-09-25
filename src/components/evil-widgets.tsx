@@ -105,8 +105,8 @@ export function MixWidget({ items, now }: { items: Item[]; now: number }) {
   const data = openByKind(items, now);
   const config: ChartConfig = {
     assignment: { label: KINDS.assignment, colors: color("var(--brand)") },
-    exam: { label: KINDS.exam, colors: color("oklch(0.7 0.15 25)") },
-    quiz: { label: KINDS.quiz, colors: color("oklch(0.75 0.13 80)") },
+    exam: { label: KINDS.exam, colors: color("color-mix(in oklch, var(--foreground) 80%, var(--card))") },
+    quiz: { label: KINDS.quiz, colors: color("color-mix(in oklch, var(--foreground) 30%, var(--card))") },
     reading: { label: KINDS.reading, colors: color("var(--muted-foreground)") },
   };
   return (
