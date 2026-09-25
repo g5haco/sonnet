@@ -16,7 +16,7 @@ Specs: [v1](superpowers/specs/2026-09-22-student-hub-design.md) · [v1.5 shell, 
 | 8   | **Focus & heatmap**             | Pomodoro timer that fills the study heatmap and streak                                                                                                                                              | —                                                                                         | ✅ Done: global focus timer in the sidebar (animated ring panel), minutes per course, 18-week heatmap + streak on Home                                                                                                  |
 | 9   | **Polish**                      | Phone layout pass, a week of real daily use + fixes                                                                                                                                                 | Feedback                                                                                  | Ongoing                                                                                                                               |
 
-**Next: Phase 9 — polish and a real-use pass.** Also added in Phase 8: the chat's thought chain (steps, reasoning, web search with sources) and drag-and-drop files.
+**Now: Phase 9 — polish and a real-use pass.** Done so far: course page What-if and settings moved into a popover and a dialog; Home is a widget grid you arrange in edit mode (drag, resize, remove, add back), saved per user (migration 0008). Next: a widget library and new widgets, then customizable sidebar actions. Also added in Phase 8: the chat's thought chain (steps, reasoning, web search with sources) and drag-and-drop files.
 
 ### Added before Phase 5 (from your feedback)
 

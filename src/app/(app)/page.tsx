@@ -1,4 +1,5 @@
 import { Dashboard } from "@/components/dashboard";
+import { readLayout } from "@/lib/home";
 import { ITEM_COLS, MEETING_COLS, toCards, toItems, toMeetings } from "@/lib/rows";
 import { requireUser } from "@/lib/supabase/server";
 
@@ -6,7 +7,7 @@ export default async function Page() {
   const { supabase, name } = await requireUser();
 
   const [settings, courses, items, meetings, focus] = await Promise.all([
-    supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
+    supabase.from("settings").select("*").maybeSingle(), // "*": home_layout only exists after migration 0008
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).order("due"),
     supabase.from("class_meetings").select(MEETING_COLS).order("starts"),
@@ -24,6 +25,7 @@ export default async function Page() {
   return (
     <Dashboard
       name={name}
+      layout={readLayout(settings.data?.home_layout)}
       term={settings.data && { start: settings.data.term_start, weeks: settings.data.term_weeks }}
       courses={courses.data!}
       items={all}

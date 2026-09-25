@@ -1,8 +1,21 @@
 "use client";
 
+import {
+  BookOpen,
+  CalendarClock,
+  CalendarDays,
+  ChartNoAxesColumn,
+  Grid3x3,
+  GraduationCap,
+  ListTodo,
+  Plus,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
+import { saveHomeLayout } from "@/app/actions";
 import { useCreate, useOpenSettings } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Carousel } from "@/components/carousel";
@@ -15,11 +28,25 @@ import { WeekStrip } from "@/components/week-strip";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
+import { GooeyMenu, type MenuItem } from "@/components/gooey-menu";
+import { Button } from "@/components/ui/button";
+import { DraggableWidgetGrid, SPANS, type WidgetItem } from "@/components/ui/draggable-widget-grid";
 import type { FocusSession } from "@/lib/focus";
+import { DEFAULT_LAYOUT, SIZES, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
+
+const ICONS: Record<WidgetId, typeof Plus> = {
+  progress: ChartNoAxesColumn,
+  next: ListTodo,
+  exam: CalendarClock,
+  week: CalendarDays,
+  courses: BookOpen,
+  grades: GraduationCap,
+  focus: Grid3x3,
+};
 
 export function Dashboard({
   term,
@@ -28,8 +55,10 @@ export function Dashboard({
   cards,
   sessions,
   name,
+  layout: saved = DEFAULT_LAYOUT,
 }: {
   name: string;
+  layout?: Layout;
   term: Term | null;
   courses: Course[];
   items: Item[];
@@ -40,6 +69,12 @@ export function Dashboard({
   const { shown, checked, toggle: flipItem, remove } = useWork(items);
   const create = useCreate();
   const openSettings = useOpenSettings();
+  // Home is a widget grid you arrange in edit mode; Done saves the layout to settings.home_layout.
+  const [layout, setLayout] = useState(saved);
+  const [lastSaved, setLastSaved] = useState(saved);
+  const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [saving, startSave] = useTransition();
 
   if (!term) return <TermSetup />;
   const termStart = new Date(`${term.start}T00:00:00`);
@@ -78,113 +113,212 @@ export function Dashboard({
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   const examIn = nextExam && Math.ceil((Date.parse(nextExam.due) - now) / 864e5);
 
+  const view: Record<WidgetId, ReactNode> = {
+    progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
+    next: (
+      <UpNext
+        items={shown}
+        now={now}
+        checked={checked}
+        onToggle={toggle}
+        onDelete={remove}
+        onAddCourse={courses.length ? undefined : () => create("course")}
+      />
+    ),
+    exam: <ExamRing items={shown} now={now} />,
+    week: <WeekStrip items={shown} now={now} />,
+    courses: (
+      // Quick access to every course: spin the ring, tap a card to open it.
+      <Block
+        title="Courses"
+        aside={
+          <Link href="/courses" className="hover:text-foreground">
+            all courses →
+          </Link>
+        }
+        className="overflow-hidden"
+      >
+        {cards.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Your courses will spin here once you add one.</p>
+        ) : (
+          <Carousel
+            label="Your courses"
+            orbit={92}
+            width={360}
+            slides={cards.map((c) => ({
+              key: c.id,
+              href: `/courses/${c.id}`,
+              label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
+              face: <CourseFace course={c} now={now} compact />,
+            }))}
+          />
+        )}
+      </Block>
+    ),
+    grades: (
+      <Block
+        title="Grades"
+        aside={courses.some((c) => c.grade != null) ? "from Canvas" : "with Canvas sync"}
+        className="@container"
+      >
+        {courses.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
+        ) : (
+          <ul className="-my-2 grid divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
+            {courses.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 py-2">
+                <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
+                <span className="min-w-0 flex-1 truncate text-sm">
+                  <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
+                  {c.name && <span className="ml-2">{c.name}</span>}
+                </span>
+                <span
+                  className={cn("font-mono tabular-nums", c.grade == null && "text-muted-foreground")}
+                  aria-label={c.grade == null ? "No grade yet" : undefined}
+                >
+                  {gradeLabel(c.grade)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Block>
+    ),
+    focus: <FocusBlock sessions={sessions} now={now} />,
+  };
+  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
+  const missing: MenuItem<WidgetId>[] = (Object.keys(WIDGETS) as WidgetId[])
+    .filter((id) => !layout.some((w) => w.id === id))
+    .map((id) => ({ kind: id, label: WIDGETS[id], icon: ICONS[id] }));
+
+  const finish = () => {
+    setEditing(false);
+    setAdding(false);
+    if (JSON.stringify(layout) === JSON.stringify(lastSaved)) return;
+    startSave(async () => {
+      const r = await saveHomeLayout(layout);
+      if (r.error) return void toast.error(r.error);
+      setLastSaved(layout);
+    });
+  };
+
   return (
     <main className="@container mx-auto w-full max-w-6xl px-4 pt-5 pb-24 md:px-6 md:pt-7">
-      <header className="mb-6">
-        <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
-        <p className="mt-1.5 text-base text-muted-foreground">
-          {today} · week {week} of {term.weeks}
-          {/* A 1-week semester is almost always a typo, and it flattens every weekly readout. */}
-          {term.weeks <= 2 && (
+      <header className="mb-6 flex flex-wrap items-start gap-x-4 gap-y-3">
+        <div className="min-w-0 flex-1 basis-72">
+          <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
+          <p className="mt-1.5 text-base text-muted-foreground">
+            {today} · week {week} of {term.weeks}
+            {/* A 1-week semester is almost always a typo, and it flattens every weekly readout. */}
+            {term.weeks <= 2 && (
+              <>
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => openSettings("semester")}
+                  className="text-foreground underline underline-offset-4 hover:text-brand"
+                >
+                  set your real semester length
+                </button>
+              </>
+            )}
+          </p>
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
+            <span>{dueThisWeek === 0 ? "nothing due this week" : `${dueThisWeek} due this week`}</span>
+            {overdue > 0 && <span className="text-destructive">{overdue} overdue</span>}
+            {nextExam && (
+              <span>
+                {nextExam.course} exam in {examIn}d
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {editing ? (
             <>
-              {" · "}
-              <button
+              <Button
                 type="button"
-                onClick={() => openSettings("semester")}
-                className="text-foreground underline underline-offset-4 hover:text-brand"
+                variant="ghost"
+                onClick={() => setLayout(DEFAULT_LAYOUT)}
+                className="h-10 gap-2 rounded-full px-4 text-muted-foreground"
               >
-                set your real semester length
-              </button>
+                <RotateCcw aria-hidden="true" />
+                Reset
+              </Button>
+              {missing.length > 0 && (
+                <GooeyMenu
+                  direction="down"
+                  label="Add widget"
+                  items={missing}
+                  open={adding}
+                  onOpenChange={setAdding}
+                  onPick={(id) => setLayout((l) => [...l, { id, size: DEFAULT_LAYOUT.find((w) => w.id === id)!.size }])}
+                />
+              )}
+              <Button id="home-done" type="button" onClick={finish} className="h-10 rounded-full px-5 active:scale-[0.97]">
+                Done
+              </Button>
             </>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={saving}
+              onClick={() => setEditing(true)}
+              className="h-10 rounded-full px-5 active:scale-[0.97]"
+            >
+              {saving ? "Saving…" : "Edit"}
+            </Button>
           )}
-        </p>
-        <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
-          <span>{dueThisWeek === 0 ? "nothing due this week" : `${dueThisWeek} due this week`}</span>
-          {overdue > 0 && <span className="text-destructive">{overdue} overdue</span>}
-          {nextExam && (
-            <span>
-              {nextExam.course} exam in {examIn}d
-            </span>
-          )}
-        </p>
+        </div>
       </header>
 
-      {/* Two independent columns (not a grid), so no block is stretched to match its neighbour.
-          Container queries: the layout reacts to the space left beside the assistant panel.
-          Grades (one row per course, the block that grows) lives in the wide column, two-up, so many courses
-          don't make the narrow column run on. Stacked on phones, the columns dissolve (`contents`) and
-          order-1 sends the two placeholders below the live blocks. */}
-      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
-        <div className="contents min-w-0 flex-1 flex-col gap-3 @3xl:flex">
-          <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />
-          <UpNext
-            items={shown}
-            now={now}
-            checked={checked}
-            onToggle={toggle}
-            onDelete={remove}
-            onAddCourse={courses.length ? undefined : () => create("course")}
-          />
-          <Block
-            title="Grades"
-            aside={courses.some((c) => c.grade != null) ? "from Canvas" : "with Canvas sync"}
-            className="order-1"
-          >
-            {courses.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
-            ) : (
-              <ul className="-my-2 grid divide-y divide-border @4xl:grid-cols-2 @4xl:gap-x-8 @4xl:divide-y-0">
-                {courses.map((c) => (
-                  <li key={c.id} className="flex items-center gap-3 py-2">
-                    <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
-                    <span className="min-w-0 flex-1 truncate text-sm">
-                      <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
-                      {c.name && <span className="ml-2">{c.name}</span>}
-                    </span>
-                    <span
-                      className={cn("font-mono tabular-nums", c.grade == null && "text-muted-foreground")}
-                      aria-label={c.grade == null ? "No grade yet" : undefined}
-                    >
-                      {gradeLabel(c.grade)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Block>
-        </div>
-
-        <div className="contents flex-col gap-3 @3xl:flex @3xl:w-80 @3xl:shrink-0">
-          <ExamRing items={shown} now={now} />
-          <WeekStrip items={shown} now={now} />
-          {cards.length > 0 && (
-            // Quick access to every course: spin the ring, tap a card to open it.
-            <Block
-              title="Courses"
-              aside={
-                <Link href="/courses" className="hover:text-foreground">
-                  all courses →
-                </Link>
-              }
-              className="overflow-hidden"
+      <DraggableWidgetGrid
+        items={items_}
+        editable={editing}
+        rowHeight={320}
+        onChange={(next) => setLayout(next.map(({ id, size }) => ({ id: id as WidgetId, size })))}
+        renderItem={(w) => view[w.id as WidgetId]}
+        controls={(w, columns) => (
+          <>
+            <button
+              type="button"
+              aria-label={`Remove ${w.label}`}
+              onClick={() => {
+                setLayout((l) => l.filter((x) => x.id !== w.id));
+                document.getElementById("home-done")?.focus(); // the button is about to disappear
+              }}
+              className="absolute -top-2.5 -left-2.5 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
             >
-              <Carousel
-                label="Your courses"
-                orbit={92}
-                width={360}
-                slides={cards.map((c) => ({
-                  key: c.id,
-                  href: `/courses/${c.id}`,
-                  label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
-                  face: <CourseFace course={c} now={now} compact />,
-                }))}
-              />
-            </Block>
-          )}
-
-          <FocusBlock sessions={sessions} now={now} className="order-1" />
-        </div>
-      </div>
+              <X className="size-4" aria-hidden="true" />
+            </button>
+            {columns > 1 && (
+              <div
+                role="group"
+                aria-label={`${w.label} size`}
+                className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-0.5 rounded-full bg-popover p-1 shadow-sm ring-1 ring-foreground/10"
+              >
+                {SIZES.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    aria-pressed={w.size === size}
+                    onClick={() => setLayout((l) => l.map((x) => (x.id === w.id ? { ...x, size } : x)))}
+                    className="h-7 rounded-full px-2 font-mono text-xs tabular-nums text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-foreground aria-pressed:text-background"
+                  >
+                    {SPANS[size].col}×{SPANS[size].row}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      />
+      {layout.length === 0 && !editing && (
+        <p className="rounded-2xl border border-dashed border-foreground/15 p-6 text-sm text-muted-foreground">
+          Home is empty. Press Edit to add widgets back.
+        </p>
+      )}
     </main>
   );
 }

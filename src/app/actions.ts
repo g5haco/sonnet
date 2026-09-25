@@ -14,6 +14,7 @@ import { complete, MODELS } from "@/lib/ai";
 import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
+import { readLayout } from "@/lib/home";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -113,6 +114,19 @@ export async function deleteMeeting(id: string): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase.from("class_meetings").delete().eq("id", id);
   return done(error, "remove the class time");
+}
+
+// Home's widget layout. Before migration 0008 the column doesn't exist, so say that instead of a schema error.
+export async function saveHomeLayout(raw: unknown): Promise<Result> {
+  const layout = readLayout(raw);
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const { error } = await supabase
+    .from("settings")
+    .update({ home_layout: layout })
+    .eq("user_id", data?.claims.sub ?? "");
+  if (error?.message.includes("home_layout")) return { error: "Saving layouts needs migration 0008 in Supabase." };
+  return done(error, "save your Home layout");
 }
 
 // A fresh secret for the Google Calendar feed; the old URL stops working (e.g. if it was shared by accident).
