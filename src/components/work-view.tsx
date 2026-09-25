@@ -94,70 +94,81 @@ export function WorkView({
 
   return (
     <Dialog open={!!current} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl sm:max-w-xl">
+      {/* Big like a page: details on the left, the description scrolls on the right (stacked on phones). */}
+      <DialogContent className="max-h-[90dvh] gap-0 overflow-y-auto rounded-2xl p-0 sm:max-w-5xl md:h-[88dvh] md:grid-cols-[17rem_1fr] md:overflow-hidden">
         {item && (
           <>
-            <DialogHeader>
-              <DialogDescription className="flex items-center gap-1.5 font-mono text-xs">
-                <span className="size-2 rounded-full" style={{ background: courseColor(item.hue) }} />
-                {item.course}
-                <span aria-hidden="true">·</span>
-                {item.kind}
-              </DialogDescription>
-              <DialogTitle className="text-lg leading-snug text-balance">{item.title}</DialogTitle>
-            </DialogHeader>
+            <div className="flex flex-col gap-4 p-5 md:overflow-y-auto md:border-r md:border-border md:p-6">
+              <DialogHeader>
+                <DialogDescription className="flex items-center gap-1.5 font-mono text-xs">
+                  <span className="size-2 rounded-full" style={{ background: courseColor(item.hue) }} />
+                  {item.course}
+                  <span aria-hidden="true">·</span>
+                  {item.kind}
+                </DialogDescription>
+                <DialogTitle className="text-lg leading-snug text-balance">{item.title}</DialogTitle>
+              </DialogHeader>
 
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-              {facts?.filter((f): f is string[] => !!f).map(([k, v]) => (
-                <div key={k} className="contents">
-                  <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="font-mono tabular-nums">{v}</dd>
-                </div>
-              ))}
-            </dl>
-
-            {d === undefined ? (
-              <p className="text-sm text-muted-foreground">Loading details…</p>
-            ) : (
-              <>
-                {d?.description &&
-                  (d.source === "canvas" ? (
-                    <CanvasHtml html={d.description} base={link ?? undefined} />
-                  ) : (
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-pretty [overflow-wrap:anywhere]">
-                      {d.description}
-                    </p>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+                {facts
+                  ?.filter((f): f is string[] => !!f)
+                  .map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="text-muted-foreground">{k}</dt>
+                      <dd className="font-mono tabular-nums">{v}</dd>
+                    </div>
                   ))}
-                {d?.source === "ics" && (
-                  <p className="rounded-lg bg-secondary px-3 py-2 text-sm text-muted-foreground">
-                    Points, submission type and attempts need a Canvas access token. Add one in Sync.
-                  </p>
-                )}
-                {d?.source === "canvas" && !d.description && (
-                  <p className="text-sm text-muted-foreground">No description in Canvas.</p>
-                )}
-              </>
-            )}
+              </dl>
 
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                variant={done ? "secondary" : "default"}
-                onClick={() => onToggle(item.id)}
-                className="h-10 rounded-full px-5 transition-transform active:scale-[0.97]"
-              >
-                {done ? "Undo" : "Mark as done"}
-              </Button>
-              {link && (
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(buttonVariants({ variant: "ghost" }), "h-10 gap-2 rounded-full px-4")}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  variant={done ? "secondary" : "default"}
+                  onClick={() => onToggle(item.id)}
+                  className="h-10 rounded-full px-5 transition-transform active:scale-[0.97]"
                 >
-                  Open in Canvas
-                  <ExternalLink aria-hidden="true" />
-                </a>
-              )}
+                  {done ? "Undo" : "Mark as done"}
+                </Button>
+                {link && (
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(buttonVariants({ variant: "ghost" }), "h-10 gap-2 rounded-full px-4")}
+                  >
+                    Open in Canvas
+                    <ExternalLink aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="flex min-h-0 flex-col gap-4 px-5 pb-6 md:overflow-y-auto md:px-10 md:py-8">
+              <div className="flex max-w-prose flex-col gap-4">
+                {d === undefined ? (
+                  <p className="text-sm text-muted-foreground">Loading details…</p>
+                ) : (
+                  <>
+                    {d?.description &&
+                      (d.source === "canvas" ? (
+                        <CanvasHtml html={d.description} base={link ?? undefined} />
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-pretty [overflow-wrap:anywhere]">
+                          {d.description}
+                        </p>
+                      ))}
+                    {d?.source === "ics" && (
+                      <p className="rounded-lg bg-secondary px-3 py-2 text-sm text-muted-foreground">
+                        Points, submission type and attempts need a Canvas access token. Add one in Sync.
+                      </p>
+                    )}
+                    {d !== null && !d.description && d.source !== "ics" && (
+                      <p className="text-sm text-muted-foreground">
+                        {d.source === "canvas" ? "No description in Canvas." : "No description."}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </>
         )}
