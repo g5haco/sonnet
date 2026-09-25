@@ -36,7 +36,7 @@ export function CoursesGrid({ courses }: { courses: CourseCard[] }) {
             : "Open one to see its work, class times and materials, or to change its name and color."}
         </p>
       </header>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-6">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] sm:gap-6">
         {courses.map((c) => (
           <li key={c.id}>
             <TiltCard href={`/courses/${c.id}`} label={`${c.code}${c.name ? `, ${c.name}` : ""}`}>

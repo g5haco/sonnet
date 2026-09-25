@@ -44,7 +44,7 @@ export function CourseFace({ course, now, compact }: { course: CourseCard; now: 
   const s = courseStats(course.items, course.meetings, now);
   return (
     <div
-      className="flex h-full flex-col p-5 text-[oklch(0.2_0_0)] select-none"
+      className="flex h-full flex-col p-4 text-[oklch(0.2_0_0)] select-none sm:p-5"
       style={{
         background: `linear-gradient(165deg, oklch(0.82 0.11 ${course.hue}), oklch(0.7 0.13 ${course.hue}))`,
       }}
@@ -58,7 +58,7 @@ export function CourseFace({ course, now, compact }: { course: CourseCard; now: 
         </p>
       )}
       <div className="mt-auto">
-        <p className="text-6xl leading-none font-medium tracking-tight tabular-nums">{s.week}</p>
+        <p className="text-5xl leading-none font-medium tracking-tight tabular-nums sm:text-6xl">{s.week}</p>
         <p className="mt-1 font-mono text-xs">
           due this week{s.late > 0 && <span className="font-semibold"> · {s.late} late</span>}
         </p>

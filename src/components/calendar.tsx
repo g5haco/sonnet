@@ -188,7 +188,7 @@ function CalendarBody({ items, meetings, term, feed, initial }: Props) {
           <span className="sr-only">Calendar, </span>
           {title(view, anchor)}
         </h1>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 max-sm:w-full max-sm:justify-between">
           <ViewSwitch view={view} onChange={(v) => jump(anchor, v)} />
           <GooeyMenu
             direction="down"
