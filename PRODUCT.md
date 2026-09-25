@@ -1,5 +1,11 @@
 # Product
 
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web (responsive: laptop and phone browsers; live at https://www.ericwei.me)
+
 ## Register
 
 product
@@ -10,7 +16,18 @@ College students taking 4–6 courses, each with its own syllabus, Canvas page a
 
 ## Product Purpose
 
-One place for a student's classes. Canvas sync, syllabus import and a materials hub feed a single list of everything due and a calendar of classes, deadlines and exams; a progress readout shows how caught up you are; a global AI assistant that knows every course, assignment and exam answers questions, plans the week and builds study guides. Success is opening Sonnet daily instead of Canvas, with every deadline for the semester already in it.
+One place for a student's classes. Canvas sync, syllabus import and a materials hub feed a single list of everything due and a calendar of classes, deadlines and exams; a progress readout shows how caught up you are; a global AI assistant that knows every course, assignment and exam answers questions, plans the week and builds study guides. Success is opening Sonnet daily instead of Canvas, with every deadline for the term already in it.
+
+## Positioning
+
+Sonnet knows the student's whole term: class times, every deadline, grades and how caught up they are. Document-first tools and Canvas itself don't combine these, so Sonnet can answer "what do I do next" and plan the week, not just list files.
+
+## Capabilities and Constraints
+
+- Shipped: Canvas sync (token or ICS), Google Calendar feed, syllabus import (summary + key dates), materials, grades with what-if, focus timer, a customizable Home widget grid, and an AI assistant that can change data only through a confirm card.
+- Multi-user today (each user's data is private). Say "term", not "semester", in the UI (onboarding still offers semester or quarter).
+- AI runs on free models by default, so it can be slow or fail; the UI must say so plainly.
+- **Planned, undecided:** Sonnet is going SaaS: paid plans and a public landing page are intended, but pricing, plan limits and timing are not decided. Don't invent them.
 
 ## Brand Personality
 
@@ -26,6 +43,10 @@ Precise, tactile, cheeky.
 - Generic SaaS admin templates: identical card grids, hero-metric tiles, purple gradients.
 - Childish gamification: mascots, confetti, points shops, guilt-trip streak notifications.
 - The first Sonnet draft: six identical grey boxes with no color and nothing that responds.
+
+## Evidence on Hand
+
+- The live app and real use by its builder. No testimonials, user counts, press or benchmarks exist yet; don't fabricate them.
 
 ## Design Principles
 
