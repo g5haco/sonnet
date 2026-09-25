@@ -15,6 +15,7 @@ import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
 import { courseColor, gradeLabel } from "@/lib/course";
+import type { Term } from "@/lib/calendar";
 import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 import { Fit } from "@/components/fit";
@@ -50,7 +51,6 @@ import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, freeSpot, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
-export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
 

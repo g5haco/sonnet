@@ -12,6 +12,8 @@ import { GooeyMenu, type CreateKind } from "@/components/gooey-menu";
 import { cn } from "@/lib/utils";
 import { FocusButton } from "@/components/focus-timer";
 
+const SPRING = { type: "spring", stiffness: 420, damping: 42 } as const;
+
 const NAV = [
   { href: "/", label: "Home", icon: House },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
@@ -143,7 +145,7 @@ export function Sidebar({
           aria-label="Main"
           initial={false}
           animate={{ width: open ? WIDE : RAIL }}
-          transition={{ type: "spring", stiffness: 420, damping: 42 }}
+          transition={SPRING}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setHovered(true)}
@@ -170,10 +172,10 @@ export function Sidebar({
             )}
           >
             <GooeyMenu direction="right" open={creating} onOpenChange={setCreating} onPick={onCreate} />
-            <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
+            <motion.div layout transition={SPRING}>
               <ChatLink active={onChat} />
             </motion.div>
-            <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 42 }}>
+            <motion.div layout transition={SPRING}>
               <FocusButton />
             </motion.div>
           </div>

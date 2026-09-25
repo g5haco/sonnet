@@ -145,7 +145,6 @@ export function FocusDial({ className }: { className?: string }) {
     <div className={className}>
       {/* The ring fills over the whole session, a little every second. */}
       <AnimatedCircularProgressBar
-        min={0}
         max={LENGTH * 60}
         value={run ? used : 0}
         gaugePrimaryColor="var(--done)"
@@ -196,7 +195,6 @@ export function FocusButton() {
             transition={SPRING}
           >
             <AnimatedCircularProgressBar
-              min={0}
               max={LENGTH * 60_000}
               value={LENGTH * 60_000 - left}
               gaugePrimaryColor="var(--done)"
