@@ -29,7 +29,7 @@ const FocusContext = createContext<Focus>({
   setOpen: () => {},
   toggle: () => {},
 });
-const useFocus = () => useContext(FocusContext);
+export const useFocus = () => useContext(FocusContext);
 
 // A session the student walked away from long ago (browser closed, tab slept) is dropped, not logged.
 const load = (): Run | null => {

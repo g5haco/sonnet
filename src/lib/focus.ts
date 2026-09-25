@@ -1,6 +1,6 @@
 import { dayKey } from "./course";
 
-export type FocusSession = { started_at: string; minutes: number };
+export type FocusSession = { started_at: string; minutes: number; course_id?: string | null };
 
 // Minutes studied per local day ("YYYY-MM-DD").
 export function studyDays(sessions: FocusSession[]) {

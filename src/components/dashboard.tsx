@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowLeftRight,
-  Plus,
-  RotateCcw,
-  X,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Plus, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -31,11 +26,26 @@ import {
   TimerWidget,
   type RecentMaterial,
 } from "@/components/widgets";
+import {
+  ClearWidget,
+  CountdownWidget,
+  ExamsWidget,
+  GapsWidget,
+  GradeBarsWidget,
+  HoursWidget,
+  LoadWidget,
+  OnTimeWidget,
+  ScoresWidget,
+  SplitWidget,
+  SpotlightWidget,
+  TrendWidget,
+  type GradePoint,
+} from "@/components/chart-widgets";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DraggableWidgetGrid, type WidgetItem } from "@/components/ui/draggable-widget-grid";
+import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
-import { DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { COLS, DEFAULT_LAYOUT, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 export type Term = { start: string; weeks: number }; // start = YYYY-MM-DD (local)
@@ -49,6 +59,7 @@ export function Dashboard({
   cards,
   sessions,
   materials = [],
+  history = null,
   name,
   layout: saved = DEFAULT_LAYOUT,
 }: {
@@ -60,6 +71,7 @@ export function Dashboard({
   cards: CourseCard[];
   sessions: FocusSession[];
   materials?: RecentMaterial[];
+  history?: GradePoint[] | null;
 }) {
   const [now] = useState(() => Date.now()); // one clock per render tree
   const { shown, checked, toggle: flipItem, remove } = useWork(items);
@@ -109,7 +121,7 @@ export function Dashboard({
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   const examIn = nextExam && Math.ceil((Date.parse(nextExam.due) - now) / 864e5);
 
-  const wide = (id: WidgetId) => layout.find((w) => w.id === id)?.size !== "sm";
+  const wide = (id: WidgetId) => (layout.find((w) => w.id === id)?.w ?? 12) >= 6;
   const view: Record<WidgetId, ReactNode> = {
     progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
     next: (
@@ -203,12 +215,28 @@ export function Dashboard({
     streak: <StreakWidget sessions={sessions} now={now} />,
     materials: <MaterialsWidget materials={materials} courses={courses} />,
     ask: <AskWidget items={shown} now={now} />,
+    trend: <TrendWidget courses={courses} history={history} />,
+    gradebars: <GradeBarsWidget courses={courses} />,
+    scores: <ScoresWidget items={shown} />,
+    gaps: <GapsWidget courses={courses} />,
+    exams: <ExamsWidget items={shown} now={now} />,
+    spotlight: <SpotlightWidget courses={courses} items={shown} now={now} term={term} />,
+    hours: <HoursWidget sessions={sessions} now={now} />,
+    load: <LoadWidget items={shown} now={now} />,
+    ontime: <OnTimeWidget items={shown} now={now} term={term} />,
+    split: <SplitWidget sessions={sessions} courses={courses} />,
+    countdown: <CountdownWidget items={shown} />,
+    clear: <ClearWidget items={shown} now={now} />,
   };
-  const items_: WidgetItem[] = layout.map((w) => ({ ...w, label: WIDGETS[w.id] }));
-  const add = (id: WidgetId, size: "wide" | "sm") => {
-    setLayout((l) => [...l, { id, size }]);
+  // A new widget goes in below everything, at its default width.
+  const add = (id: WidgetId) => {
+    setLayout((l) => [...l, { id, x: 0, y: Math.max(0, ...l.map((p) => p.y)) + 1, w: WIDGETS[id].w }]);
     setAdding(false);
   };
+  const change = (id: WidgetId, f: (p: Layout[number]) => Partial<Layout[number]>) =>
+    setLayout((l) => l.map((p) => (p.id === id ? { ...p, ...f(p) } : p)));
+  const pill =
+    "grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 disabled:opacity-40";
 
   const finish = () => {
     setEditing(false);
@@ -222,7 +250,7 @@ export function Dashboard({
   };
 
   return (
-    <main className="@container mx-auto w-full max-w-6xl px-4 pt-5 pb-24 md:px-6 md:pt-7">
+    <main className="@container w-full px-4 pt-5 pb-24 md:px-6 md:pt-7">
       <header className="mb-6 flex flex-wrap items-start gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1 basis-72">
           <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
@@ -291,63 +319,95 @@ export function Dashboard({
         </div>
       </header>
 
-      {/* Two independent columns, each widget at its natural height (as before the grid). In edit mode widgets
-          drag within their column and a button moves one to the other column. Stacked on phones. */}
-      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-start">
-        {(["wide", "sm"] as const).map((col) => (
-          <DraggableWidgetGrid
-            key={col}
-            className={col === "wide" ? "min-w-0 flex-1" : "@3xl:w-80 @3xl:shrink-0"}
-            maxColumns={1}
-            items={items_.filter((w) => w.size === col)}
-            editable={editing}
-            onChange={(next) =>
-              setLayout((l) => [
-                ...next.map(({ id }) => ({ id: id as WidgetId, size: col })),
-                ...l.filter((x) => x.size !== col),
-              ])
-            }
-            renderItem={(w) => view[w.id as WidgetId]}
-            controls={(w) => (
-              <>
-                <button
-                  type="button"
-                  aria-label={`Remove ${w.label}`}
-                  onClick={() => {
-                    setLayout((l) => l.filter((x) => x.id !== w.id));
-                    document.getElementById("home-done")?.focus(); // the button is about to disappear
-                  }}
-                  className="absolute -top-2.5 -left-2.5 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
-                >
-                  <X className="size-4" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  aria-label={`Move ${w.label} to the ${col === "wide" ? "side" : "main"} column`}
-                  title={`Move to the ${col === "wide" ? "side" : "main"} column`}
-                  onClick={() =>
-                    setLayout((l) => l.map((x) => (x.id === w.id ? { ...x, size: col === "wide" ? "sm" : "wide" } : x)))
-                  }
-                  className="absolute -top-2.5 -right-2.5 z-10 hidden size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 @3xl:grid"
-                >
-                  <ArrowLeftRight className="size-4" aria-hidden="true" />
-                </button>
-              </>
-            )}
-          />
-        ))}
-      </div>
+      <SnapGrid
+        layout={layout}
+        onChange={setLayout}
+        editable={editing}
+        render={(id) => view[id]}
+        controls={(id, stacked) => {
+          const p = layout.find((q) => q.id === id)!;
+          const order = [...layout].sort((a, b) => a.y - b.y || a.x - b.x);
+          const i = order.indexOf(p);
+          // Stacked (phones): move up or down by trading places with the neighbour.
+          const swap = (j: number) => {
+            const q = order[j];
+            setLayout((l) =>
+              l.map((r) =>
+                r.id === p.id
+                  ? { ...r, x: Math.min(q.x, COLS - r.w), y: q.y }
+                  : r.id === q.id
+                    ? { ...r, x: Math.min(p.x, COLS - r.w), y: p.y }
+                    : r,
+              ),
+            );
+          };
+          return (
+            <>
+              <button
+                type="button"
+                aria-label={`Remove ${WIDGETS[id].label}`}
+                onClick={() => {
+                  setLayout((l) => l.filter((x) => x.id !== id));
+                  document.getElementById("home-done")?.focus(); // the button is about to disappear
+                }}
+                className={cn(pill, "absolute top-2 left-2 z-10")}
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
+              <div className="absolute top-2 right-2 z-10 flex gap-1">
+                {stacked ? (
+                  <>
+                    <button type="button" aria-label={`Move ${WIDGETS[id].label} up`} disabled={i === 0} onClick={() => swap(i - 1)} className={pill}>
+                      <ArrowUp className="size-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Move ${WIDGETS[id].label} down`}
+                      disabled={i === order.length - 1}
+                      onClick={() => swap(i + 1)}
+                      className={pill}
+                    >
+                      <ArrowDown className="size-4" aria-hidden="true" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      aria-label={`Make ${WIDGETS[id].label} narrower`}
+                      disabled={p.w <= WIDGETS[id].min}
+                      onClick={() => change(id, (q) => ({ w: q.w - 1 }))}
+                      className={pill}
+                    >
+                      <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Make ${WIDGETS[id].label} wider`}
+                      disabled={p.w >= COLS}
+                      onClick={() => change(id, (q) => ({ w: q.w + 1, x: Math.min(q.x, COLS - q.w - 1) }))}
+                      className={pill}
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          );
+        }}
+      />
       {layout.length === 0 && !editing && (
         <p className="rounded-2xl border border-dashed border-foreground/15 p-6 text-sm text-muted-foreground">
           Home is empty. Press Edit to add widgets back.
         </p>
       )}
-      {/* The widget library: every widget with a live preview (your real data), added to either column. */}
+      {/* The widget library: every widget with a live preview (your real data). */}
       <Dialog open={adding} onOpenChange={setAdding}>
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Widgets</DialogTitle>
-            <DialogDescription>Previews use your real data. Add one to the main or side column.</DialogDescription>
+            <DialogDescription>Previews use your real data. Added widgets go at the bottom; drag them anywhere.</DialogDescription>
           </DialogHeader>
           <ul className="grid gap-4 sm:grid-cols-2">
             {(Object.keys(WIDGETS) as WidgetId[]).map((id) => {
@@ -359,24 +419,13 @@ export function Dashboard({
                     <div className="w-80 origin-top-left scale-[0.75]">{view[id]}</div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="mr-auto text-sm font-medium">{WIDGETS[id]}</span>
+                    <span className="mr-auto text-sm font-medium">{WIDGETS[id].label}</span>
                     {on ? (
                       <span className="font-mono text-xs text-muted-foreground">on Home</span>
                     ) : (
-                      <>
-                        <Button type="button" size="sm" onClick={() => add(id, "wide")} className="h-8 rounded-full px-3">
-                          Main
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => add(id, "sm")}
-                          className="h-8 rounded-full px-3"
-                        >
-                          Side
-                        </Button>
-                      </>
+                      <Button type="button" size="sm" onClick={() => add(id)} className="h-8 rounded-full px-3">
+                        Add
+                      </Button>
                     )}
                   </div>
                 </li>

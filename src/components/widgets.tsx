@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { shortcutsFor } from "@/components/chat/shortcuts";
-import { FocusDial } from "@/components/focus-timer";
+import { FocusDial, useFocus } from "@/components/focus-timer";
+import { motion, useReducedMotion } from "motion/react";
 import { sessions, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey } from "@/lib/course";
 import { streak, studyDays, type FocusSession } from "@/lib/focus";
@@ -183,10 +184,19 @@ export function StreakWidget({ sessions: list, now }: { sessions: FocusSession[]
   const today = new Date(now);
   const n = streak(days, today);
   const minutes = days.get(dayKey(today)) ?? 0;
+  const { run } = useFocus();
+  const still = useReducedMotion();
   return (
-    <Block title="Streak">
+    <Block title="Streak" aside={run ? "focusing now" : undefined}>
       <p className="flex items-baseline gap-2">
-        <span className="font-mono text-5xl font-medium tracking-tight tabular-nums">{n}</span>
+        {/* Breathes gently while a focus session runs. */}
+        <motion.span
+          className="font-mono text-5xl font-medium tracking-tight tabular-nums"
+          animate={run && !still ? { opacity: [1, 0.55, 1] } : { opacity: 1 }}
+          transition={run && !still ? { duration: 2.4, ease: "easeInOut", repeat: Infinity } : { duration: 0.3 }}
+        >
+          {n}
+        </motion.span>
         <span className="text-sm text-muted-foreground">{n === 1 ? "day" : "days"} in a row</span>
       </p>
       <p className="mt-2 font-mono text-xs text-muted-foreground">

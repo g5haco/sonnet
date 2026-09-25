@@ -338,6 +338,11 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       // A separate write, so a database without migration 0006 still syncs (the error is ignored).
       const grade = course.enrollments?.find((e) => Number.isFinite(e.computed_current_score))?.computed_current_score;
       await admin.from("courses").update({ grade: grade ?? null }).eq("id", id);
+      // Today's point on the Grade trend (one per course per day). Ignored before migration 0009.
+      if (grade != null)
+        await admin
+          .from("grade_history")
+          .upsert({ user_id: userId, course_id: id, day: new Date().toISOString().slice(0, 10), grade });
     }
     // Feed-only users (no token) still get real courses from the " [CODE]" on each feed title.
     for (const event of ics) {
