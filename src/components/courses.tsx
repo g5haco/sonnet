@@ -123,7 +123,7 @@ export function CourseView({
               <WhatIf grade={course.grade ?? null} />
             </PopoverContent>
           </Popover>
-          <CourseSettings course={course} items={items.length} />
+          <CourseSettings course={course} items={items.length} meetings={meetings} />
           <GooeyMenu
             direction="down"
             label="Add"
@@ -307,9 +307,11 @@ function ClassTimes({ course, meetings }: { course: { id: string; code: string }
 function CourseSettings({
   course,
   items,
+  meetings,
 }: {
   course: { id: string; code: string; name: string; hue: number };
   items: number;
+  meetings: ClassMeeting[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -332,7 +334,7 @@ function CourseSettings({
       >
         <Settings2 aria-hidden="true" />
       </Button>
-      <DialogContent className="rounded-2xl sm:max-w-sm">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-2xl sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Course settings</DialogTitle>
           <DialogDescription>How {course.code} shows up everywhere in Sonnet.</DialogDescription>
@@ -400,6 +402,11 @@ function CourseSettings({
           </div>
           <FormError text={error} />
         </form>
+        {/* Class times here too, next to the course's other details (their own form, so outside the one above). */}
+        <section className="border-t border-border pt-4">
+          <h3 className={cn(label, "mb-2")}>Class times</h3>
+          <ClassTimes course={course} meetings={meetings} />
+        </section>
       </DialogContent>
     </Dialog>
   );
