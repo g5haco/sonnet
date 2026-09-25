@@ -24,7 +24,8 @@ export const paceByWeek = (items: Item[], term: Term, now: number) => {
   const g = termGlance(term, new Date(now));
   const weeks = Math.min(Math.max(g.week, 0), term.weeks);
   return Array.from({ length: weeks }, (_, w) => {
-    const list = items.filter((i) => Math.floor((Date.parse(i.due) - +g.start) / (7 * 864e5)) === w);
+    // Whole days first (rounded: DST days are 23 or 25 hours), then weeks.
+    const list = items.filter((i) => Math.floor(Math.round((+startOfDay(new Date(i.due)) - +g.start) / 864e5) / 7) === w);
     return { week: `W${w + 1}`, due: list.length, done: list.filter((i) => i.doneAt).length };
   });
 };

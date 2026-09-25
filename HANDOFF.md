@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-09-25, through commit `b40cf3f`. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
+> Updated 2026-09-25, through the EvilCharts widgets + Calendar/Courses polish. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
 
 ## Project Summary
 
@@ -29,6 +29,9 @@ The user ran the signed-in real-use pass on the live site (2026-09-25): everythi
 - **Ask about this (0013 `chats.item_id`):** chat attached to one assignment: chip in the shared chat input (panel and `/chat`), opens `/chat`; server adds `itemContext()` (all fields, description as text capped at 6k chars inside `<<<DESCRIPTION … DESCRIPTION>>>`, missing fields "not in Sonnet") on every message; canned due-lists skipped; reopening returns to that item's newest chat; × detaches; switching course detaches. Syllabus "Ask about it" attaches a **syllabus chip** (not persisted).
 - **Assistant scope:** general help (code, writing, math, anything) with basic refusals (weapons, malware, hurting someone, minors, serious crime; self-harm → 988). max_tokens 3000/4000; history keeps 16k chars per answer. Pure small talk (`smallTalk()`) skips course data; the "Reading your courses" step now comes from the server (`{t:"read"}`) only when it really loaded them.
 - **UI:** docked chat input stacks (text full width, buttons below) via container query; descriptions 15px.
+- **EvilCharts widgets (Recharts, new dep):** Workload radar, Grade rings, Done vs due, Work mix (`evil-widgets.tsx`, data in `lib/charts.ts`). Vendored registry code in `components/evilcharts/` (`@evilcharts` registry in `components.json`); loaded via `next/dynamic` so Recharts only ships when one is on the grid. Config keys must be CSS-safe (course codes have spaces → keyed `c0…`).
+- **Polish:** Courses list is two columns on phones (smaller card padding/number); calendar toolbar's view switch + Add span the row when it wraps.
+- **"Term" wording** everywhere users see it (code names still say semester).
 - **Cleanups (chisle/ponytail audits):** term week from `termGlance` everywhere, `addDays` for day ranges, unused exports/variants/props removed, all migration fallbacks removed.
 
 ## Important Decisions
@@ -58,13 +61,12 @@ Confirmed:
 - Free AI models are unreliable (429/503); Nemotron slow on long answers.
 - On `/chat`, a task toast (bottom middle) can cover the centered composer until it clears.
 - Canvas URL checks are https-only; an https URL pointing at a private IP isn't blocked (low risk on Vercel).
-- Local `next build` fails on the untracked `src/app/login/cal-preview` type error (missing `canvas` field); move the `*-preview` folders aside to build.
 - Grid widgets never auto-shrink on small screens; tour flag is per browser; a failed layout save keeps the unsaved layout until reload; magic link works only in the same browser.
 - `graphify update .` can segfault; the git hook's background rebuild still runs.
 
 ## Current Priorities
 
-1. Polish Calendar and Courses list pages (next task below).
+1. Signed-in check of the four new widgets with real data (next task below).
 
 ## Important Constraints / User Intent
 
@@ -96,7 +98,7 @@ Confirmed:
 
 ## Next Recommended Task
 
-**Polish Calendar and Courses list pages** (Impeccable for the pass; keep the minimal visual language).
+**Signed-in check of the new EvilCharts widgets** (Edit → add Workload radar, Grade rings, Done vs due, Work mix) on real data, light and dark. Preview-verified only (`dash-preview`; `?v=courses` shows the Courses grid, `cal-preview?show=calendar` the calendar). Then pick from ROADMAP's unscheduled ideas.
 
 ## Suggested New-Session Prompt
 

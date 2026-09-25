@@ -47,6 +47,7 @@ export function RingsWidget({ courses }: { courses: Course[] }) {
   // Keyed by position: config keys become CSS variable names, and course codes have spaces.
   const shown = courses.filter((c) => c.grade != null);
   const data = shown.map((c, k) => ({ key: `c${k}`, grade: Math.round(Number(c.grade)) }));
+  const rings = data.map((r) => ({ ...r, grade: Math.min(100, r.grade) })); // extra credit fills the ring, no more
   const config: ChartConfig = Object.fromEntries(
     shown.map((c, k) => [`c${k}`, { label: c.code, colors: color(courseColor(c.hue)) }]),
   );
@@ -56,7 +57,7 @@ export function RingsWidget({ courses }: { courses: Course[] }) {
         <Empty>Grades show here once Canvas sync brings them in, or you add scores on a course page.</Empty>
       ) : (
         <>
-          <EvilRadialChart className={chart} config={config} data={data} nameKey="key" max={100} innerRadius="30%">
+          <EvilRadialChart className={chart} config={config} data={rings} nameKey="key" max={100} innerRadius="30%">
             <EvilRadialChart.RadialBar dataKey="grade" showBackground cornerRadius={8} />
             <EvilRadialChart.Tooltip />
           </EvilRadialChart>
