@@ -364,19 +364,37 @@ export async function setDone(id: string, isDone: boolean): Promise<Result> {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Saved after each answer (and each yes/no on a proposal). Chats aren't shown elsewhere, so no revalidate.
-export async function saveChat(id: string, title: string, focus: string, messages: unknown[]): Promise<Result> {
-  if (!UUID.test(id) || !Array.isArray(messages)) return { error: "Bad chat." };
+// item: the work item an "Ask about this" chat is about (null once its chip is removed).
+export async function saveChat(
+  id: string,
+  title: string,
+  focus: string,
+  messages: unknown[],
+  item: string | null = null,
+): Promise<Result> {
+  if (!UUID.test(id) || !Array.isArray(messages) || (item !== null && !UUID.test(item))) return { error: "Bad chat." };
   const kept = messages.slice(-100);
   if (JSON.stringify(kept).length > 400_000) return { error: "That chat is too long to save." };
   const supabase = await createClient();
-  const { error } = await supabase.from("chats").upsert({
-    id,
-    title: title.slice(0, 120),
-    focus: focus.slice(0, 40),
-    messages: kept,
-    updated_at: new Date().toISOString(),
-  });
+  const row = { id, title: title.slice(0, 120), focus: focus.slice(0, 40), messages: kept, updated_at: new Date().toISOString() };
+  let { error } = await supabase.from("chats").upsert({ ...row, item_id: item });
+  // Before migration 0013 there's no item_id column: save the chat without its assignment link.
+  if (error && ["PGRST204", "42703"].includes(error.code)) ({ error } = await supabase.from("chats").upsert(row));
   return error ? { error: `Couldn't save the chat. ${error.message}` } : {};
+}
+
+// The newest chat about this work item, so "Ask about this" returns to it. None before migration 0013.
+export async function itemChat(item: string) {
+  if (!UUID.test(item)) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("chats")
+    .select("id")
+    .eq("item_id", item)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data?.id as string | undefined) ?? null;
 }
 
 export async function listChats() {
@@ -392,9 +410,10 @@ export async function listChats() {
 export async function loadChat(id: string) {
   if (!UUID.test(id)) return { error: "Bad chat." };
   const supabase = await createClient();
-  const { data, error } = await supabase.from("chats").select("id, focus, messages").eq("id", id).maybeSingle();
+  // "*": item_id exists only after migration 0013
+  const { data, error } = await supabase.from("chats").select("*").eq("id", id).maybeSingle();
   if (error || !data) return { error: "Couldn't open that chat." };
-  return { chat: data as { id: string; focus: string; messages: unknown[] } };
+  return { chat: data as { id: string; focus: string; messages: unknown[]; item_id?: string | null } };
 }
 
 export async function deleteChat(id: string): Promise<Result> {

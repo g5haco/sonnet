@@ -6,11 +6,14 @@
 import { ArrowUp, FileText, Globe, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
-import { SHORTCUTS } from "@/components/chat/shortcuts";
+import { useAssistant } from "@/components/app-shell";
+import { ABOUT_ITEM, SHORTCUTS } from "@/components/chat/shortcuts";
+import { courseColor } from "@/lib/course";
 import { MAX_FILES, readAttachment, type ChatFile } from "@/lib/attach";
 import { cn, isShown } from "@/lib/utils";
 
@@ -78,6 +81,9 @@ export function ChatInput({
   const still = useReducedMotion();
   const dictation = useDictationSupported();
   const mic = useMicrophone();
+  const { item, detach } = useAssistant(); // an "Ask about this" chat's assignment, shown as a chip
+  const Chip = item?.courseId ? "button" : "span"; // opens the assignment when it knows where it lives
+  const router = useRouter();
   const { resolvedTheme } = useTheme();
   const theme = resolvedTheme === "light" ? "light" : "dark";
   const expanded = shortcuts && (focused || !!value || listening);
@@ -235,6 +241,41 @@ export function ChatInput({
             void attach([...e.dataTransfer.files]);
           }}
         >
+          {item && (
+            <div className="flex px-3 pt-3 text-xs">
+              <span className="flex max-w-full min-w-0 items-center gap-1 rounded-full bg-background py-1 pr-1 pl-2.5">
+                <Chip
+                  {...(item.courseId && {
+                    type: "button" as const,
+                    title: "Open the assignment",
+                    onClick: (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      router.push(`/courses/${item.courseId}?item=${item.id}`);
+                    },
+                  })}
+                  className="flex min-w-0 items-center gap-1.5 rounded-full focus-visible:ring-2 focus-visible:ring-ring [button&]:hover:text-foreground"
+                >
+                  <FileText className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  <span className="truncate font-medium">{item.title}</span>
+                  <span className="flex shrink-0 items-center gap-1 font-mono text-muted-foreground">
+                    <span className="size-1.5 rounded-full" style={{ background: courseColor(item.hue) }} />
+                    {item.course}
+                  </span>
+                </Chip>
+                <button
+                  type="button"
+                  aria-label={`Stop asking about ${item.title}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    detach();
+                  }}
+                  className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="size-3" aria-hidden="true" />
+                </button>
+              </span>
+            </div>
+          )}
           {(files.length > 0 || reading > 0) && (
             <div className="flex flex-wrap gap-2 px-3 pt-3">
               {files.map((f, i) => (
@@ -446,7 +487,7 @@ export function ChatInput({
             inert={!expanded}
           >
             <div className="flex flex-wrap gap-1.5 px-2 pb-2">
-              {SHORTCUTS.map(({ label, prompt, icon: Icon }) => (
+              {(item ? ABOUT_ITEM : SHORTCUTS).map(({ label, prompt, icon: Icon }) => (
                 <button
                   key={label}
                   type="button"

@@ -1,5 +1,8 @@
 import {
+  Award,
   BookOpenCheck,
+  CalendarClock,
+  ListChecks,
   CalendarCheck,
   CalendarRange,
   FileQuestion,
@@ -28,7 +31,19 @@ export const SHORTCUTS: Shortcut[] = [
 
 // Shortcuts for where the student is: a course (the page they're on, or the chat's focus) gets its exams'
 // study guides first, then quiz and flashcards, then the everyday questions.
-export function shortcutsFor(course: string | undefined, items: Item[], now: number): Shortcut[] {
+// An "Ask about this" chat starts with questions about that assignment (the chip already says which one).
+export const ABOUT_ITEM: Shortcut[] = [
+  { label: "What do I need to do?", prompt: "What do I need to do for this assignment? Walk me through it.", icon: ListChecks },
+  {
+    label: "Plan to finish on time",
+    prompt: "Make a plan to finish this assignment by the due date, around my classes.",
+    icon: CalendarClock,
+  },
+  { label: "What's this worth?", prompt: "What's this assignment worth, and how much does it matter for my grade?", icon: Award },
+];
+
+export function shortcutsFor(course: string | undefined, items: Item[], now: number, item?: Item | null): Shortcut[] {
+  if (item) return ABOUT_ITEM;
   if (!course) return SHORTCUTS;
   const exams = items
     .filter((i) => i.course === course && i.kind === "exam" && !i.doneAt)

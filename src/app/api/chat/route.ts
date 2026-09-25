@@ -55,5 +55,7 @@ export async function POST(request: Request) {
   // Optional course focus from the chat page (a course code); studentContext ignores unknown codes.
   const focus = typeof body?.focus === "string" ? body.focus.slice(0, 40) : undefined;
   const search = body?.search === true || needsSearch(typedPart(turns.at(-1)!.content));
-  return streamReply(await studentContext(supabase, timeZone, focus), turns, think, body?.think === true, search);
+  // Optional attached work item ("Ask about this"): its id, loaded under the student's own RLS.
+  const item = typeof body?.item === "string" && /^[0-9a-f-]{36}$/i.test(body.item) ? body.item : undefined;
+  return streamReply(await studentContext(supabase, timeZone, focus, item), turns, think, body?.think === true, search);
 }

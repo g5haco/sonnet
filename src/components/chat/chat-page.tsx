@@ -18,7 +18,7 @@ import { courseColor } from "@/lib/course";
 // The assistant as a full page: the same conversation as the side panel, with room to study in it.
 // Border beam (Libraries.dev): always riding the page's input, brighter while the assistant is working.
 export function ChatPage() {
-  const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses, schedule } = useAssistant();
+  const { messages, busy, send, clear, resolve, focus, setFocus, focusKey, courses, schedule, item } = useAssistant();
   const { resolvedTheme } = useTheme();
   const [more, setMore] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -32,7 +32,7 @@ export function ChatPage() {
   const nextExam = schedule.items
     .filter((i) => i.kind === "exam" && !i.doneAt && Date.parse(i.due) > now)
     .sort((a, b) => a.due.localeCompare(b.due))[0];
-  const ideas = shortcutsFor(focus || nextExam?.course || courses[0]?.code, schedule.items, now);
+  const ideas = shortcutsFor(focus || nextExam?.course || courses[0]?.code, schedule.items, now, item);
   const shown = more ? ideas : ideas.slice(0, 4);
   const title = messages.find((m) => m.role === "user")?.text;
   const hue = courses.find((c) => c.code === focus)?.hue;

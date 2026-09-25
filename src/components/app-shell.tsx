@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
-import { loadChat, saveChat, syncCanvasNow } from "@/app/actions";
+import { itemChat, loadChat, saveChat, syncCanvasNow } from "@/app/actions";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
@@ -46,9 +46,12 @@ type Assistant = {
   focusKey: number;
   courses: Course[];
   schedule: Schedule;
-  open: (id: string) => Promise<void>; // reopen a saved chat
+  open: (id: string) => Promise<boolean>; // reopen a saved chat
   chatId: string | null;
   show: () => void; // open the assistant panel (or focus it on /chat)
+  item: Item | null; // the assignment an "Ask about this" chat is about (its chip)
+  detach: () => void; // remove the chip: it becomes a normal chat
+  askAbout: (item: Item) => Promise<void>; // "Ask about this": back to that assignment's chat, or a new one
 };
 export type Schedule = { items: Item[]; meetings: ClassMeeting[] };
 // Any page can open the floating Settings window (e.g. the calendar's "set your semester dates"), closing Sync if open.
@@ -105,6 +108,8 @@ export function AppShell({
   const [chatId, setChatId] = useState<string | null>(null);
   const dirty = useRef(false); // changed since the last save
   const [focus, setFocus] = useState("");
+  const [itemId, setItemId] = useState<string | null>(null);
+  const item = schedule.items.find((i) => i.id === itemId) ?? null;
   const path = usePathname();
 
   // Canvas catch-up: the Vercel Hobby cron only runs daily, so opening the app syncs when the last sync is over
@@ -140,7 +145,7 @@ export function AppShell({
 
   // Streams the answer from /api/chat (NDJSON events: think | text | error) into the conversation.
   const send = async (text: string, think = false, files?: ChatFile[], course?: string, search = false) => {
-    if (course) setFocus(course);
+    if (course) changeFocus(course);
     if (!chatId) setChatId(crypto.randomUUID());
     dirty.current = true;
     const mine = { role: "user" as const, text, files: files?.length ? files : undefined };
@@ -171,6 +176,7 @@ export function AppShell({
           think,
           search,
           focus: (course ?? focus) || undefined,
+          item: item?.id, // every message, so the assistant always has the assignment's details
           messages: slim(history),
         }),
         signal: ctrl.signal,
@@ -258,6 +264,16 @@ export function AppShell({
     inflight.current?.abort();
     setMessages([]);
     setChatId(null);
+    setItemId(null);
+  };
+  const detach = () => {
+    dirty.current = true; // saved without the link, so "Ask about this" starts fresh next time
+    setItemId(null);
+  };
+  // Another course means another subject: the assignment chip goes.
+  const changeFocus = (code: string) => {
+    if (item && code !== item.course) detach();
+    setFocus(code);
   };
 
   // Save once an answer (or a yes/no) settles. Streaming states and in-flight saves aren't stored.
@@ -274,18 +290,34 @@ export function AppShell({
       chain: m.chain && { ...m.chain, reasoning: m.chain.reasoning.slice(0, 4000) },
       proposals: m.proposals?.map((x) => (x.status === "saving" ? { ...x, status: "pending" as const } : x)),
     }));
-    saveChat(chatId, title, focus, stored).then((r) => r.error && console.error("[chat]", r.error));
-  }, [messages, chatId, focus]);
+    // item?.id: an assignment deleted meanwhile isn't linked (its row is gone)
+    saveChat(chatId, title, focus, stored, item?.id ?? null).then((r) => r.error && console.error("[chat]", r.error));
+  }, [messages, chatId, focus, item?.id]);
 
   const open = async (id: string) => {
     const r = await loadChat(id);
-    if (!r.chat) return void toast.error(r.error);
+    if (!r.chat) {
+      toast.error(r.error);
+      return false;
+    }
     inflight.current?.abort();
     const loaded = (r.chat.messages as ChatMessage[]).map((m, i) => ({ ...m, id: i }));
     nextId.current = loaded.length + 1; // new messages get fresh ids
     setMessages(loaded);
     setFocus(r.chat.focus);
+    setItemId(r.chat.item_id ?? null);
     setChatId(id);
+    return true;
+  };
+
+  const askAbout = async (i: Item) => {
+    if (itemId !== i.id) {
+      const saved = await itemChat(i.id); // always null before migration 0013: a fresh chat each time
+      if (!saved || !(await open(saved))) clear();
+    }
+    setFocus(i.course); // the course's syllabus and materials come along, as with "Ask about it"
+    setItemId(i.id);
+    openAssistant();
   };
 
   // ⌘K / Ctrl+K: straight to the assistant from anywhere. Escape closes the sheet.
@@ -313,6 +345,7 @@ export function AppShell({
         focus || courses.find((c) => path === `/courses/${c.id}`)?.code,
         schedule.items,
         now,
+        item,
       )}
       className={className}
     />
@@ -335,13 +368,16 @@ export function AppShell({
               clear,
               resolve,
               focus,
-              setFocus,
+              setFocus: changeFocus,
               focusKey,
               courses,
               schedule,
               open,
               chatId,
               show: openAssistant,
+              item,
+              detach,
+              askAbout,
             }}
           >
             <FocusProvider>

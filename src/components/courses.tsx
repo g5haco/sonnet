@@ -2,7 +2,7 @@
 
 import { Calculator, CalendarClock, FilePlus2, FileUp, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createMeeting, deleteCourse, deleteMeeting, updateCourse } from "@/app/actions";
@@ -84,6 +84,11 @@ export function CourseView({
   const create = useCreate();
   const { shown, checked, toggle, remove } = useWork(items);
   const [openId, setOpenId] = useState<string | null>(null);
+  // ?item=<id>: from the chat's assignment chip
+  const params = useSearchParams();
+  const linked = params.get("item");
+  const router = useRouter();
+  const path = usePathname();
   const s = courseStats(shown, meetings, now);
   const percent = term && progress(shown, new Date(`${term.start}T00:00:00`), term.weeks, new Date(now)).percent;
 
@@ -150,7 +155,14 @@ export function CourseView({
             empty={`Nothing for ${course.code} yet. Add an assignment or exam with Add.`}
           />
           {/* reads the live row from `shown`, so Mark as done / Undo updates here and in the list together */}
-          <WorkView item={shown.find((i) => i.id === openId) ?? null} onClose={() => setOpenId(null)} onToggle={toggle} />
+          <WorkView
+            item={shown.find((i) => i.id === (openId ?? linked)) ?? null}
+            onClose={() => {
+              setOpenId(null);
+              if (linked) router.replace(path, { scroll: false });
+            }}
+            onToggle={toggle}
+          />
           <Materials course={course} materials={materials} />
       </div>
     </main>

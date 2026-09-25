@@ -1,6 +1,7 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MessageCircle } from "lucide-react";
+import { useAssistant } from "@/components/app-shell";
 import { useEffect, useState } from "react";
 import { CanvasHtml } from "@/components/canvas-html";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -52,6 +53,7 @@ export function WorkView({
   const [last, setLast] = useState(current);
   if (current && current !== last) setLast(current);
   const item = current ?? last;
+  const { askAbout } = useAssistant();
   const [detail, setDetail] = useState<{ id: string; row: Detail | null } | null>(null);
   const id = item?.id;
 
@@ -127,6 +129,18 @@ export function WorkView({
                   className="h-10 rounded-full px-5 transition-transform active:scale-[0.97]"
                 >
                   {done ? "Undo" : "Mark as done"}
+                </Button>
+                {/* The chat opens beside the page, already about this assignment (its chip). */}
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    onClose();
+                    void askAbout(item);
+                  }}
+                  className="h-10 gap-2 rounded-full px-4 transition-transform active:scale-[0.97]"
+                >
+                  <MessageCircle aria-hidden="true" />
+                  Ask about this
                 </Button>
                 {link && (
                   <a
