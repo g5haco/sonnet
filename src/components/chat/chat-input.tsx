@@ -196,6 +196,9 @@ export function ChatInput({
     };
     r.onerror = (e) => {
       if (e.error === "not-allowed") toast.error("Microphone access is blocked. Allow it in your browser to dictate.");
+      // Brave, Arc and Opera expose the API but not Google's speech service behind it, so it fails right away.
+      else if (e.error === "network" || e.error === "service-not-allowed")
+        toast.error("This browser doesn't offer speech recognition. Use Chrome, Edge or Safari, or your system dictation (Windows: Win + H).");
       else if (e.error !== "no-speech" && e.error !== "aborted") toast.error("Dictation stopped. Try again.");
     };
     rec.current = r;
