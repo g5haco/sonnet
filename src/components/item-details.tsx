@@ -40,10 +40,10 @@ export function ItemDetails({ item, now, onToggle }: { item: Item; now: number; 
         </Button>
         {item.courseId && (
           <Link
-            href={`/courses/${item.courseId}`}
+            href={`/courses/${item.courseId}?item=${item.id}`} // the course page opens it in the work view
             className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-full px-3")}
           >
-            Open {item.course}
+            Open assignment
           </Link>
         )}
       </div>
