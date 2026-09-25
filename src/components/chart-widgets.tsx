@@ -51,7 +51,7 @@ export function TrendWidget({ courses, history }: { courses: Course[]; history: 
           <svg
             viewBox="0 0 100 40"
             preserveAspectRatio="none"
-            className="h-32 w-full overflow-visible"
+            className="min-h-24 w-full flex-1 overflow-visible"
             role="img"
             aria-label={lines.map((l) => `${l.c.code}: ${gradeLabel(l.pts[0].grade)} to ${gradeLabel(l.pts.at(-1)!.grade)}`).join(", ")}
           >
@@ -137,7 +137,7 @@ export function ScoresWidget({ items }: { items: Item[] }) {
         <>
           <Big unit="average">{Math.round(avg)}%</Big>
           <div
-            className="mt-4 flex h-16 items-end gap-1"
+            className="mt-4 flex min-h-16 flex-1 items-end gap-1"
             role="img"
             aria-label={list.map((i) => `${i.course} ${i.title}: ${i.score}/${i.points}`).join(", ")}
           >
@@ -347,7 +347,7 @@ export function LoadWidget({ items, now }: { items: Item[]; now: number }) {
     <Block title="Workload" aside="next 14 days">
       <Big unit="due">{total}</Big>
       <div
-        className="mt-4 flex h-16 items-end gap-1"
+        className="mt-4 flex min-h-16 flex-1 items-end gap-1"
         role="img"
         aria-label={`Open work due per day for the next 14 days: ${counts.join(", ")}.`}
       >

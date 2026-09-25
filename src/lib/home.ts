@@ -11,12 +11,12 @@ export const WIDGETS = {
   next: { label: "Up next", w: 5, h: 4, minW: 3, minH: 2 },
   grades: { label: "Grades", w: 3, h: 4, minH: 2 },
   exam: { label: "Next exam", w: 2, h: 2, minH: 2 },
-  week: { label: "This week", w: 3, h: 2 },
   courses: { label: "Courses", w: 4, h: 3, minW: 3, minH: 3 }, // the carousel needs the room
   focus: { label: "Study days", w: 2, h: 2 },
   timer: { label: "Focus timer", w: 2, h: 2, minH: 2 },
   classes: { label: "Today's classes", w: 4, h: 1 },
-  calendar: { label: "Calendar", w: 3, h: 2 },
+  // 1 column wide: today; 1 row tall: this week; bigger: the month.
+  calendar: { label: "Calendar", w: 3, h: 1, minW: 1, minH: 1 },
   today: { label: "Due today", w: 3, h: 2 },
   streak: { label: "Streak", w: 2, h: 1 },
   materials: { label: "Recent materials", w: 3, h: 2 },
@@ -46,7 +46,8 @@ export const minH = (id: WidgetId) => (WIDGETS[id] as Spec).minH ?? 1;
 export const DEFAULT_LAYOUT: Layout = [
   { id: "progress", x: 0, y: 0, w: 5, h: 2 },
   { id: "exam", x: 5, y: 0, w: 2, h: 2 },
-  { id: "week", x: 7, y: 0, w: 3, h: 2 },
+  { id: "calendar", x: 7, y: 0, w: 3, h: 1 },
+  { id: "streak", x: 7, y: 1, w: 3, h: 1 },
   { id: "focus", x: 10, y: 0, w: 2, h: 2 },
   { id: "next", x: 0, y: 2, w: 5, h: 4 },
   { id: "courses", x: 5, y: 2, w: 4, h: 4 },
@@ -82,7 +83,8 @@ export function freeSpot(layout: Layout, id: WidgetId): Place | null {
 export function readLayout(raw: unknown): Layout {
   if (!Array.isArray(raw)) return DEFAULT_LAYOUT;
   const layout: Layout = [];
-  for (const p of raw) {
+  for (const saved of raw) {
+    const p = saved?.id === "week" ? { ...saved, id: "calendar" } : saved; // "This week" is now the Calendar's week view
     if (!p || !Object.hasOwn(WIDGETS, p.id) || layout.some((q) => q.id === p.id)) continue;
     if (![p.x, p.y, p.w, p.h].every(Number.isInteger)) continue;
     const place = { id: p.id as WidgetId, x: p.x, y: p.y, w: p.w, h: p.h };

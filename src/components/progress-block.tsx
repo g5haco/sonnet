@@ -63,8 +63,8 @@ export function ProgressBlock({
   return (
     <Block className={cn("@container", className)}>
       {/* Readout on the left, the semester's weekly bars on the right (stacked on phones). */}
-      <div className="flex flex-col gap-6 @lg:flex-row @lg:items-end @lg:gap-8">
-        <div className="shrink-0 @lg:w-52">
+      <div className="flex flex-1 flex-col gap-6 @lg:flex-row @lg:gap-8">
+        <div className="shrink-0 @lg:w-52 @lg:self-end">
           <p className="flex items-baseline font-mono tabular-nums">
             <span className="text-7xl leading-none font-medium tracking-tighter">
               <Count value={p.percent} />
@@ -84,11 +84,12 @@ export function ProgressBlock({
           <p className="mt-3 text-sm text-pretty [overflow-wrap:anywhere]">{verdict(p)}</p>
         </div>
 
-        <div className="min-w-0 flex-1">
+        {/* The bars grow to fill whatever height the widget has. */}
+        <div className="flex min-w-0 flex-1 flex-col">
           <div
             role="img"
             aria-label={`Week ${p.current + 1} of ${weeks}. ${p.percent}% of work due so far is done.`}
-            className="flex h-24 items-end gap-[3px] @lg:h-28 @lg:gap-1"
+            className="flex min-h-24 flex-1 items-end gap-[3px] @lg:gap-1"
           >
             {p.bars.map((b, i) => {
               const past = i < p.current;

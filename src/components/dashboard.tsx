@@ -13,7 +13,6 @@ import { TermSetup } from "@/components/create-forms";
 import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
-import { WeekStrip } from "@/components/week-strip";
 import { courseColor, gradeLabel } from "@/lib/course";
 import { cn } from "@/lib/utils";
 import { FocusBlock } from "@/components/focus";
@@ -121,7 +120,8 @@ export function Dashboard({
     .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
   const examIn = nextExam && Math.ceil((Date.parse(nextExam.due) - now) / 864e5);
 
-  const wide = (id: WidgetId) => (layout.find((w) => w.id === id)?.w ?? 12) >= 4;
+  const at = (id: WidgetId) => layout.find((w) => w.id === id) ?? { w: 12, h: 6 };
+  const wide = (id: WidgetId) => at(id).w >= 4;
   const view: Record<WidgetId, ReactNode> = {
     progress: <ProgressBlock items={shown} now={now} termStart={termStart} weeks={term.weeks} />,
     next: (
@@ -135,7 +135,6 @@ export function Dashboard({
       />
     ),
     exam: <ExamRing items={shown} now={now} />,
-    week: <WeekStrip items={shown} now={now} />,
     courses: (
       // Quick access to every course: spin the ring, tap a card to open it.
       <Block
@@ -175,7 +174,7 @@ export function Dashboard({
         {courses.length === 0 ? (
           <p className="text-sm text-muted-foreground">Your courses will line up here.</p>
         ) : (
-          <ul className="-my-2 grid min-w-0 divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
+          <ul className="-my-2 grid min-w-0 flex-1 auto-rows-[minmax(2.5rem,1fr)] divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
             {courses.map((c) => (
               <li key={c.id} className="flex items-center gap-3 py-2">
                 <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
@@ -199,7 +198,7 @@ export function Dashboard({
     focus: <FocusBlock sessions={sessions} now={now} />,
     timer: <TimerWidget />,
     classes: <ClassesWidget term={term} now={now} wide={wide("classes")} />,
-    calendar: <CalendarWidget items={shown} now={now} wide={wide("calendar")} />,
+    calendar: <CalendarWidget items={shown} now={now} w={at("calendar").w} h={at("calendar").h} />,
     today: (
       <UpNext
         title="Due today"

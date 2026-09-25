@@ -139,7 +139,8 @@ export function UpNext({
           )}
         </div>
       ) : (
-        <ul className="-mx-2">
+        // The list scrolls on its own, so the header and the footer below stay in view in a short widget.
+        <ul className="-mx-2 min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
           {list.map((i) => {
             const done = !!i.doneAt;
             const due = when(i.due, now);

@@ -5,6 +5,7 @@ import { FileText, Link2, StickyNote } from "lucide-react";
 import Link from "next/link";
 import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
+import { WeekStrip } from "@/components/week-strip";
 import { shortcutsFor } from "@/components/chat/shortcuts";
 import { FocusDial, useFocus } from "@/components/focus-timer";
 import { motion, useReducedMotion } from "motion/react";
@@ -100,8 +101,8 @@ export function ClassesWidget({ term, now, wide }: { term: Term | null; now: num
   );
 }
 
-// Calendar. Narrow: today (the date and what's due). Wide: this month, a dot per thing due.
-export function CalendarWidget({ items, now, wide }: { items: Item[]; now: number; wide: boolean }) {
+// The Calendar changes with its size: 1 column wide = today, 1 row tall = this week, anything bigger = the month.
+export function CalendarWidget({ items, now, w, h }: { items: Item[]; now: number; w: number; h: number }) {
   const today = new Date(now);
   const due = (d: Date) => items.filter((i) => dayKey(new Date(i.due)) === dayKey(d));
   const link = (
@@ -110,28 +111,31 @@ export function CalendarWidget({ items, now, wide }: { items: Item[]; now: numbe
     </Link>
   );
 
-  if (!wide) {
+  if (w === 1) {
     const list = due(today);
+    const open = list.filter((i) => !i.doneAt).length;
     return (
-      <Block title="Today" aside={link}>
-        <p className="flex items-baseline gap-2">
-          <span className="font-mono text-4xl font-medium tabular-nums">{today.getDate()}</span>
-          <span className="text-sm text-muted-foreground">
-            {today.toLocaleDateString(undefined, { weekday: "long", month: "short" })}
-          </span>
-        </p>
-        <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-          {list.length === 0 && <li className="text-muted-foreground">Nothing due today.</li>}
-          {list.map((i) => (
-            <li key={i.id} className={cn("flex items-center gap-2", i.doneAt && "text-muted-foreground line-through")}>
-              <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
-              <span className="truncate">{i.title}</span>
-            </li>
-          ))}
-        </ul>
-      </Block>
+      <Link href="/calendar" className="flex flex-col rounded-2xl bg-card p-4 hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring">
+        <span className="font-mono text-xs text-brand">
+          {today.toLocaleDateString(undefined, { weekday: "short" }).toUpperCase()}
+        </span>
+        <span className="font-mono text-4xl leading-tight font-medium tabular-nums">{today.getDate()}</span>
+        <span className="mt-auto font-mono text-xs text-muted-foreground">{open ? `${open} due` : "nothing due"}</span>
+        {h > 1 && (
+          <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+            {list.map((i) => (
+              <li key={i.id} className={cn("flex items-center gap-2", i.doneAt && "text-muted-foreground line-through")}>
+                <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(i.hue) }} />
+                <span className="truncate">{i.title}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Link>
     );
   }
+
+  if (h === 1) return <WeekStrip items={items} now={now} />;
 
   const first = new Date(today.getFullYear(), today.getMonth(), 1);
   const start = new Date(first);
@@ -140,7 +144,8 @@ export function CalendarWidget({ items, now, wide }: { items: Item[]; now: numbe
   const days = Array.from({ length: weeks * 7 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
   return (
     <Block title={today.toLocaleDateString(undefined, { month: "long" })} aside={link}>
-      <ol className="grid grid-cols-7 gap-y-1 text-center">
+      {/* The weeks share the widget's height. */}
+      <ol className="grid flex-1 auto-rows-fr grid-cols-7 grid-rows-[auto] gap-y-1 text-center">
         {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
           <li key={i} className="font-mono text-xs text-muted-foreground" aria-hidden="true">
             {d}
@@ -152,7 +157,7 @@ export function CalendarWidget({ items, now, wide }: { items: Item[]; now: numbe
           return (
             <li
               key={d.toISOString()}
-              className={cn("flex flex-col items-center gap-0.5", d.getMonth() !== today.getMonth() && "opacity-35")}
+              className={cn("flex flex-col items-center justify-center gap-0.5", d.getMonth() !== today.getMonth() && "opacity-35")}
               title={list.map((i) => `${i.course}: ${i.title}`).join("\n") || undefined}
             >
               <span
