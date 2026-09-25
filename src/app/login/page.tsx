@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { LoginForm } from "./form";
+
+export const metadata: Metadata = {
+  title: "Sonnet · Your courses, deadlines and grades in one place",
+  alternates: { canonical: "/login" },
+};
 
 // What Sonnet does, said plainly: no fake stats or testimonials.
 const POINTS = [

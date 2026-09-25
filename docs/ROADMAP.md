@@ -28,7 +28,7 @@ Done in Phase 9 (2026-09-24):
 
 Still to do in Phase 9:
 - Real-use pass signed in: Canvas grades and scores, focus sessions, web search, photo transcription, study-guide chips, and everything above (all verified only in the signed-out preview).
-- Production polish: page titles and descriptions, social preview image, custom 404, robots.txt and sitemap, favicon check, alt text, console errors, bundle size, source maps, exposed debug settings.
+- ~~Production polish~~ done 2026-09-24: login title/canonical/OG + Twitter card, generated social image, custom 404, robots.txt + sitemap (only /login public; app pages noindex), proxy lets crawlers reach them. Source maps stay off (Next default). Left: bundle-size check.
 - Say "term" instead of "semester" in Settings and Home's nudge.
 - Dashboard polish beyond Home (calendar, courses list).
 

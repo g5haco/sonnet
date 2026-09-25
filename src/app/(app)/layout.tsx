@@ -2,6 +2,9 @@ import { AppShell } from "@/components/app-shell";
 import { ITEM_COLS, MEETING_COLS, toItems, toMeetings } from "@/lib/rows";
 import { createClient } from "@/lib/supabase/server";
 
+// Signed-in pages are private: keep them out of search.
+export const metadata = { robots: { index: false, follow: false } };
+
 // Shared chrome for signed-in pages. No auth check here: layouts don't re-run on navigation,
 // so each page calls requireUser(). Row-level security returns nothing to signed-out visitors.
 // Items and class times feed the assistant's cards; the settings row and account feed the Settings window,

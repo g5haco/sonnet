@@ -8,8 +8,11 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.ericwei.me"),
   title: "Sonnet",
   description: "Everything due, how caught up you are, and an AI that knows your courses.",
+  openGraph: { type: "website", siteName: "Sonnet", url: "/login" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
