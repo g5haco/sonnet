@@ -51,9 +51,8 @@ Nothing half-built. Follow-ups:
 
 Confirmed:
 - Free AI models are unreliable (429/503); Nemotron slow on long answers.
-- On `/chat`, a task toast can cover the centered composer until it clears.
 - Canvas URL checks are https-only; an https URL to a private IP isn't blocked (low risk on Vercel).
-- Grid widgets never auto-shrink on small screens; tour flag is per browser; a failed layout save keeps the unsaved layout until reload; magic link works only in the same browser.
+- Home stacks into one column below 960px of content width; on short laptops (≈750px tall) grid cells get small; tour flag is per browser; a failed layout save keeps the unsaved layout until reload; magic link works only in the same browser.
 - Courses widget at 2×2 works but cards are very small (the carousel stage 360×340 includes air); acceptable per request.
 - Dev-only console warning from `next-themes` ("script tag while rendering") — pre-existing, harmless.
 - `graphify update .` can segfault; the git hook's background rebuild still runs.
