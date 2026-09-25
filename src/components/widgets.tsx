@@ -102,8 +102,8 @@ export function ClassesWidget({
             className={cn("absolute inset-y-1.5 overflow-hidden rounded-md px-1.5 py-1", +s.end < now && "opacity-40")}
             style={{ left: `${at(s.start)}%`, width: `${at(s.end) - at(s.start)}%`, background: courseColor(s.meeting.hue) }}
           >
-            <span className="block truncate font-mono text-xs font-medium text-black/80">{s.meeting.course}</span>
-            <span className="block truncate text-xs text-black/60">{s.meeting.location}</span>
+            <span className="block truncate font-mono text-xs font-medium text-black">{s.meeting.course}</span>
+            <span className="block truncate text-xs text-black">{s.meeting.location}</span>
           </div>
         ))}
         {nowAt > 0 && nowAt < 100 && (
