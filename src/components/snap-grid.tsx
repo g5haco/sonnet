@@ -11,7 +11,8 @@ const SPRING = { type: "spring", stiffness: 520, damping: 44 } as const; // crit
 
 type Drag = { id: WidgetId; mode: "move" | "size"; startX: number; startY: number; dx: number; dy: number };
 
-// Home's grid: COLS × ROWS square cells, as big as the space allows, so it always fits the screen. In edit mode a
+// Home's grid: COLS × ROWS cells stretched to fill the space (not square), so there's no dead space at any
+// resolution; outside edit mode only the area the widgets use is stretched, so unused edge cells don't show either. In edit mode a
 // widget drags to any free cells, and its bottom-right corner resizes it; both snap to cells on release, and a
 // spot that's taken or off the grid springs back. Keyboard: arrows move, Shift + arrows resize.
 export function SnapGrid({
@@ -42,16 +43,29 @@ export function SnapGrid({
     return () => observer.disconnect();
   }, [stacked]); // the stacked list and the grid use different boxes
 
-  const step = Math.max(0, Math.min((size.w + GAP) / COLS, (size.h + GAP) / ROWS)); // one cell plus its gap
-  const px = (n: number) => n * step - GAP; // n cells across, in px
+  // Cells shown: the whole grid while editing, else just the widgets' bounding box.
+  const [x0, y0, x1, y1] = editable
+    ? [0, 0, COLS, ROWS]
+    : [
+        Math.min(...layout.map((p) => p.x)),
+        Math.min(...layout.map((p) => p.y)),
+        Math.max(...layout.map((p) => p.x + p.w)),
+        Math.max(...layout.map((p) => p.y + p.h)),
+      ];
+  const sx = layout.length || editable ? Math.max(0, (size.w + GAP) / (x1 - x0)) : 0; // one cell plus its gap
+  const sy = layout.length || editable ? Math.max(0, (size.h + GAP) / (y1 - y0)) : 0;
+  const step = Math.min(sx, sy); // 0 until measured
+  const pw = (n: number) => n * sx - GAP; // n cells across, in px
+  const ph = (n: number) => n * sy - GAP;
 
   // Where the dragged widget would land, snapped to cells.
   const target = (d: Drag): Place => {
     const p = layout.find((q) => q.id === d.id)!;
-    const cells = (v: number) => Math.round(v / step);
+    const cx = Math.round(d.dx / sx);
+    const cy = Math.round(d.dy / sy);
     return d.mode === "move"
-      ? { ...p, x: p.x + cells(d.dx), y: p.y + cells(d.dy) }
-      : { ...p, w: Math.max(1, p.w + cells(d.dx)), h: Math.max(1, p.h + cells(d.dy)) };
+      ? { ...p, x: p.x + cx, y: p.y + cy }
+      : { ...p, w: Math.max(1, p.w + cx), h: Math.max(1, p.h + cy) };
   };
   const drop = drag && target(drag);
   const ok = drop ? fits(layout, drop) : false;
@@ -100,7 +114,7 @@ export function SnapGrid({
   return (
     <div ref={box} className="min-h-0 flex-1">
       <MotionConfig reducedMotion="user">
-        <div className={cn("relative", !step && "opacity-0")} style={{ width: px(COLS), height: px(ROWS) }}>
+        <div className={cn("relative", !step && "opacity-0")} style={{ width: pw(x1 - x0), height: ph(y1 - y0) }}>
           {/* Snap guides: every cell. */}
           {editable &&
             Array.from({ length: COLS * ROWS }, (_, i) => (
@@ -108,7 +122,7 @@ export function SnapGrid({
                 key={i}
                 aria-hidden="true"
                 className="absolute rounded-xl border border-dashed border-foreground/10"
-                style={{ left: (i % COLS) * step, top: Math.floor(i / COLS) * step, width: px(1), height: px(1) }}
+                style={{ left: (i % COLS) * sx, top: Math.floor(i / COLS) * sy, width: pw(1), height: ph(1) }}
               />
             ))}
           {drop && (
@@ -118,7 +132,7 @@ export function SnapGrid({
                 "absolute rounded-2xl border-2 border-dashed",
                 ok ? "border-foreground/40 bg-foreground/5" : "border-destructive/60 bg-destructive/10",
               )}
-              style={{ left: drop.x * step, top: drop.y * step, width: px(drop.w), height: px(drop.h) }}
+              style={{ left: drop.x * sx, top: drop.y * sy, width: pw(drop.w), height: ph(drop.h) }}
             />
           )}
           {/* Widgets appear once the grid is measured, so they start in place instead of growing from 0. */}
@@ -136,10 +150,10 @@ export function SnapGrid({
                 tabIndex={editable ? 0 : undefined}
                 initial={false}
                 animate={{
-                  x: p.x * step + (moving ? d.dx : 0),
-                  y: p.y * step + (moving ? d.dy : 0),
-                  width: Math.max(px(1), px(p.w) + (sizing ? d.dx : 0)),
-                  height: Math.max(px(1), px(p.h) + (sizing ? d.dy : 0)),
+                  x: (p.x - x0) * sx + (moving ? d.dx : 0),
+                  y: (p.y - y0) * sy + (moving ? d.dy : 0),
+                  width: Math.max(pw(1), pw(p.w) + (sizing ? d.dx : 0)),
+                  height: Math.max(ph(1), ph(p.h) + (sizing ? d.dy : 0)),
                 }}
                 transition={d ? { duration: 0 } : SPRING}
                 className={cn(
