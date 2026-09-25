@@ -90,7 +90,7 @@ export function SyncWindow({ open, onClose, account }: { open: boolean; onClose:
             name="Google Calendar"
             blurb="Sends classes, due dates and exams to Google Calendar. One-way; Google refreshes it every few hours."
             status={
-              <Status tone="off">{account.feed ? "Ready to subscribe" : "Needs semester dates"}</Status>
+              <Status tone="off">{account.feed ? "Ready to subscribe" : "Needs term dates"}</Status>
             }
           >
             <FeedLink token={account.feed} />
@@ -106,7 +106,7 @@ function NeedsSemester({ what, className }: { what: string; className?: string }
   const openSettings = useOpenSettings();
   return (
     <p className={cn("text-sm text-pretty text-muted-foreground", className)}>
-      {what} needs your semester dates.{" "}
+      {what} needs your term dates.{" "}
       <button
         type="button"
         onClick={() => openSettings("semester")}

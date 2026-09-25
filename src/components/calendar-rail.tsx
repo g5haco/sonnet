@@ -139,9 +139,9 @@ function Semester({ term, items, now, days, view, onPick }: Props) {
   if (!term)
     return (
       <section>
-        <h2 className="mb-1 pl-1 text-sm font-medium">Semester</h2>
+        <h2 className="mb-1 pl-1 text-sm font-medium">Term</h2>
         <p className="pl-1 text-sm text-muted-foreground">
-          Set your semester dates in{" "}
+          Set your term dates in{" "}
           <button type="button" onClick={() => openSettings()} className="text-foreground underline underline-offset-4">
             Settings
           </button>{" "}
@@ -166,7 +166,7 @@ function Semester({ term, items, now, days, view, onPick }: Props) {
   return (
     <section>
       <header className="mb-2 flex items-baseline justify-between pl-1">
-        <h2 className="text-sm font-medium">Semester</h2>
+        <h2 className="text-sm font-medium">Term</h2>
         <span className="font-mono text-xs text-muted-foreground">{status}</span>
       </header>
       <ol className="grid grid-cols-8 gap-1">

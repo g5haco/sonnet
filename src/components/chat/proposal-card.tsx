@@ -89,7 +89,7 @@ const VERB: Record<Proposal["type"], [string, string]> = {
   add_course: ["New course", "Add course"],
   update_course: ["Course", "Save"],
   delete_course: ["Delete course", "Delete"],
-  semester: ["Semester", "Save"],
+  semester: ["Term", "Save"],
 };
 const DESTRUCTIVE = new Set<Proposal["type"]>(["delete", "delete_class", "delete_course"]);
 

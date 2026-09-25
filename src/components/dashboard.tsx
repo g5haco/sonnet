@@ -265,7 +265,7 @@ export function Dashboard({
                   onClick={() => openSettings("semester")}
                   className="text-foreground underline underline-offset-4 hover:text-brand"
                 >
-                  set your real semester length
+                  set your real term length
                 </button>
               </>
             )}

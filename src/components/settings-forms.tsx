@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 const DoubtButton = dynamic(() => import("@/components/evil-buttons/doubt-button"));
 
 function SemesterForm({ start, weeks }: { start: string; weeks: number }) {
-  const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Semester saved."));
+  const { pending, error, submit } = useSubmit(saveTerm, () => toast.success("Term saved."));
   return (
     <form autoComplete="off" action={submit} className="grid gap-2 sm:grid-cols-[1fr_8rem_auto] sm:items-end sm:gap-3">
       <div className="flex flex-col gap-2">
@@ -169,7 +169,7 @@ export type Account = {
 // Preferences only. Integrations (Canvas, the Google Calendar feed) live in Sync.
 const SECTIONS: { id: SettingsSection; label: string; short?: string; icon: typeof CalendarDays }[] = [
   { id: "account", label: "Account & appearance", short: "Account", icon: CircleUser },
-  { id: "semester", label: "Semester", icon: CalendarDays },
+  { id: "semester", label: "Term", icon: CalendarDays },
   { id: "data", label: "Data & privacy", icon: ShieldCheck },
 ];
 
@@ -272,7 +272,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
   const g = term && termGlance(term, now);
   return (
     <>
-      <h2 className={heading}>Semester</h2>
+      <h2 className={heading}>Term</h2>
       <p className={cn(help, "mb-6")}>
         Sets the weekly bars on Home, the calendar&apos;s heat map, and when class times stop repeating.
       </p>
@@ -303,7 +303,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
           </div>
           <div
             role="progressbar"
-            aria-label="Semester progress"
+            aria-label="Term progress"
             aria-valuenow={g.percent}
             aria-valuemin={0}
             aria-valuemax={100}
@@ -318,7 +318,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
         </div>
       ) : (
         <p className="rounded-2xl bg-secondary/60 p-5 text-sm text-pretty">
-          No semester yet. Add the first day of classes to turn on weekly progress, the heat map and the Google Calendar
+          No term yet. Add the first day of classes to turn on weekly progress, the heat map and the Google Calendar
           feed.
         </p>
       )}
@@ -326,7 +326,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
         <h3 className={cn(label, "mb-4")}>{term ? "Change dates" : "Set dates"}</h3>
         {term && term.weeks <= 2 && (
           <p className="mb-4 rounded-xl bg-secondary px-3 py-2 text-sm">
-            Set to {term.weeks} week{term.weeks === 1 ? "" : "s"}? Most semesters run 15 or 16.
+            Set to {term.weeks} week{term.weeks === 1 ? "" : "s"}? Semesters usually run 15 or 16, quarters about 11.
           </p>
         )}
         <SemesterForm start={term?.start ?? ""} weeks={term?.weeks ?? 16} />
@@ -367,7 +367,7 @@ function ResetData({ onDone }: { onDone: () => void }) {
       </h3>
       <p className={help}>
         Deletes every course with its assignments, exams, class times and materials (uploaded files too), your chats,
-        and your semester dates. Canvas gets disconnected, or its daily sync would bring everything back. Your login and
+        and your term dates. Canvas gets disconnected, or its daily sync would bring everything back. Your login and
         name stay. This can&apos;t be undone.
       </p>
       {open ? (

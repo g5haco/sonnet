@@ -35,11 +35,11 @@ async function done(error: { message: string } | null, what: string): Promise<Re
 export async function saveTerm(form: FormData): Promise<Result> {
   const start = text(form, "start");
   const weeks = Number(form.get("weeks"));
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return { error: "Pick the date your semester started." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) return { error: "Pick the date your term started." };
   if (!Number.isInteger(weeks) || weeks < 1 || weeks > 30) return { error: "Weeks should be between 1 and 30." };
   const supabase = await createClient();
   const { error } = await supabase.from("settings").upsert({ term_start: start, term_weeks: weeks });
-  return done(error, "save your semester");
+  return done(error, "save your term");
 }
 
 export async function createCourse(form: FormData): Promise<Result> {
@@ -180,7 +180,7 @@ export async function saveCanvasConnection(form: FormData): Promise<Result> {
       .maybeSingle();
     if (settingsError) throw settingsError;
     // Canvas settings live on the semester row (new account, or after Reset all data).
-    if (!current) return { error: "Set your semester dates first (Settings → Semester), then connect Canvas." };
+    if (!current) return { error: "Set your term dates first (Settings → Term), then connect Canvas." };
     if (!token && !feed && !current?.canvas_token_connected)
       return { error: "Add an access token, a calendar link, or both." };
     if (token) {

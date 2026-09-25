@@ -49,7 +49,6 @@ Do not reverse these casually.
 
 Nothing half-built. Follow-ups:
 - **Google sign-in** still needs the Google provider in Supabase + OAuth client + redirect URLs (`https://www.ericwei.me/auth/confirm`, `http://localhost:3000/auth/confirm`).
-- **"Semester" wording** remains in Settings and Home's nudge; onboarding says "term".
 - **Syllabus chip isn't saved** with the chat (reopened chat keeps focus, not chip). Persisting it needs a migration; user hasn't asked.
 - Unscheduled ideas: after-class check-in, "start by" planning, crunch forecast, Sunday reset (ROADMAP).
 
@@ -65,8 +64,7 @@ Confirmed:
 
 ## Current Priorities
 
-1. "Term" wording in Settings and Home's nudge (next task below).
-2. Polish Calendar and Courses list pages.
+1. Polish Calendar and Courses list pages (next task below).
 
 ## Important Constraints / User Intent
 
@@ -98,7 +96,7 @@ Confirmed:
 
 ## Next Recommended Task
 
-**"Term" wording.** User-facing "semester" strings (Settings section/form/toasts, Home's short-term nudge, calendar rail heading, sync window, actions.ts errors, proposal card label) → "term", matching onboarding. Keep code identifiers and the `set_semester` tool name. Done when no user-visible "semester" remains and tests pass.
+**Polish Calendar and Courses list pages** (Impeccable for the pass; keep the minimal visual language).
 
 ## Suggested New-Session Prompt
 
