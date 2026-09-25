@@ -1,105 +1,102 @@
 # Project Handoff
 
-> Updated 2026-09-25, through the EvilCharts widgets + Calendar/Courses polish. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
+> Updated 2026-09-25, through commit `5841c8b`. The code wins over this file if they disagree. Phase status lives in `docs/ROADMAP.md`. Code structure: ask Graphify (`graphify-out/`), not this file.
 
 ## Project Summary
 
-**Sonnet** is a student hub: courses, deadlines, calendar, materials, grades, a focus timer and an AI assistant in one **minimal** app. Built by one college student (vibecoding on Windows). Live at `https://www.ericwei.me`. Sign-up exists, so it's multi-user (RLS scopes everything per user).
+**Sonnet** is a student hub: courses, deadlines, calendar, materials, grades, a focus timer and an AI assistant in one **minimal** app. Built by one college student (vibecoding on Windows). Live at `https://www.ericwei.me`. Multi-user (RLS scopes everything per user).
 
-- **Stack:** Next.js 16 App Router, Supabase (Postgres + RLS, Auth, Storage), Vercel (Hobby), OpenRouter (free models by default).
-- **Direction:** Phases 0–8 done; Phase 9 (polish + real-use pass) in progress. SaaS extras (Stripe, landing page) only when the user asks.
+- **Stack:** Next.js 16 App Router, Supabase (Postgres + RLS, Auth, Storage), Vercel (Hobby), OpenRouter (free models by default), Recharts (via EvilCharts) for some Home widgets.
+- **Direction:** Phases 0–8 done; Phase 9 (polish + real use) in progress. SaaS extras (Stripe, landing page) only when the user asks.
 
 ## Current State
 
-Works (see ROADMAP for phases 0–8): login/sign-up/Google, onboarding + tour, Home widget grid, courses, work items, class times, calendar, Google Calendar feed, Canvas sync (token and/or ICS) with hourly catch-up on open, materials + syllabus summary/date import, grades + what-if, focus timer, assistant with confirm cards and web search.
+Works: login/sign-up, onboarding + tour, Home widget grid (32 widgets), courses, work items + work view, class times (incl. single-day removal), calendar, Google Calendar feed, Canvas sync (token and/or ICS), materials + syllabus summary/date import, grades + what-if, focus timer, assistant (confirm cards, web search, Ask about this, general help), background task toasts via `/api/tasks`.
 
-**All migrations 0001–0013 are applied** (user confirmed). No pre-migration fallbacks remain in code.
-
-The user ran the signed-in real-use pass on the live site (2026-09-25): everything works.
+**Migrations 0001–0013 all applied**; no pre-migration fallbacks remain. The user ran a signed-in real-use pass of all earlier features on the live site (2026-09-25): everything works.
 
 ## Completed This Session
 
-- **Production polish:** root metadata (`metadataBase`), login title/canonical/OG/Twitter, generated OG image (`app/opengraph-image.tsx`), `not-found.tsx`, `robots.ts` + `sitemap.ts` (only `/login` public; `(app)` layout is noindex). `proxy.ts` lets signed-out crawlers reach robots/sitemap/OG image.
-- **Bundle:** `matter-js` (Reset button) and `react-markdown` load via `next/dynamic` → shared app JS 336 → 219 KB gzip.
-- **Security pass (Semgrep, supply-chain, sharp-edges):** Canvas sync re-validates saved URLs (https) before fetching; paging refuses cross-origin `next` links (token never leaves the Canvas host); GCM `authTagLength: 16`; proxy public paths match exactly (`p` or `p/…`); cron secret uses `timingSafeEqual`. **Migration 0010:** trigger blocks non-service-role writes to `settings.canvas_*`; materials bucket drops SVG.
-- **Assistant fixes:** statements with a clock time / repeating day ("my math is every day 1:30–2:20") count as change requests; a reply that opens as raw JSON is held back and retried; saved class cards don't warn about overlapping themselves.
-- **Remove a day from the schedule (0011 `class_meetings.skip_dates`):** tool `remove_class_day` — no ref = every class that date ("no class Monday"), ref = one class. Hidden in calendar sessions, ICS feed (EXDATE), assistant context. Saved card has **Undo** (`setClassDayOff(ids, date, off)`).
-- **Work view (0012 `items.submission_types`, `allowed_attempts`):** course page title click opens a large two-column dialog (`work-view.tsx`): due, points/score, submission, attempts, Canvas description, Mark as done/Undo (same `useWork` toggle), Open in Canvas, **Ask about this**. Descriptions render through `canvas-html.tsx` (browser `DOMParser` → allowlisted React elements, no new dep). `?item=<id>` on a course page opens it; item popovers' "Open assignment" link there. Home's widget still completes on click.
-- **Slow tasks in the background:** `useTasks()` (`components/tasks.tsx`) shows Sonner custom toasts (bottom middle): running → done (click opens result) / failed. Used by syllabus summary (`?summary=1`), syllabus dates (`?dates=<file>`, in-flight read cached per file), Canvas sync, uploads. These calls go through **`/api/tasks`** (`slow()`), not Server Actions.
-- **Ask about this (0013 `chats.item_id`):** chat attached to one assignment: chip in the shared chat input (panel and `/chat`), opens `/chat`; server adds `itemContext()` (all fields, description as text capped at 6k chars inside `<<<DESCRIPTION … DESCRIPTION>>>`, missing fields "not in Sonnet") on every message; canned due-lists skipped; reopening returns to that item's newest chat; × detaches; switching course detaches. Syllabus "Ask about it" attaches a **syllabus chip** (not persisted).
-- **Assistant scope:** general help (code, writing, math, anything) with basic refusals (weapons, malware, hurting someone, minors, serious crime; self-harm → 988). max_tokens 3000/4000; history keeps 16k chars per answer. Pure small talk (`smallTalk()`) skips course data; the "Reading your courses" step now comes from the server (`{t:"read"}`) only when it really loaded them.
-- **UI:** docked chat input stacks (text full width, buttons below) via container query; descriptions 15px.
-- **EvilCharts widgets (Recharts, new dep):** Workload radar, Grade rings, Done vs due, Work mix (`evil-widgets.tsx`, data in `lib/charts.ts`). Vendored registry code in `components/evilcharts/` (`@evilcharts` registry in `components.json`); loaded via `next/dynamic` so Recharts only ships when one is on the grid. Config keys must be CSS-safe (course codes have spaces → keyed `c0…`).
-- **Polish:** Courses list is two columns on phones (smaller card padding/number); calendar toolbar's view switch + Add span the row when it wraps.
-- **Widget library previews:** fixed-height frames (charts draw), and a widget whose real data hits its empty state (`data-empty` marker) previews with `lib/sample.ts` data instead, labeled "sample" (CSS `peer-has-data-empty`, no per-widget checks). New empty states must carry `data-empty`.
-- **"Term" wording** everywhere users see it (code names still say semester).
-- **Cleanups (chisle/ponytail audits):** term week from `termGlance` everywhere, `addDays` for day ranges, unused exports/variants/props removed, all migration fallbacks removed.
+- **"Term" wording:** every user-visible "semester" → "term" (Settings section/toasts, Home nudge, calendar rail, sync window, action errors, proposal card). Code identifiers (`"semester"` settings section, `set_semester` tool), model-facing prompt text, and onboarding's Semester/Quarter choice deliberately unchanged.
+- **Four EvilCharts widgets** (user-approved new dep `recharts`): Workload radar (open work ahead per course, needs ≥3 courses), Grade rings (radial per graded course, capped at 100%, own legend list), Done vs due (per term week so far, DST-safe bucketing), Work mix (open work by kind). Code: `components/evil-widgets.tsx`, data helpers `lib/charts.ts` (+ test). Vendored registry code in `components/evilcharts/` (registry `@evilcharts` in `components.json`); two local edits there: legend `flex-wrap`, removed unused import. Loaded with `next/dynamic` so Recharts only ships when one is on the grid.
+- **Widget library previews** (Edit → Add widget): previews get a fixed-height frame so charts draw; if a widget's real render hits its empty state, a second render from `lib/sample.ts` shows instead with a "sample" badge. Mechanism: the widget map is now `render(data)` in `dashboard.tsx`; empty states carry a `data-empty` attribute; CSS `peer-has-data-empty` swaps. Sample data has its own term (5 weeks in) so week charts work even in a real first week. Never shown on Home itself.
+- **Courses widget resizable to 2×2** (was 3×3 min). Root fix in `components/fit.tsx`: its grid track is now `minmax(0,1fr)` so oversized content is centered and scaled down instead of hanging from the top and clipping. Applies to every `Fit` user.
+- **Polish:** Courses list is 2 columns on phones (smaller padding/number in `CourseFace`, also affects Home's carousel cards on phones); calendar toolbar's view switch + Add span the row when it wraps on phones.
+- **Small fixes:** Ask-about chips keyed by index (two same-titled exams collided); untracked `cal-preview` fixed (added `canvas` field, `?show=calendar` renders the calendar) so local `next build` no longer fails.
 
 ## Important Decisions
 
 Do not reverse these casually.
 
 - **Changes need approval:** the AI never saves without a confirm card. Model choice is config (`AI_MODEL`, `AI_VISION_MODEL`); free models by default.
-- **Slow work uses `/api/tasks`, not Server Actions:** Next runs Server Actions one at a time per tab, so a minute-long syllabus read would block check-offs. Add new slow server calls to the `TASKS` map in `app/api/tasks/route.ts` and call them with `slow()`; wrap in `useTasks()` for the toast. The tray refreshes the router when a task settles.
-- **Task cards are Sonner toasts** (bottom middle, user's choice), not a separate tray.
-- **Canvas HTML is never injected:** `canvas-html.tsx` copies allowlisted tags only; links http(s)/mailto, new tab; failed images become links. Don't switch to `dangerouslySetInnerHTML`.
-- **Assignment context is fenced** as untrusted data; keep the markers and the 6k cap (free models choke on long prompts).
-- **Chips:** assignment chip = persisted link (`chats.item_id`); syllabus chip = the course focus made visible (removing it drops the focus). One chip markup in `chat-input.tsx` serves both.
-- **Honest UI:** real data or a clear empty/"not in Sonnet" state; ICS-only items say details need a Canvas token; no fake progress percentages.
-- **Home grid, focus timer, visual language, Vercel Hobby, kept-on-purpose code** (`evil-buttons/`, `spring.ts`): unchanged from before; see ROADMAP/PRODUCT.
-- **`cn` package stays** (it is clsx + tailwind-merge in one dep).
+- **Slow work uses `/api/tasks`, not Server Actions** (Server Actions run one at a time per tab and would block check-offs). New slow calls go in the `TASKS` map in `app/api/tasks/route.ts`, called with `slow()`, wrapped in `useTasks()`. Task cards are Sonner toasts, bottom middle.
+- **Canvas HTML is never injected:** `canvas-html.tsx` copies allowlisted tags only. No `dangerouslySetInnerHTML`.
+- **Assignment context is fenced** as untrusted data with a 6k cap (free models choke on long prompts).
+- **Chips:** assignment chip = persisted `chats.item_id`; syllabus chip = visible course focus (not persisted).
+- **Honest UI:** real data or a clear empty state; no fake numbers. The **only** exception is the widget library's labeled "sample" previews.
+- **Empty states must carry `data-empty`** or the library preview won't fall back to sample data.
+- **EvilCharts config keys become CSS variable names:** keep them CSS-safe (course codes have spaces → Grade rings keys `c0…`, label from config). Keying by course code broke colors and caused duplicate-key warnings.
+- **Chart widgets stay lazy** (`next/dynamic` in `dashboard.tsx`); existing hand-drawn SVG widgets in `chart-widgets.tsx` were deliberately left as-is (user choice).
+- **Kept-on-purpose code:** `evil-buttons/`, `spring.ts`; `cn` package stays (clsx + tailwind-merge).
 
 ## In Progress / Unfinished Work
 
 Nothing half-built. Follow-ups:
-- **Google sign-in** still needs the Google provider in Supabase + OAuth client + redirect URLs (`https://www.ericwei.me/auth/confirm`, `http://localhost:3000/auth/confirm`).
-- **Syllabus chip isn't saved** with the chat (reopened chat keeps focus, not chip). Persisting it needs a migration; user hasn't asked.
+- **Grade goals** don't exist; Grade rings shows current grade only. A goal per course needs a migration (ask first).
+- **Google sign-in** needs the Google provider in Supabase + OAuth client + redirect URLs (`https://www.ericwei.me/auth/confirm`, `http://localhost:3000/auth/confirm`).
+- **Syllabus chip isn't saved** with the chat (needs a migration; user hasn't asked).
 - Unscheduled ideas: after-class check-in, "start by" planning, crunch forecast, Sunday reset (ROADMAP).
 
 ## Known Bugs / Issues
 
 Confirmed:
 - Free AI models are unreliable (429/503); Nemotron slow on long answers.
-- On `/chat`, a task toast (bottom middle) can cover the centered composer until it clears.
-- Canvas URL checks are https-only; an https URL pointing at a private IP isn't blocked (low risk on Vercel).
+- On `/chat`, a task toast can cover the centered composer until it clears.
+- Canvas URL checks are https-only; an https URL to a private IP isn't blocked (low risk on Vercel).
 - Grid widgets never auto-shrink on small screens; tour flag is per browser; a failed layout save keeps the unsaved layout until reload; magic link works only in the same browser.
+- Courses widget at 2×2 works but cards are very small (the carousel stage 360×340 includes air); acceptable per request.
+- Dev-only console warning from `next-themes` ("script tag while rendering") — pre-existing, harmless.
 - `graphify update .` can segfault; the git hook's background rebuild still runs.
 
 ## Current Priorities
 
-1. Signed-in check of the four new widgets with real data (next task below).
+1. Signed-in check of this session's Home changes on real data (next task).
+2. Pick from ROADMAP's unscheduled ideas with the user.
 
 ## Important Constraints / User Intent
 
-- **Workflow:** commit and push every important change straight to `main`; say "needs migration N" / "untested" in messages. Per `CLAUDE.md`: Graphify first, minimal reads, terse chat, one fresh reviewer sub-agent after normal feature work (skip for tiny changes). Ponytail/Chisle: reuse code and deps, no speculative abstractions, one small test for non-trivial logic.
+- **Workflow:** commit and push every important change straight to `main`; say "needs migration N" / "untested" in messages. Per `CLAUDE.md`: Graphify first, minimal reads, terse chat, one fresh reviewer sub-agent after normal feature work (skip for tiny ones). Ponytail/Chisle: reuse code/deps, no speculative abstractions, one small test for non-trivial logic. **Run tests before committing** (don't chain commit after tests with `;`).
 - **Ask before:** adding a dependency, writing a migration, removing a feature, changing focus-timer behavior, changing how chats are stored.
-- **Migrations:** the user pastes SQL into Supabase; new code must work before its migration runs, and the fallback is removed once the user confirms it ran.
+- **Migrations:** the user pastes SQL into Supabase; new code must work before its migration runs.
 - **Secrets** only in `.env.local`/Vercel. **Next 16:** `src/proxy.ts` is middleware; pages call `requireUser()`; read `node_modules/next/dist/docs/` for unfamiliar APIs.
-- **Local preview pages** `src/app/login/*-preview/` are untracked (`.git/info/exclude`); never commit. `course-preview` was given a schedule item locally for chip testing.
-- **Windows editing gotchas:** Python edit scripts must preserve line endings (read/write bytes or `newline=''`) and use raw strings for regex/`\n`; `src/app/(app)/page.tsx` is CRLF; never run Prettier on whole existing files (only on new files, `--print-width 120`).
-- **User wants:** minimal UI, visible but calm animation, big readable assignment view, chat that answers anything, nothing claimed that didn't happen.
+- **Local preview pages** `src/app/login/*-preview/` are untracked (`.git/info/exclude`); never commit. `dash-preview` (`?s=`, `&t=<week>`, `?v=courses` for the Courses grid; its `layout=` prop is edited ad hoc for testing), `cal-preview?show=calendar`.
+- **Windows gotchas:** Python edit scripts must preserve line endings (bytes) and use raw strings; `src/app/(app)/page.tsx` is CRLF; never Prettier whole existing files; vitest doesn't resolve `@/` in `lib/*` — use relative imports there.
+- **User wants:** minimal UI, visible but calm animation, big readable views, widgets that explain themselves before being added, chat that answers anything, nothing claimed that didn't happen.
 
 ## Testing / Validation Status
 
-- **Automated:** `npm test` 45 passing (incl. `itemContext`, `smallTalk`, remove-class-day proposals, Canvas mapping + cross-origin paging). `npx tsc --noEmit` clean except local `cal-preview`. `npm run lint` clean. `npm audit` 0 vulnerabilities; Semgrep 1 finding (fixed).
-- **Preview-verified (signed out, local):** work view open/close/size (desktop 1600/2560, phone), task toast error state and position, docked chat input stacking, Ask-about-this chip + starters + ×, Reset button lazy load, OG/robots/sitemap routes.
-- **Signed in (live, 2026-09-25):** user confirmed all flows work.
-- **Preview gotcha:** hidden pane freezes animations; stale HMR errors linger in the console after fixes.
+- **Automated:** `npm test` 48 passing (incl. `charts.test.ts`, `sample.test.ts`, updated `home.test.ts`). `npx tsc --noEmit` clean (incl. previews). `npm run lint` clean.
+- **Preview-verified (signed out, local, sample data):** four EvilCharts widgets render (no console errors); library previews show real vs sample correctly (incl. week-1 term); Courses widget at 3×2 and 2×2 fits; Courses list on phone; calendar toolbar on phone; month/week views.
+- **Reviewer sub-agents:** widgets + polish (findings fixed: DST bucketing, ring overflow); sample previews (no issues).
+- **Not tested signed in:** new widgets on real data, light theme for the charts, the widget library with a real account, Courses widget at small sizes on the live site.
+- **Preview gotcha:** a hidden pane freezes animations (e.g. the view-switch pill looks stuck); page intro animation needs ~8s before measuring.
 
 ## Relevant Architecture Context
 
-- **Chat:** `AppShell` holds the one conversation (messages, focus, `itemId`, `syllabus`) shared by `ChatPanel` and `ChatPage`; `send()` posts `{focus, item, syllabus}` to `/api/chat` → `smallTalk ? lightContext : studentContext(…)` → `streamReply` (NDJSON events incl. `read`). Saved via `saveChat` (`chats.item_id`).
-- **Work items:** `courses.tsx` owns `useWork` + `WorkView`; `UpNext` gets `onOpen` only there (Home has none).
-- **Slow tasks:** `components/tasks.tsx` (`useTasks`, `slow`) ↔ `app/api/tasks/route.ts`.
+- **Home:** `dashboard.tsx` builds every widget via `render(data)` → `view` (real) and `sample` (library only); layout/sizes in `lib/home.ts` (`WIDGETS`, `readLayout`, `freeSpot`), grid in `snap-grid.tsx`. Widgets live in `widgets.tsx`, `chart-widgets.tsx`, `evil-widgets.tsx`, plus `progress-block`, `exam-ring`, `up-next`, `focus`. `Fit` scales fixed designs to their cell.
+- **Chat / slow tasks / work view:** unchanged; see Graphify.
 - **Useful queries:**
-  - `graphify query "How does Ask about this attach an assignment to the chat and reach the model?"`
+  - `graphify query "How does the Home widget library render previews and fall back to sample data?"`
+  - `graphify explain "Fit"`
   - `graphify query "How do slow tasks run through /api/tasks and show status toasts?"`
-  - `graphify query "Where does Canvas sync write items and assignment details?"`
-  - `graphify explain "WorkView"`
+  - `graphify query "How does Ask about this attach an assignment to the chat and reach the model?"`
 
 ## Next Recommended Task
 
-**Signed-in check of the new EvilCharts widgets** (Edit → add Workload radar, Grade rings, Done vs due, Work mix) on real data, light and dark. Preview-verified only (`dash-preview`; `?v=courses` shows the Courses grid, `cal-preview?show=calendar` the calendar). Then pick from ROADMAP's unscheduled ideas.
+**Signed-in check of this session's Home changes.**
+- **Goal:** on the live site (user signs in; Claude may not enter passwords), open Edit → Add widget and confirm previews show real data or labeled samples; add Workload radar, Grade rings, Done vs due, Work mix and check them with real courses in dark and light; resize Courses to 2×2/3×2.
+- **Why next:** everything this session was verified only in the local preview with made-up data.
+- **Done when:** each works on real data or its bug is fixed and pushed; this file's Testing section updated.
 
 ## Suggested New-Session Prompt
 
