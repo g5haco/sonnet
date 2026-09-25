@@ -112,7 +112,7 @@ export function encryptCanvasToken(token: string) {
 export function decryptCanvasToken(value: string) {
   const [iv, tag, encrypted] = value.split(".").map((part) => Buffer.from(part, "base64url"));
   if (!iv || !tag || !encrypted) throw new Error("The saved Canvas token is invalid.");
-  const decipher = createDecipheriv("aes-256-gcm", encryptionKey(), iv);
+  const decipher = createDecipheriv("aes-256-gcm", encryptionKey(), iv, { authTagLength: 16 });
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
 }
@@ -139,6 +139,8 @@ export async function canvasPages<T>(url: string, token: string, fetcher: typeof
     if (!Array.isArray(page)) throw new Error("Canvas returned an unexpected response.");
     rows.push(...page);
     next = nextLink(response.headers.get("link"));
+    // The token only ever goes to the Canvas server we started on.
+    if (next && new URL(next).origin !== new URL(url).origin) throw new Error("Canvas sent a link to another site.");
   }
   return rows;
 }
@@ -296,11 +298,13 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         .eq("user_id", userId)
         .single();
       if (error || !secret) throw new Error("Canvas access token is missing.");
-      if (!config.canvas_base_url) throw new Error("Canvas base URL is missing.");
+      // Re-checked here: the saved value is only trusted if it still passes the save-time rules.
+      const base = config.canvas_base_url && canvasBaseUrl(config.canvas_base_url);
+      if (!base) throw new Error("Canvas base URL is missing.");
       const token = decryptCanvasToken(secret.token_encrypted);
       canvasCourses.push(
         ...(await canvasPages<CanvasCourse>(
-          `${config.canvas_base_url}/api/v1/courses?enrollment_type=student&state[]=available&include[]=total_scores&per_page=100`,
+          `${base}/api/v1/courses?enrollment_type=student&state[]=available&include[]=total_scores&per_page=100`,
           token,
           fetcher,
         )),
@@ -309,7 +313,7 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         assignments.set(
           String(course.id),
           await canvasPages<CanvasAssignment>(
-            `${config.canvas_base_url}/api/v1/courses/${course.id}/assignments?include[]=submission&order_by=due_at&per_page=100`,
+            `${base}/api/v1/courses/${course.id}/assignments?include[]=submission&order_by=due_at&per_page=100`,
             token,
             fetcher,
           ),
@@ -318,8 +322,9 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
     }
 
     let ics: IcsEvent[] = [];
-    if (config.canvas_ics_url) {
-      const response = await fetcher(config.canvas_ics_url, { signal: AbortSignal.timeout(20_000) });
+    const feed = config.canvas_ics_url && canvasFeedUrl(config.canvas_ics_url);
+    if (feed) {
+      const response = await fetcher(feed, { signal: AbortSignal.timeout(20_000) });
       if (!response.ok) throw new Error(`Canvas calendar returned ${response.status}.`);
       ics = parseCanvasIcs(await response.text());
     }

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { syncCanvasUser } from "@/lib/canvas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -6,7 +7,9 @@ export const maxDuration = 60;
 // Vercel calls this once a day and sends CRON_SECRET as the bearer token.
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+  const got = Buffer.from(request.headers.get("authorization") ?? "");
+  const want = Buffer.from(`Bearer ${secret}`);
+  if (!secret || got.length !== want.length || !timingSafeEqual(got, want)) {
     return new Response("Unauthorized", { status: 401 });
   }
   const admin = createAdminClient();

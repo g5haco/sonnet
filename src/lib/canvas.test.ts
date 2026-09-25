@@ -54,6 +54,14 @@ test("Canvas pagination follows the opaque next link and keeps string ids", asyn
   ]);
 });
 
+test("Canvas paging refuses a next link to another site", async () => {
+  const fetcher = async () =>
+    new Response("[]", { headers: { Link: '<http://169.254.169.254/latest>; rel="next"' } });
+  await expect(
+    canvasPages("https://canvas.example.edu/api/v1/courses", "secret", fetcher as typeof fetch),
+  ).rejects.toThrow("another site");
+});
+
 test("Canvas calendar events unfold lines and token assignments win duplicate conflicts", () => {
   const events = parseCanvasIcs(
     [
