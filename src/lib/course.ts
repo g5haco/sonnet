@@ -1,7 +1,8 @@
 // Course colors share one lightness/chroma (theme tokens); only the hue varies.
 // Eight hues 45deg apart. Amber (80) and green (150) share hues with --warning / --done: status is always a word or icon
 // (or a chip), course identity always a dot/bar/block, so form tells them apart, not hue alone.
-export const HUES = [35, 80, 115, 150, 195, 250, 295, 350];
+// Ordered so the first few courses land far apart on the wheel (blue, coral, green, violet, ...).
+export const HUES = [250, 35, 150, 295, 80, 195, 350, 115];
 
 export const courseColor = (hue: number) => `oklch(var(--course-l) var(--course-c) ${hue})`;
 
