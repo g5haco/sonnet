@@ -22,6 +22,7 @@
   "menuColor": "default",
   "menuAccent": "subtle",
   "registries": {
-    "@evilbuttons": "https://evilbuttons.radiumcoders.com/r/{name}.json"
+    "@evilbuttons": "https://evilbuttons.radiumcoders.com/r/{name}.json",
+    "@evilcharts": "https://evilcharts.com/r/{name}.json"
   }
 }

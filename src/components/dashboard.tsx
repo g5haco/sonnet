@@ -45,11 +45,18 @@ import {
   type GradePoint,
 } from "@/components/chart-widgets";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, freeSpot, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
+
+// Recharts widgets load on demand, only when one is on the grid.
+const RadarWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.RadarWidget));
+const RingsWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.RingsWidget));
+const PaceWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.PaceWidget));
+const MixWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.MixWidget));
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
@@ -229,6 +236,10 @@ export function Dashboard({
     split: <SplitWidget sessions={sessions} courses={courses} />,
     countdown: <CountdownWidget items={shown} />,
     clear: <ClearWidget items={shown} now={now} />,
+    radar: <RadarWidget items={shown} courses={courses} now={now} />,
+    rings: <RingsWidget courses={courses} />,
+    pace: <PaceWidget items={shown} term={term} now={now} />,
+    mix: <MixWidget items={shown} now={now} />,
   };
   // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {

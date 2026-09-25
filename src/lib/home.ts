@@ -33,6 +33,10 @@ export const WIDGETS = {
   split: { label: "Time by course", w: 3, h: 2 },
   countdown: { label: "Next deadline", w: 3, h: 1 },
   clear: { label: "Week clear", w: 3, h: 1 },
+  radar: { label: "Workload radar", w: 3, h: 3, minW: 3, minH: 2 },
+  rings: { label: "Grade rings", w: 3, h: 3, minW: 2, minH: 2 },
+  pace: { label: "Done vs due", w: 4, h: 2, minW: 3, minH: 2 },
+  mix: { label: "Work mix", w: 3, h: 3, minW: 2, minH: 2 },
 } satisfies Record<string, Spec>;
 
 export type WidgetId = keyof typeof WIDGETS;
