@@ -1,111 +1,95 @@
 # Project Handoff
 
-> Updated 2026-09-25, through commit `e2a430e`. The code wins over this file if they disagree. Phase status: `docs/ROADMAP.md` (its Phase 9 "term" line is stale: that's done). Product truth: `PRODUCT.md`. Code structure: ask Graphify (`graphify-out/`).
+> Updated 2026-09-26, through commit `a12ea7f`. The code wins over this file if they disagree. Product truth: `PRODUCT.md`. Code structure: ask Graphify (`graphify-out/`). `docs/ROADMAP.md` Phase 9 "term" line is stale (done).
 
 ## Project Summary
 
 **Sonnet** is a student hub: courses, deadlines, calendar, materials, grades, a focus timer and an AI assistant in one **minimal** app. Built by one college student (vibecoding on Windows). Live at `https://www.ericwei.me`, multi-user (RLS per user).
 
-- **Stack:** Next.js 16 App Router, Supabase (Postgres + RLS, Auth, Storage), Vercel (Hobby), OpenRouter (free models), Recharts via vendored EvilCharts.
-- **Direction:** Phases 0–8 done; **Phase 9 = polish and real use** (in progress). The user does **not** want new features right now; they explicitly pushed back on feature ideas. SaaS (paid plans, landing page) is planned but undecided; don't build it unasked.
+- **Stack:** Next.js 16 App Router, Supabase (Postgres + RLS, Auth, Storage), Vercel (Hobby), OpenRouter (free models), Recharts via vendored EvilCharts, `motion` for animation.
+- **Direction:** Phase 9 = polish and real use, plus a **public landing page** (built this session). Paid plans / pricing: still undecided; don't build unasked.
 
 ## Current State
 
-Everything works on the live site (user's signed-in check, 2026-09-25): auth, onboarding + tour, Home widget grid (32 widgets, library with real/sample previews), courses, work items, class times, calendar, Google Calendar feed, Canvas sync, materials + syllabus import, grades + what-if, focus timer, assistant (confirm cards, web search, Ask about this), task toasts via `/api/tasks`. Migrations 0001–0013 applied.
-
-**New visual identity shipped this session:** "Paper & Ink" palette + IBM Plex type (live on `main`). User confirmed signed in on the live site (2026-09-25): everything works.
+Everything in the app works on the live site (user confirmed signed in, 2026-09-25). Signed-out visitors to `/` now see the landing page; `/login` has a meadow backdrop. Migrations 0001–0013 applied.
 
 ## Completed This Session
 
-- **Audit fixes (Impeccable audit + critique, dual sub-agent):** Home stacks to one column when content width < 960px (`snap-grid.tsx` `STACK`), because the 12-col grid shrank widgets unreadably at ~800px. Home header shows "● N overdue" first, heavier, in red. Phone targets ≥44px (sidebar/focus buttons, calendar arrows, "← courses", "Create an account"). Home `main` has `md:pb-20` so the floating Ask button doesn't cover the bottom-right widget. Course page: percent only shows once something is due by Sunday (0 of 0 isn't "100%"); a course with only done work says "All done for X. Nice."
-- **Chat toasts:** on `/chat`, Sonner toasts sit 10rem up (CSS `body:has(main[data-chat])` in `globals.css`) so they no longer cover the composer.
-- **`PRODUCT.md` refreshed** (Impeccable init): platform web, positioning, shipped capabilities, SaaS = planned/undecided, no fabricated evidence. `.impeccable/config.json` = `buildPath: code`.
-- **Paper & Ink palette** (user-approved spec, applied exactly; fixes Impeccable "AI cyan" finding):
-  - Tokens in `globals.css`: warm paper light / ink-navy dark surfaces; ink-blue `--primary` (= `--brand`, "you, now" + the one primary action); new `--warning` (marigold text), `--warning-fill`, `--highlight` (selection); `--done`, `--destructive` retuned; `--chart-1` = primary, `--chart-2` = done.
-  - Status mapping: done → green, today/tmrw → marigold (`when()` in `up-next.tsx` got a `soon` flag), late → vermilion, otherwise muted. Late weeks in "on time" widget → destructive.
-  - Selected nav: ink icon on `primary/12` pill (`/18` dark), no side stripe.
-  - Focus: base rule on `[class*="focus-visible:ring"]:focus-visible` adds a 2px background-colored gap to every existing ring; shadcn button/checkbox rings now `ring-2 ring-ring`.
-  - Links: `@utility link` (ink, 1px underline at 30%, 3px offset, solid on hover) on all inline text links.
-  - Charts: flat fills, no gradients (Done vs due `variant="solid"`; vendored radar fill edited to flat 0.3).
-  - Course hues now `75,125,185,215,290,320,350,45` (`lib/course.ts`).
-- **IBM Plex fonts** (replaced Geist, Impeccable "overused font"): Plex Sans body, Plex Serif as `--font-heading` (only dialog titles use it), Plex Mono for all readouts. Changed only `layout.tsx` + font tokens.
-- **Impeccable mechanical fixes:** "Email me a link instead" button `py-3` (cramped padding); sidebar's top button group animates `grid-template-rows` instead of `height` (same 200ms ease-out, verified interpolation).
-- **Contrast fix:** Today's classes blocks use solid black on course color (≥4.9:1 light, ≥9.2:1 dark).
-- **Themed scrollbars:** one base rule: thin, muted-ink thumb (`color-mix(muted-foreground 40%)`), no track, on every scroller (widget library, calendar, chat, page). Widget-internal lists keep their fainter `--border` thumb.
+- **Midnight Study palette** (replaced Paper & Ink; user-approved exact values in `globals.css`). Monochrome shell: chroma-0 dark greys (bg 0.18, sidebar 0.195, card 0.21), off-white text; `--primary` (= `--brand`) is off-white in dark / ink in light, so primary buttons and "now"/today markers are neutral. Theme follows system. Contrast measured with a real luminance script (all AA).
+- **Course colors:** 8 hues, saturated "Folio-like": `--course-l/c` 0.70/0.17 dark, 0.58/0.17 light. `HUES = [250, 35, 150, 295, 80, 195, 350, 115]` (spread order, blue first, so the first courses differ). Course-card faces use `oklch(0.82 0.15 h) → oklch(0.72 0.17 h)`. The user recolored their own courses via SQL; other users keep old stored hues.
+- **Status colors:** done `0.74 0.17 160`, soon `0.80 0.16 70`, late `0.70 0.17 32` (dark; light variants in `globals.css`).
+- **`chip` utility** (`globals.css`, set `--chip`): 16% tint, same-hue text mixed toward ink (oklab), 60% border. Used only on Up next course code + status labels, the chat WorkCard late label, and the landing page. Everywhere else course = dot + text (deliberately not changed).
+- **Work mix** exam/quiz = neutral ink shades.
+- **Home grid** (`snap-grid.tsx`): cells stretch (separate `sx`/`sy`) to fill any resolution; outside edit mode only the widgets' bounding box is used, so unused edge cells don't leave dead space. Edit mode shows the full grid.
+- **Sidebar:** open rail shows `+` · wide "Chat" pill (icon + label) · timer at right; collapsed stays stacked icons.
+- **Mobile keyboard (iOS):** `useVisibleViewport()` in `app-shell.tsx` writes `--vvh`/`--vvtop` from `visualViewport`; phone top bar, `/chat` page and assistant sheet size to it so the chat stays above the keyboard (ChatGPT-style). Android: `viewport.interactiveWidget = "resizes-content"`. Fields ≥16px on phones (no iOS zoom).
+- **Dictation:** fails in Brave/Arc/Opera (no speech service); toast now says so and suggests Chrome/Edge/Safari or Win+H. User declined a server-side STT.
+- **Login page:** Google button disabled with a "soon" sticker + note (Google OAuth not set up; `google` action kept). Blurred meadow backdrop (`public/login/meadow.webp`) and abstract dark pitch panel (`abstract.webp`), both Higgsfield-generated (Z Image; Soul Location needs a paid plan). Pitch panel forced `dark`. One `h1`, header/footer, JSON-LD.
+- **SEO/tech hardening:** security headers + `poweredByHeader: false` in `next.config.ts` (X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy with `microphone=(self)` for dictation); `manifest.ts`, `icon.tsx`, `apple-icon.tsx` ("s." mark); theme-color. `images.qualities: [75, 90]`.
+- **Landing page** `src/app/landing/` (always dark): proxy **rewrites** signed-out `/` → `/landing` (URL stays `/`); signed-in `/` = Home. Sections: floating nav pill, meadow hero, "works with", pitch, feature bento (big Up-next illustration + 5 features = 3 full rows), 3 steps, FAQ (`<details>`), closing CTA, footer. `hero.tsx`: Watermelon landing-01-style animation (staggered fade-up, fan of 8 real screenshots blurring in, hover lifts, **click opens a full-size Dialog with prev/next + arrow keys**). Screens in `public/landing/*.webp` (2160px q90, sample data from local preview pages). Sitemap includes `/`; robots allows `/$` and `/login`.
+- **Reverted:** Aceternity container-scroll + self-contained interactive demo (user: "doesn't look good").
 
 ## Important Decisions
 
-Do not reverse these casually.
-
-- **Palette = Midnight Study** (replaced Paper & Ink, user-approved exact values, `globals.css`). Shell is monochrome (chroma-0 dark greys, off-white text); color only for courses, status, data. `--primary` (= `--brand`) is off-white in dark / ink in light: primary button, "now"/today markers. Theme follows system. Course hues `35,80,115,150,195,250,295,350` at L/C 0.74/0.11 dark, 0.64/0.12 light. `chip` utility (16% tint, same-hue text, 50% border via `--chip`) used only on Up next course code + status labels and chat WorkCard late label. No chart gradients.
-- **Token aliases live in `:root` only** (`--brand`, `--chart-1/2`, `--sidebar-*`, `--warning-fill`): next-themes puts `.dark` on `<html>`, so they resolve against dark values. Don't re-add them to `.dark`.
-- **"Due soon" = today/tmrw buckets** of the existing `when()` (≈36h by its rounding), not a new 48h rule, so a "2d" label never has two colors. User was told; change only if asked.
-- **Course hues are stored per course.** The user moved their own courses to the Midnight Study hues via SQL (2026-09-25, by created_at order); other users keep their old hues. New courses and the picker use `HUES`.
-- **Fonts:** Plex Mono stays for readouts (instrument-dial brand). Serif only via `--font-heading`.
-- **Sonner's toast height transition is left alone** (library behavior; overriding changes stacking).
-- **Build path code-first**; design authority = `PRODUCT.md` + this palette (no `DESIGN.md` yet).
-- **Changes need approval:** AI never saves without a confirm card. Models are config (`AI_MODEL`, `AI_VISION_MODEL`).
-- **Slow work uses `/api/tasks`, not Server Actions** (they serialize per tab). New slow calls go in `TASKS` in `app/api/tasks/route.ts` with `slow()` / `useTasks()`.
-- **Canvas HTML never injected** (`canvas-html.tsx` allowlist; no `dangerouslySetInnerHTML`). **Assignment context fenced** as untrusted, 6k cap.
-- **Honest UI:** real data or a clear empty state; the only exception is the widget library's labeled "sample" previews. **Empty states must carry `data-empty`** or previews won't fall back.
-- **EvilCharts config keys become CSS variable names** → keep them CSS-safe (Grade rings uses `c0…`).
-- **Chart widgets stay lazy** (`next/dynamic`); hand-drawn SVG widgets in `chart-widgets.tsx` stay as-is (user choice).
-- **Work mix kinds are neutral:** exam = ink 80%, quiz = ink 30% (`evil-widgets.tsx`), user choice. **Kept on purpose:** `evil-buttons/`, `spring.ts`, `cn`.
+- **Palette = Midnight Study.** Color only means: a course, a status, data. Shell/nav/buttons neutral. No chart gradients. Aliases (`--brand`, `--chart-1/2`, `--sidebar-*`, `--warning-fill`) live in `:root` only (next-themes puts `.dark` on `<html>`).
+- **Status vs course with shared hue** (amber/green): distinguished by form (status = word/icon/chip, course = dot/bar/block), not hue alone.
+- **Landing = honest:** only shipped features, no stats/testimonials/pricing; screenshots captioned "sample data". Landing is always dark; Dialog content needs `dark` class (portal is outside the wrapper).
+- **Don't install whole shadcn templates** (landing-01 pulled react-router-dom + 3 icon libs and would overwrite `button`/`checkbox`); port the needed part with `motion/react` instead. Same for `framer-motion` → use installed `motion`.
+- **Public paths** are an allowlist in `src/proxy.ts` (`/login`, `/landing`, `/auth`, `/api/cal`, `/api/cron`, robots, sitemap, OG image, `/icon`, `/apple-icon`, `/manifest.webmanifest`). New public metadata routes must be added there or they redirect to `/login`.
+- Carried over: AI never saves without a confirm card; slow work via `/api/tasks`; Canvas HTML never injected; honest UI/empty states carry `data-empty`; EvilCharts config keys CSS-safe; chart widgets lazy; Sonner toast CSS left alone; kept on purpose: `evil-buttons/`, `spring.ts`, `cn`.
 
 ## In Progress / Unfinished Work
 
-Nothing half-built. Open decisions/follow-ups:
-- **Course faces** (`course-card.tsx`) keep their own light gradient with near-black ink (compliant, but a gradient; Impeccable flags cyan/purple "gradient backgrounds" on preview pages with hues 185/215/290).
-- Later/ask first: grade goals (migration), Google sign-in setup (Supabase provider + OAuth + redirect URLs), saving the syllabus chip (migration). A `DESIGN.md` via `/impeccable document` would help before any SaaS landing page.
+Nothing half-built. Open options (ask first):
+- Landing: a true month-view screenshot (capture came out identical to week; dropped); optional rotating headline word; pricing section only once SaaS plans are decided.
+- Google sign-in setup (Supabase provider + OAuth + redirect URLs), then undo the disabled button in `login/form.tsx`.
+- Later/ask first: grade goals (migration), saving the syllabus chip (migration), a `DESIGN.md` (`/impeccable document`) reflecting Midnight Study.
 
 ## Known Bugs / Issues
 
-Confirmed:
-- Impeccable still reports `layout-transition` from Sonner's `[data-sonner-toast]` CSS (intentional, see decisions).
-- Light `--warning-fill` is 2.28:1 on card, fails 3:1 if ever used alone as a UI indicator (currently unused).
-- Local `next build` fails on the **untracked** `login/course-preview` (`useSearchParams` without Suspense). Tracked code builds; to verify locally, temporarily rename it `_course-preview`.
-- Hydration mismatch in dev on pages with the docked chat panel: BorderBeam size differs server vs client (viewport-dependent, not color-related). Plus the known harmless `next-themes` script warning.
-- The running dev server keeps stale Tailwind classes (e.g. old `transition-[height]`) until restarted; production CSS is clean.
-- Free AI models unreliable (429/503). Canvas https URL to a private IP not blocked (low risk). Short laptops (~750px tall) get small Home cells; tour flag per browser; failed layout save keeps unsaved layout until reload; magic link same-browser only. Courses widget at 2×2 is tiny (accepted).
-- Safari only partly supports the scrollbar styling.
-- `graphify update .` can segfault; the git hook's background rebuild still runs.
+- Local `next build` fails on the untracked `login/course-preview` (`useSearchParams` without Suspense). Build with it renamed `_course-preview`, and `rm -rf .next/dev/types` first (stale dev types break type-check).
+- Hydration mismatch in dev on pages with the docked chat panel (BorderBeam size) + harmless next-themes script warning.
+- Impeccable (pre-existing, not from this session): low-contrast false positives on stacked course cards, "cyan gradient" on course faces (hue 195), some cramped-padding/nested-card/Sonner layout-transition findings.
+- `X-Frame-Options: DENY` blocks iframes of the site (intended; remember when testing).
+- Free AI models unreliable (429/503); Safari only partly supports scrollbar styling; `graphify update .` can segfault.
+- The browser preview pane often renders black bands/timeouts after scripted scrolls and pauses animations when hidden; verify with JS measurements.
 
 ## Current Priorities
 
-1. Further Phase 9 polish the user points at (they review screenshots and ask for specific fixes).
+1. Live check of the landing page (signed out) and login on desktop + phone, incl. the hero Dialog and image sharpness.
+2. iPhone check of the chat keyboard behavior (only simulated so far).
+3. Further polish the user points at.
 
 ## Important Constraints / User Intent
 
-- **Phase 9 is polish, not features.** Don't propose new features unless asked.
-- **Workflow:** commit and push every important change straight to `main` (goes live via Vercel). Run tests/lint before committing (separate commands). Say "untested" / "needs migration N" when true. Per `CLAUDE.md`: Graphify first, minimal reads, terse chat, one fresh reviewer sub-agent for normal feature work (skip tiny ones), Ponytail/Chisle: no speculative abstractions.
-- **Ask before:** adding a dependency, writing a migration, removing a feature, changing focus-timer behavior, changing chat storage, touching Supabase/env/API routes/auth.
-- **Design specs the user approves are authoritative**: apply exactly; report conflicts instead of "improving" them.
-- **Migrations:** the user pastes SQL into Supabase; code must work before a migration runs.
-- **Local preview pages** `src/app/login/*-preview/` are untracked (`.git/info/exclude`); never commit. `dash-preview` (`?s=`, `&t=`, `?v=courses`), `cal-preview?show=calendar`, `course-preview`, `settings-preview`.
-- **Windows:** Python edit scripts preserve line endings (bytes); some files are CRLF; never Prettier whole files; vitest can't resolve `@/` in `lib/*`. No Chrome; use Edge (`IMPECCABLE_BROWSER="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"`) for detector URL scans.
-- **User wants:** minimal, calm, readable UI ("Moleskine not SaaS"), visible but calm motion, nothing claimed that didn't happen.
+- Minimal, calm, readable ("Moleskine not SaaS"); the user likes Folio's black shell + colorful content. Reviews screenshots and asks for specific fixes; reverts things that don't look good.
+- Workflow: commit + push every important change straight to `main` (Vercel). Run tests/lint/tsc (separately) before committing. Say "untested" when true.
+- **Ask before:** adding a dependency, writing a migration, removing a feature, changing focus-timer behavior, chat storage, Supabase/env/API routes/auth. (Proxy public-path edits were done with the user's implied approval for landing/icons.)
+- User-approved design specs are authoritative; apply exactly, report conflicts.
+- Migrations/data fixes: give the user SQL to paste into Supabase; Claude never writes to Supabase or enters passwords.
+- Local preview pages `src/app/login/*-preview/` are untracked (`.git/info/exclude`); never commit. `dash-preview` (`?s=`, `&t=`, `?v=courses`), `cal-preview?show=calendar`, `course-preview`, `settings-preview`.
+- Windows: edit files byte-safely (some CRLF); never Prettier whole files. **Python edit scripts: build the new content fully before `open(p,'wb')`** (a failed write truncated a file this session). Use Edge for puppeteer/Impeccable; puppeteer lives in the session scratchpad, not the project.
 
 ## Testing / Validation Status
 
-- **Automated:** `npm test` 48 passing; `npx tsc --noEmit` clean; `npm run lint` clean; `npm run build` passes (with the untracked course-preview excluded).
-- **Impeccable detector** (bundled CLI, Edge, production build on :3100): only the Sonner `layout-transition` remains. Contrast computed for all token pairs (text ≥5.0:1, focus ring ≥5.5:1, nav icon ≥5.9:1).
-- **Preview-verified locally (signed out, sample data):** palette light/dark, focus-ring gap, Plex loading, Home stacking at 900px, overdue header, course-page wording, sidebar grid-rows transition (interpolates 132→40px, 200ms ease-out), scrollbars.
-- **Signed-in live check:** user confirmed everything works (2026-09-25). Not verified: Safari.
-- **Preview gotcha:** a hidden browser pane throttles rAF and freezes animations; wait ~8s for intro animations.
+- `npm test` 48 passing; `tsc` clean; `npm run lint` clean; `npm run build` passes (course-preview excluded).
+- Verified locally (signed out, sample data): palette light/dark, chips contrast (measured), Home grid fill at 2000px, sidebar Chat pill, login backdrops light/dark, mobile pages at 375px (no horizontal overflow), assistant sheet with simulated keyboard, landing sections/bento/hero animation/hover/Dialog + arrow keys, icons/manifest served, security headers.
+- User confirmed on live: signed-in app, Home grid fix.
+- **Not verified:** landing + login on the live site; real iPhone keyboard; Android; Safari; dictation error toast (no mic in pane).
 
 ## Relevant Architecture Context
 
-- **Theme:** all color/font tokens + base rules (focus gap, selection, scrollbars, `link` utility, chat toast offset) in `src/app/globals.css`; fonts loaded in `src/app/layout.tsx`; course colors `lib/course.ts` (`courseColor` uses `--course-l/--course-c`).
-- **Home:** `dashboard.tsx` (widgets via `render(data)`, header), `snap-grid.tsx` (grid / stacked mode), `lib/home.ts`, widgets in `widgets.tsx`, `chart-widgets.tsx`, `evil-widgets.tsx`, `up-next.tsx` (status colors).
-- **Shell:** `sidebar.tsx` (nav, selected state), `app-shell.tsx` (floating Ask button).
-- **Queries:** `graphify query "Where are theme tokens and status colors used?"`, `graphify query "How does the Home snap grid lay out widgets?"`, `graphify query "How does the widget library fall back to sample data?"`.
+- Theme tokens, `chip` utility, base rules: `src/app/globals.css`; fonts/viewport: `src/app/layout.tsx`; course colors: `src/lib/course.ts`.
+- Auth gate + landing rewrite: `src/proxy.ts`. Landing: `src/app/landing/{page,hero}.tsx`. Login: `src/app/login/{page,form}.tsx`.
+- Home: `dashboard.tsx` + `snap-grid.tsx`; shell: `app-shell.tsx` (visual viewport hook, assistant sheet), `sidebar.tsx`; chat: `components/chat/*`.
+- Queries: `graphify query "How does the proxy decide public vs signed-in routes?"`, `graphify query "Where are theme tokens and chip styles used?"`, `graphify query "How does the Home snap grid lay out widgets?"`.
 
 ## Next Recommended Task
 
-**Signed-in visual check of the new look on the live site.**
-- **Goal:** with the user signed in (Claude never enters passwords), walk Home, Calendar, Courses, a course page, Chat and Settings in light and dark mode. Confirm the ink/paper colors, status colors (done/soon/late), selected nav pill, focus rings, links, Plex fonts, scrollbars, and that the chat toast sits above the composer.
-- **Why next:** everything this session was verified only locally with sample data.
-- **Done when:** each page is confirmed or its issue is fixed and pushed, and the Testing section here is updated.
+**Live verification of the landing and login pages.**
+- **Goal:** signed out on `https://www.ericwei.me`, check `/` (hero animation, fan, click-to-expand Dialog, image sharpness, sections, FAQ, CTAs → `/login?mode=signup`) and `/login` (meadow, pitch panel, disabled Google button) at desktop and phone widths; fix anything broken.
+- **Why:** it's the public face and was only verified on localhost.
+- **Done when:** both pages look right on live at both widths (or fixes are pushed) and the Testing section is updated.
 
 ## Suggested New-Session Prompt
 
