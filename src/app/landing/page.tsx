@@ -1,25 +1,61 @@
 import type { Metadata } from "next";
+import { FileText, Presentation } from "lucide-react";
+import Link from "next/link";
+import { Assistant } from "./ai";
 import { Features } from "./features";
 import { Hero } from "./hero";
 import { Showcase } from "./showcase";
-import Link from "next/link";
 
 // The public front page. Signed-out visitors to "/" are rewritten here by the proxy (the URL stays "/"); signed-in
 // ones get Home. Always dark: it's the product's own look. Only real, shipped features; no stats or testimonials.
 export const metadata: Metadata = {
   title: "Sonnet · Your courses, deadlines and grades in one place",
   description:
-    "A calm student hub: Canvas deadlines, your calendar, grades with what-if, a focus timer and an AI assistant that knows your courses. Free.",
+    "An AI assistant that has read your syllabus and knows every deadline, plus Canvas sync, a calendar, grades with what-if, a customizable Home and a focus timer. Free.",
   alternates: { canonical: "/" },
 };
 
 const SIGN_UP = "/login?mode=signup";
 
-const WORKS_WITH = ["Canvas", "Google Calendar", "Syllabus PDFs", "Slides and readings"];
+// Simple monochrome marks (not official logos) for what Sonnet connects to.
+function CanvasMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      {Array.from({ length: 8 }, (_, i) => (
+        <circle key={i} cx={12 + 8 * Math.cos((i * Math.PI) / 4)} cy={12 + 8 * Math.sin((i * Math.PI) / 4)} r="2" fill="currentColor" />
+      ))}
+    </svg>
+  );
+}
+function CalendarMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="17" rx="3" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 9h18" stroke="currentColor" strokeWidth="2" />
+      <text x="12" y="18.5" textAnchor="middle" fontSize="8" fontWeight="700" fill="currentColor" fontFamily="sans-serif">
+        31
+      </text>
+    </svg>
+  );
+}
+const WORKS_WITH = [
+  { name: "Canvas", mark: <CanvasMark /> },
+  { name: "Google Calendar", mark: <CalendarMark /> },
+  { name: "Syllabus PDFs", mark: <FileText className="size-6" aria-hidden="true" /> },
+  { name: "Slides and readings", mark: <Presentation className="size-6" aria-hidden="true" /> },
+];
 
 // Real answers about how Sonnet works today.
 const FAQ = [
   ["Is it free?", "Yes. Sonnet is free for students."],
+  [
+    "What does the assistant know?",
+    "Every course, assignment, exam, class time and grade in Sonnet, plus the syllabus, slides, readings and notes you upload. It answers from those first, and can search the web when you ask.",
+  ],
+  [
+    "Is the assistant always fast?",
+    "It runs on free AI models, so it can be slow or busy at times. When that happens it tells you, and you can try again.",
+  ],
   [
     "Does it work with my school's Canvas?",
     "If your school uses Canvas, yes: connect with a Canvas access token, the Canvas calendar feed, or both.",
@@ -66,6 +102,9 @@ export default function Landing() {
             <Wordmark />
           </Link>
           <div className="hidden gap-6 text-sm text-muted-foreground sm:flex">
+            <a href="#assistant" className="hover:text-foreground">
+              Assistant
+            </a>
             <a href="#features" className="hover:text-foreground">
               Features
             </a>
@@ -98,26 +137,40 @@ export default function Landing() {
           <Hero signUp={SIGN_UP} />
         </section>
 
-        <section aria-label="Works with" className="mx-auto max-w-6xl px-4 pt-8">
-          <p className="text-center font-mono text-xs text-muted-foreground">works with</p>
-          <ul className="mt-4 flex flex-wrap justify-center gap-x-10 gap-y-3 text-lg font-medium text-muted-foreground">
+        {/* Works with: a bordered logo row, like CodeForge's "trusted by" grid. */}
+        <section aria-labelledby="works-with" className="reveal mx-auto mt-8 max-w-6xl md:px-4">
+          <div className="grid grid-cols-2 gap-px border-y border-border bg-border md:grid-cols-5 md:border-x">
+            <p
+              id="works-with"
+              className="col-span-2 flex items-center justify-center bg-background p-6 text-center text-sm text-muted-foreground md:col-span-1"
+            >
+              Works with the tools your school already uses
+            </p>
             {WORKS_WITH.map((w) => (
-              <li key={w}>{w}</li>
+              <div
+                key={w.name}
+                className="flex items-center justify-center gap-2.5 bg-background px-4 py-8 text-foreground/75 transition-colors hover:text-foreground"
+              >
+                {w.mark}
+                <span className="text-sm font-medium whitespace-nowrap sm:text-base">{w.name}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </section>
+
+        <Assistant signUp={SIGN_UP} />
 
         <Showcase signUp={SIGN_UP} />
 
         <Features signUp={SIGN_UP} />
 
-        <section aria-labelledby="faq" className="mx-auto max-w-3xl px-4 pb-24">
+        <section aria-labelledby="faq" className="mx-auto max-w-3xl px-4 py-24">
           <h2 id="faq" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             Questions and answers
           </h2>
           <div className="mt-10 divide-y divide-border border-y border-border">
             {FAQ.map(([q, a]) => (
-              <details key={q} className="group py-5">
+              <details key={q} className="group reveal py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium [&::-webkit-details-marker]:hidden">
                   {q}
                   <span aria-hidden="true" className="text-muted-foreground transition-transform group-open:rotate-45">

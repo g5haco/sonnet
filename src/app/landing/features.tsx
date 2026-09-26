@@ -1,25 +1,31 @@
 "use client";
 // Landing features, laid out like Magic UI's CodeForge template: a centered header, a flickering dot strip, then a
-// sticky intro on the left and bordered illustration cards on the right that animate once when scrolled into view.
+// sticky intro on the left and bordered cards on the right that animate each time they scroll into view.
 import {
-  BookOpen,
   CalendarDays,
-  FileText,
+  FolderOpen,
   GraduationCap,
-  MessageCircle,
-  Presentation,
+  Hourglass,
+  LayoutGrid,
+  Lock,
+  Palette,
+  Plus,
   RefreshCw,
   Rss,
+  Shuffle,
+  Smartphone,
   Sparkles,
+  SunMoon,
   Timer,
 } from "lucide-react";
-import { MotionConfig, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { courseColor } from "@/lib/course";
 
 export const EASE = [0.16, 1, 0.3, 1] as const;
-export const ONCE = { once: true, margin: "-80px" } as const;
+// Replays every time it scrolls back into view.
+export const VIEW = { amount: 0.3 } as const;
 
 // Illustration only: made-up course codes in the product's real course colors.
 const SAMPLE = [
@@ -31,33 +37,23 @@ const SAMPLE = [
 
 export const chip = (color: string) => ({ "--chip": color }) as React.CSSProperties;
 
-const SMALL = [
-  {
-    icon: CalendarDays,
-    title: "One calendar",
-    text: "Class times, deadlines and exams on a day, week or month view, with a feed for Google Calendar.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Grades and what-if",
-    text: "See where each course stands and what you'd need on the final to hit the grade you want.",
-  },
-  {
-    icon: MessageCircle,
-    title: "An assistant that knows your classes",
-    text: "It reads your syllabus, slides and readings, and plans your week. Nothing saves without your yes.",
-  },
+// Everything else Sonnet does, so the list is complete.
+const EVERYTHING = [
+  { icon: CalendarDays, title: "Day, week and month", text: "Class times, deadlines and exams on one calendar, with the week of the term." },
+  { icon: Rss, title: "Google Calendar feed", text: "Subscribe once and your deadlines show up in Google or Apple Calendar." },
+  { icon: RefreshCw, title: "Canvas token or feed", text: "Sync with an access token or just the calendar link. It refreshes daily." },
+  { icon: FolderOpen, title: "Materials per course", text: "Slides, readings and notes live with their course, ready for the assistant." },
+  { icon: GraduationCap, title: "Grades and what-if", text: "Canvas grades, trends and gaps, and what you need on the final." },
+  { icon: Hourglass, title: "Countdowns", text: "The next exam and the next deadline, ticking down on Home." },
+  { icon: Palette, title: "A color per course", text: "Every course keeps its color everywhere. Rename or recolor any time." },
+  { icon: Plus, title: "Quick add", text: "Add an assignment, exam, reading or class from anywhere with one +." },
+  { icon: Timer, title: "Focus timer and streaks", text: "Pomodoro sessions, study hours, study days and a streak to keep." },
+  { icon: SunMoon, title: "Light, dark or system", text: "A calm theme that follows your device, day or night." },
+  { icon: Smartphone, title: "On your phone", text: "Runs in the browser, laptop or phone. Add it to your home screen." },
+  { icon: Lock, title: "Private by default", text: "Only you see your data, and Settings can wipe it whenever you want." },
 ];
 
-// What flows into Sonnet, placed around the center mark (angle in degrees, radius in px).
-const SOURCES = [
-  { icon: GraduationCap, angle: 200, r: 150 },
-  { icon: CalendarDays, angle: 240, r: 120 },
-  { icon: FileText, angle: 300, r: 150 },
-  { icon: Rss, angle: 355, r: 125 },
-  { icon: Presentation, angle: 60, r: 135 },
-  { icon: BookOpen, angle: 125, r: 125 },
-];
+type Node = { icon: typeof Timer; angle: number; r: number; label?: string };
 const LINES = 22;
 
 // A grid of squares that flicker softly; paused offscreen and still with reduced motion.
@@ -107,14 +103,14 @@ export function FlickerStrip() {
   return <canvas ref={ref} aria-hidden="true" className="block h-14 w-full text-muted-foreground" />;
 }
 
-// Lines draw out from the Sonnet mark, then each source springs out to its spot.
-function SyncOrbit() {
+// Lines draw out from the center, then each node springs out to its spot (angle in degrees, radius in px).
+export function Orbit({ center, nodes }: { center: React.ReactNode; nodes: Node[] }) {
   return (
     <motion.div
       aria-hidden="true"
       initial="hidden"
       whileInView="visible"
-      viewport={ONCE}
+      viewport={VIEW}
       className="relative flex min-h-[320px] items-center justify-center overflow-hidden mask-[radial-gradient(ellipse_at_center,black_40%,transparent_85%)] md:min-h-[400px]"
     >
       {Array.from({ length: LINES }, (_, i) => (
@@ -128,10 +124,8 @@ function SyncOrbit() {
           />
         </div>
       ))}
-      <div className="relative z-20 flex size-12 items-center justify-center rounded-full border border-border bg-card font-mono text-sm font-medium">
-        s<span className="text-muted-foreground">.</span>
-      </div>
-      {SOURCES.map(({ icon: Icon, angle, r }, i) => {
+      {center}
+      {nodes.map(({ icon: Icon, angle, r, label }, i) => {
         const a = (angle * Math.PI) / 180;
         return (
           <motion.div
@@ -149,6 +143,11 @@ function SyncOrbit() {
             }}
           >
             <Icon className="size-4 text-muted-foreground" />
+            {label && (
+              <span className="absolute top-full mt-1 text-[10px] whitespace-nowrap text-muted-foreground sm:text-xs">
+                {label}
+              </span>
+            )}
           </motion.div>
         );
       })}
@@ -163,7 +162,7 @@ function UpNext() {
     <motion.ul
       initial="hidden"
       whileInView="visible"
-      viewport={ONCE}
+      viewport={VIEW}
       transition={{ staggerChildren: 0.1 }}
       className="flex w-full max-w-sm flex-col divide-y divide-border rounded-xl border border-border bg-card px-2"
     >
@@ -216,7 +215,7 @@ function StudyDots() {
       aria-hidden="true"
       initial="hidden"
       whileInView="visible"
-      viewport={ONCE}
+      viewport={VIEW}
       className="flex min-h-[260px] items-center justify-center overflow-hidden px-6 mask-[radial-gradient(ellipse_at_center,black_50%,transparent_90%)] md:min-h-[320px]"
     >
       <div className="grid grid-flow-col grid-rows-7 gap-1.5 sm:gap-2">
@@ -242,6 +241,177 @@ function StudyDots() {
   );
 }
 
+// A small Home you can rearrange: tiles reshuffle on their own while in view; touching a control stops the demo.
+const TILES = [
+  {
+    id: "Progress",
+    span: "col-span-2 row-span-2",
+    body: (
+      <div className="flex h-full items-end gap-3">
+        <p className="font-mono text-3xl leading-none">
+          33<span className="text-sm text-muted-foreground">%</span>
+        </p>
+        <div className="flex h-full flex-1 items-end gap-1">
+          {[30, 55, 80, 45, 95, 60, 25].map((h, i) => (
+            <span key={i} className={`flex-1 rounded-full ${i === 4 ? "bg-foreground" : "bg-secondary"}`} style={{ height: `${h}%` }} />
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "Grades",
+    span: "col-span-2 row-span-2",
+    body: (
+      <ul className="space-y-1.5 font-mono">
+        {(
+          [
+            ["POLS 202", 250, "93.4"],
+            ["BUS 101", 150, "88.0"],
+            ["CHEM 1210", 295, "72.5"],
+            ["HIST 150", 195, "84.7"],
+          ] as const
+        ).map(([c, h, g]) => (
+          <li key={c} className="flex items-center gap-1.5">
+            <span className="size-1.5 shrink-0 rounded-full" style={{ background: courseColor(h) }} />
+            <span className="flex-1 truncate">{c}</span>
+            {g}%
+          </li>
+        ))}
+      </ul>
+    ),
+  },
+  { id: "Next exam", span: "col-span-2", body: <p className="font-mono text-xl">9d 13h</p> },
+  {
+    id: "This week",
+    span: "col-span-2",
+    body: (
+      <div className="flex justify-between font-mono">
+        {[21, 22, 23, 24, 25, 26, 27].map((d) => (
+          <span key={d} className={d === 26 ? "rounded-full bg-foreground px-1 text-background" : ""}>
+            {d}
+          </span>
+        ))}
+      </div>
+    ),
+  },
+  { id: "Timer", span: "", body: <p className="font-mono text-base">25:00</p> },
+  { id: "Streak", span: "", body: <p className="font-mono text-base">12 days</p> },
+  {
+    id: "Courses",
+    span: "col-span-2 row-span-2",
+    body: (
+      <div className="relative h-full">
+        {[295, 35, 250].map((h, i) => (
+          <span
+            key={h}
+            className="absolute top-1 h-[85%] w-[45%] rounded-lg shadow-lg"
+            style={{
+              left: `${10 + i * 20}%`,
+              rotate: `${(i - 1) * 8}deg`,
+              background: `linear-gradient(oklch(0.82 0.15 ${h}), oklch(0.72 0.17 ${h}))`,
+            }}
+          />
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: "Grade trend",
+    span: "col-span-2",
+    body: (
+      <svg viewBox="0 0 100 24" className="h-6 w-full" aria-hidden="true">
+        <polyline points="0,20 15,16 30,18 45,10 60,12 75,6 100,4" fill="none" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  { id: "Next deadline", span: "col-span-2", body: <p className="font-mono text-base">23h 12m 20s</p> },
+  {
+    id: "Rings",
+    span: "row-span-2",
+    body: (
+      <svg viewBox="0 0 40 40" className="mx-auto w-full max-w-16" aria-hidden="true">
+        {[16, 11, 6].map((r, i) => (
+          <circle
+            key={r}
+            cx="20"
+            cy="20"
+            r={r}
+            fill="none"
+            strokeWidth="3"
+            strokeLinecap="round"
+            stroke={courseColor([250, 150, 35][i])}
+            strokeDasharray={`${2 * Math.PI * r * [0.9, 0.7, 0.8][i]} 999`}
+            transform="rotate(-90 20 20)"
+          />
+        ))}
+      </svg>
+    ),
+  },
+];
+const START = ["Progress", "Grades", "Next exam", "This week", "Courses", "Timer", "Streak"];
+
+function WidgetsDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.4 });
+  const [shown, setShown] = useState(START);
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    if (!inView || touched || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setShown((s) => [...s.slice(1), s[0]]), 2400);
+    return () => clearInterval(id);
+  }, [inView, touched]);
+  const toggle = (id: string) => {
+    setTouched(true);
+    setShown((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  };
+  return (
+    <div ref={ref} className="flex flex-col items-center gap-5 px-4 py-12 sm:px-6">
+      <div className="grid w-full max-w-lg grid-flow-dense auto-rows-[64px] grid-cols-4 gap-2 text-[10px] sm:auto-rows-[72px] sm:text-xs">
+        <AnimatePresence mode="popLayout">
+          {shown.map((id) => {
+            const t = TILES.find((x) => x.id === id)!;
+            return (
+              <motion.div
+                key={id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", duration: 0.5, bounce: 0.15 }}
+                className={`${t.span} flex flex-col gap-1.5 overflow-hidden rounded-xl border border-border bg-card p-2.5`}
+              >
+                <span className="text-muted-foreground">{id}</span>
+                <div className="min-h-0 flex-1">{t.body}</div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+      <div className="flex max-w-lg flex-wrap justify-center gap-1.5">
+        {TILES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-pressed={shown.includes(t.id)}
+            onClick={() => toggle(t.id)}
+            className="h-7 rounded-full border border-border px-2.5 text-xs text-muted-foreground transition-[background-color,color,scale] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97] aria-pressed:bg-secondary aria-pressed:text-foreground"
+          >
+            {shown.includes(t.id) ? "−" : "+"} {t.id}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => (setTouched(true), setShown((s) => [...s].reverse()))}
+          className="flex h-7 items-center gap-1 rounded-full px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
+          <Shuffle className="size-3" aria-hidden="true" /> Shuffle
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function SectionHead({
   icon: Icon,
   badge,
@@ -256,7 +426,7 @@ export function SectionHead({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center px-4 py-24 text-center">
+    <div className="reveal flex flex-col items-center px-4 py-24 text-center">
       <span className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
         <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
         {badge}
@@ -295,10 +465,11 @@ export function Features({ signUp }: { signUp: string }) {
           <div className="grid grid-cols-1 border-t border-border md:grid-cols-6">
             <div className="flex flex-col gap-6 p-8 md:sticky md:top-20 md:col-span-2 md:self-start lg:p-12">
               <h3 className="font-heading text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
-                Your whole semester, in one calm place
+                Everything your term needs
               </h3>
               <p className="text-pretty text-muted-foreground">
-                Deadlines, class times, grades and study time, all from the tools you already use. No setup marathon.
+                A Home you build yourself, one calendar, grades, countdowns, a focus timer and every file for every
+                course. All of it feeds the assistant.
               </p>
               <Link
                 href={signUp}
@@ -309,15 +480,15 @@ export function Features({ signUp }: { signUp: string }) {
             </div>
 
             <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div>
-                <SyncOrbit />
-                <Caption icon={RefreshCw} label="Canvas, synced">
-                  Assignments, due dates and grades come in on their own, plus your syllabus, slides and readings.
-                  Nothing is due that you don&apos;t know about.
+              <div className="reveal">
+                <WidgetsDemo />
+                <Caption icon={LayoutGrid} label="Make Home yours">
+                  29 widgets: progress, grades, countdowns, calendar, courses, study hours and more. Drag them around,
+                  resize them, keep only what helps. Try the chips above.
                 </Caption>
               </div>
 
-              <div>
+              <div className="reveal">
                 <div className="flex min-h-[260px] items-center justify-center px-6 py-10 md:min-h-[320px]">
                   <UpNext />
                 </div>
@@ -326,22 +497,22 @@ export function Features({ signUp }: { signUp: string }) {
                 </Caption>
               </div>
 
-              <div>
+              <div className="reveal">
                 <StudyDots />
-                <Caption icon={Timer} label="A focus timer that remembers">
-                  Pomodoro-style sessions that keep track of how much you studied, day by day.
+                <Caption icon={Timer} label="Study days, counted">
+                  Every focus session adds up, day by day, so you can see the weeks you showed up.
                 </Caption>
               </div>
 
-              <div className="grid divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                {SMALL.map((f) => (
-                  <div key={f.title} className="p-6">
+              <ul className="grid sm:grid-cols-2 lg:grid-cols-3">
+                {EVERYTHING.map((f) => (
+                  <li key={f.title} className="reveal border-b border-border p-6 sm:border-r">
                     <f.icon className="size-5 text-muted-foreground" aria-hidden="true" />
                     <h3 className="mt-4 font-medium">{f.title}</h3>
                     <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{f.text}</p>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
         </div>

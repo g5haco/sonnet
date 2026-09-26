@@ -18,19 +18,20 @@ const blurIn: Variants = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: EASE } },
 };
 
-// The four tabs of the rotating showcase; each advances when its progress bar fills (5s, paused on hover).
+// The five tabs of the rotating showcase; each advances when its progress bar fills (5s, paused on hover).
 const TABS = [
-  { src: "home", label: "Home", alt: "Home: what's overdue, course cards, Up next and the assistant" },
+  { src: "home", label: "Home", alt: "Home: progress, grades, next exam, Up next, this week and course cards" },
+  { src: "assistant", label: "Assistant", alt: "The assistant answering from a course syllabus, with a study block to confirm" },
   { src: "calendar", label: "Calendar", alt: "The calendar's week view" },
   { src: "courses", label: "Courses", alt: "All courses as colored cards" },
-  { src: "course", label: "Course page", alt: "One course's page with its work and materials" },
+  { src: "course", label: "Course", alt: "One course's page with its work and materials" },
 ];
 
 export function Hero({ signUp }: { signUp: string }) {
   const [active, setActive] = useState(0);
   return (
     <MotionConfig reducedMotion="user">
-      <motion.div className="mx-auto max-w-3xl text-center" variants={stagger} initial="hidden" animate="visible">
+      <motion.div className="mx-auto max-w-3xl text-center" variants={stagger} initial="hidden" whileInView="visible" viewport={{ amount: 0.3 }}>
         <motion.a
           variants={rise}
           href="#features"
@@ -51,8 +52,8 @@ export function Hero({ signUp }: { signUp: string }) {
           All your classes, one calm place.
         </motion.h1>
         <motion.p variants={rise} className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
-          Sonnet pulls in your Canvas deadlines, lays out your week and tells you how caught up you really are. Plus an
-          assistant that actually knows your courses.
+          An AI assistant that has read your syllabus, slides and readings, and knows every deadline, grade and class
+          time. Plus your Canvas work, calendar and grades in one calm place.
         </motion.p>
         <motion.div variants={rise} className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
@@ -74,10 +75,11 @@ export function Hero({ signUp }: { signUp: string }) {
         className="group mx-auto mt-20 w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-2xl backdrop-blur md:mt-28"
         variants={blurIn}
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={{ amount: 0.2 }}
         transition={{ delay: 0.8 }}
       >
-        <div role="tablist" aria-label="Sonnet screens" className="grid grid-cols-4 border-b border-border">
+        <div role="tablist" aria-label="Sonnet screens" className="grid grid-cols-5 border-b border-border">
           {TABS.map((t, i) => (
             <button
               key={t.src}

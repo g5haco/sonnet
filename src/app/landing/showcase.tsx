@@ -1,34 +1,36 @@
 "use client";
 // "How it works" as hands-on demos, like the workflow cards in Magic UI's CodeForge template: a Canvas sync that
-// plays itself when scrolled into view, then an assistant plan, a what-if grade slider and a focus timer to try.
-import { Check, GraduationCap, MessageCircle, RefreshCw, Timer, Workflow } from "lucide-react";
+// plays itself each time it scrolls into view, then a what-if grade slider and a focus timer to try.
+import { Check, GraduationCap, RefreshCw, Timer, Workflow } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { courseColor } from "@/lib/course";
 import { Caption, chip, EASE, FlickerStrip, SectionHead } from "./features";
 
-// Counts 0 → total, one step every `ms`, once the returned ref scrolls into view (instantly with reduced motion).
-function useSequence(total: number, ms: number) {
+// Counts 0 → total, one step every `ms`, while the returned ref is in view; resets when it leaves, so it replays.
+// With reduced motion it jumps straight to the end.
+export function useSequence(total: number, ms: number) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-120px" });
+  const inView = useInView(ref, { amount: 0.4 });
   const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
   useEffect(() => {
-    if (!inView || reduce || step >= total) return;
-    const id = setTimeout(() => setStep(step + 1), ms);
+    const next = inView ? Math.min(step + 1, total) : 0;
+    if (reduce || next === step) return;
+    const id = setTimeout(() => setStep(next), inView ? ms : 0);
     return () => clearTimeout(id);
   }, [inView, reduce, step, total, ms]);
   return [ref, reduce ? total : step] as const;
 }
 
-const fadeUp = {
+export const fadeUp = {
   initial: { opacity: 0, transform: "translateY(6px)" },
   animate: { opacity: 1, transform: "translateY(0px)" },
   transition: { duration: 0.35, ease: EASE },
 };
 
-function Window({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+export function Window({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={`w-full max-w-md overflow-hidden rounded-xl border border-border bg-card shadow-2xl ${className}`}>
       <div className="flex items-center gap-2 border-b border-border bg-secondary/50 px-4 py-2.5">
@@ -112,97 +114,6 @@ function SyncDemo({ signUp }: { signUp: string }) {
           )}
         </AnimatePresence>
       </div>
-    </div>
-  );
-}
-
-const PLAN = [
-  { code: "BIO 110", hue: 150, what: "Lab report draft", when: "Mon 4–6pm" },
-  { code: "HIST 201", hue: 35, what: "Read ch. 7–8", when: "Tue 7–8pm" },
-  { code: "PSYC 100", hue: 295, what: "Quiz review", when: "Thu 3–4pm" },
-];
-
-function AssistantDemo() {
-  const [ref, step] = useSequence(3, 700);
-  const [answer, setAnswer] = useState<"added" | "skipped" | null>(null);
-  return (
-    <div ref={ref} className="flex min-h-[380px] items-center justify-center px-6 py-14 md:min-h-[440px]">
-      <Window title="Assistant">
-        <div className="flex min-h-72 flex-col gap-3 p-4 text-sm">
-          {step >= 1 && (
-            <motion.p {...fadeUp} className="self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">
-              Plan my week
-            </motion.p>
-          )}
-          {step === 2 && (
-            <motion.span {...fadeUp} className="flex gap-1 self-start px-1 py-2" aria-label="Thinking">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="size-1.5 animate-pulse rounded-full bg-muted-foreground motion-reduce:animate-none"
-                  style={{ animationDelay: `${i * 120}ms` }}
-                />
-              ))}
-            </motion.span>
-          )}
-          {step >= 3 && (
-            <motion.div {...fadeUp} className="flex flex-col gap-3">
-              <p className="text-muted-foreground">Here&apos;s a plan around your deadlines. Want it on your calendar?</p>
-              <div className="rounded-xl border border-border bg-background/60">
-                <ul className="divide-y divide-border">
-                  {PLAN.map((p) => (
-                    <li key={p.code} className="flex items-center gap-3 px-3 py-2.5">
-                      <span className="chip shrink-0 rounded-full px-1.5 font-mono text-xs" style={chip(courseColor(p.hue))}>
-                        {p.code}
-                      </span>
-                      <span className="flex-1 truncate">{p.what}</span>
-                      <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.when}</span>
-                      {answer === "added" && (
-                        <motion.span {...fadeUp}>
-                          <Check className="size-3.5 text-done" aria-hidden="true" />
-                        </motion.span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex items-center gap-2 border-t border-border p-2.5" aria-live="polite">
-                  {answer ? (
-                    <>
-                      <p className="flex-1 px-1 text-muted-foreground">
-                        {answer === "added" ? "Added to your calendar." : "Nothing saved."}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setAnswer(null)}
-                        className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      >
-                        Undo
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setAnswer("added")}
-                        className="h-8 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]"
-                      >
-                        Add to calendar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAnswer("skipped")}
-                        className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      >
-                        Not now
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </Window>
     </div>
   );
 }
@@ -338,32 +249,24 @@ export function Showcase({ signUp }: { signUp: string }) {
                 From Canvas to a calm week
               </h3>
               <p className="text-pretty text-muted-foreground">
-                Your deadlines come in on their own. Then ask for a plan, check what you need on the final, and start a
-                focus session.
+                Your deadlines come in on their own. Then check what you need on the final and start a focus session.
               </p>
             </div>
 
             <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div>
+              <div className="reveal">
                 <SyncDemo signUp={signUp} />
                 <Caption icon={RefreshCw} label="Connect once">
                   Add your Canvas access token or calendar feed. Courses, assignments and grades arrive in a minute.
                 </Caption>
               </div>
-              <div>
-                <AssistantDemo />
-                <Caption icon={MessageCircle} label="It suggests. You decide.">
-                  Ask the assistant to plan your week. It works from your real courses, and nothing saves without your
-                  yes. Try both buttons.
-                </Caption>
-              </div>
-              <div>
+              <div className="reveal">
                 <WhatIfDemo />
                 <Caption icon={GraduationCap} label="Grades and what-if">
                   Drag the slider: see what the final does to your course grade before you walk into it.
                 </Caption>
               </div>
-              <div>
+              <div className="reveal">
                 <TimerDemo />
                 <Caption icon={Timer} label="Focus, counted">
                   Pomodoro-style sessions that add up day by day. This one runs fast so you don&apos;t have to wait 25
