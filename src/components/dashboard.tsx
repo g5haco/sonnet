@@ -20,6 +20,7 @@ import { sampleData } from "@/lib/sample";
 import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 import { Fit } from "@/components/fit";
+import { HomeSearch } from "@/components/home-search";
 import { FocusBlock } from "@/components/focus";
 import {
   AskWidget,
@@ -279,7 +280,7 @@ export function Dashboard({
   return (
     <main className="@container flex w-full flex-col px-4 pt-5 pb-24 md:h-dvh md:overflow-y-auto md:px-6 md:pt-7 md:pb-20">
       <header className="mb-6 flex flex-wrap items-start gap-x-4 gap-y-3">
-        <div className="min-w-0 flex-1 basis-72">
+        <div className="min-w-0 flex-1 basis-72 @5xl:basis-0">
           <h1 className="text-3xl font-medium tracking-tight text-balance md:text-4xl">{greeting}</h1>
           <p className="mt-1.5 text-base text-muted-foreground">
             {today} · week {week} of {term.weeks}
@@ -313,7 +314,11 @@ export function Dashboard({
             )}
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        {/* Top middle on wide screens; its own row under the greeting on narrow ones. */}
+        <div className="order-last w-full basis-full @5xl:order-none @5xl:w-[26rem] @5xl:basis-auto @5xl:self-center">
+          <HomeSearch items={shown} courses={courses} now={now} />
+        </div>
+        <div className="flex flex-1 items-center justify-end gap-2 @5xl:basis-0">
           {editing ? (
             <>
               <Button
