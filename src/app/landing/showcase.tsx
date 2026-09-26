@@ -5,8 +5,7 @@ import { Check, RefreshCw, Workflow } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { courseColor } from "@/lib/course";
-import { Caption, chip, FlickerStrip, SectionHead } from "./features";
+import { Caption, FlickerStrip, SectionHead } from "./features";
 
 // Counts 0 → total, one step every `ms`, while the returned ref is in view; resets when it leaves, so it replays.
 // With reduced motion it jumps straight to the end.
@@ -114,120 +113,6 @@ function SyncDemo({ signUp }: { signUp: string }) {
           )}
         </AnimatePresence>
       </div>
-    </div>
-  );
-}
-
-// Illustration numbers: 75% of the course graded at 88.4%, the final is the other 25%.
-const letter = (g: number) =>
-  g >= 93 ? "A" : g >= 90 ? "A-" : g >= 87 ? "B+" : g >= 83 ? "B" : g >= 80 ? "B-" : g >= 77 ? "C+" : g >= 70 ? "C" : "D";
-
-export function WhatIfDemo() {
-  const [final, setFinal] = useState(80);
-  const grade = 0.75 * 88.4 + 0.25 * final;
-  return (
-    <div className="flex min-h-[320px] items-center justify-center px-6 py-14 md:min-h-[380px]">
-      <Window title="CALC II · Grades">
-        <div className="space-y-6 p-5">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Course grade if you get this on the final</p>
-              <p className="mt-1 font-mono text-4xl font-medium tabular-nums">{grade.toFixed(1)}%</p>
-            </div>
-            <motion.span
-              key={letter(grade)}
-              initial={{ opacity: 0, transform: "scale(0.9)" }}
-              animate={{ opacity: 1, transform: "scale(1)" }}
-              transition={{ type: "spring", duration: 0.3, bounce: 0.2 }}
-              className="chip rounded-full px-2.5 py-0.5 font-mono text-lg"
-              style={chip(courseColor(250))}
-            >
-              {letter(grade)}
-            </motion.span>
-          </div>
-          <label className="block">
-            <span className="flex justify-between text-sm">
-              Final exam <span className="font-mono text-muted-foreground tabular-nums">{final}%</span>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={final}
-              onChange={(e) => setFinal(+e.target.value)}
-              className="mt-3 w-full accent-foreground"
-            />
-          </label>
-          <p className="text-xs text-muted-foreground">Graded so far: 88.4% · worth 75% of the course</p>
-        </div>
-      </Window>
-    </div>
-  );
-}
-
-const FOCUS = 25 * 60;
-
-export function TimerDemo() {
-  const [{ left, running, today }, set] = useState({ left: FOCUS, running: false, today: 50 });
-  useEffect(() => {
-    if (!running) return;
-    // Demo speed: a 25-minute session plays in about 4 seconds, then counts toward today.
-    const id = setInterval(
-      () => set((t) => (t.left > 15 ? { ...t, left: t.left - 15 } : { left: 0, running: false, today: t.today + 25 })),
-      40,
-    );
-    return () => clearInterval(id);
-  }, [running]);
-  const R = 54;
-  const C = 2 * Math.PI * R;
-  const mm = String(Math.floor(left / 60)).padStart(2, "0");
-  const ss = String(left % 60).padStart(2, "0");
-  return (
-    <div className="flex min-h-[320px] items-center justify-center px-6 py-14 md:min-h-[380px]">
-      <Window title="Focus">
-        <div className="flex flex-wrap items-center justify-center gap-6 p-6">
-          <div className="relative size-32 shrink-0">
-            <svg viewBox="0 0 120 120" className="size-full -rotate-90" aria-hidden="true">
-              <circle cx="60" cy="60" r={R} fill="none" strokeWidth="6" className="stroke-secondary" />
-              <circle
-                cx="60"
-                cy="60"
-                r={R}
-                fill="none"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={C}
-                strokeDashoffset={C * (left / FOCUS)}
-                className="stroke-foreground"
-              />
-            </svg>
-            <span className="absolute inset-0 grid place-items-center font-mono text-2xl tabular-nums">
-              {mm}:{ss}
-            </span>
-          </div>
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground" aria-live="polite">
-              Studied today: <span className="font-mono text-foreground tabular-nums">{today} min</span>
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => set((t) => ({ ...t, left: t.left || FOCUS, running: !t.running }))}
-                className="h-9 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]"
-              >
-                {running ? "Pause" : left === FOCUS || left === 0 ? "Start focus" : "Resume"}
-              </button>
-              <button
-                type="button"
-                onClick={() => set((t) => ({ ...t, left: FOCUS, running: false }))}
-                className="h-9 rounded-full px-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
-      </Window>
     </div>
   );
 }

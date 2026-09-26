@@ -25,7 +25,6 @@ import { useEffect, useRef, useState } from "react";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
 import { courseColor } from "@/lib/course";
-import { TimerDemo, WhatIfDemo } from "./showcase";
 
 export const EASE = [0.16, 1, 0.3, 1] as const;
 // Replays every time it scrolls back into view.
@@ -955,21 +954,6 @@ export function Features({ signUp }: { signUp: string }) {
                 <Caption icon={CalendarDays} label="Up next, at a glance">
                   Every course keeps its color. Status reads in words: late,
                   today, done. Tap one to check it off.
-                </Caption>
-              </div>
-
-              <div>
-                <WhatIfDemo />
-                <Caption icon={GraduationCap} label="Grades and what-if">
-                  Drag the slider: see what the final does to your course grade before you walk into it.
-                </Caption>
-              </div>
-
-              <div>
-                <TimerDemo />
-                <Caption icon={Timer} label="A focus timer">
-                  Pomodoro-style sessions that add up day by day. This one runs fast so you don&apos;t have to wait 25
-                  minutes.
                 </Caption>
               </div>
 
