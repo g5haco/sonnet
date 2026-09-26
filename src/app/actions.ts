@@ -15,6 +15,7 @@ import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
 import { readLayout } from "@/lib/home";
+import { aiSearchPrompt, parseAiSearch } from "@/lib/search";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -623,4 +624,41 @@ export async function logFocus(s: { startedAt: string; minutes: number }): Promi
     .from("focus_sessions")
     .insert({ started_at: new Date(started).toISOString(), minutes: s.minutes });
   return done(error, "save the session");
+}
+
+// Home search's fallback: Sonnet picks the work and courses a fuzzy query means. Ids back, nothing saved.
+export async function smartSearch(query: string, today: string) {
+  const q = query.trim().slice(0, 200);
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getClaims();
+  if (!auth?.claims || !q) return null;
+  const [{ data: courses }, { data: items }] = await Promise.all([
+    supabase.from("courses").select("id, code, name").order("created_at"),
+    // ponytail: 400 items from two months back on; page by term if someone has more
+    supabase
+      .from("items")
+      .select("id, title, kind, due, done_at, course_id")
+      .gte("due", new Date(Date.now() - 60 * 864e5).toISOString())
+      .order("due")
+      .limit(400),
+  ]);
+  if (!courses || !items) return null;
+  const code = new Map(courses.map((c) => [c.id, c.code]));
+  const lines = [
+    ...courses.map((c, n) => `C${n}. ${c.code} ${c.name}`),
+    ...items.map((i, n) => `${n}. ${i.title.slice(0, 90)} | ${code.get(i.course_id) ?? ""} | ${i.kind} | ${i.due.slice(0, 10)} | ${i.done_at ? "done" : "open"}`),
+  ].join("\n");
+  const reply = await complete({
+    ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
+    reasoning: { enabled: false },
+    temperature: 0,
+    max_tokens: 300,
+    messages: [
+      { role: "system", content: aiSearchPrompt(today.slice(0, 40)) },
+      { role: "user", content: `${lines}\n\nSearch: ${q}` },
+    ],
+  });
+  const picked = reply && parseAiSearch(reply, items.length, courses.length);
+  if (!picked) return null;
+  return { items: picked.items.map((n) => items[n].id), courses: picked.courses.map((n) => courses[n].id), answer: picked.answer };
 }

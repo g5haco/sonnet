@@ -6,7 +6,8 @@ import { endOfWeek, type Item } from "./progress";
 
 type Course = { id: string; code: string; name: string; hue: number };
 export type Place = { label: string; hint: string; href?: string; settings?: "account" | "semester" | "data" };
-export type Results = { days: { date: string; items: Item[] }[]; courses: Course[]; items: Item[]; places: Place[] };
+// fuzzy: words that matched nothing here; Sonnet (the AI) gets a look.
+export type Results = { days: { date: string; items: Item[] }[]; courses: Course[]; items: Item[]; places: Place[]; fuzzy: boolean };
 
 const PLACES: (Place & { words: string[] })[] = [
   { label: "Home", hint: "your dashboard", href: "/", words: ["home", "dashboard", "widgets"] },
@@ -38,7 +39,7 @@ const at0 = (t: number) => new Date(t).setHours(0, 0, 0, 0);
 
 export function search(raw: string, items: Item[], courses: Course[], now: number): Results {
   let q = ` ${raw.toLowerCase().trim()} `;
-  const out: Results = { days: [], courses: [], items: [], places: [] };
+  const out: Results = { days: [], courses: [], items: [], places: [], fuzzy: false };
   if (!q.trim()) return out;
 
   // Dates first, cut out of the query as they're found: a range narrows work, a single day also gets a day card.
@@ -108,6 +109,28 @@ export function search(raw: string, items: Item[], courses: Course[], now: numbe
   );
   // Only list work when the query asked for some (a lone course name shows the course, plus its upcoming work).
   if (kind || status || range || text.length || hit.size) out.items = sorted(matched).slice(0, 8);
+  out.fuzzy = text.length > 0 && !matched.length;
   if (day != null) out.days = [{ date: dayKey(new Date(day)), items: sorted(matched) }];
   return out;
+}
+
+// Sonnet's side of a fuzzy search: numbered lines in, {"items":[..],"courses":[..],"answer":".."} back.
+export const aiSearchPrompt = (today: string) =>
+  `You search a college student's planner. Today is ${today}. You get their courses (C0, C1, ...) and work items ` +
+  `(0, 1, ...: title | course | kind | due | done or open), then a search. Pick what the search is looking for, ` +
+  `best match first, at most 8 items and 3 courses. Reply with only JSON, no prose: ` +
+  `{"items":[numbers],"courses":[numbers],"answer":"one short casual line, lowercase, under 15 words"}. ` +
+  `Nothing fits: empty lists and say so in answer.`;
+
+export function parseAiSearch(text: string, items: number, courses: number) {
+  try {
+    const j = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    const pick = (a: unknown, max: number) =>
+      [...new Set((Array.isArray(a) ? a : []).map((x) => Number(String(x).replace(/^C/i, ""))))].filter(
+        (n) => Number.isInteger(n) && n >= 0 && n < max,
+      );
+    return { items: pick(j.items, items).slice(0, 8), courses: pick(j.courses, courses).slice(0, 3), answer: String(j.answer ?? "").slice(0, 140) };
+  } catch {
+    return null;
+  }
 }

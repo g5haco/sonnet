@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, CalendarDays, Search, Settings, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { smartSearch } from "@/app/actions";
 import { useAssistant, useOpenSettings } from "@/components/app-shell";
 import { courseColor, courseFace } from "@/lib/course";
 import type { Item } from "@/lib/progress";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 type Course = { id: string; code: string; name: string; hue: number };
 type Row = { key: string; go: () => void; node: ReactNode; wide?: boolean };
+type Found = Awaited<ReturnType<typeof smartSearch>> | "loading";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const EXAMPLES = ["next assignment due", "overdue", "exams", "this week", "friday", "settings"];
@@ -36,6 +38,24 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
   const input = useRef<HTMLInputElement>(null);
   const q = query;
   const r = useMemo(() => search(q, items, courses, now), [q, items, courses, now]);
+  // Words the keyword search can't place go to Sonnet after a short pause; answers are kept per query.
+  const [ai, setAi] = useState<Record<string, Found>>({});
+  const key = q.trim().toLowerCase();
+  const found = r.fuzzy && key in ai ? ai[key] : undefined; // null: Sonnet had nothing to say
+  useEffect(() => {
+    if (!r.fuzzy || key in ai) return;
+    const id = setTimeout(() => {
+      setAi((a) => ({ ...a, [key]: "loading" }));
+      const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+      smartSearch(key, today)
+        .catch(() => null)
+        .then((res) => setAi((a) => ({ ...a, [key]: res })));
+    }, 600);
+    return () => clearTimeout(id);
+  }, [r.fuzzy, key, ai]);
+  const picked = found && found !== "loading" ? found : null;
+  const shownCourses = [...r.courses, ...courses.filter((c) => picked?.courses.includes(c.id) && !r.courses.includes(c))];
+  const shownItems = [...r.items, ...(picked?.items.map((id) => items.find((i) => i.id === id)).filter((i) => !!i) ?? [])];
 
   // "/" focuses search from anywhere on Home (not while typing elsewhere).
   useEffect(() => {
@@ -93,7 +113,7 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
         ),
       };
     }),
-    ...r.courses.map((c) => {
+    ...shownCourses.map((c) => {
       const next = items.filter((i) => i.courseId === c.id && !i.doneAt && Date.parse(i.due) >= now).sort((a, b) => Date.parse(a.due) - Date.parse(b.due))[0];
       return {
         key: `course-${c.id}`,
@@ -109,7 +129,7 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
         ),
       };
     }),
-    ...r.items.map((i) => {
+    ...shownItems.map((i) => {
       const status = i.doneAt ? "done" : Date.parse(i.due) < now ? "destructive" : Date.parse(i.due) - now < 2 * 864e5 ? "warning" : null;
       return {
         key: `item-${i.id}`,
@@ -278,6 +298,17 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
                 </div>
               </div>
             ) : (
+              <>
+              {found !== undefined && (found === null || found === "loading" || found.answer) && (
+                <p aria-live="polite" className="flex items-center gap-2 px-3 pt-2 pb-2.5 text-sm text-muted-foreground">
+                  <Sparkles aria-hidden="true" className={cn("size-4 shrink-0", found === "loading" && "animate-pulse")} />
+                  {found === "loading" ? (
+                    <span className="animate-pulse">Sonnet is looking…</span>
+                  ) : (
+                    (found?.answer ?? "Sonnet couldn't search just now.")
+                  )}
+                </p>
+              )}
               <div id="home-search-results" role="listbox" className="grid gap-1.5 sm:grid-cols-2">
                 {rows.map((row, n) => (
                   <motion.button
@@ -310,6 +341,7 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
                   </motion.button>
                 ))}
               </div>
+              </>
             )}
           </motion.div>
         )}

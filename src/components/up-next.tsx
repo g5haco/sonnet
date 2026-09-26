@@ -182,7 +182,7 @@ export function UpNext({
                   {wrap(
                     i,
                     <>
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-0 flex-1 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none">
                         {/* Two lines at most (anywhere: even one unbroken word wraps); the full title is on hover. */}
                         <span
                           title={i.title}

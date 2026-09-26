@@ -160,6 +160,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Every hover/active color change eases in instead of snapping; a transition-* utility on an element wins. */
+  :where(a, button, summary, label, [role="button"], [role="option"], [role="tab"], [role="menuitem"]) {
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
   html {
     @apply font-sans;
   }

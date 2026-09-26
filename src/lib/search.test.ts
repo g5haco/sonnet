@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { search } from "./search";
+import { parseAiSearch, search } from "./search";
 import type { Item } from "./progress";
 
 const now = new Date(2026, 8, 26, 12).getTime(); // Sat Sep 26 2026, noon
@@ -48,4 +48,19 @@ test("title text, places, and nonsense", () => {
   expect(search("cal", items, courses, now).places[0].label).toBe("Calendar");
   expect(ids("zzzz")).toEqual([]);
   expect(ids("")).toEqual([]);
+});
+
+test("fuzzy only when leftover words match nothing", () => {
+  expect(search("hardest thing", items, courses, now).fuzzy).toBe(true);
+  expect(search("skeleton", items, courses, now).fuzzy).toBe(false);
+  expect(search("overdue", items, courses, now).fuzzy).toBe(false);
+});
+
+test("Sonnet's reply parses leniently and drops bad indexes", () => {
+  expect(parseAiSearch('sure! {"items":[2,"1",9,2],"courses":["C1"],"answer":"try these"}', 5, 2)).toEqual({
+    items: [2, 1],
+    courses: [1],
+    answer: "try these",
+  });
+  expect(parseAiSearch("no json here", 5, 2)).toBeNull();
 });
