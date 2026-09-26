@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, GraduationCap, MessageCircle, RefreshCw, Timer } from "lucide-react";
 import { courseColor } from "@/lib/course";
-import { HeroDemo } from "./hero-demo";
 
 // The public front page. Signed-out visitors to "/" are rewritten here by the proxy (the URL stays "/"); signed-in
 // ones get Home. Always dark: it's the product's own look. Only real, shipped features; no stats or testimonials.
@@ -144,41 +144,49 @@ export default function Landing() {
 
       <main>
         {/* Hero: the meadow, dimmed, with the real app on top of it. */}
-        <section className="relative isolate overflow-hidden px-4 pt-16 pb-16">
+        <section className="relative isolate overflow-hidden px-4 pt-36 pb-16 sm:pt-44">
           <div
             aria-hidden="true"
             className="absolute inset-0 -z-10 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]"
           />
           <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-linear-to-b from-transparent to-background" />
-          <HeroDemo
-            title={
-              <div className="mx-auto max-w-3xl text-center">
-                <a
-                  href="#features"
-                  className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm backdrop-blur hover:bg-accent"
-                >
-                  <span className="chip rounded-full px-1.5 font-mono text-xs" style={chip("var(--done)")}>
-                    free
-                  </span>
-                  Made for students on Canvas <span aria-hidden="true">→</span>
-                </a>
-                <h1 className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl">
-                  All your classes, one calm place.
-                </h1>
-                <p className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
-                  Sonnet pulls in your Canvas deadlines, lays out your week and tells you how caught up you really are.
-                  Plus an assistant that actually knows your courses.
-                </p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
-                  <Primary>Get started free</Primary>
-                  <Secondary href="/login">Sign in</Secondary>
-                </div>
-              </div>
-            }
-          />
-          <p className="-mt-4 text-center font-mono text-xs text-muted-foreground md:-mt-24">
-            A live demo with sample data: check things off, open the calendar, ask the assistant.
-          </p>
+          <div className="mx-auto max-w-3xl text-center">
+            <a
+              href="#features"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm backdrop-blur hover:bg-accent"
+            >
+              <span className="chip rounded-full px-1.5 font-mono text-xs" style={chip("var(--done)")}>
+                free
+              </span>
+              Made for students on Canvas <span aria-hidden="true">→</span>
+            </a>
+            <h1 className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl">
+              All your classes, one calm place.
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
+              Sonnet pulls in your Canvas deadlines, lays out your week and tells you how caught up you really are.
+              Plus an assistant that actually knows your courses.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Primary>Get started free</Primary>
+              <Secondary href="/login">Sign in</Secondary>
+            </div>
+          </div>
+          <figure className="mx-auto mt-16 max-w-5xl">
+            <div className="overflow-hidden rounded-2xl border border-border shadow-2xl">
+              <Image
+                src="/landing/app.webp"
+                alt="Sonnet's Home: overdue and due-this-week counts, course cards, the Up next list and the assistant"
+                width={1920}
+                height={1200}
+                priority
+                className="h-auto w-full"
+              />
+            </div>
+            <figcaption className="mt-3 text-center font-mono text-xs text-muted-foreground">
+              Home, with sample data.
+            </figcaption>
+          </figure>
         </section>
 
         <section aria-label="Works with" className="mx-auto max-w-6xl px-4 pt-8">
