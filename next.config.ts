@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // 90 for the landing page screenshots, where text in the UI has to stay crisp.
+  images: { qualities: [75, 90] },
   // Keep a visited tab for 30s so switching back is instant. Saves call revalidatePath, which clears
   // this cache, so edits still show right away.
   experimental: { staleTimes: { dynamic: 30 } },

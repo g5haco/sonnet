@@ -1,9 +1,12 @@
 "use client";
 // Landing hero, animated like Watermelon UI's landing-01: the copy fades up in a stagger, then a fan of real
-// Sonnet screens (sample data) blurs in one by one; hovering one lifts it to the front.
+// Sonnet screens (sample data) blurs in one by one; hovering one lifts it to the front, clicking opens it full size.
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MotionConfig, motion, type Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -30,6 +33,9 @@ const SCREENS = [
 ];
 
 export function Hero({ signUp }: { signUp: string }) {
+  const [open, setOpen] = useState<number | null>(null); // index into SCREENS
+  const shown = open === null ? null : SCREENS[open];
+  const step = (d: number) => setOpen((i) => (i === null ? i : (i + d + SCREENS.length) % SCREENS.length));
   return (
     <MotionConfig reducedMotion="user">
       <motion.div className="mx-auto max-w-3xl text-center" variants={stagger} initial="hidden" animate="visible">
@@ -73,15 +79,19 @@ export function Hero({ signUp }: { signUp: string }) {
       </motion.div>
 
       <motion.div
-        className="relative mx-auto mt-20 h-[300px] w-full max-w-6xl sm:h-[480px] md:mt-28 md:h-[640px]"
+        // Tall enough that the front screen (top 40%, ~0.36 × width tall) ends inside the box: height > 0.6 × width.
+        className="relative mx-auto mt-20 aspect-[5/3] w-full max-w-6xl md:mt-28"
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.8 } } }}
       >
-        {SCREENS.map((s) => (
-          <motion.figure
+        {SCREENS.map((s, i) => (
+          <motion.button
             key={s.src}
-            className="absolute"
+            type="button"
+            aria-label={`Open: ${s.alt}`}
+            onClick={() => setOpen(i)}
+            className="absolute cursor-zoom-in rounded-lg focus-visible:ring-2 focus-visible:ring-ring md:rounded-xl"
             style={{ ...s.pos, transformOrigin: "center" }}
             variants={blurIn}
             whileHover={{ scale: 1.05, zIndex: 50, transition: { duration: 0.4 } }}
@@ -90,17 +100,54 @@ export function Hero({ signUp }: { signUp: string }) {
               <Image
                 src={`/landing/${s.src}.webp`}
                 alt={s.alt}
-                width={1440}
-                height={900}
+                width={2160}
+                height={1350}
+                quality={90}
                 priority={s.src === "home"}
-                sizes="(min-width: 1152px) 640px, 56vw"
+                sizes={`(min-width: 1152px) ${Math.round(parseFloat(s.pos.width) * 11.52)}px, ${parseFloat(s.pos.width)}vw`}
                 className="h-auto w-full rounded-md md:rounded-lg"
               />
             </div>
-          </motion.figure>
+          </motion.button>
         ))}
       </motion.div>
-      <p className="mt-4 text-center font-mono text-xs text-muted-foreground">Real Sonnet screens, with sample data.</p>
+      <p className="mt-8 text-center font-mono text-xs text-muted-foreground">
+        Real Sonnet screens, with sample data. Click one to see it up close.
+      </p>
+
+      <Dialog open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
+        {/* `dark`: the portal renders outside the landing page's dark wrapper. */}
+        <DialogContent
+          className="dark gap-3 bg-card p-3 text-foreground sm:max-w-[min(92vw,90rem)]"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") step(1);
+            if (e.key === "ArrowLeft") step(-1);
+          }}
+        >
+          {shown && (
+            <>
+              <Image
+                src={`/landing/${shown.src}.webp`}
+                alt={shown.alt}
+                width={2160}
+                height={1350}
+                quality={90}
+                sizes="92vw"
+                className="h-auto max-h-[80dvh] w-full rounded-lg object-contain"
+              />
+              <div className="flex items-center gap-3 px-1">
+                <DialogTitle className="flex-1 font-sans text-sm font-normal text-muted-foreground">{shown.alt}</DialogTitle>
+                <button type="button" aria-label="Previous screen" onClick={() => step(-1)} className="grid size-9 place-items-center rounded-full bg-secondary hover:bg-accent">
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button type="button" aria-label="Next screen" onClick={() => step(1)} className="grid size-9 place-items-center rounded-full bg-secondary hover:bg-accent">
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </MotionConfig>
   );
 }
