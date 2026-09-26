@@ -326,3 +326,12 @@
 body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
   bottom: 10rem;
 }
+
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

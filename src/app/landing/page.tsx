@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Features } from "./features";
 import { Hero } from "./hero";
+import { Showcase } from "./showcase";
 import Link from "next/link";
 
 // The public front page. Signed-out visitors to "/" are rewritten here by the proxy (the URL stays "/"); signed-in
@@ -32,12 +33,6 @@ const FAQ = [
     "Only you. Every row is locked to your account, and Settings can wipe your academic data whenever you want.",
   ],
   ["Do I need to install anything?", "No. It runs in your browser, on a laptop or a phone."],
-];
-
-const STEPS = [
-  ["Connect", "Add your Canvas access token or calendar feed. Your courses and deadlines arrive in a minute."],
-  ["See your week", "Home shows what's next, what's late and how caught up you are, in one honest number."],
-  ["Ask", "\"Plan my week\" or \"explain this assignment\": the assistant answers with your real courses."],
 ];
 
 function Wordmark() {
@@ -112,20 +107,9 @@ export default function Landing() {
           </ul>
         </section>
 
-        <Features signUp={SIGN_UP} />
+        <Showcase signUp={SIGN_UP} />
 
-        <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-24">
-          <h2 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">Set up in a minute.</h2>
-          <ol className="mt-10 grid gap-3 md:grid-cols-3">
-            {STEPS.map(([title, text], i) => (
-              <li key={title} className="rounded-2xl border border-border bg-card p-6">
-                <span className="font-mono text-sm text-muted-foreground">0{i + 1}</span>
-                <h3 className="mt-3 font-medium">{title}</h3>
-                <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <Features signUp={SIGN_UP} />
 
         <section aria-labelledby="faq" className="mx-auto max-w-3xl px-4 pb-24">
           <h2 id="faq" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">

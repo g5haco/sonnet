@@ -1,12 +1,10 @@
 "use client";
-// Landing hero, animated like Watermelon UI's landing-01: the copy fades up in a stagger, then a fan of real
-// Sonnet screens (sample data) blurs in one by one; hovering one lifts it to the front, clicking opens it full size.
-import { ChevronLeft, ChevronRight } from "lucide-react";
+// Landing hero, animated like Watermelon UI's landing-01: the copy fades up in a stagger, then real Sonnet screens
+// (sample data) blur in as a tabbed showcase that rotates every 5s, like Magic UI's CodeForge demo.
 import { MotionConfig, motion, type Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -20,22 +18,16 @@ const blurIn: Variants = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: EASE } },
 };
 
-// Back to front: outer pairs first, Home last and largest in the middle.
-const SCREENS = [
-  { src: "calendar", alt: "The calendar's week view", pos: { top: "-8%", left: "-4%", width: "30%", rotate: "-10deg", zIndex: 2 } },
-  { src: "courses", alt: "All courses as colored cards", pos: { top: "-8%", right: "-4%", width: "30%", rotate: "10deg", zIndex: 2 } },
-  { src: "settings", alt: "Settings, with the theme picker", pos: { top: "0%", left: "38%", width: "24%", rotate: "0deg", zIndex: 0 } },
-  { src: "course", alt: "One course's page with its work and materials", pos: { top: "12%", left: "4%", width: "34%", rotate: "-5deg", zIndex: 3 } },
-  { src: "home-light", alt: "Home in light mode", pos: { top: "12%", right: "4%", width: "34%", rotate: "5deg", zIndex: 3 } },
-  { src: "caught", alt: "Home when you're all caught up", pos: { top: "26%", left: "13%", width: "40%", rotate: "-2deg", zIndex: 4 } },
-  { src: "login", alt: "The sign-in page", pos: { top: "26%", right: "13%", width: "40%", rotate: "2deg", zIndex: 4 } },
-  { src: "home", alt: "Home: what's overdue, course cards, Up next and the assistant", pos: { top: "40%", left: "22%", width: "56%", rotate: "0deg", zIndex: 10 } },
+// The four tabs of the rotating showcase; each advances when its progress bar fills (5s, paused on hover).
+const TABS = [
+  { src: "home", label: "Home", alt: "Home: what's overdue, course cards, Up next and the assistant" },
+  { src: "calendar", label: "Calendar", alt: "The calendar's week view" },
+  { src: "courses", label: "Courses", alt: "All courses as colored cards" },
+  { src: "course", label: "Course page", alt: "One course's page with its work and materials" },
 ];
 
 export function Hero({ signUp }: { signUp: string }) {
-  const [open, setOpen] = useState<number | null>(null); // index into SCREENS
-  const shown = open === null ? null : SCREENS[open];
-  const step = (d: number) => setOpen((i) => (i === null ? i : (i + d + SCREENS.length) % SCREENS.length));
+  const [active, setActive] = useState(0);
   return (
     <MotionConfig reducedMotion="user">
       <motion.div className="mx-auto max-w-3xl text-center" variants={stagger} initial="hidden" animate="visible">
@@ -79,75 +71,54 @@ export function Hero({ signUp }: { signUp: string }) {
       </motion.div>
 
       <motion.div
-        // Tall enough that the front screen (top 40%, ~0.36 × width tall) ends inside the box: height > 0.6 × width.
-        className="relative mx-auto mt-20 aspect-[5/3] w-full max-w-6xl md:mt-28"
+        className="group mx-auto mt-20 w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-card/80 shadow-2xl backdrop-blur md:mt-28"
+        variants={blurIn}
         initial="hidden"
         animate="visible"
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.8 } } }}
+        transition={{ delay: 0.8 }}
       >
-        {SCREENS.map((s, i) => (
-          <motion.button
-            key={s.src}
-            type="button"
-            aria-label={`Open: ${s.alt}`}
-            onClick={() => setOpen(i)}
-            className="absolute cursor-zoom-in rounded-lg focus-visible:ring-2 focus-visible:ring-ring md:rounded-xl"
-            style={{ ...s.pos, transformOrigin: "center" }}
-            variants={blurIn}
-            whileHover={{ scale: 1.05, zIndex: 50, transition: { duration: 0.4 } }}
-          >
-            <div className="overflow-hidden rounded-lg border border-white/10 bg-card p-1 shadow-2xl md:rounded-xl md:p-1.5">
-              <Image
-                src={`/landing/${s.src}.webp`}
-                alt={s.alt}
-                width={2160}
-                height={1350}
-                quality={90}
-                priority={s.src === "home"}
-                sizes={`(min-width: 1152px) ${Math.round(parseFloat(s.pos.width) * 11.52)}px, ${parseFloat(s.pos.width)}vw`}
-                className="h-auto w-full rounded-md md:rounded-lg"
-              />
-            </div>
-          </motion.button>
-        ))}
+        <div role="tablist" aria-label="Sonnet screens" className="grid grid-cols-4 border-b border-border">
+          {TABS.map((t, i) => (
+            <button
+              key={t.src}
+              type="button"
+              role="tab"
+              id={`tab-${t.src}`}
+              aria-selected={i === active}
+              aria-controls="hero-screen"
+              onClick={() => setActive(i)}
+              className="relative h-12 border-border px-1 text-xs font-medium text-muted-foreground transition-colors not-last:border-r hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-selected:text-foreground sm:text-sm"
+            >
+              {t.label}
+              {i === active && (
+                <span
+                  key={active}
+                  aria-hidden="true"
+                  onAnimationEnd={() => setActive((active + 1) % TABS.length)}
+                  className="absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[tab-progress_5s_linear_forwards] bg-foreground group-hover:[animation-play-state:paused] motion-reduce:animate-none"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+        <div id="hero-screen" role="tabpanel" aria-labelledby={`tab-${TABS[active].src}`} className="relative p-2 md:p-3">
+          {TABS.map((t, i) => (
+            <Image
+              key={t.src}
+              src={`/landing/${t.src}.webp`}
+              alt={i === active ? t.alt : ""}
+              aria-hidden={i !== active}
+              width={2160}
+              height={1350}
+              quality={90}
+              priority={i === 0}
+              sizes="(min-width: 1152px) 1152px, 100vw"
+              className={`h-auto w-full rounded-lg transition-opacity duration-500 ease-out ${i ? "absolute inset-2 w-[calc(100%-1rem)] md:inset-3 md:w-[calc(100%-1.5rem)]" : ""} ${i === active ? "opacity-100" : "opacity-0"}`}
+            />
+          ))}
+        </div>
       </motion.div>
-      <p className="mt-8 text-center font-mono text-xs text-muted-foreground">
-        Real Sonnet screens, with sample data. Click one to see it up close.
-      </p>
-
-      <Dialog open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
-        {/* `dark`: the portal renders outside the landing page's dark wrapper. */}
-        <DialogContent
-          className="dark gap-3 bg-card p-3 text-foreground sm:max-w-[min(92vw,90rem)]"
-          onKeyDown={(e) => {
-            if (e.key === "ArrowRight") step(1);
-            if (e.key === "ArrowLeft") step(-1);
-          }}
-        >
-          {shown && (
-            <>
-              <Image
-                src={`/landing/${shown.src}.webp`}
-                alt={shown.alt}
-                width={2160}
-                height={1350}
-                quality={90}
-                sizes="92vw"
-                className="h-auto max-h-[80dvh] w-full rounded-lg object-contain"
-              />
-              <div className="flex items-center gap-3 px-1">
-                <DialogTitle className="flex-1 font-sans text-sm font-normal text-muted-foreground">{shown.alt}</DialogTitle>
-                <button type="button" aria-label="Previous screen" onClick={() => step(-1)} className="grid size-9 place-items-center rounded-full bg-secondary hover:bg-accent">
-                  <ChevronLeft className="size-4" />
-                </button>
-                <button type="button" aria-label="Next screen" onClick={() => step(1)} className="grid size-9 place-items-center rounded-full bg-secondary hover:bg-accent">
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <p className="mt-8 text-center font-mono text-xs text-muted-foreground">Real Sonnet screens, with sample data.</p>
     </MotionConfig>
   );
 }

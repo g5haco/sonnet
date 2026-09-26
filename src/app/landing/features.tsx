@@ -15,11 +15,11 @@ import {
 } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { courseColor } from "@/lib/course";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-const ONCE = { once: true, margin: "-80px" } as const;
+export const EASE = [0.16, 1, 0.3, 1] as const;
+export const ONCE = { once: true, margin: "-80px" } as const;
 
 // Illustration only: made-up course codes in the product's real course colors.
 const SAMPLE = [
@@ -29,7 +29,7 @@ const SAMPLE = [
   { code: "PSYC 100", due: "Fri", hue: 295 },
 ];
 
-const chip = (color: string) => ({ "--chip": color }) as React.CSSProperties;
+export const chip = (color: string) => ({ "--chip": color }) as React.CSSProperties;
 
 const SMALL = [
   {
@@ -61,7 +61,7 @@ const SOURCES = [
 const LINES = 22;
 
 // A grid of squares that flicker softly; paused offscreen and still with reduced motion.
-function FlickerStrip() {
+export function FlickerStrip() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = ref.current!;
@@ -138,11 +138,12 @@ function SyncOrbit() {
             key={i}
             className="absolute top-1/2 left-1/2 z-30 -mt-5 -ml-5 flex size-10 items-center justify-center rounded-full border border-border bg-background"
             variants={{
-              hidden: { x: 0, y: 0, scale: 0 },
+              hidden: { x: 0, y: 0, scale: 0.5, opacity: 0 },
               visible: {
                 x: Math.cos(a) * r,
                 y: Math.sin(a) * r,
                 scale: 1,
+                opacity: 1,
                 transition: { type: "spring", stiffness: 160, damping: 14, delay: 0.05 + i * 0.07 },
               },
             }}
@@ -152,6 +153,52 @@ function SyncOrbit() {
         );
       })}
     </motion.div>
+  );
+}
+
+// Up next rows you can tick off: tap one and its status flips to "done", tap again to undo.
+function UpNext() {
+  const [done, setDone] = useState<string[]>(["CALC II"]);
+  return (
+    <motion.ul
+      initial="hidden"
+      whileInView="visible"
+      viewport={ONCE}
+      transition={{ staggerChildren: 0.1 }}
+      className="flex w-full max-w-sm flex-col divide-y divide-border rounded-xl border border-border bg-card px-2"
+    >
+      {SAMPLE.map((s) => {
+        const isDone = done.includes(s.code);
+        const tone = isDone ? "done" : s.tone === "done" ? undefined : s.tone;
+        return (
+          <motion.li
+            key={s.code}
+            variants={{
+              hidden: { opacity: 0, y: 12 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+            }}
+          >
+            <button
+              type="button"
+              aria-pressed={isDone}
+              onClick={() => setDone((d) => (isDone ? d.filter((c) => c !== s.code) : [...d, s.code]))}
+              className="flex w-full items-center gap-3 rounded-lg px-2 py-3 font-mono text-sm transition-[background-color,scale] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.98]"
+            >
+              <span className="chip rounded-full px-1.5 text-xs" style={chip(courseColor(s.hue))}>
+                {s.code}
+              </span>
+              <span className="flex-1" />
+              <span
+                className={tone ? "chip rounded-full px-1.5" : "text-muted-foreground"}
+                style={tone ? chip(`var(--${tone})`) : undefined}
+              >
+                {isDone ? "done" : s.due === "done" ? "Mon" : s.due}
+              </span>
+            </button>
+          </motion.li>
+        );
+      })}
+    </motion.ul>
   );
 }
 
@@ -195,7 +242,34 @@ function StudyDots() {
   );
 }
 
-function Caption({ icon: Icon, label, children }: { icon: typeof Timer; label: string; children: React.ReactNode }) {
+export function SectionHead({
+  icon: Icon,
+  badge,
+  title,
+  muted,
+  children,
+}: {
+  icon: typeof Timer;
+  badge: string;
+  title: string;
+  muted: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center px-4 py-24 text-center">
+      <span className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
+        <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+        {badge}
+      </span>
+      <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
+        {title} <span className="text-muted-foreground">{muted}</span>
+      </h2>
+      <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">{children}</p>
+    </div>
+  );
+}
+
+export function Caption({ icon: Icon, label, children }: { icon: typeof Timer; label: string; children: React.ReactNode }) {
   return (
     <div className="max-w-xl p-6">
       <h3 className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -211,23 +285,14 @@ export function Features({ signUp }: { signUp: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <section id="features" className="mx-auto max-w-6xl scroll-mt-24 border-border pb-24 md:px-4">
-        <div className="flex flex-col items-center px-4 py-24 text-center">
-          <span className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
-            <Sparkles className="size-4 text-muted-foreground" aria-hidden="true" />
-            Features
-          </span>
-          <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
-            Better than five tabs <span className="text-muted-foreground">and a sticky note.</span>
-          </h2>
-          <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
-            Canvas, a calendar, a grade calculator, a timer and a chatbot, each in its own tab. Sonnet is one quiet
-            place for all of it, and the color only ever means something: a course, or what&apos;s due.
-          </p>
-        </div>
+        <SectionHead icon={Sparkles} badge="Features" title="Better than five tabs" muted="and a sticky note.">
+          Canvas, a calendar, a grade calculator, a timer and a chatbot, each in its own tab. Sonnet is one quiet place
+          for all of it, and the color only ever means something: a course, or what&apos;s due.
+        </SectionHead>
 
         <div className="border-y border-border md:border-x">
           <FlickerStrip />
-          <div className="grid border-t border-border md:grid-cols-6">
+          <div className="grid grid-cols-1 border-t border-border md:grid-cols-6">
             <div className="flex flex-col gap-6 p-8 md:sticky md:top-20 md:col-span-2 md:self-start lg:p-12">
               <h3 className="font-heading text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
                 Your whole semester, in one calm place
@@ -254,39 +319,10 @@ export function Features({ signUp }: { signUp: string }) {
 
               <div>
                 <div className="flex min-h-[260px] items-center justify-center px-6 py-10 md:min-h-[320px]">
-                  <motion.ul
-                    aria-hidden="true"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={ONCE}
-                    transition={{ staggerChildren: 0.1 }}
-                    className="flex w-full max-w-sm flex-col divide-y divide-border rounded-xl border border-border bg-card px-4"
-                  >
-                    {SAMPLE.map((s) => (
-                      <motion.li
-                        key={s.code}
-                        variants={{
-                          hidden: { opacity: 0, y: 12 },
-                          visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-                        }}
-                        className="flex items-center gap-3 py-3 font-mono text-sm"
-                      >
-                        <span className="chip rounded-full px-1.5 text-xs" style={chip(courseColor(s.hue))}>
-                          {s.code}
-                        </span>
-                        <span className="flex-1" />
-                        <span
-                          className={s.tone ? "chip rounded-full px-1.5" : "text-muted-foreground"}
-                          style={s.tone ? chip(`var(--${s.tone})`) : undefined}
-                        >
-                          {s.due}
-                        </span>
-                      </motion.li>
-                    ))}
-                  </motion.ul>
+                  <UpNext />
                 </div>
                 <Caption icon={CalendarDays} label="Up next, at a glance">
-                  Every course keeps its color. Status reads in words: late, today, done. Nothing to decode.
+                  Every course keeps its color. Status reads in words: late, today, done. Tap one to check it off.
                 </Caption>
               </div>
 
