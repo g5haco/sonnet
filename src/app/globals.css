@@ -379,19 +379,22 @@ body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
 /* Landing sky (see landing/page.tsx). Defaults are the static fallback (night, dimmed) for browsers without
    scroll-driven animations; where they're supported, the layers follow the hero's and the CTA's scroll position. */
 .landing {
-  timeline-scope: --hero, --cta;
+  timeline-scope: --hero, --tail;
 }
 .landing-hero {
   view-timeline: --hero block;
 }
-.landing-cta {
-  view-timeline: --cta block;
+.landing-tail {
+  view-timeline: --tail block;
 }
 .sky-night {
   opacity: 1;
 }
 .sky-dim {
-  opacity: 0.72;
+  opacity: 0.8;
+}
+.sky-deep {
+  opacity: 0;
 }
 .sky-grain {
   opacity: 0.05;
@@ -411,15 +414,15 @@ body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
     opacity: 0;
   }
   to {
-    opacity: 0.72;
+    opacity: 0.8;
   }
 }
-@keyframes sky-lift {
+@keyframes sky-deep-in {
   from {
-    opacity: 1;
+    opacity: 0;
   }
   to {
-    opacity: 0.2;
+    opacity: 1;
   }
 }
 @supports (animation-timeline: view()) {
@@ -433,9 +436,9 @@ body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
     animation-timeline: --hero;
     animation-range: exit 20% exit 90%;
   }
-  .sky-lift {
-    animation: sky-lift linear both;
-    animation-timeline: --cta;
-    animation-range: entry 10% entry 100%;
+  .sky-deep {
+    animation: sky-deep-in linear both;
+    animation-timeline: --tail;
+    animation-range: entry 0% entry 100%;
   }
 }

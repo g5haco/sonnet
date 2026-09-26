@@ -96,13 +96,12 @@ export default function Landing() {
   return (
     <div className="landing dark relative isolate text-foreground">
       {/* One sky behind the whole page: the dusk meadow at the top, the same meadow at night once you scroll past
-          the hero (dimmed under the sections), lifting again for the closing call to action. See globals.css. */}
+          the hero (dimmed under the sections), fading to the solid theme color by FAQ and About. See globals.css. */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background">
         <div className="absolute inset-0 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]" />
         <div className="sky-night absolute inset-0 scale-110 bg-[url(/landing/night.webp)] bg-cover bg-center blur-md" />
-        <div className="sky-lift absolute inset-0">
-          <div className="sky-dim absolute inset-0 bg-background" />
-        </div>
+        <div className="sky-dim absolute inset-0 bg-background" />
+        <div className="sky-deep absolute inset-0 bg-background" />
         <div className="sky-grain absolute inset-0" />
       </div>
       <SiteNav signUp={SIGN_UP} />
@@ -140,6 +139,8 @@ export default function Landing() {
 
         <Features />
 
+        {/* Pricing, FAQ and About: the sky fades to solid as these scroll in (see .sky-deep). */}
+        <div className="landing-tail">
         <section id="pricing" aria-labelledby="pricing-title" className="relative mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
           <div aria-hidden="true" className="absolute inset-x-0 top-24 -z-10 mx-auto aspect-square max-w-2xl bg-[radial-gradient(closest-side,oklch(1_0_0/0.06),transparent)]" />
           <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -200,9 +201,14 @@ export default function Landing() {
             </p>
           </div>
         </section>
+        </div>
 
-        {/* Closing call to action: the sky lifts back to the night meadow here. */}
-        <section className="landing-cta relative px-4 py-40 text-center">
+        {/* Closing call to action: its own night meadow, fading in from the solid page color above it. */}
+        <section className="relative isolate flex min-h-[85svh] flex-col items-center justify-center overflow-hidden px-4 py-40 text-center">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 scale-110 bg-[url(/landing/night.webp)] bg-cover bg-bottom blur-md brightness-75 mask-[linear-gradient(to_bottom,transparent,black_60%)]"
+          />
           <h2 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
             Stop losing deadlines in tabs.
           </h2>
