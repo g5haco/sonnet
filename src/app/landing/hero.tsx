@@ -5,8 +5,8 @@ import { MotionConfig, motion, type Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { EASE } from "./kit";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 const stagger: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } } };
 const rise: Variants = {
@@ -35,7 +35,7 @@ export function Hero({ signUp }: { signUp: string }) {
         <motion.a
           variants={rise}
           href="#features"
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm backdrop-blur hover:bg-accent"
+          className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm sm:min-h-0 backdrop-blur hover:bg-accent"
         >
           <span
             className="chip rounded-full px-1.5 font-mono text-xs"
@@ -79,7 +79,19 @@ export function Hero({ signUp }: { signUp: string }) {
         viewport={{ amount: 0.2 }}
         transition={{ delay: 0.8 }}
       >
-        <div role="tablist" aria-label="Sonnet screens" className="grid grid-cols-5 border-b border-border">
+        <div
+          role="tablist"
+          aria-label="Sonnet screens"
+          className="grid grid-cols-5 border-b border-border"
+          onKeyDown={(e) => {
+            // Arrow keys move between tabs (roving focus), like native tabs.
+            const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+            if (!d) return;
+            const next = (active + d + TABS.length) % TABS.length;
+            setActive(next);
+            document.getElementById(`tab-${TABS[next].src}`)?.focus();
+          }}
+        >
           {TABS.map((t, i) => (
             <button
               key={t.src}
@@ -87,6 +99,7 @@ export function Hero({ signUp }: { signUp: string }) {
               role="tab"
               id={`tab-${t.src}`}
               aria-selected={i === active}
+              tabIndex={i === active ? 0 : -1}
               aria-controls="hero-screen"
               onClick={() => setActive(i)}
               className="relative h-12 border-border px-1 text-xs font-medium text-muted-foreground transition-colors not-last:border-r hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-selected:text-foreground sm:text-sm"

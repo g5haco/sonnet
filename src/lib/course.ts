@@ -5,6 +5,8 @@
 export const HUES = [250, 35, 150, 295, 80, 195, 350, 115];
 
 export const courseColor = (hue: number) => `oklch(var(--course-l) var(--course-c) ${hue})`;
+// The bright face of a course card (course cards, the landing demos).
+export const courseFace = (hue: number) => `linear-gradient(165deg, oklch(0.82 0.15 ${hue}), oklch(0.72 0.17 ${hue}))`;
 
 // First hue not taken yet; cycles once all are used.
 export const nextHue = (taken: number[]) => HUES.find((h) => !taken.includes(h)) ?? HUES[taken.length % HUES.length];

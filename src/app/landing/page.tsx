@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Check, ChevronDown, FileText, Presentation } from "lucide-react";
+import { Check, FileText, Presentation } from "lucide-react";
 import Link from "next/link";
 import { Assistant } from "./ai";
-import { Features, Rise } from "./features";
+import { Features } from "./features";
+import { Rise } from "./kit";
+import { SiteNav, Wordmark } from "./nav";
 import { Hero } from "./hero";
 import { Showcase } from "./showcase";
 
@@ -79,14 +81,6 @@ const PLAN = [
   "Focus timer, study days and streaks",
 ];
 
-function Wordmark() {
-  return (
-    <span className="font-mono text-lg font-medium tracking-tight">
-      sonnet<span className="text-muted-foreground">.</span>
-    </span>
-  );
-}
-
 function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href?: string }) {
   return (
     <Link
@@ -101,59 +95,7 @@ function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href
 export default function Landing() {
   return (
     <div className="landing dark bg-background text-foreground">
-      <header className="fixed inset-x-0 top-3 z-50 px-4">
-        <nav
-          aria-label="Main"
-          className="mx-auto flex h-14 max-w-4xl items-center gap-6 rounded-2xl border border-border bg-background/70 px-5 backdrop-blur-md"
-        >
-          <Link href="/" aria-label="Sonnet home">
-            <Wordmark />
-          </Link>
-          <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            {/* A CSS dropdown: opens on hover or keyboard focus, no script. */}
-            <div className="group relative">
-              <button type="button" aria-haspopup="true" className="flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none">
-                What&apos;s included <ChevronDown className="size-3.5 transition-transform group-focus-within:rotate-180 group-hover:rotate-180" aria-hidden="true" />
-              </button>
-              <div className="invisible absolute top-full -left-3 pt-3 opacity-0 transition-[opacity,visibility] duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                <div className="flex w-64 flex-col rounded-xl border border-border bg-background/95 p-1.5 shadow-2xl backdrop-blur-md">
-                  <a href="#assistant" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
-                    <span className="block text-foreground">Sonnet AI</span>
-                    <span className="text-xs">Knows your courses, down to the syllabus</span>
-                  </a>
-                  <a href="#features" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
-                    <span className="block text-foreground">Features</span>
-                    <span className="text-xs">Widgets, calendar, grades, timer and more</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <a href="#how" className="hover:text-foreground">
-              How it works
-            </a>
-            <a href="#pricing" className="hover:text-foreground">
-              Pricing
-            </a>
-            <a href="#faq" className="hover:text-foreground">
-              FAQ
-            </a>
-            <a href="#about" className="hover:text-foreground">
-              About
-            </a>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Link href="/login" className="hidden h-9 items-center rounded-full px-4 text-sm hover:bg-accent sm:flex">
-              Sign in
-            </Link>
-            <Link
-              href={SIGN_UP}
-              className="flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
-            >
-              Get started
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <SiteNav signUp={SIGN_UP} />
 
       <main>
         {/* Hero: the meadow, dimmed, with the real app on top of it. */}
@@ -191,7 +133,7 @@ export default function Landing() {
 
         <Showcase signUp={SIGN_UP} />
 
-        <Features signUp={SIGN_UP} />
+        <Features />
 
         <section id="pricing" aria-labelledby="pricing-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
           <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">

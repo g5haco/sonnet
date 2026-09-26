@@ -1,12 +1,13 @@
 "use client";
-// Landing features, laid out like Magic UI's CodeForge template: a centered header, a flickering dot strip, then a
-// sticky intro on the left and bordered cards on the right that animate each time they scroll into view.
+// Landing features: a bento of live demos (widgets, calendar, countdowns, Up next, study days), then everything else
+// as a plain list. Also exports the courses carousel demo, used by How it works.
 import {
   CalendarDays,
   FolderOpen,
   GraduationCap,
   Hourglass,
   LayoutGrid,
+  ListChecks,
   Lock,
   Palette,
   Plus,
@@ -19,15 +20,11 @@ import {
   Timer,
 } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
-import { courseColor } from "@/lib/course";
-
-export const EASE = [0.16, 1, 0.3, 1] as const;
-// Replays every time it scrolls back into view.
-export const VIEW = { amount: 0.3 } as const;
+import { courseColor, courseFace } from "@/lib/course";
+import { Caption, CHIP, chip, EASE, SectionHead, useAutoCycle, VIEW } from "./kit";
 
 // Illustration only: made-up course codes in the product's real course colors.
 const SAMPLE = [
@@ -36,9 +33,6 @@ const SAMPLE = [
   { code: "CALC II", due: "done", hue: 250, tone: "done" },
   { code: "PSYC 100", due: "Fri", hue: 295 },
 ];
-
-export const chip = (color: string) =>
-  ({ "--chip": color }) as React.CSSProperties;
 
 // Everything else Sonnet does, so the list is complete.
 const EVERYTHING = [
@@ -93,159 +87,6 @@ const EVERYTHING = [
     text: "Only you see your data, and Settings can wipe it whenever you want.",
   },
 ];
-
-type Node = { icon: typeof Timer; angle: number; r: number; label?: string };
-const LINES = 22;
-
-// A grid of squares that flicker softly; paused offscreen and still with reduced motion.
-export function FlickerStrip() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = ref.current!;
-    const ctx = canvas.getContext("2d")!;
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const CELL = 6,
-      SQ = 3;
-    let cols = 0,
-      rows = 0,
-      cells = new Float32Array(0),
-      raf = 0,
-      visible = false;
-    const color = getComputedStyle(canvas).color;
-    const size = () => {
-      const dpr = devicePixelRatio || 1;
-      canvas.width = canvas.clientWidth * dpr;
-      canvas.height = canvas.clientHeight * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cols = Math.ceil(canvas.clientWidth / CELL);
-      rows = Math.ceil(canvas.clientHeight / CELL);
-      cells = Float32Array.from(
-        { length: cols * rows },
-        () => Math.random() * 0.3,
-      );
-    };
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-      ctx.fillStyle = color;
-      for (let i = 0; i < cells.length; i++) {
-        ctx.globalAlpha = cells[i];
-        ctx.fillRect((i % cols) * CELL, Math.floor(i / cols) * CELL, SQ, SQ);
-      }
-    };
-    const tick = () => {
-      for (let i = 0; i < cells.length; i++)
-        if (Math.random() < 0.02) cells[i] = Math.random() * 0.3;
-      draw();
-      if (visible) raf = requestAnimationFrame(tick);
-    };
-    size();
-    draw();
-    const ro = new ResizeObserver(() => {
-      size();
-      draw();
-    });
-    ro.observe(canvas);
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting && !still;
-      cancelAnimationFrame(raf);
-      if (visible) raf = requestAnimationFrame(tick);
-    });
-    io.observe(canvas);
-    return () => {
-      ro.disconnect();
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-  return (
-    <canvas
-      ref={ref}
-      aria-hidden="true"
-      className="block h-14 w-full text-muted-foreground"
-    />
-  );
-}
-
-// Lines draw out from the center, then each node springs out to its spot (angle in degrees, radius in px).
-export function Orbit({
-  center,
-  nodes,
-}: {
-  center: React.ReactNode;
-  nodes: Node[];
-}) {
-  return (
-    <motion.div
-      aria-hidden="true"
-      initial="hidden"
-      whileInView="visible"
-      viewport={VIEW}
-      className="relative flex min-h-[320px] items-center justify-center overflow-hidden mask-[radial-gradient(ellipse_at_center,black_40%,transparent_85%)] md:min-h-[400px]"
-    >
-      {/* The whole field turns slowly; icons and labels turn back so they stay upright. */}
-      <div className="absolute inset-0 animate-[spin_80s_linear_infinite] motion-reduce:animate-none">
-        {Array.from({ length: LINES }, (_, i) => (
-          <div
-            key={i}
-            className="absolute top-1/2 left-1/2 origin-top-left"
-            style={{ transform: `rotate(${(i * 360) / LINES}deg)` }}
-          >
-            <motion.div
-              className="h-[1.5px] w-[40rem] origin-left bg-border"
-              variants={{
-                hidden: { scaleX: 0, opacity: 0 },
-                visible: {
-                  scaleX: 1,
-                  opacity: i % 2 ? 0.6 : 1,
-                  transition: {
-                    duration: 0.8,
-                    delay: 0.1 + i * 0.015,
-                    ease: EASE,
-                  },
-                },
-              }}
-            />
-          </div>
-        ))}
-        {nodes.map(({ icon: Icon, angle, r, label }, i) => {
-          const a = (angle * Math.PI) / 180;
-          return (
-            <motion.div
-              key={i}
-              className="absolute top-1/2 left-1/2 z-30 -mt-5 -ml-5 flex size-10 items-center justify-center rounded-full border border-border bg-background"
-              variants={{
-                hidden: { x: 0, y: 0, scale: 0.5, opacity: 0 },
-                visible: {
-                  x: Math.cos(a) * r,
-                  y: Math.sin(a) * r,
-                  scale: 1,
-                  opacity: 1,
-                  transition: {
-                    type: "spring",
-                    stiffness: 160,
-                    damping: 14,
-                    delay: 0.05 + i * 0.07,
-                  },
-                },
-              }}
-            >
-              <span className="relative flex animate-[spin_80s_linear_infinite_reverse] items-center justify-center motion-reduce:animate-none">
-                <Icon className="size-4 text-muted-foreground" />
-                {label && (
-                  <span className="absolute top-full mt-3 text-[10px] whitespace-nowrap text-muted-foreground sm:text-xs">
-                    {label}
-                  </span>
-                )}
-              </span>
-            </motion.div>
-          );
-        })}
-      </div>
-      <span className="absolute top-1/2 left-1/2 size-14 -translate-1/2 animate-ping rounded-full border border-foreground/20 [animation-duration:2.5s] motion-reduce:hidden" />
-      {center}
-    </motion.div>
-  );
-}
 
 // Up next rows you can tick off: tap one and its status flips to "done", tap again to undo.
 function UpNext() {
@@ -311,42 +152,37 @@ const WEEKS = 18;
 const level = (i: number) => {
   const v = Math.sin(i * 12.9898) * 43758.5453;
   const f = v - Math.floor(v);
-  return i % 7 > 4 ? f * 0.5 : f; // weekends lighter
+  // rounded: Math.sin differs in the last digits between the server and the browser (hydration)
+  return Math.round((i % 7 > 4 ? f * 0.5 : f) * 100) / 100; // weekends lighter
 };
 
 function StudyDots() {
+  const ref = useRef<HTMLDivElement>(null);
+  const on = useInView(ref, VIEW) ? 1 : 0;
   return (
-    <motion.div
+    <div
+      ref={ref}
       aria-hidden="true"
-      initial="hidden"
-      whileInView="visible"
-      viewport={VIEW}
       className="flex min-h-[260px] items-center justify-center overflow-hidden px-6 mask-[radial-gradient(ellipse_at_center,black_50%,transparent_90%)] md:min-h-[320px]"
     >
-      <div className="grid grid-flow-col grid-rows-7 gap-1.5 sm:gap-2">
+      {/* --on flips 0 → 1 in view; each dot eases in with its own CSS transition, delayed by its week. */}
+      <div className="grid grid-flow-col grid-rows-7 gap-1.5 sm:gap-2" style={{ "--on": on } as React.CSSProperties}>
         {Array.from({ length: WEEKS * 7 }, (_, i) => {
           const l = level(i);
           return (
-            <motion.span
+            <span
               key={i}
-              className="size-2.5 rounded-full bg-foreground sm:size-3"
-              variants={{
-                hidden: { opacity: 0, scale: 0.4 },
-                visible: {
-                  opacity: l < 0.2 ? 0.07 : 0.15 + l * 0.75,
-                  scale: 1,
-                  transition: {
-                    duration: 0.5,
-                    delay: Math.floor(i / 7) * 0.04,
-                    ease: EASE,
-                  },
-                },
+              className="size-2.5 rounded-full bg-foreground transition-[opacity,scale] duration-500 ease-out motion-reduce:transition-none sm:size-3"
+              style={{
+                opacity: `calc(var(--on) * ${l < 0.2 ? 0.07 : 0.15 + l * 0.75})`,
+                scale: "calc(0.4 + var(--on) * 0.6)",
+                transitionDelay: `${Math.floor(i / 7) * 40}ms`,
               }}
             />
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -438,7 +274,7 @@ const TILES = [
             style={{
               left: `${10 + i * 20}%`,
               rotate: `${(i - 1) * 8}deg`,
-              background: `linear-gradient(oklch(0.82 0.15 ${h}), oklch(0.72 0.17 ${h}))`,
+              background: courseFace(h),
             }}
           />
         ))}
@@ -502,22 +338,10 @@ const START = [
 ];
 
 function WidgetsDemo() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
   const [shown, setShown] = useState(START);
-  const [touched, setTouched] = useState(false);
-  useEffect(() => {
-    if (
-      !inView ||
-      touched ||
-      matchMedia("(prefers-reduced-motion: reduce)").matches
-    )
-      return;
-    const id = setInterval(() => setShown((s) => [...s.slice(1), s[0]]), 2400);
-    return () => clearInterval(id);
-  }, [inView, touched]);
+  const [ref, stop] = useAutoCycle(() => setShown((s) => [...s.slice(1), s[0]]), 2400);
   const toggle = (id: string) => {
-    setTouched(true);
+    stop();
     setShown((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   };
   return (
@@ -553,15 +377,15 @@ function WidgetsDemo() {
             type="button"
             aria-pressed={shown.includes(t.id)}
             onClick={() => toggle(t.id)}
-            className="h-7 rounded-full border border-border px-2.5 text-xs text-muted-foreground transition-[background-color,color,scale] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97] aria-pressed:bg-secondary aria-pressed:text-foreground"
+            className={CHIP}
           >
             {shown.includes(t.id) ? "−" : "+"} {t.id}
           </button>
         ))}
         <button
           type="button"
-          onClick={() => (setTouched(true), setShown((s) => [...s].reverse()))}
-          className="flex h-7 items-center gap-1 rounded-full px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          onClick={() => (stop(), setShown((s) => [...s].reverse()))}
+          className="flex h-11 items-center sm:h-8 gap-1 rounded-full px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <Shuffle className="size-3" aria-hidden="true" /> Shuffle
         </button>
@@ -602,15 +426,8 @@ function Block({ c }: { c: (typeof CLASSES)[number] }) {
 }
 
 function CalendarDemo() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
   const [view, setView] = useState<(typeof VIEWS)[number]>("Week");
-  const [touched, setTouched] = useState(false);
-  useEffect(() => {
-    if (!inView || touched || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setView((v) => VIEWS[(VIEWS.indexOf(v) + 1) % VIEWS.length]), 3000);
-    return () => clearInterval(id);
-  }, [inView, touched]);
+  const [ref, stop] = useAutoCycle(() => setView((v) => VIEWS[(VIEWS.indexOf(v) + 1) % VIEWS.length]), 3000);
   const days = view === "Day" ? [2] : [0, 1, 2, 3, 4];
   return (
     <div ref={ref} className="flex min-h-[380px] flex-col items-center justify-center gap-4 px-4 py-12 sm:px-6 md:min-h-[440px]">
@@ -620,8 +437,8 @@ function CalendarDemo() {
             key={v}
             type="button"
             aria-pressed={v === view}
-            onClick={() => (setTouched(true), setView(v))}
-            className="h-7 rounded-full px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-pressed:bg-secondary aria-pressed:text-foreground"
+            onClick={() => (stop(), setView(v))}
+            className="h-11 rounded-full px-4 text-muted-foreground transition-colors sm:h-7 sm:px-3 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-pressed:bg-secondary aria-pressed:text-foreground"
           >
             {v}
           </button>
@@ -770,8 +587,10 @@ const SAMPLE_COURSES = [
   ["HIST 150", "", 195],
 ] as const;
 
+const NOW = Date.UTC(2026, 8, 21, 16); // a Monday: every sample due date lands this week
+
 export function CoursesDemo({ signUp }: { signUp: string }) {
-  const [now] = useState(() => Date.now());
+  const now = NOW;
   const cards: CourseCard[] = SAMPLE_COURSES.map(([code, name, hue], k) => ({
     id: `c${k}`,
     code,
@@ -784,7 +603,7 @@ export function CoursesDemo({ signUp }: { signUp: string }) {
       course: code,
       hue,
       kind: j === 1 && k % 2 === 0 ? ("exam" as const) : ("assignment" as const),
-      due: new Date(now + (j * 3 + 1) * 86400000).toISOString(),
+      due: new Date(now + (j * 2 + 1) * 86400000).toISOString(),
       doneAt: null,
     })),
   }));
@@ -805,177 +624,71 @@ export function CoursesDemo({ signUp }: { signUp: string }) {
   );
 }
 
-export function SectionHead({
-  icon: Icon,
-  badge,
-  title,
-  muted,
-  children,
-}: {
-  icon: typeof Timer;
-  badge: string;
-  title: string;
-  muted: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <motion.div
-      className="flex flex-col items-center px-4 py-24 text-center"
-      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ amount: 0.5 }}
-    >
-      <motion.span variants={RISE} className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
-        <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
-        {badge}
-      </motion.span>
-      <motion.h2 variants={RISE} className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
-        {title} <span className="text-muted-foreground">{muted}</span>
-      </motion.h2>
-      <motion.p variants={RISE} className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
-        {children}
-      </motion.p>
-    </motion.div>
-  );
+function Cell({ className = "", children }: { className?: string; children: React.ReactNode }) {
+  return <div className={`flex flex-col justify-between bg-background ${className}`}>{children}</div>;
 }
 
-// The hero's fade-up, for section headings: plays each time the heading scrolls into view, either direction.
-const RISE = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const } },
-};
-export function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Features() {
   return (
     <MotionConfig reducedMotion="user">
-      <motion.div className={className} variants={RISE} initial="hidden" whileInView="visible" viewport={{ amount: 0.5 }}>
-        {children}
-      </motion.div>
-    </MotionConfig>
-  );
-}
-
-export function Caption({
-  icon: Icon,
-  label,
-  children,
-}: {
-  icon: typeof Timer;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="max-w-xl p-6">
-      <h3 className="flex items-center gap-3 text-sm text-muted-foreground">
-        <Icon className="size-4" aria-hidden="true" />
-        {label}
-      </h3>
-      <p className="mt-2 leading-relaxed text-pretty">{children}</p>
-    </div>
-  );
-}
-
-export function Features({ signUp }: { signUp: string }) {
-  return (
-    <MotionConfig reducedMotion="user">
-      <section
-        id="features"
-        className="mx-auto max-w-6xl scroll-mt-24 border-border pb-24 md:px-4"
-      >
-        <SectionHead
-          icon={Sparkles}
-          badge="Features"
-          title="Better than five tabs"
-          muted="and a sticky note."
-        >
-          Canvas, a calendar, a grade calculator, a timer and a chatbot, each in
-          its own tab. Sonnet is one quiet place for all of it, and the color
-          only ever means something: a course, or what&apos;s due.
+      <section id="features" className="mx-auto max-w-6xl scroll-mt-24 pb-24 md:px-4">
+        <SectionHead icon={Sparkles} badge="Features" title="Better than five tabs" muted="and a sticky note.">
+          Canvas, a calendar, a grade calculator, a timer and a chatbot, each in its own tab. Sonnet is one quiet
+          place for all of it, and the color only ever means something: a course, or what&apos;s due.
         </SectionHead>
 
-        <div className="border-y border-border md:border-x">
-          <FlickerStrip />
-          <div className="grid grid-cols-1 border-t border-border md:grid-cols-6">
-            <div className="flex flex-col gap-6 p-8 md:sticky md:top-20 md:col-span-2 md:self-start lg:p-12">
-              <h3 className="font-heading text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
-                Everything your term needs
-              </h3>
-              <p className="text-pretty text-muted-foreground">
-                A Home you build yourself, one calendar, grades, countdowns, a
-                focus timer and every file for every course. All of it feeds
-                Sonnet.
-              </p>
-              <Link
-                href={signUp}
-                className="inline-flex h-10 w-fit items-center rounded-full border border-border px-5 text-sm font-medium hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Get started free
-              </Link>
+        <div className="grid gap-px border-y border-border bg-border md:grid-cols-2 md:border-x">
+          <Cell className="md:col-span-2 md:flex-row md:items-center">
+            <div className="md:w-3/5">
+              <WidgetsDemo />
             </div>
-
-            <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div>
-                <WidgetsDemo />
-                <Caption icon={LayoutGrid} label="Make Home yours">
-                  29 widgets: progress, grades, countdowns, calendar, courses,
-                  study hours and more. Drag them around, resize them, keep only
-                  what helps. Try the chips above.
-                </Caption>
-              </div>
-
-              <div>
-                <CalendarDemo />
-                <Caption icon={CalendarDays} label="One calendar for everything">
-                  Class times, deadlines and exams from every course on a day, week or month view, with the week of the
-                  term. Switch views above.
-                </Caption>
-              </div>
-
-              <div>
-                <CountdownDemo />
-                <Caption icon={Hourglass} label="Countdowns">
-                  The next exam and the next deadline tick down on Home, to the second, so nothing sneaks up on you.
-                </Caption>
-              </div>
-
-              <div>
-                <div className="flex min-h-[260px] items-center justify-center px-6 py-10 md:min-h-[320px]">
-                  <UpNext />
-                </div>
-                <Caption icon={CalendarDays} label="Up next, at a glance">
-                  Every course keeps its color. Status reads in words: late,
-                  today, done. Tap one to check it off.
-                </Caption>
-              </div>
-
-              <div>
-                <StudyDots />
-                <Caption icon={Timer} label="Study days, counted">
-                  Every focus session adds up, day by day, so you can see the
-                  weeks you showed up.
-                </Caption>
-              </div>
-
-              <ul className="grid sm:grid-cols-2 lg:grid-cols-3">
-                {EVERYTHING.map((f) => (
-                  <li
-                    key={f.title}
-                    className="border-b border-border p-6 sm:border-r"
-                  >
-                    <f.icon
-                      className="size-5 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                    <h3 className="mt-4 font-medium">{f.title}</h3>
-                    <p className="mt-1.5 text-sm text-pretty text-muted-foreground">
-                      {f.text}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+            <div className="md:w-2/5 md:pr-6">
+              <Caption icon={LayoutGrid} label="Make Home yours">
+                29 widgets: progress, grades, countdowns, calendar, courses, study hours and more. Drag them around,
+                resize them, keep only what helps. Try the chips.
+              </Caption>
             </div>
-          </div>
+          </Cell>
+          <Cell>
+            <CalendarDemo />
+            <Caption icon={CalendarDays} label="One calendar for everything">
+              Class times, deadlines and exams from every course on a day, week or month view. Switch views above.
+            </Caption>
+          </Cell>
+          <Cell>
+            <CountdownDemo />
+            <Caption icon={Hourglass} label="Countdowns">
+              The next exam and the next deadline tick down on Home, to the second, so nothing sneaks up on you.
+            </Caption>
+          </Cell>
+          <Cell>
+            <div className="flex min-h-[260px] items-center justify-center px-6 py-10 md:min-h-[320px]">
+              <UpNext />
+            </div>
+            <Caption icon={ListChecks} label="Up next, at a glance">
+              Every course keeps its color. Status reads in words: late, today, done. Tap one to check it off.
+            </Caption>
+          </Cell>
+          <Cell>
+            <StudyDots />
+            <Caption icon={Timer} label="Study days, counted">
+              Every focus session adds up, day by day, so you can see the weeks you showed up.
+            </Caption>
+          </Cell>
         </div>
+
+        <h3 className="mt-20 px-4 font-heading text-2xl font-semibold tracking-tight">And the rest</h3>
+        <dl className="mt-6 grid gap-x-12 gap-y-6 px-4 sm:grid-cols-2">
+          {EVERYTHING.map((f) => (
+            <div key={f.title} className="flex gap-4">
+              <f.icon className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <div>
+                <dt className="font-medium">{f.title}</dt>
+                <dd className="mt-1 text-sm text-pretty text-muted-foreground">{f.text}</dd>
+              </div>
+            </div>
+          ))}
+        </dl>
       </section>
     </MotionConfig>
   );

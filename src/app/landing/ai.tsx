@@ -24,8 +24,7 @@ import { MotionConfig, motion, useInView, useReducedMotion } from "motion/react"
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { courseColor } from "@/lib/course";
-import { Caption, chip, FlickerStrip, Orbit, SectionHead } from "./features";
-import { fadeUp, useSequence, Window } from "./showcase";
+import { Caption, CHIP, chip, FlickerStrip, fadeUp, Orbit, SectionHead, useSequence, Window } from "./kit";
 
 const POLS = courseColor(250);
 
@@ -209,7 +208,7 @@ function AskDemo() {
             type="button"
             aria-pressed={i === q}
             onClick={() => (setQ(i), setN(0))}
-            className="h-8 rounded-full border border-border px-3 text-xs text-muted-foreground transition-[background-color,color,scale] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97] aria-pressed:bg-secondary aria-pressed:text-foreground"
+            className={CHIP}
           >
             {x.q}
           </button>
@@ -265,13 +264,13 @@ function FlashcardsDemo() {
         </motion.div>
       </button>
       <div className="flex items-center gap-3 text-sm">
-        <button type="button" onClick={() => go(-1)} className="h-8 rounded-full px-3 text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+        <button type="button" onClick={() => go(-1)} className="h-11 rounded-full px-4 text-muted-foreground hover:bg-accent sm:h-8 sm:px-3 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
           Back
         </button>
         <span className="font-mono text-xs text-muted-foreground tabular-nums">
           {i + 1} / {DECK.length}
         </span>
-        <button type="button" onClick={() => go(1)} className="h-8 rounded-full bg-primary px-4 text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]">
+        <button type="button" onClick={() => go(1)} className="h-11 rounded-full bg-primary px-5 text-primary-foreground sm:h-8 sm:px-4 transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]">
           Next
         </button>
       </div>
@@ -310,7 +309,7 @@ export function Assistant({ signUp }: { signUp: string }) {
               </p>
               <Link
                 href={signUp}
-                className="inline-flex h-10 w-fit items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
+                className="inline-flex h-11 w-fit items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
               >
                 Try Sonnet free
               </Link>
@@ -434,7 +433,7 @@ function AssistantDemo() {
                       <button
                         type="button"
                         onClick={() => setAnswer(null)}
-                        className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="h-11 rounded-full px-3 text-xs text-muted-foreground sm:h-8 hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       >
                         Undo
                       </button>
@@ -444,14 +443,14 @@ function AssistantDemo() {
                       <button
                         type="button"
                         onClick={() => setAnswer("added")}
-                        className="h-8 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]"
+                        className="h-11 rounded-full bg-primary px-4 text-xs sm:h-8 sm:px-3.5 font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97]"
                       >
                         Add to calendar
                       </button>
                       <button
                         type="button"
                         onClick={() => setAnswer("skipped")}
-                        className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="h-11 rounded-full px-3 text-xs text-muted-foreground sm:h-8 hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       >
                         Not now
                       </button>

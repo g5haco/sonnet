@@ -1,49 +1,11 @@
 "use client";
-// "How it works" as hands-on demos, like the workflow cards in Magic UI's CodeForge template: a Canvas sync that
-// plays itself each time it scrolls into view, then a what-if grade slider and a focus timer to try.
-import { BookOpen, Check, RefreshCw, Workflow } from "lucide-react";
-import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
+// "How it works" as a three-step timeline, each step with its own live demo: a Canvas sync that plays itself, files
+// being read, then the courses carousel you land on. Demos replay each time they scroll back into view.
+import { Check, FileText, Workflow, RefreshCw } from "lucide-react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Caption, CoursesDemo, FlickerStrip, SectionHead } from "./features";
-
-// Counts 0 → total, one step every `ms`, while the returned ref is in view; resets when it leaves, so it replays.
-// With reduced motion it jumps straight to the end.
-export function useSequence(total: number, ms: number) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
-  const reduce = useReducedMotion();
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    const next = inView ? Math.min(step + 1, total) : 0;
-    if (reduce || next === step) return;
-    const id = setTimeout(() => setStep(next), inView ? ms : 0);
-    return () => clearTimeout(id);
-  }, [inView, reduce, step, total, ms]);
-  return [ref, reduce ? total : step] as const;
-}
-
-export const fadeUp = {
-  initial: { opacity: 0, transform: "translateY(6px)" },
-  animate: { opacity: 1, transform: "translateY(0px)" },
-  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const }, // = EASE; inlined: features.tsx imports this file back
-};
-
-export function Window({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`w-full max-w-md overflow-hidden rounded-xl border border-border bg-card shadow-2xl ${className}`}>
-      <div className="flex items-center gap-2 border-b border-border bg-secondary/50 px-4 py-2.5">
-        <span className="flex gap-1.5" aria-hidden="true">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="size-2.5 rounded-full bg-muted-foreground/40" />
-          ))}
-        </span>
-        <span className="ml-2 text-xs text-muted-foreground">{title}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
+import { CoursesDemo } from "./features";
+import { fadeUp, SectionHead, useSequence, Window } from "./kit";
 
 const SYNC = [
   "Connecting to canvas.yourschool.edu",
@@ -57,7 +19,7 @@ function SyncDemo({ signUp }: { signUp: string }) {
   const [ref, step] = useSequence(SYNC.length + 2, 650);
   const synced = step > SYNC.length;
   return (
-    <div ref={ref} className="relative flex min-h-[360px] items-center justify-center px-6 py-14 md:min-h-[420px]">
+    <div ref={ref} className="relative flex min-h-[360px] items-center justify-center px-4 py-14 sm:px-6 md:min-h-[400px]">
       <div className="relative w-full max-w-md">
         <motion.span
           key={synced ? "done" : "sync"}
@@ -103,7 +65,7 @@ function SyncDemo({ signUp }: { signUp: string }) {
                   <p className="text-sm text-muted-foreground">Deadlines, classes and grades, all in one place.</p>
                   <Link
                     href={signUp}
-                    className="mt-1 inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
+                    className="mt-1 inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] sm:h-9"
                   >
                     Try it free
                   </Link>
@@ -117,10 +79,50 @@ function SyncDemo({ signUp }: { signUp: string }) {
   );
 }
 
+// Files land in a course and get read, one by one.
+const FILES = ["Syllabus · POLS 202.pdf", "Lecture 6 slides.pdf", "Chapter 3 reading.pdf"];
+
+function FilesDemo() {
+  const [ref, step] = useSequence(FILES.length * 2, 600);
+  return (
+    <div ref={ref} className="flex min-h-[300px] items-center justify-center px-4 py-14 sm:px-6 md:min-h-[400px]">
+      <Window title="POLS 202 · Materials">
+        <ul className="min-h-44 space-y-2 p-4 text-sm">
+          {FILES.slice(0, Math.ceil(step / 2)).map((f, i) => (
+            <motion.li key={f} {...fadeUp} className="flex items-center gap-3 rounded-lg border border-border bg-background/60 px-3 py-2.5">
+              <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate">{f}</span>
+              {step > i * 2 + 1 ? (
+                <span className="flex items-center gap-1 text-xs text-done">
+                  <Check className="size-3.5" aria-hidden="true" /> read
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">reading…</span>
+              )}
+            </motion.li>
+          ))}
+        </ul>
+      </Window>
+    </div>
+  );
+}
+
 const STEPS = [
-  ["Connect Canvas", "Paste an access token or your Canvas calendar link. Courses, deadlines and grades come in."],
-  ["Add your syllabus", "Upload the syllabus, slides and readings. Sonnet reads them and remembers."],
-  ["Open Home and ask", "Your week is laid out. Ask \"what should I do next?\" and get a real answer."],
+  {
+    title: "Connect Canvas",
+    text: "Paste an access token or your Canvas calendar link. Courses, deadlines and grades come in, and keep coming.",
+    demo: (signUp: string) => <SyncDemo signUp={signUp} />,
+  },
+  {
+    title: "Add your syllabus",
+    text: "Drop in the syllabus, slides and readings. Sonnet reads them and remembers, so you can ask about them later.",
+    demo: () => <FilesDemo />,
+  },
+  {
+    title: "Open Home",
+    text: "Every course arrives in its own color with its work and exams filled in. Spin through them. Give it a drag.",
+    demo: (signUp: string) => <CoursesDemo signUp={signUp} />,
+  },
 ];
 
 export function Showcase({ signUp }: { signUp: string }) {
@@ -128,48 +130,21 @@ export function Showcase({ signUp }: { signUp: string }) {
     <MotionConfig reducedMotion="user">
       <section id="how" className="mx-auto max-w-6xl scroll-mt-24 md:px-4">
         <SectionHead icon={Workflow} badge="How it works" title="Set up in a minute." muted="Three steps, no marathon.">
-          Connect Canvas once and Sonnet does the sorting. Everything below is a live demo with sample data: click
-          around.
+          Connect Canvas once and Sonnet does the sorting. Everything below is a live demo with sample data.
         </SectionHead>
 
-        <div className="border-y border-border md:border-x">
-          <FlickerStrip />
-          <div className="grid grid-cols-1 border-t border-border md:grid-cols-6">
-            <div className="flex flex-col gap-6 p-8 md:sticky md:top-20 md:col-span-2 md:self-start lg:p-12">
-              <h3 className="font-heading text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
-                From Canvas to a calm week
-              </h3>
-              <p className="text-pretty text-muted-foreground">
-                Connect once and your deadlines keep coming in on their own. Watch a sync run on the right.
-              </p>
-            </div>
-
-            <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div>
-                <SyncDemo signUp={signUp} />
-                <Caption icon={RefreshCw} label="Connect once">
-                  Add your Canvas access token or calendar feed. Courses, assignments and grades arrive in a minute.
-                </Caption>
+        <ol className="border-y border-border md:border-x">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="grid grid-cols-1 border-border not-last:border-b md:grid-cols-5">
+              <div className="relative p-8 md:col-span-2 lg:p-12">
+                <span className="font-mono text-5xl text-muted-foreground/60 tabular-nums">0{i + 1}</span>
+                <h3 className="mt-4 font-heading text-2xl font-semibold tracking-tight">{s.title}</h3>
+                <p className="mt-2 text-pretty text-muted-foreground">{s.text}</p>
               </div>
-              <div>
-                <CoursesDemo signUp={signUp} />
-                <Caption icon={BookOpen} label="Then it's all there">
-                  Every course arrives in its own color, with its assignments, exams and due dates already filled in.
-                  Spin through them on Home. Give it a drag.
-                </Caption>
-              </div>
-              <ol className="grid sm:grid-cols-3">
-                {STEPS.map(([title, text], i) => (
-                  <li key={title} className="border-b border-border p-6 sm:border-r sm:border-b-0 sm:last:border-r-0">
-                    <span className="font-mono text-sm text-muted-foreground">0{i + 1}</span>
-                    <h3 className="mt-3 font-medium">{title}</h3>
-                    <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </div>
+              <div className="border-t border-border md:col-span-3 md:border-t-0 md:border-l">{s.demo(signUp)}</div>
+            </li>
+          ))}
+        </ol>
       </section>
     </MotionConfig>
   );
