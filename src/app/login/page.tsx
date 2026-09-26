@@ -13,6 +13,18 @@ const POINTS = [
   ["An assistant that knows your classes", "It reads your syllabus and plans your week. Nothing saves without a yes."],
 ];
 
+// Structured data for search engines: what the app is, nothing invented.
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Sonnet",
+  url: "https://www.ericwei.me",
+  applicationCategory: "EducationalApplication",
+  operatingSystem: "Web",
+  description: "A student hub: courses, deadlines, calendar, grades, a focus timer and an AI assistant in one place.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+
 export default async function Login({ searchParams }: PageProps<"/login">) {
   const { expired, google, mode } = await searchParams;
   const up = mode === "signup";
@@ -24,7 +36,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         : null;
 
   return (
-    <main className="relative isolate grid min-h-dvh place-items-center overflow-hidden p-4">
+    <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden p-4">
       {/* Backdrop: a blurred, dimmed meadow at dusk (generated). Decorative only. */}
       <div
         aria-hidden="true"
@@ -34,11 +46,11 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         {/* The pitch: hidden on phones, where the form is the whole page. Always the dark theme, since it sits on a
             dark abstract backdrop (generated). */}
         <section className="dark hidden flex-col justify-between gap-12 bg-[url(/login/abstract.webp)] bg-cover bg-center p-10 text-foreground md:flex">
-          <p className="font-mono text-lg font-medium tracking-tight">
+          <header className="font-mono text-lg font-medium tracking-tight">
             sonnet<span className="text-foreground">.</span>
-          </p>
+          </header>
           <div>
-            <h2 className="text-3xl font-medium tracking-tight text-balance">All your classes, one calm place.</h2>
+            <p className="text-3xl font-medium tracking-tight text-balance">All your classes, one calm place.</p>
             <ul className="mt-8 flex flex-col gap-5">
               {POINTS.map(([title, text]) => (
                 <li key={title} className="flex gap-3">
@@ -64,6 +76,12 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
           <LoginForm key={up ? "up" : "in"} mode={up ? "up" : "in"} note={note} />
         </section>
       </div>
+      <footer className="mt-6 text-center text-xs text-white/70">
+        Sonnet is a free student hub: Canvas deadlines, your calendar, grades and an assistant that knows your
+        courses.
+      </footer>
+      {/* JSON-LD, static and ours: safe to inline. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
     </main>
   );
 }

@@ -9,7 +9,13 @@ const plexSerif = IBM_Plex_Serif({ variable: "--font-plex-serif", subsets: ["lat
 const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 // Android Chrome: the keyboard shrinks the page instead of covering it (iOS is handled in app-shell).
-export const viewport: Viewport = { interactiveWidget: "resizes-content" };
+export const viewport: Viewport = {
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f7f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#121212" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ericwei.me"),
