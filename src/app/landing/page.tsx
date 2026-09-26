@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { Hero } from "./hero";
 import Link from "next/link";
 import { CalendarDays, GraduationCap, MessageCircle, RefreshCw, Timer } from "lucide-react";
 import { courseColor } from "@/lib/course";
@@ -98,17 +98,6 @@ function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href
   );
 }
 
-function Secondary({ children, href }: { children: React.ReactNode; href: string }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-11 items-center rounded-full border border-border bg-background/40 px-6 text-sm font-medium backdrop-blur transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export default function Landing() {
   return (
     <div className="dark bg-background text-foreground">
@@ -150,43 +139,7 @@ export default function Landing() {
             className="absolute inset-0 -z-10 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]"
           />
           <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-linear-to-b from-transparent to-background" />
-          <div className="mx-auto max-w-3xl text-center">
-            <a
-              href="#features"
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm backdrop-blur hover:bg-accent"
-            >
-              <span className="chip rounded-full px-1.5 font-mono text-xs" style={chip("var(--done)")}>
-                free
-              </span>
-              Made for students on Canvas <span aria-hidden="true">→</span>
-            </a>
-            <h1 className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl">
-              All your classes, one calm place.
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
-              Sonnet pulls in your Canvas deadlines, lays out your week and tells you how caught up you really are.
-              Plus an assistant that actually knows your courses.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Primary>Get started free</Primary>
-              <Secondary href="/login">Sign in</Secondary>
-            </div>
-          </div>
-          <figure className="mx-auto mt-16 max-w-5xl">
-            <div className="overflow-hidden rounded-2xl border border-border shadow-2xl">
-              <Image
-                src="/landing/app.webp"
-                alt="Sonnet's Home: overdue and due-this-week counts, course cards, the Up next list and the assistant"
-                width={1920}
-                height={1200}
-                priority
-                className="h-auto w-full"
-              />
-            </div>
-            <figcaption className="mt-3 text-center font-mono text-xs text-muted-foreground">
-              Home, with sample data.
-            </figcaption>
-          </figure>
+          <Hero signUp={SIGN_UP} />
         </section>
 
         <section aria-label="Works with" className="mx-auto max-w-6xl px-4 pt-8">
