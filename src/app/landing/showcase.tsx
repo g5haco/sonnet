@@ -1,12 +1,12 @@
 "use client";
 // "How it works" as hands-on demos, like the workflow cards in Magic UI's CodeForge template: a Canvas sync that
 // plays itself each time it scrolls into view, then a what-if grade slider and a focus timer to try.
-import { Check, GraduationCap, RefreshCw, Timer, Workflow } from "lucide-react";
+import { Check, RefreshCw, Workflow } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { courseColor } from "@/lib/course";
-import { Caption, chip, EASE, FlickerStrip, SectionHead } from "./features";
+import { Caption, chip, FlickerStrip, SectionHead } from "./features";
 
 // Counts 0 → total, one step every `ms`, while the returned ref is in view; resets when it leaves, so it replays.
 // With reduced motion it jumps straight to the end.
@@ -27,7 +27,7 @@ export function useSequence(total: number, ms: number) {
 export const fadeUp = {
   initial: { opacity: 0, transform: "translateY(6px)" },
   animate: { opacity: 1, transform: "translateY(0px)" },
-  transition: { duration: 0.35, ease: EASE },
+  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const }, // = EASE; inlined: features.tsx imports this file back
 };
 
 export function Window({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
@@ -122,7 +122,7 @@ function SyncDemo({ signUp }: { signUp: string }) {
 const letter = (g: number) =>
   g >= 93 ? "A" : g >= 90 ? "A-" : g >= 87 ? "B+" : g >= 83 ? "B" : g >= 80 ? "B-" : g >= 77 ? "C+" : g >= 70 ? "C" : "D";
 
-function WhatIfDemo() {
+export function WhatIfDemo() {
   const [final, setFinal] = useState(80);
   const grade = 0.75 * 88.4 + 0.25 * final;
   return (
@@ -167,7 +167,7 @@ function WhatIfDemo() {
 
 const FOCUS = 25 * 60;
 
-function TimerDemo() {
+export function TimerDemo() {
   const [{ left, running, today }, set] = useState({ left: FOCUS, running: false, today: 50 });
   useEffect(() => {
     if (!running) return;
@@ -232,11 +232,17 @@ function TimerDemo() {
   );
 }
 
+const STEPS = [
+  ["Connect Canvas", "Paste an access token or your Canvas calendar link. Courses, deadlines and grades come in."],
+  ["Add your syllabus", "Upload the syllabus, slides and readings. The assistant reads them and remembers."],
+  ["Open Home and ask", "Your week is laid out. Ask \"what should I do next?\" and get a real answer."],
+];
+
 export function Showcase({ signUp }: { signUp: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <section id="how" className="mx-auto max-w-6xl scroll-mt-24 md:px-4">
-        <SectionHead icon={Workflow} badge="How it works" title="Set up in a minute." muted="Then try it right here.">
+        <SectionHead icon={Workflow} badge="How it works" title="Set up in a minute." muted="Three steps, no marathon.">
           Connect Canvas once and Sonnet does the sorting. Everything below is a live demo with sample data: click
           around.
         </SectionHead>
@@ -249,7 +255,7 @@ export function Showcase({ signUp }: { signUp: string }) {
                 From Canvas to a calm week
               </h3>
               <p className="text-pretty text-muted-foreground">
-                Your deadlines come in on their own. Then check what you need on the final and start a focus session.
+                Connect once and your deadlines keep coming in on their own. Watch a sync run on the right.
               </p>
             </div>
 
@@ -260,19 +266,15 @@ export function Showcase({ signUp }: { signUp: string }) {
                   Add your Canvas access token or calendar feed. Courses, assignments and grades arrive in a minute.
                 </Caption>
               </div>
-              <div className="reveal">
-                <WhatIfDemo />
-                <Caption icon={GraduationCap} label="Grades and what-if">
-                  Drag the slider: see what the final does to your course grade before you walk into it.
-                </Caption>
-              </div>
-              <div className="reveal">
-                <TimerDemo />
-                <Caption icon={Timer} label="Focus, counted">
-                  Pomodoro-style sessions that add up day by day. This one runs fast so you don&apos;t have to wait 25
-                  minutes.
-                </Caption>
-              </div>
+              <ol className="grid sm:grid-cols-3">
+                {STEPS.map(([title, text], i) => (
+                  <li key={title} className="reveal border-b border-border p-6 sm:border-r sm:border-b-0 sm:last:border-r-0">
+                    <span className="font-mono text-sm text-muted-foreground">0{i + 1}</span>
+                    <h3 className="mt-3 font-medium">{title}</h3>
+                    <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>

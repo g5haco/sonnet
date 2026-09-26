@@ -1,6 +1,6 @@
 "use client";
 // Landing hero, animated like Watermelon UI's landing-01: the copy fades up in a stagger, then real Sonnet screens
-// (sample data) blur in as a tabbed showcase that rotates every 5s, like Magic UI's CodeForge demo.
+// (sample data) blur in as a tabbed showcase that rotates every 3s, like Magic UI's CodeForge demo.
 import { MotionConfig, motion, type Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,7 +18,7 @@ const blurIn: Variants = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: EASE } },
 };
 
-// The five tabs of the rotating showcase; each advances when its progress bar fills (5s, paused on hover).
+// The five tabs of the rotating showcase; each advances when its progress bar fills (3s, paused on hover).
 const TABS = [
   { src: "home", label: "Home", alt: "Home: progress, grades, next exam, Up next, this week and course cards" },
   { src: "assistant", label: "Assistant", alt: "The assistant answering from a course syllabus, with a study block to confirm" },
@@ -97,7 +97,7 @@ export function Hero({ signUp }: { signUp: string }) {
                   key={active}
                   aria-hidden="true"
                   onAnimationEnd={() => setActive((active + 1) % TABS.length)}
-                  className="absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[tab-progress_5s_linear_forwards] bg-foreground group-hover:[animation-play-state:paused] motion-reduce:animate-none"
+                  className="absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[tab-progress_3s_linear_forwards] bg-foreground group-hover:[animation-play-state:paused] motion-reduce:animate-none"
                 />
               )}
             </button>
