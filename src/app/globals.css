@@ -375,3 +375,67 @@ body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
     transform: translateX(300%);
   }
 }
+
+/* Landing sky (see landing/page.tsx). Defaults are the static fallback (night, dimmed) for browsers without
+   scroll-driven animations; where they're supported, the layers follow the hero's and the CTA's scroll position. */
+.landing {
+  timeline-scope: --hero, --cta;
+}
+.landing-hero {
+  view-timeline: --hero block;
+}
+.landing-cta {
+  view-timeline: --cta block;
+}
+.sky-night {
+  opacity: 1;
+}
+.sky-dim {
+  opacity: 0.72;
+}
+.sky-grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes sky-night-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sky-dim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.72;
+  }
+}
+@keyframes sky-lift {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
+@supports (animation-timeline: view()) {
+  .sky-night {
+    animation: sky-night-in linear both;
+    animation-timeline: --hero;
+    animation-range: exit 0% exit 60%;
+  }
+  .sky-dim {
+    animation: sky-dim-in linear both;
+    animation-timeline: --hero;
+    animation-range: exit 20% exit 90%;
+  }
+  .sky-lift {
+    animation: sky-lift linear both;
+    animation-timeline: --cta;
+    animation-range: entry 10% entry 100%;
+  }
+}

@@ -94,17 +94,22 @@ function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href
 
 export default function Landing() {
   return (
-    <div className="landing dark bg-background text-foreground">
+    <div className="landing dark relative isolate text-foreground">
+      {/* One sky behind the whole page: the dusk meadow at the top, the same meadow at night once you scroll past
+          the hero (dimmed under the sections), lifting again for the closing call to action. See globals.css. */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background">
+        <div className="absolute inset-0 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]" />
+        <div className="sky-night absolute inset-0 bg-[url(/landing/night.webp)] bg-cover bg-center" />
+        <div className="sky-lift absolute inset-0">
+          <div className="sky-dim absolute inset-0 bg-background" />
+        </div>
+        <div className="sky-grain absolute inset-0" />
+      </div>
       <SiteNav signUp={SIGN_UP} />
 
       <main>
-        {/* Hero: the meadow, dimmed, with the real app on top of it. */}
-        <section className="relative isolate overflow-hidden px-4 pt-36 pb-16 sm:pt-44">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 -z-10 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]"
-          />
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-linear-to-b from-transparent to-background" />
+        {/* Hero: the real app on the dusk meadow (the page's sky layer). */}
+        <section className="landing-hero relative isolate overflow-hidden px-4 pt-36 pb-16 sm:pt-44">
           <Hero signUp={SIGN_UP} />
         </section>
 
@@ -135,7 +140,8 @@ export default function Landing() {
 
         <Features />
 
-        <section id="pricing" aria-labelledby="pricing-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
+        <section id="pricing" aria-labelledby="pricing-title" className="relative mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
+          <div aria-hidden="true" className="absolute inset-x-0 top-24 -z-10 mx-auto aspect-square max-w-2xl bg-[radial-gradient(closest-side,oklch(1_0_0/0.06),transparent)]" />
           <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             Pricing
           </h2></Rise>
@@ -195,13 +201,8 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Closing call to action, back on the meadow. */}
-        <section className="relative isolate overflow-hidden px-4 py-32 text-center">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 -z-10 bg-[url(/login/meadow.webp)] bg-cover bg-bottom brightness-[0.45]"
-          />
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 -z-10 h-1/3 bg-linear-to-t from-transparent to-background" />
+        {/* Closing call to action: the sky lifts back to the night meadow here. */}
+        <section className="landing-cta relative px-4 py-40 text-center">
           <h2 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
             Stop losing deadlines in tabs.
           </h2>
