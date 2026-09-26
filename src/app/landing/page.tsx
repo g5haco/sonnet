@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import { Features } from "./features";
 import { Hero } from "./hero";
 import Link from "next/link";
-import { CalendarDays, GraduationCap, MessageCircle, RefreshCw, Timer } from "lucide-react";
-import { courseColor } from "@/lib/course";
 
 // The public front page. Signed-out visitors to "/" are rewritten here by the proxy (the URL stays "/"); signed-in
 // ones get Home. Always dark: it's the product's own look. Only real, shipped features; no stats or testimonials.
@@ -14,34 +13,6 @@ export const metadata: Metadata = {
 };
 
 const SIGN_UP = "/login?mode=signup";
-
-const FEATURES = [
-  {
-    icon: RefreshCw,
-    title: "Canvas, synced",
-    text: "Assignments, due dates and grades come in on their own. Nothing is due that you don't know about.",
-  },
-  {
-    icon: CalendarDays,
-    title: "One calendar",
-    text: "Class times, deadlines and exams on a day, week or month view, with a feed for Google Calendar.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Grades and what-if",
-    text: "See where each course stands and what you'd need on the final to hit the grade you want.",
-  },
-  {
-    icon: MessageCircle,
-    title: "An assistant that knows your classes",
-    text: "It reads your syllabus, slides and readings, and plans your week. It suggests; nothing saves without your yes.",
-  },
-  {
-    icon: Timer,
-    title: "A focus timer",
-    text: "Pomodoro-style sessions that remember how much you studied, day by day.",
-  },
-];
 
 const WORKS_WITH = ["Canvas", "Google Calendar", "Syllabus PDFs", "Slides and readings"];
 
@@ -68,16 +39,6 @@ const STEPS = [
   ["See your week", "Home shows what's next, what's late and how caught up you are, in one honest number."],
   ["Ask", "\"Plan my week\" or \"explain this assignment\": the assistant answers with your real courses."],
 ];
-
-// Illustration only: made-up course codes in the product's real course colors.
-const SAMPLE = [
-  { code: "BIO 110", due: "today", hue: 150, tone: "warning" },
-  { code: "HIST 201", due: "2d", hue: 35 },
-  { code: "CALC II", due: "done", hue: 250, tone: "done" },
-  { code: "PSYC 100", due: "Fri", hue: 295 },
-];
-
-const chip = (color: string) => ({ "--chip": color }) as React.CSSProperties;
 
 function Wordmark() {
   return (
@@ -151,52 +112,7 @@ export default function Landing() {
           </ul>
         </section>
 
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 py-24 md:grid-cols-2 md:items-end">
-          <h2 className="font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl">
-            Better than five tabs and a sticky note.
-          </h2>
-          <p className="text-lg text-pretty text-muted-foreground">
-            Canvas, a calendar, a grade calculator, a timer and a chatbot, each in its own tab. Sonnet is one quiet
-            place for all of it, and the color only ever means something: a course, or what&apos;s due.
-          </p>
-        </section>
-
-        {/* Features: a bento of what's shipped (big card 2×2 + five = three full rows), with one illustration. */}
-        <section id="features" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-24">
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="flex flex-col justify-between gap-8 rounded-2xl border border-border bg-card p-6 md:col-span-2 md:row-span-2 md:p-8">
-              <div>
-                <h3 className="text-xl font-medium">Up next, at a glance</h3>
-                <p className="mt-2 max-w-md text-muted-foreground">
-                  Every course keeps its color. Status reads in words: late, today, done. Nothing to decode.
-                </p>
-              </div>
-              <ul className="flex flex-col divide-y divide-border rounded-xl border border-border bg-background/50 px-4">
-                {SAMPLE.map((s) => (
-                  <li key={s.code} className="flex items-center gap-3 py-3 font-mono text-sm">
-                    <span className="chip rounded-full px-1.5 text-xs" style={chip(courseColor(s.hue))}>
-                      {s.code}
-                    </span>
-                    <span className="flex-1" />
-                    <span
-                      className={s.tone ? "chip rounded-full px-1.5" : "text-muted-foreground"}
-                      style={s.tone ? chip(`var(--${s.tone})`) : undefined}
-                    >
-                      {s.due}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-2xl border border-border bg-card p-6">
-                <f.icon className="size-5 text-muted-foreground" aria-hidden="true" />
-                <h3 className="mt-4 font-medium">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Features signUp={SIGN_UP} />
 
         <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-24">
           <h2 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">Set up in a minute.</h2>
