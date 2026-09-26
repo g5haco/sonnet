@@ -56,7 +56,6 @@ Nothing half-built. Open options (ask first):
 
 ## Current Priorities
 
-1. Live check of the landing page (signed out) and login on desktop + phone, incl. the hero Dialog and image sharpness.
 2. iPhone check of the chat keyboard behavior (only simulated so far).
 3. Further polish the user points at.
 
@@ -75,7 +74,8 @@ Nothing half-built. Open options (ask first):
 - `npm test` 48 passing; `tsc` clean; `npm run lint` clean; `npm run build` passes (course-preview excluded).
 - Verified locally (signed out, sample data): palette light/dark, chips contrast (measured), Home grid fill at 2000px, sidebar Chat pill, login backdrops light/dark, mobile pages at 375px (no horizontal overflow), assistant sheet with simulated keyboard, landing sections/bento/hero animation/hover/Dialog + arrow keys, icons/manifest served, security headers.
 - User confirmed on live: signed-in app, Home grid fix.
-- **Not verified:** landing + login on the live site; real iPhone keyboard; Android; Safari; dictation error toast (no mic in pane).
+- **Live-verified 2026-09-26 (signed out, pane at 800px + 375px):** landing hero/fan/Dialog + arrow keys (dark), CTAs → `/login?mode=signup`, 5 FAQ items, no horizontal overflow; login desktop split + mobile card, Google disabled + "soon", inputs 16px.
+- **Not verified:** real iPhone keyboard; Android; Safari; dictation error toast (no mic in pane).
 
 ## Relevant Architecture Context
 
