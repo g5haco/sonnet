@@ -71,7 +71,7 @@ const SLIDES = [
     ),
   },
   {
-    title: "An assistant that knows your classes",
+    title: "Sonnet knows your classes",
     text: "It reads your syllabus and materials, plans your week and makes study guides. Anything it wants to change waits for your yes.",
     art: (
       <div className="flex h-full flex-col justify-center gap-2 text-[11px]">

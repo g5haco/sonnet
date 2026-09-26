@@ -65,10 +65,10 @@ export function ChatPanel({
   }, [messages]);
 
   return (
-    <aside data-chat aria-label="Assistant" className={cn("flex flex-col bg-sidebar", className)}>
+    <aside data-chat aria-label="Sonnet" className={cn("flex flex-col bg-sidebar", className)}>
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
         <ThinkingOrb state="breathing" size={20} aria-hidden="true" />
-        <h2 className="text-sm font-medium">Assistant</h2>
+        <h2 className="text-sm font-medium">Sonnet</h2>
         <div className="ml-auto flex items-center">
           {messages.length > 0 && (
             <button
@@ -83,7 +83,7 @@ export function ChatPanel({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close assistant"
+            aria-label="Close Sonnet"
             className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="size-4" />

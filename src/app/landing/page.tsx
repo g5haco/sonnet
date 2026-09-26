@@ -11,7 +11,7 @@ import { Showcase } from "./showcase";
 export const metadata: Metadata = {
   title: "Sonnet · Your courses, deadlines and grades in one place",
   description:
-    "An AI assistant that has read your syllabus and knows every deadline, plus Canvas sync, a calendar, grades with what-if, a customizable Home and a focus timer. Free.",
+    "Sonnet is an AI that has read your syllabus and knows every deadline, plus Canvas sync, a calendar, grades with what-if, a customizable Home and a focus timer. Free.",
   alternates: { canonical: "/" },
 };
 
@@ -49,11 +49,11 @@ const WORKS_WITH = [
 const FAQ = [
   ["Is it free?", "Yes. Sonnet is free for students."],
   [
-    "What does the assistant know?",
+    "What does Sonnet know?",
     "Every course, assignment, exam, class time and grade in Sonnet, plus the syllabus, slides, readings and notes you upload. It answers from those first, and can search the web when you ask.",
   ],
   [
-    "Is the assistant always fast?",
+    "Is Sonnet always fast?",
     "It runs on free AI models, so it can be slow or busy at times. When that happens it tells you, and you can try again.",
   ],
   [
@@ -61,7 +61,7 @@ const FAQ = [
     "If your school uses Canvas, yes: connect with a Canvas access token, the Canvas calendar feed, or both.",
   ],
   [
-    "Can the assistant change my stuff?",
+    "Can Sonnet change my stuff?",
     "Only with your okay. It proposes changes as cards you confirm; nothing saves without a yes.",
   ],
   [
@@ -72,7 +72,7 @@ const FAQ = [
 ];
 
 const PLAN = [
-  "The assistant, with your syllabus, slides and readings",
+  "Sonnet, the AI, with your syllabus, slides and readings",
   "Canvas sync and the Google Calendar feed",
   "Calendar, grades and what-if, countdowns",
   "A customizable Home with 29 widgets",
@@ -118,7 +118,7 @@ export default function Landing() {
               <div className="invisible absolute top-full -left-3 pt-3 opacity-0 transition-[opacity,visibility] duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
                 <div className="flex w-64 flex-col rounded-xl border border-border bg-background/95 p-1.5 shadow-2xl backdrop-blur-md">
                   <a href="#assistant" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
-                    <span className="block text-foreground">Assistant</span>
+                    <span className="block text-foreground">Sonnet AI</span>
                     <span className="text-xs">Knows your courses, down to the syllabus</span>
                   </a>
                   <a href="#features" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
@@ -247,7 +247,7 @@ export default function Landing() {
             </p>
             <p>
               So it&apos;s one calm place instead: every deadline in one list, a Home you arrange yourself, and an
-              assistant that has actually read your syllabus. It&apos;s used for real classes every day, and it keeps
+              AI that has actually read your syllabus. It&apos;s used for real classes every day, and it keeps
               getting better from what students ask for.
             </p>
           </div>

@@ -21,7 +21,7 @@ const blurIn: Variants = {
 // The five tabs of the rotating showcase; each advances when its progress bar fills (3s, paused on hover).
 const TABS = [
   { src: "home", label: "Home", alt: "Home: progress, grades, next exam, Up next, this week and course cards" },
-  { src: "assistant", label: "Assistant", alt: "The assistant answering from a course syllabus, with a study block to confirm" },
+  { src: "assistant", label: "Ask Sonnet", alt: "Sonnet answering from a course syllabus, with a study block to confirm" },
   { src: "calendar", label: "Calendar", alt: "The calendar's week view" },
   { src: "courses", label: "Courses", alt: "All courses as colored cards" },
   { src: "course", label: "Course", alt: "One course's page with its work and materials" },
@@ -52,7 +52,7 @@ export function Hero({ signUp }: { signUp: string }) {
           All your classes, one calm place.
         </motion.h1>
         <motion.p variants={rise} className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
-          An AI assistant that has read your syllabus, slides and readings, and knows every deadline, grade and class
+          Sonnet is an AI that has read your syllabus, slides and readings, and knows every deadline, grade and class
           time. Plus your Canvas work, calendar and grades in one calm place.
         </motion.p>
         <motion.div variants={rise} className="mt-8 flex flex-wrap justify-center gap-3">

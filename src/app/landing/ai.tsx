@@ -55,7 +55,7 @@ function SyllabusDemo() {
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">POLS202_Syllabus.pdf</p>
               <p className="text-xs text-muted-foreground" aria-live="polite">
-                {reading ? "Reading 9 pages…" : "Read. Summary saved, the assistant remembers it."}
+                {reading ? "Reading 9 pages…" : "Read. Summary saved, Sonnet remembers it."}
               </p>
             </div>
             {reading ? (
@@ -164,7 +164,7 @@ function AskDemo() {
   const shown = reduce ? full : n;
   return (
     <div ref={ref} className="flex min-h-[440px] flex-col items-center justify-center gap-4 px-4 py-12 sm:px-6 md:min-h-[500px]">
-      <Window title="Assistant · POLS 202">
+      <Window title="Sonnet · POLS 202">
         <div className="flex min-h-64 flex-col gap-3 p-4 text-sm">
           <p className="self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">{QA[q].q}</p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -278,8 +278,8 @@ export function Assistant({ signUp }: { signUp: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <section id="assistant" className="mx-auto max-w-6xl scroll-mt-24 md:px-4">
-        <SectionHead icon={Sparkles} badge="The assistant" title="It has read your syllabus." muted="And everything else.">
-          Sonnet&apos;s assistant knows every course, assignment, exam, class time and grade, plus the syllabus, slides
+        <SectionHead icon={Sparkles} badge="Meet Sonnet" title="Sonnet has read your syllabus." muted="And everything else.">
+          Sonnet knows every course, assignment, exam, class time and grade, plus the syllabus, slides
           and readings you add. Ask it anything about your classes and get answers from your own material.
         </SectionHead>
 
@@ -298,7 +298,7 @@ export function Assistant({ signUp }: { signUp: string }) {
                 href={signUp}
                 className="inline-flex h-10 w-fit items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
               >
-                Try the assistant free
+                Try Sonnet free
               </Link>
             </div>
 
@@ -373,7 +373,7 @@ function AssistantDemo() {
   const [answer, setAnswer] = useState<"added" | "skipped" | null>(null);
   return (
     <div ref={ref} className="flex min-h-[380px] items-center justify-center px-6 py-14 md:min-h-[440px]">
-      <Window title="Assistant">
+      <Window title="Sonnet">
         <div className="flex min-h-72 flex-col gap-3 p-4 text-sm">
           {step >= 1 && (
             <motion.p {...fadeUp} className="self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">

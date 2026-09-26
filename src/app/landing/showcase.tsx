@@ -119,7 +119,7 @@ function SyncDemo({ signUp }: { signUp: string }) {
 
 const STEPS = [
   ["Connect Canvas", "Paste an access token or your Canvas calendar link. Courses, deadlines and grades come in."],
-  ["Add your syllabus", "Upload the syllabus, slides and readings. The assistant reads them and remembers."],
+  ["Add your syllabus", "Upload the syllabus, slides and readings. Sonnet reads them and remembers."],
   ["Open Home and ask", "Your week is laid out. Ask \"what should I do next?\" and get a real answer."],
 ];
 

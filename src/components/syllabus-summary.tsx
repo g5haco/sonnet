@@ -39,7 +39,7 @@ export function SummaryDialog({
         <div className="border-b border-border px-5 pt-5 pb-4 sm:px-6">
           <DialogTitle className="text-lg font-medium tracking-tight">Syllabus summary</DialogTitle>
           <DialogDescription className="mt-1">
-            {course}. The assistant keeps the full syllabus, so ask it anything this page leaves out.
+            {course}. Sonnet keeps the full syllabus, so ask it anything this page leaves out.
           </DialogDescription>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed sm:px-6">

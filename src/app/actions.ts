@@ -509,7 +509,7 @@ export async function readSyllabus(
 
 // One non-streamed answer about a syllabus (the paid default model, free ones as fallback).
 async function askSyllabus(system: string, body: string): Promise<{ text: string } | { error: string }> {
-  if (!process.env.AI_API_KEY) return { error: "The assistant isn't set up yet: AI_API_KEY is missing." };
+  if (!process.env.AI_API_KEY) return { error: "Sonnet isn't set up yet: AI_API_KEY is missing." };
   const ask = () =>
     complete({
       ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),

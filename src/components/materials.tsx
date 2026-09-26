@@ -332,7 +332,7 @@ export function UploadWindow({ open, course, onClose }: { open: boolean; course?
           )}
         </div>
         <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground sm:px-6">
-          Next up: the assistant reads what you add here, for study guides and flashcards from your own slides.
+          Next up: Sonnet reads what you add here, for study guides and flashcards from your own slides.
         </p>
       </DialogContent>
     </Dialog>
@@ -482,10 +482,10 @@ export function Materials({ course, materials }: { course: { id: string; code: s
           </p>
           <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
             {summaryNote
-              ? "Grading, policies and key dates on one page. The assistant knows the whole syllabus, so just ask."
+              ? "Grading, policies and key dates on one page. Sonnet knows the whole syllabus, so just ask."
               : hasSyllabus
                 ? "Get a one-page summary: grading, policies and key dates."
-                : "Sonnet reads it, writes a one-page summary (grading, policies, key dates) and remembers it, so you can ask the assistant anything about the course."}
+                : "Sonnet reads it, writes a one-page summary (grading, policies, key dates) and remembers it, so you can ask it anything about the course."}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">

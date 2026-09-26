@@ -55,7 +55,7 @@ const EVERYTHING = [
   {
     icon: FolderOpen,
     title: "Materials per course",
-    text: "Slides, readings and notes live with their course, ready for the assistant.",
+    text: "Slides, readings and notes live with their course, ready for Sonnet.",
   },
   {
     icon: GraduationCap,
@@ -902,8 +902,8 @@ export function Features({ signUp }: { signUp: string }) {
               </h3>
               <p className="text-pretty text-muted-foreground">
                 A Home you build yourself, one calendar, grades, countdowns, a
-                focus timer and every file for every course. All of it feeds the
-                assistant.
+                focus timer and every file for every course. All of it feeds
+                Sonnet.
               </p>
               <Link
                 href={signUp}

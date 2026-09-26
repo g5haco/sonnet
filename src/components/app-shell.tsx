@@ -216,7 +216,7 @@ export function AppShell({
         throw new Error(
           res.status === 413
             ? "Those files are too big to send together. Try fewer photos."
-            : ((await res.json().catch(() => null))?.error ?? "Couldn't reach the assistant."),
+            : ((await res.json().catch(() => null))?.error ?? "Couldn't reach Sonnet."),
         );
       // An expired session gets redirected to the login page (HTML), not the answer stream.
       if (res.headers.get("content-type")?.includes("text/html")) throw new Error("Your session ended. Sign in again.");
@@ -462,7 +462,7 @@ export function AppShell({
                 <button
                   type="button"
                   onClick={openAssistant}
-                  aria-label="Ask the assistant (Ctrl+K)"
+                  aria-label="Ask Sonnet (Ctrl+K)"
                   className="grid size-12 place-items-center rounded-full bg-foreground shadow-lg transition-transform active:scale-95"
                 >
                   <ThinkingOrb

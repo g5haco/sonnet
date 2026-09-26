@@ -237,7 +237,7 @@ function ClassTimes({ course, meetings }: { course: { id: string; code: string }
   return (
     <div className="flex flex-col gap-1">
       {sorted.length === 0 && !adding && (
-        <p className="text-sm text-muted-foreground">When does it meet? The calendar and the assistant use this.</p>
+        <p className="text-sm text-muted-foreground">When does it meet? The calendar and Sonnet use this.</p>
       )}
       {sorted.map((m) => (
         <div key={m.id} className="flex items-center justify-between gap-2 text-sm">
