@@ -14,9 +14,9 @@ Specs: [v1](superpowers/specs/2026-09-22-student-hub-design.md) · [v1.5 shell, 
 | 6   | **Materials + syllabus import** | Upload hub (PDF, Word, PowerPoint, photos, notes, links); AI extracts deadlines, exams, class times and grade weights for review; exam study guides from your materials                             | A real syllabus                                                                           | ✅ Done: uploads, text from PDFs, photos and scanned PDFs (vision model), the AI reads a course's materials, syllabus summary + import with review, exam study guides and course-aware chat shortcuts |
 | 7   | **Grades**                      | Current grade per course, what-if / "need X on final"                                                                                                                                               | —                                                                                         | ✅ Done: Canvas's current grade per course (Home, course page, assistant), graded work shows its score, "need X on the final" calculator                                                                                                   |
 | 8   | **Focus & heatmap**             | Pomodoro timer that fills the study heatmap and streak                                                                                                                                              | —                                                                                         | ✅ Done: global focus timer in the sidebar (animated ring panel), minutes per course, 18-week heatmap + streak on Home                                                                                                  |
-| 9   | **Polish**                      | Phone layout pass, a week of real daily use + fixes                                                                                                                                                 | Feedback                                                                                  | Ongoing                                                                                                                               |
+| 9   | **Polish**                      | Phone layout pass, a week of real daily use + fixes                                                                                                                                                 | Feedback                                                                                  | ✅ Wrapping up (2026-09-26): public landing page shipped; next is the [commercialization roadmap](COMMERCIAL-ROADMAP.md) |
 
-**Now: Phase 9 — polish and a real-use pass.**
+**Phase 9 is wrapping up. Next: [commercialization roadmap](COMMERCIAL-ROADMAP.md) (phases 10–16).**
 
 Done in Phase 9 (2026-09-24):
 - **Home**: a 12×6 grid of square cells that fits the screen; drag widgets anywhere, resize from a corner, a widget library with live previews, 25 widgets that fill their size (charts stretch, lists spread, fixed designs scale). Saved per user (migration 0008). Grade trend needs migration 0009.
@@ -29,7 +29,8 @@ Done in Phase 9 (2026-09-24):
 Still to do in Phase 9:
 - ~~Real-use pass signed in~~: done 2026-09-25, user confirmed everything works on the live site.
 - ~~Production polish~~ done 2026-09-24: login title/canonical/OG + Twitter card, generated social image, custom 404, robots.txt + sitemap (only /login public; app pages noindex), proxy lets crawlers reach them. Source maps stay off (Next default). Bundle: matter-js (Reset animation) and react-markdown now lazy-load, shared app JS 336 → 219 KB gzipped.
-- Say "term" instead of "semester" in Settings and Home's nudge.
+- ~~Say "term" instead of "semester" in Settings and Home's nudge~~ done.
+- ~~Public landing page~~ done 2026-09-26: signed-out `/` shows it (see HANDOFF.md).
 - Dashboard polish beyond Home (calendar, courses list).
 
 ### Added before Phase 5 (from your feedback)
@@ -62,5 +63,7 @@ Sonnet knows the whole semester's time (class times, every deadline, how caught 
 Nothing was dropped; phases were reordered (your choice: shell → AI → calendar → Canvas) and the App shell phase was added from feedback. Old → new: 0→0, 1→1, 5 AI→3, 4 timeline & calendar→4, 2 Canvas→5, 3 syllabus→6, 6 grades→7, 7 focus→8, 8 polish→9.
 
 ## Later (SaaS step and extras)
+
+Now planned in [COMMERCIAL-ROADMAP.md](COMMERCIAL-ROADMAP.md); the list below is kept for history.
 
 Audio / video / YouTube uploads with transcription, lecture recording, landing page (taste-skill), Stripe, real email provider (Resend) + custom sign-in email, Canvas OAuth developer key, two-way Google Calendar, auto time-blocking.
