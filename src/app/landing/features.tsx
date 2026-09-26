@@ -2,6 +2,7 @@
 // Landing features, laid out like Magic UI's CodeForge template: a centered header, a flickering dot strip, then a
 // sticky intro on the left and bordered cards on the right that animate each time they scroll into view.
 import {
+  BookOpen,
   CalendarDays,
   FolderOpen,
   GraduationCap,
@@ -21,6 +22,8 @@ import {
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Carousel } from "@/components/carousel";
+import { CourseFace, type CourseCard } from "@/components/course-card";
 import { courseColor } from "@/lib/course";
 import { TimerDemo, WhatIfDemo } from "./showcase";
 
@@ -759,6 +762,51 @@ function CountdownDemo() {
   );
 }
 
+// The real Home courses carousel, with sample courses: drag or swipe to spin it.
+const SAMPLE_COURSES = [
+  ["POLS 202", "Civics", 250],
+  ["Precalc II", "", 35],
+  ["BUS 101", "Intro to Business", 150],
+  ["CHEM 1210", "", 295],
+  ["ENGL 110", "Composition", 80],
+  ["HIST 150", "", 195],
+] as const;
+
+function CoursesDemo({ signUp }: { signUp: string }) {
+  const [now] = useState(() => Date.now());
+  const cards: CourseCard[] = SAMPLE_COURSES.map(([code, name, hue], k) => ({
+    id: `c${k}`,
+    code,
+    name,
+    hue,
+    meetings: [],
+    items: Array.from({ length: (k * 5) % 4 }, (_, j) => ({
+      id: `i${k}-${j}`,
+      title: "Sample work",
+      course: code,
+      hue,
+      kind: j === 2 ? ("exam" as const) : ("assignment" as const),
+      due: new Date(now + (j + 1) * 86400000).toISOString(),
+      doneAt: null,
+    })),
+  }));
+  return (
+    <div className="flex min-h-[380px] items-center justify-center overflow-hidden px-4 py-12 md:min-h-[440px]">
+      <Carousel
+        label="Sample courses"
+        orbit={92}
+        width={360}
+        slides={cards.map((c) => ({
+          key: c.id,
+          href: signUp,
+          label: `${c.code}${c.name ? `, ${c.name}` : ""}`,
+          face: <CourseFace course={c} now={now} compact />,
+        }))}
+      />
+    </div>
+  );
+}
+
 export function SectionHead({
   icon: Icon,
   badge,
@@ -882,6 +930,14 @@ export function Features({ signUp }: { signUp: string }) {
                 <Caption icon={CalendarDays} label="One calendar for everything">
                   Class times, deadlines and exams from every course on a day, week or month view, with the week of the
                   term. Switch views above.
+                </Caption>
+              </div>
+
+              <div>
+                <CoursesDemo signUp={signUp} />
+                <Caption icon={BookOpen} label="Every course, its own color">
+                  Spin through your courses on Home: what&apos;s due this week, what&apos;s late, the next exam and class.
+                  Each course page holds its work, class times and materials. Give it a drag.
                 </Caption>
               </div>
 
