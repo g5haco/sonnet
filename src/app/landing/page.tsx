@@ -99,7 +99,7 @@ export default function Landing() {
           the hero (dimmed under the sections), lifting again for the closing call to action. See globals.css. */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background">
         <div className="absolute inset-0 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]" />
-        <div className="sky-night absolute inset-0 bg-[url(/landing/night.webp)] bg-cover bg-center" />
+        <div className="sky-night absolute inset-0 scale-110 bg-[url(/landing/night.webp)] bg-cover bg-center blur-md" />
         <div className="sky-lift absolute inset-0">
           <div className="sky-dim absolute inset-0 bg-background" />
         </div>
