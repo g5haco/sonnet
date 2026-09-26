@@ -123,27 +123,41 @@ function SyllabusDemo() {
 // Ask it anything: pick a question and the answer streams in, with where it came from.
 const QA = [
   {
+    q: "Break down Paper 1 for me",
+    read: "Reading the Paper 1 instructions and rubric",
+    a: `it's a 5 page argument on whether federalism helps or hurts policy, due Oct 9, worth 15%
+
+how i'd start
+- pick one policy you care about (healthcare, education)
+- thesis in one line, then 3 reasons
+- the rubric weights evidence most, so grab 2 cases from chapter 3 first
+- draft the intro last
+
+want a plan to finish it by the 7th`,
+    src: ["Paper 1 on Canvas", "POLS 202 syllabus", "Chapter 3 reading"],
+  },
+  {
     q: "How much is the final worth?",
     read: "Reading the POLS 202 syllabus",
-    a: "30% of your grade, on Dec 12. You're at 93.4%, so a 92 on the final keeps your A.",
+    a: "30% of your grade, on Dec 12. you're at 93.4% so a 92 on the final keeps your A",
     src: ["POLS 202 syllabus", "Canvas grades"],
   },
   {
     q: "What's the late policy?",
     read: "Reading the POLS 202 syllabus",
-    a: "Papers lose 10% a day, for up to 3 days; after that they're a zero. Paper 1 is due Oct 9, so that's the one to protect.",
+    a: "papers lose 10% a day for up to 3 days, after that it's a zero. Paper 1 is due Oct 9 so that's the one to protect",
     src: ["POLS 202 syllabus", "Your deadlines"],
   },
   {
     q: "Explain federalism from Tuesday's lecture",
     read: "Reading Lecture 6 slides and chapter 3",
-    a: "Power split between the national government and the states. The slides frame it as layer cake (separate jobs) versus marble cake (shared jobs), and chapter 3 adds that the 10th Amendment leaves the rest to the states.",
+    a: "power split between the national government and the states. the slides call it layer cake (separate jobs) vs marble cake (shared jobs), and chapter 3 adds that the 10th Amendment leaves the rest to the states",
     src: ["Lecture 6 slides", "Chapter 3 reading"],
   },
   {
     q: "What's due before Friday?",
     read: "Checking your deadlines",
-    a: "Two things: BUS 101 Problem set 4 on Wednesday and the PSYC 100 quiz on Thursday. Nothing is late.",
+    a: "two things: BUS 101 Problem set 4 on wednesday and the PSYC 100 quiz on thursday. nothing late",
     src: ["Canvas", "Your calendar"],
   },
 ];
@@ -165,14 +179,14 @@ function AskDemo() {
   return (
     <div ref={ref} className="flex min-h-[440px] flex-col items-center justify-center gap-4 px-4 py-12 sm:px-6 md:min-h-[500px]">
       <Window title="Sonnet · POLS 202">
-        <div className="flex min-h-64 flex-col gap-3 p-4 text-sm">
+        <div className="flex min-h-80 flex-col gap-3 p-4 text-sm">
           <p className="self-end rounded-2xl rounded-br-md bg-secondary px-3.5 py-2">{QA[q].q}</p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Sparkles className="size-3.5" aria-hidden="true" />
             {QA[q].read}
             {shown < full && "…"}
           </p>
-          <p aria-live="polite">
+          <p aria-live="polite" className="whitespace-pre-line">
             {QA[q].a.slice(0, shown)}
             {shown > 0 && shown < full && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-foreground align-middle" />}
           </p>
@@ -314,7 +328,7 @@ export function Assistant({ signUp }: { signUp: string }) {
                 <AskDemo />
                 <Caption icon={MessageCircle} label="Ask anything about your classes">
                   Answers come from your syllabus, slides, readings and deadlines, and say where they came from. Tap a
-                  question to try it.
+                  question to try it, or ask about any assignment and get a plan to start it.
                 </Caption>
               </div>
               <div>
