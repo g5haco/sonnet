@@ -2,7 +2,6 @@
 // Landing features, laid out like Magic UI's CodeForge template: a centered header, a flickering dot strip, then a
 // sticky intro on the left and bordered cards on the right that animate each time they scroll into view.
 import {
-  BookOpen,
   CalendarDays,
   FolderOpen,
   GraduationCap,
@@ -771,7 +770,7 @@ const SAMPLE_COURSES = [
   ["HIST 150", "", 195],
 ] as const;
 
-function CoursesDemo({ signUp }: { signUp: string }) {
+export function CoursesDemo({ signUp }: { signUp: string }) {
   const [now] = useState(() => Date.now());
   const cards: CourseCard[] = SAMPLE_COURSES.map(([code, name, hue], k) => ({
     id: `c${k}`,
@@ -779,13 +778,13 @@ function CoursesDemo({ signUp }: { signUp: string }) {
     name,
     hue,
     meetings: [],
-    items: Array.from({ length: (k * 5) % 4 }, (_, j) => ({
+    items: Array.from({ length: 1 + (k % 3) }, (_, j) => ({
       id: `i${k}-${j}`,
       title: "Sample work",
       course: code,
       hue,
-      kind: j === 2 ? ("exam" as const) : ("assignment" as const),
-      due: new Date(now + (j + 1) * 86400000).toISOString(),
+      kind: j === 1 && k % 2 === 0 ? ("exam" as const) : ("assignment" as const),
+      due: new Date(now + (j * 3 + 1) * 86400000).toISOString(),
       doneAt: null,
     })),
   }));
@@ -929,14 +928,6 @@ export function Features({ signUp }: { signUp: string }) {
                 <Caption icon={CalendarDays} label="One calendar for everything">
                   Class times, deadlines and exams from every course on a day, week or month view, with the week of the
                   term. Switch views above.
-                </Caption>
-              </div>
-
-              <div>
-                <CoursesDemo signUp={signUp} />
-                <Caption icon={BookOpen} label="Every course, its own color">
-                  Spin through your courses on Home: what&apos;s due this week, what&apos;s late, the next exam and class.
-                  Each course page holds its work, class times and materials. Give it a drag.
                 </Caption>
               </div>
 

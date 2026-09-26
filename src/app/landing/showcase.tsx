@@ -1,11 +1,11 @@
 "use client";
 // "How it works" as hands-on demos, like the workflow cards in Magic UI's CodeForge template: a Canvas sync that
 // plays itself each time it scrolls into view, then a what-if grade slider and a focus timer to try.
-import { Check, RefreshCw, Workflow } from "lucide-react";
+import { BookOpen, Check, RefreshCw, Workflow } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Caption, FlickerStrip, SectionHead } from "./features";
+import { Caption, CoursesDemo, FlickerStrip, SectionHead } from "./features";
 
 // Counts 0 → total, one step every `ms`, while the returned ref is in view; resets when it leaves, so it replays.
 // With reduced motion it jumps straight to the end.
@@ -149,6 +149,13 @@ export function Showcase({ signUp }: { signUp: string }) {
                 <SyncDemo signUp={signUp} />
                 <Caption icon={RefreshCw} label="Connect once">
                   Add your Canvas access token or calendar feed. Courses, assignments and grades arrive in a minute.
+                </Caption>
+              </div>
+              <div>
+                <CoursesDemo signUp={signUp} />
+                <Caption icon={BookOpen} label="Then it's all there">
+                  Every course arrives in its own color, with its assignments, exams and due dates already filled in.
+                  Spin through them on Home. Give it a drag.
                 </Caption>
               </div>
               <ol className="grid sm:grid-cols-3">
