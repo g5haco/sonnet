@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FileText, Presentation } from "lucide-react";
+import { Check, ChevronDown, FileText, Presentation } from "lucide-react";
 import Link from "next/link";
 import { Assistant } from "./ai";
 import { Features } from "./features";
@@ -71,6 +71,14 @@ const FAQ = [
   ["Do I need to install anything?", "No. It runs in your browser, on a laptop or a phone."],
 ];
 
+const PLAN = [
+  "The assistant, with your syllabus, slides and readings",
+  "Canvas sync and the Google Calendar feed",
+  "Calendar, grades and what-if, countdowns",
+  "A customizable Home with 29 widgets",
+  "Focus timer, study days and streaks",
+];
+
 function Wordmark() {
   return (
     <span className="font-mono text-lg font-medium tracking-tight">
@@ -101,15 +109,36 @@ export default function Landing() {
           <Link href="/" aria-label="Sonnet home">
             <Wordmark />
           </Link>
-          <div className="hidden gap-6 text-sm text-muted-foreground sm:flex">
-            <a href="#assistant" className="hover:text-foreground">
-              Assistant
-            </a>
-            <a href="#features" className="hover:text-foreground">
-              Features
-            </a>
+          <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+            {/* A CSS dropdown: opens on hover or keyboard focus, no script. */}
+            <div className="group relative">
+              <button type="button" aria-haspopup="true" className="flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none">
+                What&apos;s included <ChevronDown className="size-3.5 transition-transform group-focus-within:rotate-180 group-hover:rotate-180" aria-hidden="true" />
+              </button>
+              <div className="invisible absolute top-full -left-3 pt-3 opacity-0 transition-[opacity,visibility] duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <div className="flex w-64 flex-col rounded-xl border border-border bg-background/95 p-1.5 shadow-2xl backdrop-blur-md">
+                  <a href="#assistant" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
+                    <span className="block text-foreground">Assistant</span>
+                    <span className="text-xs">Knows your courses, down to the syllabus</span>
+                  </a>
+                  <a href="#features" className="rounded-lg px-3 py-2 hover:bg-accent focus-visible:bg-accent focus-visible:outline-none">
+                    <span className="block text-foreground">Features</span>
+                    <span className="text-xs">Widgets, calendar, grades, timer and more</span>
+                  </a>
+                </div>
+              </div>
+            </div>
             <a href="#how" className="hover:text-foreground">
               How it works
+            </a>
+            <a href="#pricing" className="hover:text-foreground">
+              Pricing
+            </a>
+            <a href="#faq" className="hover:text-foreground">
+              FAQ
+            </a>
+            <a href="#about" className="hover:text-foreground">
+              About
             </a>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -164,8 +193,34 @@ export default function Landing() {
 
         <Features signUp={SIGN_UP} />
 
-        <section aria-labelledby="faq" className="mx-auto max-w-3xl px-4 py-24">
-          <h2 id="faq" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+        <section id="pricing" aria-labelledby="pricing-title" className="reveal mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
+          <h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+            Pricing
+          </h2>
+          <div className="mx-auto mt-10 max-w-md rounded-2xl border border-border bg-card p-8">
+            <p className="text-sm text-muted-foreground">Student</p>
+            <p className="mt-2 font-heading text-5xl font-semibold">
+              Free <span className="text-base font-normal text-muted-foreground">no card needed</span>
+            </p>
+            <ul className="mt-6 space-y-2 text-sm">
+              {PLAN.map((f) => (
+                <li key={f} className="flex gap-2">
+                  <Check className="mt-0.5 size-4 shrink-0 text-done" aria-hidden="true" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8">
+              <Primary>Get started free</Primary>
+            </div>
+          </div>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Paid plans aren&apos;t decided yet. Today, everything on this page is free.
+          </p>
+        </section>
+
+        <section aria-labelledby="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24">
+          <h2 id="faq" className="scroll-mt-28 text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             Questions and answers
           </h2>
           <div className="mt-10 divide-y divide-border border-y border-border">
@@ -180,6 +235,21 @@ export default function Landing() {
                 <p className="mt-3 text-pretty text-muted-foreground">{a}</p>
               </details>
             ))}
+          </div>
+        </section>
+
+        <section id="about" aria-labelledby="about-title" className="reveal mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
+          <h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">About</h2>
+          <div className="mt-6 space-y-4 text-lg text-pretty text-muted-foreground">
+            <p>
+              Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade
+              spreadsheet, a timer and a chatbot that knew nothing about his classes.
+            </p>
+            <p>
+              So it&apos;s one calm place instead: every deadline in one list, a Home you arrange yourself, and an
+              assistant that has actually read your syllabus. It&apos;s used for real classes every day, and it keeps
+              getting better from what students ask for.
+            </p>
           </div>
         </section>
 
