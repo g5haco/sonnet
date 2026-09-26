@@ -773,18 +773,39 @@ export function SectionHead({
   children: React.ReactNode;
 }) {
   return (
-    <div className="reveal flex flex-col items-center px-4 py-24 text-center">
-      <span className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
+    <motion.div
+      className="flex flex-col items-center px-4 py-24 text-center"
+      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.12 } } }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ amount: 0.5 }}
+    >
+      <motion.span variants={RISE} className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
         <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
         {badge}
-      </span>
-      <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
+      </motion.span>
+      <motion.h2 variants={RISE} className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
         {title} <span className="text-muted-foreground">{muted}</span>
-      </h2>
-      <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
+      </motion.h2>
+      <motion.p variants={RISE} className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
         {children}
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
+  );
+}
+
+// The hero's fade-up, for section headings: plays each time the heading scrolls into view, either direction.
+const RISE = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const } },
+};
+export function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <MotionConfig reducedMotion="user">
+      <motion.div className={className} variants={RISE} initial="hidden" whileInView="visible" viewport={{ amount: 0.5 }}>
+        {children}
+      </motion.div>
+    </MotionConfig>
   );
 }
 
@@ -847,7 +868,7 @@ export function Features({ signUp }: { signUp: string }) {
             </div>
 
             <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div className="reveal">
+              <div>
                 <WidgetsDemo />
                 <Caption icon={LayoutGrid} label="Make Home yours">
                   29 widgets: progress, grades, countdowns, calendar, courses,
@@ -856,7 +877,7 @@ export function Features({ signUp }: { signUp: string }) {
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <CalendarDemo />
                 <Caption icon={CalendarDays} label="One calendar for everything">
                   Class times, deadlines and exams from every course on a day, week or month view, with the week of the
@@ -864,14 +885,14 @@ export function Features({ signUp }: { signUp: string }) {
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <CountdownDemo />
                 <Caption icon={Hourglass} label="Countdowns">
                   The next exam and the next deadline tick down on Home, to the second, so nothing sneaks up on you.
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <div className="flex min-h-[260px] items-center justify-center px-6 py-10 md:min-h-[320px]">
                   <UpNext />
                 </div>
@@ -881,14 +902,14 @@ export function Features({ signUp }: { signUp: string }) {
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <WhatIfDemo />
                 <Caption icon={GraduationCap} label="Grades and what-if">
                   Drag the slider: see what the final does to your course grade before you walk into it.
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <TimerDemo />
                 <Caption icon={Timer} label="A focus timer">
                   Pomodoro-style sessions that add up day by day. This one runs fast so you don&apos;t have to wait 25
@@ -896,7 +917,7 @@ export function Features({ signUp }: { signUp: string }) {
                 </Caption>
               </div>
 
-              <div className="reveal">
+              <div>
                 <StudyDots />
                 <Caption icon={Timer} label="Study days, counted">
                   Every focus session adds up, day by day, so you can see the
@@ -908,7 +929,7 @@ export function Features({ signUp }: { signUp: string }) {
                 {EVERYTHING.map((f) => (
                   <li
                     key={f.title}
-                    className="reveal border-b border-border p-6 sm:border-r"
+                    className="border-b border-border p-6 sm:border-r"
                   >
                     <f.icon
                       className="size-5 text-muted-foreground"

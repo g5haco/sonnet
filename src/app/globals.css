@@ -336,31 +336,33 @@ body:has(main[data-chat]) [data-sonner-toaster][data-y-position="bottom"] {
   }
 }
 
-/* Landing: blocks fade up as they scroll in and fade out as they leave, both ways, on the scroll itself (no JS).
-   Browsers without scroll timelines, and reduced motion, just show them. */
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    transform: translateY(32px);
+/* Landing: nav links glide to their section instead of jumping. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) {
+    scroll-behavior: smooth;
   }
 }
-@keyframes reveal-out {
-  to {
-    opacity: 0;
-    transform: translateY(-32px);
-  }
+
+/* Landing FAQ: answers open and close smoothly (browsers without ::details-content just snap). */
+.faq {
+  interpolate-size: allow-keywords;
 }
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation:
-        reveal-in linear both,
-        reveal-out linear both;
-      animation-timeline: view(), view();
-      animation-range:
-        entry 0% entry 70%,
-        exit 30% exit 100%;
-    }
+.faq details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    block-size 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+    content-visibility 0.35s allow-discrete;
+}
+.faq details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq details::details-content {
+    transition: none;
   }
 }
 

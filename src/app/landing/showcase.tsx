@@ -260,7 +260,7 @@ export function Showcase({ signUp }: { signUp: string }) {
             </div>
 
             <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div className="reveal">
+              <div>
                 <SyncDemo signUp={signUp} />
                 <Caption icon={RefreshCw} label="Connect once">
                   Add your Canvas access token or calendar feed. Courses, assignments and grades arrive in a minute.
@@ -268,7 +268,7 @@ export function Showcase({ signUp }: { signUp: string }) {
               </div>
               <ol className="grid sm:grid-cols-3">
                 {STEPS.map(([title, text], i) => (
-                  <li key={title} className="reveal border-b border-border p-6 sm:border-r sm:border-b-0 sm:last:border-r-0">
+                  <li key={title} className="border-b border-border p-6 sm:border-r sm:border-b-0 sm:last:border-r-0">
                     <span className="font-mono text-sm text-muted-foreground">0{i + 1}</span>
                     <h3 className="mt-3 font-medium">{title}</h3>
                     <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>

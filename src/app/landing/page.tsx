@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Check, ChevronDown, FileText, Presentation } from "lucide-react";
 import Link from "next/link";
 import { Assistant } from "./ai";
-import { Features } from "./features";
+import { Features, Rise } from "./features";
 import { Hero } from "./hero";
 import { Showcase } from "./showcase";
 
@@ -100,7 +100,7 @@ function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href
 
 export default function Landing() {
   return (
-    <div className="dark bg-background text-foreground">
+    <div className="landing dark bg-background text-foreground">
       <header className="fixed inset-x-0 top-3 z-50 px-4">
         <nav
           aria-label="Main"
@@ -167,7 +167,7 @@ export default function Landing() {
         </section>
 
         {/* Works with: a bordered logo row, like CodeForge's "trusted by" grid. */}
-        <section aria-labelledby="works-with" className="reveal mx-auto mt-8 max-w-6xl md:px-4">
+        <section aria-labelledby="works-with" className="mx-auto mt-8 max-w-6xl md:px-4">
           <div className="grid grid-cols-2 gap-px border-y border-border bg-border md:grid-cols-5 md:border-x">
             <p
               id="works-with"
@@ -193,10 +193,10 @@ export default function Landing() {
 
         <Features signUp={SIGN_UP} />
 
-        <section id="pricing" aria-labelledby="pricing-title" className="reveal mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
-          <h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+        <section id="pricing" aria-labelledby="pricing-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
+          <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             Pricing
-          </h2>
+          </h2></Rise>
           <div className="mx-auto mt-10 max-w-md rounded-2xl border border-border bg-card p-8">
             <p className="text-sm text-muted-foreground">Student</p>
             <p className="mt-2 font-heading text-5xl font-semibold">
@@ -220,12 +220,12 @@ export default function Landing() {
         </section>
 
         <section aria-labelledby="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24">
-          <h2 id="faq" className="scroll-mt-28 text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+          <Rise><h2 id="faq" className="scroll-mt-28 text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             Questions and answers
-          </h2>
-          <div className="mt-10 divide-y divide-border border-y border-border">
+          </h2></Rise>
+          <div className="faq mt-10 divide-y divide-border border-y border-border">
             {FAQ.map(([q, a]) => (
-              <details key={q} className="group reveal py-5">
+              <details key={q} className="group py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium [&::-webkit-details-marker]:hidden">
                   {q}
                   <span aria-hidden="true" className="text-muted-foreground transition-transform group-open:rotate-45">
@@ -238,8 +238,8 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="about" aria-labelledby="about-title" className="reveal mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
-          <h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">About</h2>
+        <section id="about" aria-labelledby="about-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
+          <Rise><h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">About</h2></Rise>
           <div className="mt-6 space-y-4 text-lg text-pretty text-muted-foreground">
             <p>
               Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade

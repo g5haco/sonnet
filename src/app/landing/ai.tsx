@@ -303,21 +303,21 @@ export function Assistant({ signUp }: { signUp: string }) {
             </div>
 
             <div className="divide-y divide-border border-t border-border md:col-span-4 md:border-t-0 md:border-l">
-              <div className="reveal">
+              <div>
                 <SyllabusDemo />
                 <Caption icon={FileText} label="It reads the syllabus">
                   Upload it once. Sonnet writes a one-page summary (grading, policies, key dates) and remembers it, so
                   you never dig through the PDF again.
                 </Caption>
               </div>
-              <div className="reveal">
+              <div>
                 <AskDemo />
                 <Caption icon={MessageCircle} label="Ask anything about your classes">
                   Answers come from your syllabus, slides, readings and deadlines, and say where they came from. Tap a
                   question to try it.
                 </Caption>
               </div>
-              <div className="reveal">
+              <div>
                 <Orbit
                   nodes={KNOWS}
                   center={
@@ -331,14 +331,14 @@ export function Assistant({ signUp }: { signUp: string }) {
                   answer &quot;what should I do next&quot; instead of guessing.
                 </Caption>
               </div>
-              <div className="reveal">
+              <div>
                 <AssistantDemo />
                 <Caption icon={CalendarDays} label="It plans. You decide.">
                   Ask it to plan your week, move a deadline or add a class. Every change waits on a card for your yes.
                   Try both buttons.
                 </Caption>
               </div>
-              <div className="reveal">
+              <div>
                 <FlashcardsDemo />
                 <Caption icon={Layers} label="Study guides and flashcards">
                   &quot;Help me study&quot; turns your own slides and readings into a study guide or a deck of flip
@@ -347,7 +347,7 @@ export function Assistant({ signUp }: { signUp: string }) {
               </div>
               <ul className="grid sm:grid-cols-2 lg:grid-cols-3">
                 {TOOLS.map((f) => (
-                  <li key={f.title} className="reveal border-b border-border p-6 sm:border-r">
+                  <li key={f.title} className="border-b border-border p-6 sm:border-r">
                     <f.icon className="size-5 text-muted-foreground" aria-hidden="true" />
                     <h3 className="mt-4 font-medium">{f.title}</h3>
                     <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{f.text}</p>
