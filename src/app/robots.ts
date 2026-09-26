@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/login", disallow: "/" },
+    rules: { userAgent: "*", allow: ["/$", "/login"], disallow: "/" },
     sitemap: "https://www.ericwei.me/sitemap.xml",
   };
 }
