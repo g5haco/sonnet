@@ -37,13 +37,13 @@ import {
   GradeBarsWidget,
   HoursWidget,
   OnTimeWidget,
+  PaceWidget,
   ScoresWidget,
   SplitWidget,
   TrendWidget,
   type GradePoint,
 } from "@/components/chart-widgets";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
@@ -52,8 +52,6 @@ import { GlassWidget, PlantWidget, RollWidget } from "@/components/pro-widgets";
 import { BreatheWidget, BuddyWidget, NoteWidget, SoundWidget, ThreeWidget } from "@/components/study-widgets";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
-// Recharts widgets load on demand, only when one is on the grid.
-const PaceWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.PaceWidget));
 
 // A side-column-width render (w-80) at 3/4 scale, as tall as the h-44 frame, so charts get a real height.
 // Library previews render at the widget's default size (CELL px per grid cell), then scale down to fit the card.

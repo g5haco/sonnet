@@ -10,6 +10,7 @@ import { addDays, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey, gradeLabel } from "@/lib/course";
 import type { FocusSession } from "@/lib/focus";
 import type { Item } from "@/lib/progress";
+import { paceByWeek } from "@/lib/charts";
 import { cn } from "@/lib/utils";
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
@@ -376,3 +377,56 @@ export function CountdownWidget({ items }: { items: Item[] }) {
   );
 }
 
+
+// Per term week: how much came due (dashed line) and how much of it got done (filled).
+export function PaceWidget({ items, term, now }: { items: Item[]; term: Term; now: number }) {
+  const data = paceByWeek(items, term, now);
+  const top = Math.max(1, ...data.map((d) => d.due));
+  const x = (i: number) => (i / Math.max(1, data.length - 1)) * 100;
+  const y = (n: number) => 40 - (n / top) * 36;
+  const line = (k: "due" | "done") => data.map((d, i) => `${x(i)},${y(d[k])}`).join(" ");
+  const last = data.at(-1);
+  return (
+    <Block title="Done vs due" aside="per week">
+      {data.length < 2 ? (
+        <Empty>Fills in week by week as the term goes on.</Empty>
+      ) : (
+        <>
+          <svg
+            viewBox="0 0 100 40"
+            preserveAspectRatio="none"
+            className="min-h-20 w-full flex-1 overflow-visible"
+            role="img"
+            aria-label={data.map((d) => `${d.week}: ${d.done} of ${d.due} done`).join(", ")}
+          >
+            <polygon points={`0,40 ${line("done")} 100,40`} fill="var(--done)" fillOpacity={0.2} />
+            <polyline points={line("done")} fill="none" stroke="var(--done)" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+            <polyline
+              points={line("due")}
+              fill="none"
+              stroke="var(--muted-foreground)"
+              strokeWidth={1.5}
+              strokeDasharray="4 3"
+              vectorEffect="non-scaling-stroke"
+              strokeLinejoin="round"
+            />
+            {/* hover a week for its numbers */}
+            {data.map((d, i) => (
+              <rect key={d.week} x={x(i) - 50 / (data.length - 1)} width={100 / (data.length - 1)} y={0} height={40} fill="transparent">
+                <title>{`${d.week}: ${d.done} of ${d.due} done`}</title>
+              </rect>
+            ))}
+          </svg>
+          <div className="mt-2 flex justify-between font-mono text-xs text-muted-foreground">
+            <span>{data[0].week}</span>
+            <span className="flex gap-3">
+              <span className="text-done">done {last!.done}</span>
+              <span>due {last!.due}</span>
+            </span>
+            <span>{last!.week}</span>
+          </div>
+        </>
+      )}
+    </Block>
+  );
+}
