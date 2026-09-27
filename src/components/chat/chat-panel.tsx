@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Image as ImageIcon, SquarePen, X } from "lucide-react";
+import { FileText, Image as ImageIcon, SquarePen, X } from "@/components/icons";
 import { useEffect, useRef } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";

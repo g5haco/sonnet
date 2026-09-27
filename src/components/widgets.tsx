@@ -1,7 +1,7 @@
 "use client";
 
 // Home's extra widgets (the originals live in their own files). `wide` = the main column, else the side column.
-import { FileText, Link2, StickyNote } from "lucide-react";
+import { FileText, Link2, StickyNote } from "@/components/icons";
 import Link from "next/link";
 import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";

@@ -15,7 +15,7 @@ import {
   RotateCcw,
   Shuffle,
   Trash2,
-} from "lucide-react";
+} from "@/components/icons";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

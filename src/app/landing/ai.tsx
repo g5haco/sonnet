@@ -19,7 +19,7 @@ import {
   Presentation,
   Sparkles,
   Target,
-} from "lucide-react";
+} from "@/components/icons";
 import { MotionConfig, motion, useInView, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";

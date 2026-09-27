@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check } from "@/components/icons";
 import { MetalBadge } from "metal-fx";
 import { useTheme } from "next-themes";
 import { useState } from "react";

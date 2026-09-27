@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { BookOpenText, Brain, FileText, Globe, Mic, Paperclip, Plus, SendHorizontal, Square, X, type LucideIcon } from "lucide-react";
+import { BookOpenText, Brain, FileText, Globe, Mic, Paperclip, Plus, SendHorizontal, Square, X, type IconType } from "@/components/icons";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -609,7 +609,7 @@ export function ChatInput({
 }
 
 // A mode chip: icon only when off; on, it tints and slides its label out.
-function ModeToggle({ on, onToggle, icon: Icon, label, title }: { on: boolean; onToggle: () => void; icon: LucideIcon; label: string; title: string }) {
+function ModeToggle({ on, onToggle, icon: Icon, label, title }: { on: boolean; onToggle: () => void; icon: IconType; label: string; title: string }) {
   return (
     <motion.button
       type="button"

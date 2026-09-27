@@ -2,7 +2,7 @@
 
 // Sonnet Pro Home widgets for the study session itself: Today's three, Soundscape, Breathe, Quick note,
 // and Study buddy. (Roll for it, Study plant and Week glass live in pro-widgets.tsx.)
-import { Check, Pause, Play } from "lucide-react";
+import { Check, Pause, Play } from "@/components/icons";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Block } from "@/components/block";

@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, Sparkles, User } from "lucide-react";
+import { CircleCheck, Sparkles, User } from "@/components/icons";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";

@@ -17,7 +17,7 @@ import {
   Smartphone,
   SunMoon,
   Timer,
-} from "lucide-react";
+} from "@/components/icons";
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Carousel } from "@/components/carousel";

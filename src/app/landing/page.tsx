@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { FileText, Presentation } from "lucide-react";
+import { FileText, Presentation } from "@/components/icons";
 import Link from "next/link";
 import { Assistant } from "./ai";
 import { Features } from "./features";
+import { ScrubText } from "./scrub-text";
 import { Rise, Typed } from "./kit";
 import { SiteNav, Wordmark } from "./nav";
 import { Hero } from "./hero";
@@ -171,16 +172,9 @@ export default function Landing() {
 
         <section id="about" aria-labelledby="about-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
           <Rise><h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl"><Typed text="About" /></h2></Rise>
-          <div className="mt-6 space-y-4 text-lg text-pretty text-muted-foreground">
-            <p>
-              Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade
-              spreadsheet, a timer and a chatbot that knew nothing about his classes.
-            </p>
-            <p>
-              So it&apos;s one calm place instead: every deadline in one list, a Home you arrange yourself, and an
-              AI that has actually read your syllabus. It&apos;s used for real classes every day, and it keeps
-              getting better from what students ask for.
-            </p>
+          <div className="mt-6 space-y-4 text-lg text-pretty text-foreground">
+            <ScrubText text="Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade spreadsheet, a timer and a chatbot that knew nothing about his classes." />
+            <ScrubText text="So it's one calm place instead: every deadline in one list, a Home you arrange yourself, and an AI that has actually read your syllabus. It's used for real classes every day, and it keeps getting better from what students ask for." />
           </div>
         </section>
         </div>

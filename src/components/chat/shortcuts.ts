@@ -10,7 +10,7 @@ import {
   Layers,
   LifeBuoy,
   MessageCircleQuestion,
-} from "lucide-react";
+} from "@/components/icons";
 import type { Item } from "@/lib/progress";
 
 // `focus` = the course code the chat switches to first, so the assistant reads that course's materials.

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "@/components/icons";
 import Link from "next/link";
 import { useState } from "react";
 import { useOpenSettings } from "@/components/app-shell";

@@ -15,7 +15,7 @@ import {
   StickyNote,
   Trash2,
   TriangleAlert,
-} from "lucide-react";
+} from "@/components/icons";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addMaterial, deleteMaterial } from "@/app/actions";

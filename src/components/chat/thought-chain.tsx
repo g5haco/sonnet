@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Search } from "lucide-react";
+import { Globe, Search } from "@/components/icons";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { ThoughtLine } from "@/components/ui/thought-line";

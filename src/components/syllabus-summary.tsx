@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarSearch, MessageCircle, RefreshCw } from "lucide-react";
+import { CalendarSearch, MessageCircle, RefreshCw } from "@/components/icons";
 import dynamic from "next/dynamic";
 
 import { FormError } from "@/components/create-forms";

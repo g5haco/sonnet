@@ -8,7 +8,7 @@ import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { byDue, endOfWeek, type Item } from "@/lib/progress";
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { courseColor } from "@/lib/course";
 

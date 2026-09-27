@@ -1,7 +1,7 @@
 "use client";
 // The landing's floating nav: a "What's included" dropdown (hover, click or keyboard; Escape or a click outside
 // closes it) and, on phones, a menu button with every section.
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "@/components/icons";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 

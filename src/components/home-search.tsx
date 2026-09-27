@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, CalendarDays, Search, Settings, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, Search, Settings, Sparkles } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { smartSearch } from "@/app/actions";

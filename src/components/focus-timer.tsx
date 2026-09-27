@@ -1,6 +1,6 @@
 "use client";
 
-import { Timer, X } from "lucide-react";
+import { Timer, X } from "@/components/icons";
 import { AnimatePresence, motion, useDragControls, useMotionValue } from "motion/react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

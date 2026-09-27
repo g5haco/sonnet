@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, CalendarClock, Check, ChevronDown, FilePlus2, FileUp, Plus } from "lucide-react";
+import { BookOpen, CalendarClock, Check, ChevronDown, FilePlus2, FileUp, Plus } from "@/components/icons";
 import { Liquid } from "liquid-gooey";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cn, isShown } from "@/lib/utils";

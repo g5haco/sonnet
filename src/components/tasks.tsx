@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { StatusMark } from "@/components/ui/status-mark";

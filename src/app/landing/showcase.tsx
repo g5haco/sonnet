@@ -1,7 +1,7 @@
 "use client";
 // "How it works" as a three-step timeline, each step with its own live demo: a Canvas sync that plays itself, files
 // being read, then the courses carousel you land on. Demos replay each time they scroll back into view.
-import { Check, FileText, Workflow, RefreshCw } from "lucide-react";
+import { Check, FileText, Workflow, RefreshCw } from "@/components/icons";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import Link from "next/link";
 import { CoursesDemo } from "./features";

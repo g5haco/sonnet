@@ -1,7 +1,7 @@
 "use client";
 
 import { BorderBeam } from "border-beam";
-import { History, SquarePen, Trash2 } from "lucide-react";
+import { History, SquarePen, Trash2 } from "@/components/icons";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";

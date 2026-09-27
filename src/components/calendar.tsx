@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CalendarPlus, ChevronLeft, ChevronRight, Clock, FilePlus2, Plus } from "lucide-react";
+import { CalendarClock, CalendarPlus, ChevronLeft, ChevronRight, Clock, FilePlus2, Plus } from "@/components/icons";
 import { Liquid } from "liquid-gooey";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarRange, Check, Copy, ListChecks } from "lucide-react";
+import { CalendarRange, Check, Copy, ListChecks } from "@/components/icons";
 import Link from "next/link";
 import { useState } from "react";
 import { useAssistant } from "@/components/app-shell";

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Copy, ExternalLink, RefreshCw } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, ExternalLink, RefreshCw } from "@/components/icons";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";

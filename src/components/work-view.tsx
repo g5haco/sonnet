@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, MessageCircle } from "lucide-react";
+import { ExternalLink, MessageCircle } from "@/components/icons";
 import { useAssistant } from "@/components/app-shell";
 import { useEffect, useState } from "react";
 import { CanvasHtml } from "@/components/canvas-html";

@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Abril_Fatface, Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-// Archivo for text, Abril Fatface for headings (it has one weight, so headings never get faux bold; see globals.css).
-const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"] });
-const abril = Abril_Fatface({ variable: "--font-abril", subsets: ["latin"], weight: "400" });
-const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
+// Geist for text and headings (headings are its semibold, see globals.css), Geist Mono for readouts.
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 // Android Chrome: the keyboard shrinks the page instead of covering it (iOS is handled in app-shell).
 export const viewport: Viewport = {
@@ -30,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${abril.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full">

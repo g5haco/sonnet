@@ -1,6 +1,6 @@
 "use client";
 
-import { Calculator, CalendarClock, FilePlus2, FileUp, Plus, Settings2 } from "lucide-react";
+import { Calculator, CalendarClock, FilePlus2, FileUp, Plus, Settings2 } from "@/components/icons";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";

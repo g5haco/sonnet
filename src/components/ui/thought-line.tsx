@@ -1,9 +1,9 @@
 "use client";
 // ThoughtLine, from React Bits: a breathing, shimmering "thinking" line with a live clock that freezes into
-// "Thought for 4.2s", and a trace of steps beneath it. Ported to TypeScript on lucide icons; trimmed to the
+// "Thought for 4.2s", and a trace of steps beneath it. Ported to TypeScript on Sonnet's icons; trimmed to the
 // props the chat uses (it inherits the text color and size).
 
-import { Check, ChevronDown, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Sparkles } from "@/components/icons";
 import { animate, useReducedMotion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./thought-line.css";

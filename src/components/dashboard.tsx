@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, Plus, RotateCcw, X } from "lucide-react";
+import { Lock, Plus, RotateCcw, X } from "@/components/icons";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
