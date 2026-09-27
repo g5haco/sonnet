@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
 import { useAssistant } from "@/components/app-shell";
 import { ABOUT_ITEM, SHORTCUTS } from "@/components/chat/shortcuts";
-import { UsageLine } from "@/components/usage";
+import { UsagePill } from "@/components/usage";
 import { courseColor } from "@/lib/course";
 import { MAX_FILES, readAttachment, type ChatFile } from "@/lib/attach";
 import { cn, isShown } from "@/lib/utils";
@@ -426,6 +426,8 @@ export function ChatInput({
               )}
             </div>
 
+            <UsagePill busy={busy} />
+
             {/* +: attach files or switch on a mode; turns into an X while its menu is open. */}
             <div className="relative">
               <motion.button
@@ -624,7 +626,6 @@ export function ChatInput({
           </motion.div>
         </div>
       </VoiceBeam>
-      <UsageLine busy={busy} />
     </div>
   );
 }

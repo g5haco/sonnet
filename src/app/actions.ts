@@ -692,5 +692,15 @@ export async function usageStatus() {
     daily: number;
     resets: string;
   }>();
-  return data ?? null;
+  if (!data) return null;
+  // This week's uses by kind, for the details popover (RLS: own rows only).
+  const since = new Date(new Date(data.resets).getTime() - 7 * 864e5).toISOString();
+  const { data: rows } = await supabase.from("ai_usage").select("kind, weight").gte("at", since).gt("weight", 0);
+  const byKind: Record<string, { count: number; weight: number }> = {};
+  for (const r of rows ?? []) {
+    const k = (byKind[r.kind] ??= { count: 0, weight: 0 });
+    k.count += 1;
+    k.weight += r.weight;
+  }
+  return { ...data, byKind };
 }
