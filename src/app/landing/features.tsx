@@ -22,7 +22,6 @@ import {
 import { AnimatePresence, MotionConfig, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Carousel } from "@/components/carousel";
-import { InteractiveListPreview } from "@/components/ui/interactive-list-preview";
 import { CourseFace, type CourseCard } from "@/components/course-card";
 import { courseColor, courseFace } from "@/lib/course";
 import { Caption, CHIP, chip, EASE, SectionHead, useAutoCycle, VIEW } from "./kit";
@@ -35,36 +34,31 @@ const SAMPLE = [
   { code: "PSYC 100", due: "Fri", hue: 295 },
 ];
 
-// Everything else Sonnet does, so the list is complete. img: a real screenshot showing it (hover preview).
+// Everything else Sonnet does, so the list is complete.
 const EVERYTHING = [
   {
     icon: Rss,
     title: "Google Calendar feed",
-    img: "/landing/calendar.webp",
     text: "Subscribe once and your deadlines show up in Google or Apple Calendar.",
   },
   {
     icon: RefreshCw,
     title: "Canvas token or feed",
-    img: "/landing/courses.webp",
     text: "Sync with an access token or just the calendar link. It refreshes daily.",
   },
   {
     icon: FolderOpen,
     title: "Materials per course",
-    img: "/landing/course.webp",
     text: "Slides, readings and notes live with their course, ready for Sonnet.",
   },
   {
     icon: GraduationCap,
     title: "Grades and what-if",
-    img: "/landing/home.webp",
     text: "Canvas grades, trends and gaps, and what you need on the final.",
   },
   {
     icon: Palette,
     title: "A color per course",
-    img: "/landing/courses.webp",
     text: "Every course keeps its color everywhere. Rename or recolor any time.",
   },
   {
@@ -684,7 +678,17 @@ export function Features() {
         </div>
 
         <h3 className="mt-20 px-4 font-heading text-2xl font-semibold tracking-tight">And the rest</h3>
-        <InteractiveListPreview items={EVERYTHING} className="mt-6 md:px-0" />
+        <ul className="mt-6 grid md:grid-cols-2 md:gap-x-10">
+          {EVERYTHING.map((f) => (
+            <li key={f.title} className="flex gap-4 border-b border-border px-4 py-4">
+              <f.icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+              <div className="min-w-0">
+                <p className="font-medium">{f.title}</p>
+                <p className="mt-1 text-sm text-pretty text-muted-foreground">{f.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
     </MotionConfig>
   );
