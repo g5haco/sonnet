@@ -46,6 +46,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
+import { WorkView } from "@/components/work-view";
 import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, freeSpot, isFunWidget, isProWidget, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { GlassWidget, PlantWidget, RollWidget } from "@/components/pro-widgets";
@@ -111,6 +112,7 @@ export function Dashboard({
   const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState<"all" | "tools" | "fun">("all");
   const [saving, startSave] = useTransition();
+  const [openId, setOpenId] = useState<string | null>(null); // the work item open in WorkView
 
   if (!term) return <Onboarding name={name} />;
   const termStart = new Date(`${term.start}T00:00:00`);
@@ -169,6 +171,7 @@ export function Dashboard({
         checked={checked}
         onToggle={toggle}
         onDelete={remove}
+        onOpen={demo ? undefined : (i) => setOpenId(i.id)}
         onAddCourse={courses.length ? undefined : () => create("course")}
       />
     ),
@@ -256,6 +259,7 @@ export function Dashboard({
         checked={checked}
         onToggle={toggle}
         onDelete={remove}
+        onOpen={demo ? undefined : (i) => setOpenId(i.id)}
         empty="Nothing due in the next 24 hours."
       />
     ),
@@ -410,6 +414,8 @@ export function Dashboard({
       )}
       <Tour />
       {/* The widget library: every widget with a live preview (your real data). */}
+      {/* same view as the course page; reads the live row so Mark as done updates the widget too */}
+      <WorkView item={shown.find((i) => i.id === openId) ?? null} onClose={() => setOpenId(null)} onToggle={toggle} />
       <Dialog open={adding} onOpenChange={setAdding}>
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
           <DialogHeader>
