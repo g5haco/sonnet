@@ -190,7 +190,7 @@ export function SnapGrid({
                     <span
                       aria-hidden="true"
                       title="Drag to resize"
-                      className="absolute right-1 bottom-1 z-10 grid size-7 cursor-nwse-resize touch-none place-items-center rounded-full bg-foreground text-background shadow-sm"
+                      className="absolute right-1 bottom-1 z-10 grid size-7 cursor-nwse-resize touch-none place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
                       {...pointer(p.id, "size")}
                     >
                       <svg viewBox="0 0 10 10" className="size-3" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -35,3 +35,7 @@ export const gradeLabel = (grade?: number | null) => (grade == null ? "–" : `$
 // ponytail: assumes the current grade stands for everything except the final; per-group weights if that's too rough.
 export const needOnFinal = (current: number, target: number, weight: number) =>
   (target - current * (1 - weight / 100)) / (weight / 100);
+
+// US letter grade for a percent (the common 93/90/87 scale).
+const LETTERS = [[93, "A"], [90, "A-"], [87, "B+"], [83, "B"], [80, "B-"], [77, "C+"], [73, "C"], [70, "C-"], [67, "D+"], [60, "D"]] as const;
+export const letterGrade = (grade: number) => LETTERS.find(([cut]) => grade >= cut)?.[1] ?? "F";

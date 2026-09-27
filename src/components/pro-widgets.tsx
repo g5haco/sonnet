@@ -1,10 +1,10 @@
 "use client";
 
 // Sonnet Pro's playful Home widgets: Roll for it, Study plant and Week glass. (Study tools: study-widgets.tsx.)
-import { Dices, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Block } from "@/components/block";
+import { when } from "@/components/up-next";
 import { courseColor } from "@/lib/course";
 import type { FocusSession } from "@/lib/focus";
 import { endOfWeek, type Item } from "@/lib/progress";
@@ -73,11 +73,33 @@ export function GlassWidget({ items, now }: { items: Item[]; now: number }) {
   );
 }
 
-// Roll for it: can't pick what to work on? Roll. Titles spin like a slot machine and land on one,
-// weighted toward what's due soonest.
-export function RollWidget({ items, now }: { items: Item[]; now: number }) {
-  const open = items.filter((i) => !i.doneAt && Date.parse(i.due) > now).sort((a, b) => Date.parse(a.due) - Date.parse(b.due)).slice(0, 8);
-  const [shown, setShown] = useState<Item | null>(null);
+// Roll for it: can't pick what to work on? Roll the die. Task cards shuffle past like a deck and land on one,
+// weighted toward what's due soonest. The card fills the widget; the die sits on its corner.
+const PIPS: Record<number, number[]> = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+
+function Die({ face, rolling }: { face: number; rolling: boolean }) {
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="grid size-12 grid-cols-3 grid-rows-3 place-items-center rounded-xl bg-foreground p-2 shadow-lg"
+      animate={rolling ? { rotate: [0, 90, 180, 270, 360], y: [0, -10, 0, -6, 0] } : { rotate: 0, y: 0 }}
+      transition={rolling ? { duration: 0.45, repeat: Infinity, ease: "linear" } : { type: "spring", bounce: 0.5, duration: 0.5 }}
+    >
+      {Array.from({ length: 9 }, (_, k) => (
+        <span key={k} className={cn("size-2 rounded-full", PIPS[face].includes(k) ? "bg-background" : "bg-transparent")} />
+      ))}
+    </motion.span>
+  );
+}
+
+export function RollWidget({ items, now, preset }: { items: Item[]; now: number; preset?: boolean }) {
+  const open = items
+    .filter((i) => !i.doneAt && Date.parse(i.due) > now)
+    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))
+    .slice(0, 8);
+  // preset: the widget library shows a landed roll
+  const [shown, setShown] = useState<Item | null>(preset ? (open[1] ?? open[0] ?? null) : null);
+  const [face, setFace] = useState(preset ? 5 : 6);
   const [rolling, setRolling] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -88,64 +110,81 @@ export function RollWidget({ items, now }: { items: Item[]; now: number }) {
     // weights 8, 7, 6…: sooner is likelier
     const bag = open.flatMap((i, k) => Array<Item>(open.length - k).fill(i));
     const pick = bag[Math.floor(Math.random() * bag.length)];
-    if (still) return setShown(pick);
+    const land = 1 + Math.floor(Math.random() * 6);
+    if (still) {
+      setFace(land);
+      return setShown(pick);
+    }
     setRolling(true);
     let n = 0;
     const tick = () => {
       n++;
-      if (n >= 12) {
+      setFace(1 + Math.floor(Math.random() * 6));
+      if (n >= 10) {
+        setFace(land);
         setShown(pick);
         setRolling(false);
         return;
       }
       setShown(open[n % open.length]);
-      timer.current = setTimeout(tick, 40 + n * n * 2.5); // slows down like a real wheel
+      timer.current = setTimeout(tick, 60 + n * n * 4); // slows down like a real roll
     };
     tick();
   };
+
+  const tint = shown && `color-mix(in oklch, ${courseColor(shown.hue)} ${rolling ? 10 : 20}%, var(--secondary))`;
+  const due = shown && when(shown.due, now);
 
   return (
     <Block title="Roll for it" aside={shown && !rolling ? "do this one" : "can't decide?"} className="overflow-hidden">
       {!open.length ? (
         <p data-empty className="m-auto text-center text-sm text-muted-foreground">Nothing open to roll for. Nice.</p>
       ) : (
-        <div className="flex flex-1 items-center gap-4">
-          <motion.button
-            type="button"
-            onClick={roll}
-            whileTap={{ scale: 0.9 }}
-            animate={rolling ? { rotate: [0, 360] } : { rotate: 0 }}
-            transition={rolling ? { duration: 0.5, repeat: Infinity, ease: "linear" } : { duration: 0.3 }}
-            aria-label="Roll for what to work on"
-            className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {shown && !rolling ? <RotateCcw className="size-5" /> : <Dices className="size-6" />}
-          </motion.button>
-          <div className="relative h-14 min-w-0 flex-1 overflow-hidden" aria-live="polite">
+        <button
+          type="button"
+          onClick={roll}
+          aria-label={shown && !rolling ? `Rolled: ${shown.course}, ${shown.title}. Roll again` : "Roll for what to work on"}
+          className="group relative flex min-h-24 flex-1 outline-none [perspective:800px] focus-visible:[&>div]:ring-2 focus-visible:[&>div]:ring-ring"
+        >
+          {/* the deck behind the card */}
+          <span aria-hidden="true" className="absolute inset-x-3 -bottom-1.5 top-2 rounded-2xl bg-secondary/50" />
+          <span aria-hidden="true" className="absolute inset-x-1.5 -bottom-0.5 top-1 rounded-2xl bg-secondary/70" />
+          <div className="relative flex flex-1 overflow-hidden rounded-2xl bg-secondary" aria-live="polite">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
-                key={shown?.id ?? "none"}
-                initial={{ transform: "translateY(100%)", opacity: 0 }}
-                animate={{ transform: "translateY(0%)", opacity: 1 }}
-                exit={{ transform: "translateY(-100%)", opacity: 0 }}
-                transition={{ duration: rolling ? 0.08 : 0.35, ease: EASE }}
-                className="flex h-14 flex-col justify-center"
+                key={`${shown?.id ?? "none"}-${face}`}
+                initial={{ opacity: 0, y: "35%", rotateX: -35 }}
+                animate={{ opacity: 1, y: "0%", rotateX: 0 }}
+                exit={{ opacity: 0, y: "-35%", rotateX: 35 }}
+                transition={rolling ? { duration: 0.12, ease: EASE } : { type: "spring", bounce: 0.35, duration: 0.5 }}
+                className="flex flex-1 flex-col justify-between p-4 pr-18 text-left"
+                style={tint ? { background: tint } : undefined}
               >
                 {shown ? (
                   <>
-                    <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                       <span className="size-2 rounded-full" style={{ background: courseColor(shown.hue) }} />
-                      {shown.course}
-                    </p>
-                    <p className="truncate font-medium">{shown.title}</p>
+                      {shown.course} · {shown.kind}
+                    </span>
+                    <span className="line-clamp-3 font-heading text-2xl leading-tight text-balance">{shown.title}</span>
+                    <span className={cn("font-mono text-xs", due?.soon ? "text-warning" : "text-muted-foreground")}>
+                      due {due?.label}
+                    </span>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Tap the dice. It picks, you start.</p>
+                  <>
+                    <span className="font-mono text-xs text-muted-foreground">{open.length} open to pick from</span>
+                    <span className="font-heading text-2xl leading-tight">Can&apos;t decide what&apos;s next?</span>
+                    <span className="text-sm text-muted-foreground">Roll the die. It picks, you start.</span>
+                  </>
                 )}
               </motion.div>
             </AnimatePresence>
+            <span className="absolute right-4 bottom-4 transition-transform duration-200 group-hover:-rotate-6">
+              <Die face={face} rolling={rolling} />
+            </span>
           </div>
-        </div>
+        </button>
       )}
     </Block>
   );

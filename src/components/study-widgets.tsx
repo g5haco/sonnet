@@ -47,13 +47,17 @@ function useStored(key: string): [string | null, (v: string) => void] {
 const byDue = (a: Item, b: Item) => Date.parse(a.due) - Date.parse(b.due);
 
 // Today's three: commit to three things for today and check them off. A fresh list every day.
-export function ThreeWidget({ items, now, onToggle }: { items: Item[]; now: number; onToggle?: (id: string) => void }) {
+export function ThreeWidget({ items: given, now, onToggle, preset }: { items: Item[]; now: number; onToggle?: (id: string) => void; preset?: boolean }) {
   const [raw, save] = useStored(`sonnet:three:${dayKey(new Date(now))}`);
   const [choosing, setChoosing] = useState(false);
   let picked: string[] = [];
   try {
     picked = raw ? JSON.parse(raw) : [];
   } catch {}
+  // preset: the widget library shows three picked, one checked off
+  if (preset) picked = given.filter((i) => Date.parse(i.due) > now - 864e5).sort(byDue).slice(0, 3).map((i) => i.id);
+  const doneOne = preset ? picked[0] : null;
+  const items = doneOne ? given.map((i) => (i.id === doneOne ? { ...i, doneAt: i.doneAt ?? new Date(now).toISOString() } : i)) : given;
   const chosen = picked.map((id) => items.find((i) => i.id === id)).filter((i): i is Item => !!i);
   const candidates = items.filter((i) => !i.doneAt && !picked.includes(i.id)).sort(byDue).slice(0, 6);
   const done = chosen.filter((i) => i.doneAt).length;
@@ -354,8 +358,9 @@ export function BreatheWidget() {
 }
 
 // Quick note: a scratchpad on Home. Saved on this device as you type.
-export function NoteWidget() {
-  const [note, save] = useStored("sonnet:note");
+export function NoteWidget({ preset }: { preset?: string }) {
+  const [stored, save] = useStored("sonnet:note");
+  const note = preset ?? stored;
   return (
     <Block title="Quick note" aside="saved on this device">
       <textarea

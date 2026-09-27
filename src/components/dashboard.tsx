@@ -14,7 +14,7 @@ import { Tour } from "@/components/tour";
 import { ExamRing } from "@/components/exam-ring";
 import { ProgressBlock } from "@/components/progress-block";
 import { UpNext, useWork } from "@/components/up-next";
-import { courseColor, gradeLabel } from "@/lib/course";
+import { courseColor, gradeLabel, letterGrade } from "@/lib/course";
 import type { ClassMeeting, Term } from "@/lib/calendar";
 import { sampleData } from "@/lib/sample";
 import { termGlance } from "@/lib/term";
@@ -47,7 +47,7 @@ import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
-import { DEFAULT_LAYOUT, freeSpot, isProWidget, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { DEFAULT_LAYOUT, freeSpot, isFunWidget, isProWidget, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
 import { GlassWidget, PlantWidget, RollWidget } from "@/components/pro-widgets";
 import { BreatheWidget, BuddyWidget, NoteWidget, SoundWidget, ThreeWidget } from "@/components/study-widgets";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
@@ -56,7 +56,10 @@ import { endOfWeek, progress, type Item } from "@/lib/progress";
 const PaceWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.PaceWidget));
 
 // A side-column-width render (w-80) at 3/4 scale, as tall as the h-44 frame, so charts get a real height.
-const PREVIEW = "flex h-[235px] w-80 origin-top-left scale-[0.75] flex-col *:flex-1";
+// Library previews render at the widget's default size (CELL px per grid cell), then scale down to fit the card.
+const CELL = 88;
+const FRAME = { w: 340, h: 210 };
+const SAMPLE_NOTE = ["Ask Prof. Lee about Q4 on the midterm", "Ch. 7 p. 212: the good diagram", "Lab partner: Maya"].join("\n");
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
@@ -108,6 +111,7 @@ export function Dashboard({
   const [lastSaved, setLastSaved] = useState(saved);
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [filter, setFilter] = useState<"all" | "tools" | "fun">("all");
   const [saving, startSave] = useTransition();
 
   if (!term) return <Onboarding name={name} />;
@@ -156,8 +160,9 @@ export function Dashboard({
     history: GradePoint[];
     meetings?: ClassMeeting[];
     term: Term;
+    demo?: boolean; // the library: widgets that start empty show a filled-in state
   };
-  const render = ({ shown, courses, cards, sessions, materials, history, meetings, term }: Data): Record<WidgetId, ReactNode> => ({
+  const render = ({ shown, courses, cards, sessions, materials, history, meetings, term, demo }: Data): Record<WidgetId, ReactNode> => ({
     progress: <ProgressBlock items={shown} now={now} termStart={new Date(`${term.start}T00:00:00`)} weeks={term.weeks} />,
     next: (
       <UpNext
@@ -209,20 +214,30 @@ export function Dashboard({
         {courses.length === 0 ? (
           <p data-empty className="text-sm text-muted-foreground">Your courses will line up here.</p>
         ) : (
-          <ul className="-my-2 grid min-w-0 flex-1 auto-rows-[minmax(2.5rem,1fr)] divide-y divide-border @xl:grid-cols-2 @xl:gap-x-8 @xl:divide-y-0">
+          // One row per course: name (code under it), a bar to 100%, the percent, and the letter.
+          <ul className="grid min-w-0 flex-1 auto-rows-[minmax(2.75rem,1fr)] gap-1.5 @xl:grid-cols-2">
             {courses.map((c) => (
-              <li key={c.id} className="flex items-center gap-3 py-2">
-                <span className="size-2 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
-                {/* Narrow (side column): just the code, bigger. Wide: code and name. */}
-                <span className="min-w-0 flex-1 truncate font-mono text-sm @md:text-xs @md:text-muted-foreground">
-                  {c.code}
-                  {c.name && <span className="ml-2 hidden font-sans text-sm text-foreground @md:inline">{c.name}</span>}
+              <li key={c.id} className="flex min-w-0 items-center gap-3 rounded-xl bg-secondary/60 px-3 py-1.5">
+                <span className="h-7 w-1 shrink-0 rounded-full" style={{ background: courseColor(c.hue) }} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">{c.name || c.code}</span>
+                  {c.name && <span className="block truncate font-mono text-[11px] text-muted-foreground">{c.code}</span>}
+                  {c.grade != null && (
+                    <span className="mt-1 hidden h-1 overflow-hidden rounded-full bg-foreground/10 @xs:block" aria-hidden="true">
+                      <span
+                        className="block h-full rounded-full"
+                        style={{ width: `${Math.min(100, c.grade)}%`, background: courseColor(c.hue) }}
+                      />
+                    </span>
+                  )}
                 </span>
+                <span className="font-mono text-xs text-muted-foreground tabular-nums">{c.grade != null && gradeLabel(c.grade)}</span>
                 <span
-                  className={cn("font-mono tabular-nums", c.grade == null && "text-muted-foreground")}
-                  aria-label={c.grade == null ? "No grade yet" : undefined}
+                  className={cn("grid h-8 min-w-10 place-items-center rounded-lg px-1.5 font-heading text-lg", c.grade == null && "text-muted-foreground")}
+                  style={c.grade != null ? { background: `color-mix(in oklch, ${courseColor(c.hue)} 22%, transparent)` } : undefined}
+                  aria-label={c.grade == null ? "No grade yet" : `${gradeLabel(c.grade)}, ${letterGrade(c.grade)}`}
                 >
-                  {gradeLabel(c.grade)}
+                  {c.grade == null ? "–" : letterGrade(c.grade)}
                 </span>
               </li>
             ))}
@@ -258,19 +273,19 @@ export function Dashboard({
     split: <SplitWidget sessions={sessions} courses={courses} />,
     countdown: <CountdownWidget items={shown} />,
     pace: <PaceWidget items={shown} term={term} now={now} />,
-    roll: <RollWidget items={shown} now={now} />,
+    roll: <RollWidget items={shown} now={now} preset={demo} />,
     plant: <PlantWidget sessions={sessions} now={now} />,
     glass: <GlassWidget items={shown} now={now} />,
-    three: <ThreeWidget items={shown} now={now} onToggle={toggle} />,
+    three: <ThreeWidget items={shown} now={now} onToggle={toggle} preset={demo} />,
     sounds: <SoundWidget />,
     breathe: <BreatheWidget />,
-    note: <NoteWidget />,
+    note: <NoteWidget preset={demo ? SAMPLE_NOTE : undefined} />,
     buddy: <BuddyWidget items={shown} sessions={sessions} now={now} />,
   });
   const view = render({ shown, courses, cards, sessions, materials, history, term });
-  // Library previews: a widget with nothing real to show yet (its empty state) swaps to the sample render.
+  // Library previews always use the sample set, so every widget shows what it can do at its best.
   const fake = adding ? sampleData(now) : null;
-  const sample = fake && render({ ...fake, shown: fake.items });
+  const sample = fake && render({ ...fake, shown: fake.items, demo: true });
   // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {
     if (!pro && isProWidget(id)) return;
@@ -384,7 +399,7 @@ export function Dashboard({
               setLayout((l) => l.filter((x) => x.id !== id));
               document.getElementById("home-done")?.focus(); // the button is about to disappear
             }}
-            className="absolute top-2 left-2 z-10 grid size-8 place-items-center rounded-full bg-foreground text-background shadow-sm transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
+            className="absolute top-2 left-2 z-10 grid size-8 place-items-center rounded-full text-muted-foreground transition-[color,scale] hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90"
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -402,50 +417,81 @@ export function Dashboard({
           <DialogHeader>
             <DialogTitle>Widgets</DialogTitle>
             <DialogDescription>
-              Previews use your real data, or sample data until you have some. A new widget takes the first free space; drag it anywhere.
+              Previews use sample data to show each widget at its best. A new widget takes the first free space; drag it anywhere.
               {!pro && " Widgets marked Pro come with Sonnet Pro (coming soon)."}
             </DialogDescription>
           </DialogHeader>
+          <div role="radiogroup" aria-label="Show" className="flex gap-1.5">
+            {(
+              [
+                ["all", "All"],
+                ["tools", "Study tools"],
+                ["fun", "Fun"],
+              ] as const
+            ).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                role="radio"
+                aria-checked={filter === k}
+                onClick={() => setFilter(k)}
+                className={cn(
+                  "h-9 rounded-full px-4 text-sm transition-colors",
+                  filter === k ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <ul className="grid gap-4 sm:grid-cols-2">
             {/* Free first, then Pro, each in their usual order. */}
             {(Object.keys(WIDGETS) as WidgetId[])
+              .filter((id) => filter === "all" || (filter === "fun") === isFunWidget(id))
               .sort((a, b) => (pro ? 0 : +isProWidget(a) - +isProWidget(b)))
               .map((id) => {
-              const on = layout.some((w) => w.id === id);
-              const locked = !pro && isProWidget(id);
-              return (
-                <li key={id} className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3">
-                  {/* A side-column-width render, shrunk to fit and cut off at the bottom. */}
-                  {/* If your data leaves it empty (peer-has), the sample render shows instead, labeled. */}
-                  <div aria-hidden="true" inert className="relative h-44 overflow-hidden rounded-xl">
-                    <div className={cn(PREVIEW, "peer has-data-empty:hidden")}>{view[id]}</div>
-                    <div className={cn(PREVIEW, "hidden peer-has-data-empty:flex")}>{sample?.[id]}</div>
-                    <span className="absolute top-2 right-2 hidden rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px] text-muted-foreground peer-has-data-empty:block">
-                      sample
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="mr-auto flex items-center gap-2 text-sm font-medium">
-                      {WIDGETS[id].label}
-                      {isProWidget(id) && (
-                        <span className="rounded-full bg-brand/15 px-2 py-0.5 font-mono text-[10px] text-brand">PRO</span>
-                      )}
-                    </span>
-                    {locked ? (
-                      <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                        <Lock className="size-3" aria-hidden="true" /> Pro, soon
+                const on = layout.some((w) => w.id === id);
+                const locked = !pro && isProWidget(id);
+                // The widget at its default size, scaled to fit the frame.
+                const W = WIDGETS[id].w * CELL;
+                const H = WIDGETS[id].h * CELL;
+                const k = Math.min(FRAME.w / W, FRAME.h / H, 1);
+                return (
+                  <li key={id} className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3">
+                    <div
+                      aria-hidden="true"
+                      inert
+                      className="relative grid place-items-center overflow-hidden rounded-xl bg-background/60"
+                      style={{ height: FRAME.h + 16 }}
+                    >
+                      <div style={{ width: W * k, height: H * k }}>
+                        <div className="flex origin-top-left *:flex-1" style={{ width: W, height: H, transform: `scale(${k})` }}>
+                          {sample?.[id]}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="mr-auto flex items-center gap-2 text-sm font-medium">
+                        {WIDGETS[id].label}
+                        {isProWidget(id) && (
+                          <span className="rounded-full bg-brand/15 px-2 py-0.5 font-mono text-[10px] text-brand">PRO</span>
+                        )}
                       </span>
-                    ) : on ? (
-                      <span className="font-mono text-xs text-muted-foreground">on Home</span>
-                    ) : (
-                      <Button type="button" size="sm" onClick={() => add(id)} className="h-8 rounded-full px-3">
-                        Add
-                      </Button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
+                      {locked ? (
+                        <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                          <Lock className="size-3" aria-hidden="true" /> Pro, soon
+                        </span>
+                      ) : on ? (
+                        <span className="font-mono text-xs text-muted-foreground">on Home</span>
+                      ) : (
+                        <Button type="button" size="sm" onClick={() => add(id)} className="h-8 rounded-full px-3">
+                          Add
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
           </ul>
         </DialogContent>
       </Dialog>

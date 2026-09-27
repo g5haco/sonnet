@@ -5,7 +5,7 @@ export const COLS = 12;
 export const ROWS = 6;
 
 // Every widget: its accessible name, default size, and smallest size (in cells). pro: Sonnet Pro only.
-type Spec = { label: string; w: number; h: number; minW?: number; minH?: number; pro?: true };
+type Spec = { label: string; w: number; h: number; minW?: number; minH?: number; pro?: true; fun?: true };
 export const WIDGETS = {
   progress: { label: "Progress", w: 5, h: 2, minW: 3, minH: 2 },
   next: { label: "Up next", w: 5, h: 4, minW: 3, minH: 2 },
@@ -18,7 +18,7 @@ export const WIDGETS = {
   // 1 column wide: today; 1 row tall: this week; bigger: the month.
   calendar: { label: "Calendar", w: 3, h: 1, minW: 1, minH: 1 },
   today: { label: "Due today", w: 3, h: 2 },
-  streak: { label: "Streak", w: 2, h: 1 },
+  streak: { label: "Streak", w: 2, h: 1, fun: true },
   materials: { label: "Recent materials", w: 3, h: 2, pro: true },
   ask: { label: "Ask about…", w: 4, h: 1, pro: true },
   trend: { label: "Grade trend", w: 4, h: 2, minW: 3, pro: true },
@@ -35,14 +35,16 @@ export const WIDGETS = {
   sounds: { label: "Soundscape", w: 3, h: 2, minH: 2, pro: true },
   breathe: { label: "Breathe", w: 2, h: 2, minH: 2, pro: true },
   note: { label: "Quick note", w: 3, h: 2, pro: true },
-  buddy: { label: "Study buddy", w: 2, h: 2, minH: 2, pro: true },
-  roll: { label: "Roll for it", w: 3, h: 2, minH: 2, pro: true },
-  plant: { label: "Study plant", w: 2, h: 2, minH: 2, pro: true },
-  glass: { label: "Week glass", w: 3, h: 2, minH: 2, pro: true },
+  buddy: { label: "Study buddy", w: 2, h: 2, minH: 2, pro: true, fun: true },
+  roll: { label: "Roll for it", w: 3, h: 2, minH: 2, pro: true, fun: true },
+  plant: { label: "Study plant", w: 2, h: 2, minH: 2, pro: true, fun: true },
+  glass: { label: "Week glass", w: 3, h: 2, minH: 2, pro: true, fun: true },
 } satisfies Record<string, Spec>;
 
 export type WidgetId = keyof typeof WIDGETS;
 export const isProWidget = (id: WidgetId) => !!(WIDGETS[id] as Spec).pro;
+// The library's two filters: fun widgets, and study tools (everything else).
+export const isFunWidget = (id: WidgetId) => !!(WIDGETS[id] as Spec).fun;
 export type Place = { id: WidgetId; x: number; y: number; w: number; h: number };
 export type Layout = Place[];
 
