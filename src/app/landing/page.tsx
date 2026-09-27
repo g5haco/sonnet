@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { FileText, Presentation } from "@/components/icons";
 import Link from "next/link";
@@ -96,11 +97,11 @@ function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href
 export default function Landing() {
   return (
     <div className="landing dark relative isolate text-foreground">
-      {/* One sky behind the whole page: the dusk meadow at the top, the same meadow at night once you scroll past
-          the hero (dimmed under the sections), fading to the solid theme color by FAQ and About. See globals.css. */}
+      {/* One backdrop behind the whole page: a library at night behind the hero, the campus once you scroll past
+          it (dimmed under the sections), fading to the solid theme color by FAQ and About. See globals.css. */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-background">
-        <div className="absolute inset-0 bg-[url(/login/meadow.webp)] bg-cover bg-center brightness-[0.5]" />
-        <div className="sky-night absolute inset-0 scale-110 bg-[url(/landing/night.webp)] bg-cover bg-center blur-md" />
+        <div className="absolute inset-0 bg-[url(/landing/library.webp)] bg-cover bg-center brightness-[0.55]" />
+        <div className="sky-night absolute inset-0 scale-110 bg-[url(/landing/campus.webp)] bg-cover bg-center blur-md" />
         <div className="sky-dim absolute inset-0 bg-background" />
         <div className="sky-deep absolute inset-0 bg-background" />
         <div className="sky-grain absolute inset-0" />
@@ -108,7 +109,7 @@ export default function Landing() {
       <SiteNav signUp={SIGN_UP} />
 
       <main>
-        {/* Hero: the real app on the dusk meadow (the page's sky layer). */}
+        {/* Hero: the real app over the night library (the page's backdrop layer). */}
         <section className="landing-hero relative isolate overflow-hidden px-4 pt-36 pb-16 sm:pt-44">
           <Hero signUp={SIGN_UP} />
         </section>
@@ -172,18 +173,26 @@ export default function Landing() {
 
         <section id="about" aria-labelledby="about-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
           <Rise><h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl"><Typed text="About" /></h2></Rise>
-          <div className="mt-6 space-y-4 text-lg text-pretty text-foreground">
+          <Image
+            src="/landing/desk.webp"
+            alt="A desk at night: an open laptop, notebooks and a lamp"
+            width={1200}
+            height={900}
+            sizes="(min-width: 768px) 720px, 100vw"
+            className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover"
+          />
+          <div className="mt-8 space-y-4 text-lg text-pretty text-foreground">
             <ScrubText text="Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade spreadsheet, a timer and a chatbot that knew nothing about his classes." />
             <ScrubText text="So it's one calm place instead: every deadline in one list, a Home you arrange yourself, and an AI that has actually read your syllabus. It's used for real classes every day, and it keeps getting better from what students ask for." />
           </div>
         </section>
         </div>
 
-        {/* Closing call to action: its own night meadow, fading in from the solid page color above it. */}
+        {/* Closing call to action: the campus at night, fading in from the solid page color above it. */}
         <section className="relative isolate flex min-h-[85svh] flex-col items-center justify-center overflow-hidden px-4 py-40 text-center">
           <div
             aria-hidden="true"
-            className="absolute inset-0 -z-10 scale-110 bg-[url(/landing/night.webp)] bg-cover bg-bottom blur-md brightness-75 mask-[linear-gradient(to_bottom,transparent,black_60%)]"
+            className="absolute inset-0 -z-10 bg-[url(/landing/campus.webp)] bg-cover bg-center brightness-[0.6] mask-[linear-gradient(to_bottom,transparent,black_60%)]"
           />
           <h2 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
             Stop losing deadlines in tabs.
