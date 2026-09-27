@@ -37,20 +37,14 @@ export function Hero({ signUp }: { signUp: string }) {
           href="#features"
           className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-sm sm:min-h-0 backdrop-blur hover:bg-accent"
         >
-          <span
-            className="chip rounded-full px-1.5 font-mono text-xs"
-            style={{ "--chip": "var(--done)" } as React.CSSProperties}
-          >
-            free
-          </span>
           Made for students on Canvas <span aria-hidden="true">→</span>
         </motion.a>
         <h1 className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl">
           <Typed text="All your classes, one calm place." after={4} />
         </h1>
         <motion.p variants={rise} className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
-          Sonnet is an AI that has read your syllabus, slides and readings, and knows every deadline, grade and class
-          time. Plus your Canvas work, calendar and grades in one calm place.
+          An AI that knows your syllabus, every deadline, grade and class time, with your Canvas work and calendar
+          alongside.
         </motion.p>
         <motion.div variants={rise} className="mt-8 flex flex-wrap justify-center gap-3">
           <Link

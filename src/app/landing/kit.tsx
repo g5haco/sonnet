@@ -81,8 +81,8 @@ export function SectionHead({
   muted,
   children,
 }: {
-  icon: Icon;
-  badge: string;
+  icon?: Icon;
+  badge?: string; // a small label above the title; most sections go without
   title: string;
   muted: string;
   children: React.ReactNode;
@@ -95,11 +95,13 @@ export function SectionHead({
       whileInView="visible"
       viewport={{ amount: 0.5 }}
     >
-      <motion.span variants={RISE} className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
-        <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
-        {badge}
-      </motion.span>
-      <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
+      {badge && Icon && (
+        <motion.span variants={RISE} className="mb-4 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium">
+          <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+          {badge}
+        </motion.span>
+      )}
+      <h2 className="max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
         <Typed text={title} after={4} />{" "}
         <span className="text-muted-foreground">
           <Typed text={muted} after={4 + title.length} />

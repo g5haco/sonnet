@@ -161,6 +161,11 @@
     transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
+  /* No 300ms double-tap-zoom wait on phones, and no grey flash: every control has its own pressed state. */
+  :where(a, button, input, select, textarea, label, [role="button"]) {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
   html {
     @apply font-sans;
   }

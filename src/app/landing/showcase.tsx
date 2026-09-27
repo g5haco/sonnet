@@ -36,17 +36,17 @@ function SyncDemo({ signUp }: { signUp: string }) {
         <Window title="Connect Canvas">
           <div className="min-h-44 space-y-1.5 p-5 font-mono text-[13px]" aria-live="polite">
             <p>
-              <span className="text-muted-foreground">$</span> sonnet connect canvas
+              <span className="text-muted-foreground">Canvas token</span> ········
             </p>
             {SYNC.slice(0, step).map((line) => (
               <motion.p key={line} {...fadeUp} className="text-muted-foreground">
                 {line}
-                {!line.endsWith(".") && (step > SYNC.indexOf(line) + 1 ? "" : "...")}
+                {!line.endsWith(".") && (step > SYNC.indexOf(line) + 1 ? "" : "…")}
               </motion.p>
             ))}
             {synced && (
               <motion.p {...fadeUp} className="text-done">
-                ✓ All set. 3 things due this week.
+                All set. 3 things due this week.
               </motion.p>
             )}
           </div>
@@ -134,11 +134,10 @@ export function Showcase({ signUp }: { signUp: string }) {
         </SectionHead>
 
         <ol className="border-y border-border md:border-x">
-          {STEPS.map((s, i) => (
+          {STEPS.map((s) => (
             <li key={s.title} className="grid grid-cols-1 border-border not-last:border-b md:grid-cols-5">
               <div className="relative p-8 md:col-span-2 lg:p-12">
-                <span className="font-mono text-5xl text-muted-foreground/60 tabular-nums">0{i + 1}</span>
-                <h3 className="mt-4 font-heading text-2xl font-semibold tracking-tight">{s.title}</h3>
+                <h3 className="font-heading text-2xl font-semibold tracking-tight">{s.title}</h3>
                 <p className="mt-2 text-pretty text-muted-foreground">{s.text}</p>
               </div>
               <div className="border-t border-border md:col-span-3 md:border-t-0 md:border-l">{s.demo(signUp)}</div>

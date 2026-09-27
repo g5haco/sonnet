@@ -291,7 +291,7 @@ export function Assistant({ signUp }: { signUp: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <section id="assistant" className="mx-auto max-w-6xl scroll-mt-24 md:px-4">
-        <SectionHead icon={Sparkles} badge="Meet Sonnet" title="Sonnet has read your syllabus." muted="And everything else.">
+        <SectionHead title="Sonnet has read your syllabus." muted="And everything else.">
           Sonnet knows every course, assignment, exam, class time and grade, plus the syllabus, slides
           and readings you add. Ask it anything about your classes and get answers from your own material.
         </SectionHead>
@@ -311,7 +311,7 @@ export function Assistant({ signUp }: { signUp: string }) {
                 href={signUp}
                 className="inline-flex h-11 w-fit items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-[opacity,scale] hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
               >
-                Try Sonnet free
+                Get started free
               </Link>
             </div>
 
@@ -376,9 +376,9 @@ export function Assistant({ signUp }: { signUp: string }) {
 }
 
 const PLAN = [
-  { code: "BIO 110", hue: 150, what: "Lab report draft", when: "Mon 4–6pm" },
-  { code: "HIST 201", hue: 35, what: "Read ch. 7–8", when: "Tue 7–8pm" },
-  { code: "PSYC 100", hue: 295, what: "Quiz review", when: "Thu 3–4pm" },
+  { code: "BIO 110", hue: 150, what: "Lab report draft", when: "Mon 4-6pm" },
+  { code: "HIST 201", hue: 35, what: "Read ch. 7-8", when: "Tue 7-8pm" },
+  { code: "PSYC 100", hue: 295, what: "Quiz review", when: "Thu 3-4pm" },
 ];
 
 function AssistantDemo() {

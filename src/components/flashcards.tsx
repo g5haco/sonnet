@@ -559,7 +559,7 @@ export function DeckEditor({ deck, courses, origin }: { deck: DeckRow; courses: 
               {link ? (
                 <>
                   <div className="flex gap-2">
-                    <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Share link" className="h-11 min-w-0 flex-1 rounded-full bg-secondary px-4 font-mono text-xs outline-none md:h-9" />
+                    <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Share link" className="h-11 min-w-0 flex-1 rounded-full bg-secondary px-4 font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-9" />
                     <Button variant="secondary" onClick={() => copy(link)} aria-label="Copy link" className={ICON}>
                       <Copy />
                     </Button>

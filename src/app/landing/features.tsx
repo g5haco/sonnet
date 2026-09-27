@@ -15,7 +15,6 @@ import {
   Rss,
   Shuffle,
   Smartphone,
-  Sparkles,
   SunMoon,
   Timer,
 } from "lucide-react";
@@ -25,6 +24,7 @@ import { Carousel } from "@/components/carousel";
 import { CourseFace, type CourseCard } from "@/components/course-card";
 import { courseColor, courseFace } from "@/lib/course";
 import { Caption, CHIP, chip, EASE, SectionHead, useAutoCycle, VIEW } from "./kit";
+import { WIDGETS } from "@/lib/home";
 
 // Illustration only: made-up course codes in the product's real course colors.
 const SAMPLE = [
@@ -632,7 +632,7 @@ export function Features() {
   return (
     <MotionConfig reducedMotion="user">
       <section id="features" className="mx-auto max-w-6xl scroll-mt-24 pb-24 md:px-4">
-        <SectionHead icon={Sparkles} badge="Features" title="Better than five tabs" muted="and a sticky note.">
+        <SectionHead title="Better than five tabs" muted="and a sticky note.">
           Canvas, a calendar, a grade calculator, a timer and a chatbot, each in its own tab. Sonnet is one quiet
           place for all of it, and the color only ever means something: a course, or what&apos;s due.
         </SectionHead>
@@ -644,7 +644,7 @@ export function Features() {
             </div>
             <div className="md:w-2/5 md:pr-6">
               <Caption icon={LayoutGrid} label="Make Home yours">
-                29 widgets: progress, grades, countdowns, calendar, courses, study hours and more. Drag them around,
+                {Object.keys(WIDGETS).length} widgets: progress, grades, countdowns, calendar, courses, study hours and more. Drag them around,
                 resize them, keep only what helps. Try the chips.
               </Caption>
             </div>
