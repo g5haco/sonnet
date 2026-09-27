@@ -11,7 +11,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress.** Th
 ## Current State
 
 - Live; every commit is pushed to `main`.
-- Migrations 0001–0015 exist. **The user ran 0015** (and was given the `ai_spend` update that sets syllabus = 3). **0014 is unconfirmed**; ask. Nothing is confirmed live with a signed-in user yet.
+- Migrations 0001–0015 exist. **The user ran 0014 and 0015** (plus the `ai_spend` update that sets syllabus = 3). Nothing is confirmed live with a signed-in user yet.
 - Signed-out `/` rewrites to `/landing`; signed-in `/` is Home.
 
 ## Completed This Session
