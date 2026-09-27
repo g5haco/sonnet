@@ -428,7 +428,7 @@ export function ChatInput({
 
             <UsagePill busy={busy} />
 
-            {/* +: attach files or switch on a mode; turns into an X while its menu is open. */}
+            {/* +: attach files; turns into an X while its menu is open. */}
             <div className="relative">
               <motion.button
                 ref={plusRef}
@@ -441,7 +441,7 @@ export function ChatInput({
                 }}
                 whileTap={{ scale: 0.9 }}
                 disabled={files.length >= MAX_FILES}
-                aria-label="Add files and modes"
+                aria-label="Attach files"
                 aria-expanded={!!menu}
                 aria-haspopup="menu"
                 title="Attach photos, PDFs or text files (or paste a screenshot)"
@@ -460,7 +460,7 @@ export function ChatInput({
                   <motion.div
                     ref={menuRef}
                     role="menu"
-                    aria-label="Add files and modes"
+                    aria-label="Attach files"
                     style={{ left: menu.left, bottom: menu.bottom, width: menu.width }}
                     initial={{ opacity: 0, y: 8, scale: 0.98, filter: "blur(4px)" }}
                     animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
@@ -470,56 +470,34 @@ export function ChatInput({
                       // arrow keys walk the rows
                       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
                       e.preventDefault();
-                      const rows = [...e.currentTarget.querySelectorAll<HTMLElement>("[role=menuitem],[role=menuitemcheckbox]")];
+                      const rows = [...e.currentTarget.querySelectorAll<HTMLElement>("[role=menuitem]")];
                       const at = rows.indexOf(document.activeElement as HTMLElement);
                       rows[(at + (e.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length]?.focus();
                     }}
                     className="fixed z-[100] flex origin-bottom flex-col rounded-3xl border border-border bg-popover p-2 shadow-2xl"
                   >
-                    {(
-                      [
-                        { label: "Photos & files", hint: "Upload from this device", icon: Paperclip, accept: "image/*,.pdf,.txt,.md" },
-                        { label: "Documents", hint: "PDFs, notes and text files", icon: FileText, accept: ".pdf,.txt,.md" },
-                        { label: "Web search", hint: "Live results, with sources", icon: Globe, on: search, flip: setSearch },
-                        { label: "Think harder", hint: "Slower, more careful answers", icon: Brain, on: think, flip: setThink },
-                      ] as { label: string; hint: string; icon: LucideIcon; accept?: string; on?: boolean; flip?: typeof setThink }[]
-                    ).map(({ label, hint, icon: Icon, accept, on, flip }, n) => (
+                    {/* Web search and Think harder have their own toggles beside +, so this menu only attaches. */}
+                    {[
+                      { label: "Photos & files", hint: "Upload from this device", icon: Paperclip, accept: "image/*,.pdf,.txt,.md" },
+                      { label: "Documents", hint: "PDFs, notes and text files", icon: FileText, accept: ".pdf,.txt,.md" },
+                    ].map(({ label, hint, icon: Icon, accept }, n) => (
                       <motion.button
                         key={label}
                         type="button"
-                        role={on === undefined ? "menuitem" : "menuitemcheckbox"}
-                        aria-checked={on}
+                        role="menuitem"
                         autoFocus={n === 0}
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0, transition: { delay: 0.03 * n, duration: 0.25 } }}
                         whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (accept) return pick(accept);
-                          flip?.((v) => !v);
-                          setMenu(null);
+                          pick(accept);
                         }}
                         className="group/item flex min-h-11 items-center gap-3 rounded-2xl px-3 text-left text-sm outline-none hover:bg-accent focus-visible:bg-accent"
                       >
-                        <Icon
-                          className={cn(
-                            "size-4 shrink-0 transition-[color,scale] duration-200 group-hover/item:scale-110",
-                            on ? "text-brand" : "text-muted-foreground group-hover/item:text-foreground",
-                          )}
-                        />
+                        <Icon className="size-4 shrink-0 text-muted-foreground transition-[color,scale] duration-200 group-hover/item:scale-110 group-hover/item:text-foreground" />
                         <span className="shrink-0 font-medium whitespace-nowrap">{label}</span>
                         <span className="min-w-0 truncate text-muted-foreground">{hint}</span>
-                        {on !== undefined && (
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "ml-auto shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] transition-colors",
-                              on ? "bg-brand/15 text-brand" : "text-muted-foreground",
-                            )}
-                          >
-                            {on ? "on" : "off"}
-                          </span>
-                        )}
                       </motion.button>
                     ))}
                   </motion.div>
