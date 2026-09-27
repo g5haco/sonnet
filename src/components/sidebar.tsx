@@ -3,7 +3,7 @@
 // Adapted from the Aceternity-style sidebar (sidebar.txt): icon rail that expands on hover.
 // Changes: built on `motion` (already installed), expands OVER the page so content never reflows,
 // also expands on keyboard focus, real <button>s on mobile, active route highlighted.
-import { BookOpen, CalendarDays, House, Menu, MessageCircle, RefreshCw, Settings, X } from "lucide-react";
+import { BookOpen, CalendarDays, House, Layers, Menu, MessageCircle, RefreshCw, Settings, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,6 +18,7 @@ const NAV = [
   { href: "/", label: "Home", icon: House },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/courses", label: "Courses", icon: BookOpen }, // materials live on each course's page
+  { href: "/flashcards", label: "Flashcards", icon: Layers },
 ];
 
 const RAIL = 60;

@@ -77,8 +77,8 @@ type Refs = {
   classes: Map<string, ClassTime & { id: string; course: string }>;
   courses: { id: string; code: string; name: string; items: number }[];
 };
-// A study deck the assistant made; shown as flip cards in the chat, never saved.
-export type Deck = { title: string; cards: { front: string; back: string }[] };
+// A study deck the assistant made; shown as flip cards in the chat and saved to Flashcards.
+export type Deck = { title: string; cards: { front: string; back: string }[]; id?: string }; // id: saved in Flashcards
 
 const fn = (name: string, description: string, properties: object, required: string[]) => ({
   type: "function",

@@ -426,6 +426,67 @@ export async function deleteChat(id: string): Promise<Result> {
   return error ? { error: `Couldn't delete the chat. ${error.message}` } : {};
 }
 
+// ---- Flashcards ----
+
+// Trimmed, capped cards; a card needs a front or a back. Blank cards are the editor's "new card" slots.
+const cleanCards = (cards: unknown) =>
+  (Array.isArray(cards) ? cards : [])
+    .slice(0, 200)
+    .map((c) => ({ front: String(c?.front ?? "").trim().slice(0, 1000), back: String(c?.back ?? "").trim().slice(0, 2000) }))
+    .filter((c) => c.front || c.back);
+
+// A deck from the chat (saved automatically) or a new empty one. `focus`: the chat's course code, for the tag.
+export async function createDeck(deck: { title?: string; cards?: unknown } = {}, focus = ""): Promise<Result & { id?: string }> {
+  const supabase = await createClient();
+  const course = focus
+    ? (await supabase.from("courses").select("id").eq("code", focus.slice(0, 40)).limit(1).maybeSingle()).data
+    : null;
+  const { data, error } = await supabase
+    .from("decks")
+    .insert({ title: String(deck.title ?? "").trim().slice(0, 120) || "Untitled deck", cards: cleanCards(deck.cards), course_id: course?.id ?? null })
+    .select("id")
+    .single();
+  if (error) return { error: `Couldn't save the deck. ${error.message}` };
+  revalidatePath("/flashcards");
+  return { id: data.id };
+}
+
+export async function updateDeck(id: string, deck: { title: string; course: string | null; cards: unknown }): Promise<Result> {
+  if (!UUID.test(id) || (deck.course !== null && !UUID.test(deck.course))) return { error: "Bad deck." };
+  const title = String(deck.title).trim().slice(0, 120);
+  if (!title) return { error: "Give the deck a name." };
+  const cards = cleanCards(deck.cards);
+  if (JSON.stringify(cards).length > 380_000) return { error: "That deck is too big to save. Split it into two decks." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("decks")
+    .update({ title, course_id: deck.course, cards, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: `Couldn't save the deck. ${error.message}` };
+  revalidatePath("/flashcards", "layout");
+  return {};
+}
+
+export async function deleteDeck(id: string): Promise<Result> {
+  if (!UUID.test(id)) return { error: "Bad deck." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("decks").delete().eq("id", id);
+  if (error) return { error: `Couldn't delete the deck. ${error.message}` };
+  revalidatePath("/flashcards");
+  return {};
+}
+
+// Turns the public link on (a fresh unguessable code) or off. Turning it back on makes a new link.
+export async function shareDeck(id: string, on: boolean): Promise<Result & { code?: string | null }> {
+  if (!UUID.test(id)) return { error: "Bad deck." };
+  const code = on ? Buffer.from(crypto.getRandomValues(new Uint8Array(18))).toString("base64url") : null;
+  const supabase = await createClient();
+  const { error } = await supabase.from("decks").update({ share_code: code }).eq("id", id);
+  if (error) return { error: `Couldn't change sharing. ${error.message}` };
+  revalidatePath(`/flashcards/${id}`);
+  return { code };
+}
+
 // ---- Course materials ----
 // Files go browser -> Storage directly (server actions have a 1 MB body limit); this records them.
 

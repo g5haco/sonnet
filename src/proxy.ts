@@ -22,10 +22,10 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const path = request.nextUrl.pathname;
-  // Calendar subscriptions and Vercel Cron authenticate with secrets instead of a user session.
+  // Calendar subscriptions and Vercel Cron authenticate with secrets instead of a user session; /f/<code> is a shared deck.
   // Signed out on "/": the public landing page, under the same URL.
   if (!data?.claims && path === "/") return NextResponse.rewrite(new URL("/landing", request.url));
-  if (!data?.claims && !["/login", "/landing", "/auth", "/api/cal", "/api/cron", "/robots.txt", "/sitemap.xml", "/opengraph-image", "/icon", "/apple-icon", "/manifest.webmanifest"].some((p) => path === p || path.startsWith(`${p}/`))) {
+  if (!data?.claims && !["/login", "/landing", "/auth", "/api/cal", "/api/cron", "/f", "/robots.txt", "/sitemap.xml", "/opengraph-image", "/icon", "/apple-icon", "/manifest.webmanifest"].some((p) => path === p || path.startsWith(`${p}/`))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   return response;

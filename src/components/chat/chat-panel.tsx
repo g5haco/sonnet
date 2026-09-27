@@ -1,13 +1,13 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, FileText, Image as ImageIcon, SquarePen, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { FileText, Image as ImageIcon, SquarePen, X } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { ChatInput } from "@/components/chat/chat-input";
 import dynamic from "next/dynamic";
 
 import { ProposalCard } from "@/components/chat/proposal-card";
-import { Button } from "@/components/ui/button";
+import { FlashDeck } from "@/components/flashcards";
 import type { Deck, Proposal } from "@/lib/ai";
 import type { ChatFile } from "@/lib/attach";
 import type { Shortcut } from "@/components/chat/shortcuts";
@@ -196,57 +196,5 @@ export function ChatLog({
         ),
       )}
     </ol>
-  );
-}
-
-// A flashcard deck: one card at a time, tap (or Space) to flip, arrows to move. Nothing is saved.
-function FlashDeck({ deck }: { deck: Deck }) {
-  const [at, setAt] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const go = (d: number) => {
-    setFlipped(false);
-    setAt((i) => (i + d + deck.cards.length) % deck.cards.length);
-  };
-  const card = deck.cards[at];
-  return (
-    <div className="mt-3 rounded-2xl bg-secondary p-3">
-      <p className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span className="truncate font-medium text-foreground">{deck.title}</span>
-        <span className="shrink-0 font-mono tabular-nums">
-          {at + 1}/{deck.cards.length}
-        </span>
-      </p>
-      <div className="[perspective:900px]">
-        <button
-          type="button"
-          onClick={() => setFlipped((f) => !f)}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-              e.preventDefault();
-              go(e.key === "ArrowRight" ? 1 : -1);
-            }
-          }}
-          aria-label={`${flipped ? "Answer" : "Question"}: ${flipped ? card.back : card.front}. Press to flip.`}
-          className="relative grid min-h-36 w-full transition-transform duration-500 ease-out-quint [transform-style:preserve-3d] outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-          style={{ transform: flipped ? "rotateY(180deg)" : undefined }}
-        >
-          <span className="col-start-1 row-start-1 grid place-items-center rounded-xl bg-background p-5 text-center text-base font-medium text-balance [backface-visibility:hidden]">
-            {card.front}
-          </span>
-          <span className="col-start-1 row-start-1 grid place-items-center rounded-xl bg-background p-5 text-center text-sm text-pretty [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            {card.back}
-          </span>
-        </button>
-      </div>
-      <div className="mt-2 flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={() => go(-1)} aria-label="Previous card" className="rounded-full">
-          <ChevronLeft />
-        </Button>
-        <span className="font-mono text-xs text-muted-foreground">{flipped ? "answer" : "tap to flip"}</span>
-        <Button variant="ghost" size="icon" onClick={() => go(1)} aria-label="Next card" className="rounded-full">
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
   );
 }

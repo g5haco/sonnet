@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThinkingOrb } from "thinking-orbs";
-import { itemChat, loadChat, saveChat, syncCanvasNow } from "@/app/actions";
+import { createDeck, itemChat, loadChat, saveChat, syncCanvasNow } from "@/app/actions";
 import { ChatPanel, type ChatMessage } from "@/components/chat/chat-panel";
 import { applyProposal } from "@/components/chat/proposal-card";
 import { CourseDialog, ItemDialog } from "@/components/create-forms";
@@ -252,7 +252,16 @@ export function AppShell({
               proposals: (e.v as Proposal[]).map((p) => ({ p, status: "pending" as const })),
               chain: step(m, `Drafted ${(e.v as Proposal[]).length === 1 ? "a change" : `${(e.v as Proposal[]).length} changes`} for you to confirm`),
             }));
-          else if (e.t === "cards") patch((m) => ({ ...m, cards: e.v as Deck, chain: step(m, "Made flashcards") }));
+          else if (e.t === "cards") {
+            const deck = e.v as Deck;
+            patch((m) => ({ ...m, cards: deck, chain: step(m, "Made flashcards") }));
+            // Every deck is kept in Flashcards; the chat stores its id so it links there.
+            createDeck(deck, (course ?? focus) || "").then((r) => {
+              if (r.error) return console.error("[deck]", r.error);
+              dirty.current = true;
+              patch((m) => ({ ...m, cards: m.cards && { ...m.cards, id: r.id } }));
+            });
+          }
           else throw new Error(String(e.v));
         }
       }
