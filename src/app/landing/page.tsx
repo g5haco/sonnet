@@ -49,14 +49,17 @@ const WORKS_WITH = [
 
 // Real answers about how Sonnet works today.
 const FAQ = [
-  ["Is it free?", "Yes. Sonnet is free for students."],
+  [
+    "Is it free?",
+    "Yes. Canvas sync, the calendar, grades, flashcards and the focus timer are free. The AI comes with a weekly allowance that refills every Monday, and you can always see how much is left.",
+  ],
   [
     "What does Sonnet know?",
     "Every course, assignment, exam, class time and grade in Sonnet, plus the syllabus, slides, readings and notes you upload. It answers from those first, and can search the web when you ask.",
   ],
   [
-    "Is Sonnet always fast?",
-    "It runs on free AI models, so it can be slow or busy at times. When that happens it tells you, and you can try again.",
+    "What if Sonnet can't answer?",
+    "Sometimes it's busy at peak times. When that happens it tells you, and an answer that never came doesn't count against your allowance.",
   ],
   [
     "Does it work with my school's Canvas?",
@@ -69,6 +72,10 @@ const FAQ = [
   [
     "Who can see my data?",
     "Only you. Every row is locked to your account, and Settings can wipe your academic data whenever you want.",
+  ],
+  [
+    "Can I share my flashcards?",
+    "Yes. Every deck Sonnet makes is saved to Flashcards, where you can edit it and share a link. Anyone can study from it, no account needed.",
   ],
   ["Do I need to install anything?", "No. It runs in your browser, on a laptop or a phone."],
 ];
