@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -15,6 +16,7 @@ import {
   Shuffle,
   Trash2,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -346,6 +348,96 @@ export function DeckList({ decks, courses }: { decks: DeckRow[]; courses: Course
   );
 }
 
+// Course tag menu, animated like the chat's + menu. Arrow keys walk the rows, Escape or a click outside closes it.
+function CoursePicker({ courses, value, onChange }: { courses: Course[]; value: string | null; onChange: (id: string | null) => void }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const current = courses.find((c) => c.id === value);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: PointerEvent | KeyboardEvent) =>
+      (e instanceof KeyboardEvent ? e.key === "Escape" : !root.current?.contains(e.target as Node)) && setOpen(false);
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
+  const rows: (Course | null)[] = [null, ...courses];
+  return (
+    <div ref={root} className="relative">
+      <motion.button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        whileTap={{ scale: 0.97 }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Course: ${current?.code ?? "none"}`}
+        className={cn(
+          "inline-flex h-11 items-center gap-2 rounded-full bg-secondary px-4 text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring md:h-9",
+          open && "bg-accent",
+        )}
+      >
+        {current && <span className="size-2 rounded-full" style={{ background: courseColor(current.hue) }} aria-hidden="true" />}
+        {current?.code ?? "No course"}
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ type: "spring", bounce: 0.3, duration: 0.3 }}>
+          <ChevronDown className="size-4 text-muted-foreground" />
+        </motion.span>
+      </motion.button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            role="listbox"
+            aria-label="Course"
+            initial={{ opacity: 0, y: -8, scale: 0.98, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, scale: 0.98, filter: "blur(2px)", transition: { duration: 0.14 } }}
+            transition={{ type: "spring", bounce: 0.18, duration: 0.35 }}
+            onKeyDown={(e) => {
+              if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+              e.preventDefault();
+              const items = [...e.currentTarget.querySelectorAll<HTMLElement>("[role=option]")];
+              const at = items.indexOf(document.activeElement as HTMLElement);
+              items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]?.focus();
+            }}
+            className="absolute top-full left-0 z-40 mt-2 flex max-h-72 w-56 origin-top flex-col overflow-y-auto rounded-3xl border border-border bg-popover p-2 shadow-2xl"
+          >
+            {rows.map((c, n) => {
+              const on = (c?.id ?? null) === value;
+              return (
+                <motion.button
+                  key={c?.id ?? "none"}
+                  type="button"
+                  role="option"
+                  aria-selected={on}
+                  autoFocus={on}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0, transition: { delay: 0.03 * n, duration: 0.25 } }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    onChange(c?.id ?? null);
+                    setOpen(false);
+                  }}
+                  className="flex min-h-11 shrink-0 items-center gap-3 rounded-2xl px-3 text-left text-sm outline-none hover:bg-accent focus-visible:bg-accent"
+                >
+                  <span
+                    className={cn("size-2 shrink-0 rounded-full", !c && "ring-1 ring-muted-foreground")}
+                    style={c ? { background: courseColor(c.hue) } : undefined}
+                    aria-hidden="true"
+                  />
+                  <span className={cn("min-w-0 flex-1 truncate", !c && "text-muted-foreground")}>{c?.code ?? "No course"}</span>
+                  {on && <Check className="size-4 shrink-0 text-brand" aria-hidden="true" />}
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 type Draft = Card & { k: number };
 const snapshot = (title: string, course: string | null, cards: Card[]) =>
   JSON.stringify([title.trim(), course, cards.map((c) => [c.front.trim(), c.back.trim()]).filter(([f, b]) => f || b)]);
@@ -440,19 +532,7 @@ export function DeckEditor({ deck, courses, origin }: { deck: DeckRow; courses: 
           className="-mx-2 rounded-lg bg-transparent px-2 py-1 text-2xl font-medium tracking-tight outline-none hover:bg-secondary/60 focus-visible:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
         />
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={course ?? ""}
-            onChange={(e) => setCourse(e.target.value || null)}
-            aria-label="Course"
-            className="h-11 rounded-full bg-secondary px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring md:h-9"
-          >
-            <option value="">No course</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.code}
-              </option>
-            ))}
-          </select>
+          <CoursePicker courses={courses} value={course} onChange={setCourse} />
           <Button variant="secondary" onClick={() => setStudying(true)} disabled={!real.length} className={PILL}>
             <Play /> Study
           </Button>
