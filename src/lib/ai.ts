@@ -9,6 +9,7 @@ import { termGlance } from "./term";
 // free models go down often, so Qwen is the next try and paid DeepSeek V4.1 Flash (~$0.14/M in) the last resort.
 // Reasoning is off: first words in ~0.5-2s instead of ~15s, and answers stayed correct in testing.
 const BASE = process.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1";
+const IDLE = 45_000; // ms of silence before a streaming answer is given up on
 export const MODELS = (
   process.env.AI_MODEL ??
   "nvidia/nemotron-3-ultra-550b-a55b:free,qwen/qwen3.8-27b:free,deepseek/deepseek-v4.1-flash"
@@ -670,12 +671,22 @@ export async function streamReply(
   const tools = toolsFor(question);
   // Asked for cards: make sure it makes them (free models otherwise stop to ask "which course?").
   const forceCards = tools.length === 1 && tools[0].function.name === "make_flashcards";
-  // One upstream call. The timeout covers the whole answer, so a stalled free model can't hang the chat.
-  const open = () =>
-    fetch(`${BASE}/chat/completions`, {
+  // One upstream call. Only silence ends it: a model that keeps streaming can take as long as it needs (up to
+  // the route's 300s), but one that sends nothing for IDLE ms is cut off, so a stalled free model can't hang the chat.
+  // Every read resets the clock (`alive`); OpenRouter's keep-alive comments count, so a long think doesn't trip it.
+  let ctrl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const alive = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => ctrl.abort(), IDLE);
+  };
+  const open = () => {
+    ctrl = new AbortController();
+    alive();
+    return fetch(`${BASE}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(55_000), // route maxDuration is 60s
+      signal: ctrl.signal,
       body: JSON.stringify({
         // `models` = OpenRouter fallbacks. The vision model requires some reasoning.
         ...(vision ? { model: VISION_MODEL } : MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
@@ -702,6 +713,7 @@ export async function streamReply(
         ],
       }),
     }).catch(() => null);
+  };
 
   const upstream = await open();
   if (!upstream?.ok || !upstream.body) {
@@ -736,6 +748,7 @@ export async function streamReply(
         try {
           for (;;) {
             const { value, done } = await reader.read();
+            alive();
             if (done) {
               // Free models sometimes end without a word or a tool call: quietly try once more.
               const again = !sent && !calls.length && !retried ? await open() : null;
@@ -817,8 +830,15 @@ export async function streamReply(
               }),
             );
         } catch {
-          out.enqueue(encode({ t: "error", v: "The AI took too long. Try again, or ask something shorter." }));
+          // Went silent (or the connection dropped). Whatever already streamed stays on screen.
+          out.enqueue(
+            encode({
+              t: "error",
+              v: sent ? "The AI stopped partway through. Ask it to continue." : "The AI didn't respond. Try again in a moment.",
+            }),
+          );
         }
+        clearTimeout(timer);
         out.close();
       },
     }),

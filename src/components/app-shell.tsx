@@ -263,12 +263,15 @@ export function AppShell({
       );
     } catch (err) {
       if (ctrl.signal.aborted) return; // "new chat" cancelled it
-      patch((m) => ({
-        ...m,
-        role: "note",
-        text: err instanceof Error ? err.message : "Something went wrong.",
-        state: undefined,
-      }));
+      const why = err instanceof Error ? err.message : "Something went wrong.";
+      // A partial answer stays: the note goes under it instead of replacing it.
+      patch((m) =>
+        m.text
+          ? { ...m, text: `${m.text}
+
+*${why}*`, state: undefined, chain: m.chain && { ...m.chain, ms: Date.now() - m.chain.started } }
+          : { ...m, role: "note", text: why, state: undefined },
+      );
     }
   };
 

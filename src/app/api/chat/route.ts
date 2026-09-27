@@ -2,7 +2,7 @@ import { lightContext, needsSearch, needsThinking, smallTalk, streamReply, stude
 import { typedPart } from "@/lib/attach";
 import { createClient } from "@/lib/supabase/server";
 
-export const maxDuration = 60; // free models can reason for a while before answering
+export const maxDuration = 300; // long answers stream for minutes; Vercel Hobby (Fluid) allows up to 300s
 
 // POST { messages: Turn[], timeZone, think?, search?, focus? } → NDJSON stream (see streamReply).
 export async function POST(request: Request) {
