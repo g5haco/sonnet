@@ -409,7 +409,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
             <button
               type="button"
               onClick={() => syllabusInput.current?.click()}
-              className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="hit rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               new syllabus
             </button>
@@ -417,7 +417,7 @@ export function Materials({ course, materials }: { course: { id: string; code: s
           <button
             type="button"
             onClick={() => create("upload", undefined, course.id)}
-            className="rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="hit rounded-full hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             + upload
           </button>
@@ -583,8 +583,11 @@ function MaterialRow({ m, onOpen, onImport }: { m: Material; onOpen: () => void;
             className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg px-2 transition-colors hover:bg-accent/60"
           >
             <Glyph m={m} />
-            <span className="min-w-0 flex-1 truncate text-sm">{m.name}</span>
-            <span className="shrink-0 font-mono text-xs text-muted-foreground">{meta}</span>
+            {/* phones: the meta goes under the name, so the name isn't cut to two letters */}
+            <span className="flex min-w-0 flex-1 flex-col py-1 sm:flex-row sm:items-center sm:gap-3">
+              <span className="truncate text-sm sm:min-w-0 sm:flex-1">{m.name}</span>
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">{meta}</span>
+            </span>
           </a>
         ) : (
           <button
@@ -594,8 +597,11 @@ function MaterialRow({ m, onOpen, onImport }: { m: Material; onOpen: () => void;
             className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Glyph m={m} />
-            <span className="min-w-0 flex-1 truncate text-sm">{m.name}</span>
-            <span className="shrink-0 font-mono text-xs text-muted-foreground">{meta}</span>
+            {/* phones: the meta goes under the name, so the name isn't cut to two letters */}
+            <span className="flex min-w-0 flex-1 flex-col py-1 sm:flex-row sm:items-center sm:gap-3">
+              <span className="truncate text-sm sm:min-w-0 sm:flex-1">{m.name}</span>
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">{meta}</span>
+            </span>
           </button>
         )}
         {m.readable && m.kind !== "link" && (

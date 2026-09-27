@@ -14,7 +14,7 @@ export function WeekStrip({ items, now, className }: { items: Item[]; now: numbe
   const due = (d: Date) => items.filter((i) => dayKey(new Date(i.due)) === dayKey(d));
 
   return (
-    <Block title="This week" aside={<Link href="/calendar" className="hover:text-foreground">calendar →</Link>} className={className}>
+    <Block title="This week" aside={<Link href="/calendar" className="hit hover:text-foreground">calendar →</Link>} className={className}>
       <ol className="grid flex-1 grid-cols-7 content-center gap-1 text-center">
         {days.map((d) => {
           const list = due(d);

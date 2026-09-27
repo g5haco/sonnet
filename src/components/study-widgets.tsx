@@ -310,7 +310,7 @@ export function SoundWidget() {
             setVolume(v);
             if (master.current && ctx.current) master.current.gain.setTargetAtTime(v, ctx.current.currentTime, 0.05);
           }}
-          className="mx-auto w-3/4 accent-foreground"
+          className="mx-auto h-8 w-3/4 cursor-pointer accent-foreground"
         />
       </div>
     </Block>

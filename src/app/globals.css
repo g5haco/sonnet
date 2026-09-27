@@ -201,6 +201,16 @@
   }
 }
 
+/* Small text links: a 44px tap area around them without moving anything. */
+@utility hit {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -14px -4px;
+  }
+}
+
 /* Check-off: the strike draws left to right (paint-only background, no layout). */
 .strike {
   background: linear-gradient(currentColor, currentColor) left center / 0% 1.5px no-repeat;

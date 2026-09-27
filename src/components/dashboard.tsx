@@ -180,7 +180,7 @@ export function Dashboard({
       <Block
         title="Courses"
         aside={
-          <Link href="/courses" className="hover:text-foreground">
+          <Link href="/courses" className="hit hover:text-foreground">
             all courses →
           </Link>
         }

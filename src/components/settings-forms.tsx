@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Check, CircleUser, ShieldCheck } from "lucide-react";
+import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -48,9 +48,6 @@ function NameForm({ name }: { name: string }) {
   const { pending, error, submit } = useSubmit(saveName, () => toast.success("Saved. Say hi on Home."));
   return (
     <form autoComplete="off" action={submit} className="flex flex-col gap-2">
-      <label htmlFor="your-name" className={label}>
-        What should Sonnet call you?
-      </label>
       <div className="flex gap-2">
         <input
           id="your-name"
@@ -168,15 +165,30 @@ export type Account = {
 };
 
 // Preferences only. Integrations (Canvas, the Google Calendar feed) live in Sync.
-const SECTIONS: { id: SettingsSection; label: string; short?: string; icon: typeof CalendarDays }[] = [
-  { id: "account", label: "Account & appearance", short: "Account", icon: CircleUser },
-  { id: "semester", label: "Term", icon: CalendarDays },
-  { id: "data", label: "Data & privacy", icon: ShieldCheck },
+const SECTIONS: { id: SettingsSection; label: string; blurb: string }[] = [
+  { id: "account", label: "Account", blurb: "You, how Sonnet looks, and this week's use." },
+  { id: "semester", label: "Term", blurb: "When the term runs. Home's weekly bars and the calendar count from it." },
+  { id: "data", label: "Data", blurb: "What's kept, and how to wipe it." },
 ];
 
 const heading = "text-base font-medium";
 const help = "mt-1 text-sm text-pretty text-muted-foreground";
-const group = "mt-6 border-t border-border pt-6";
+
+// One line of the spec sheet: what it is on the left, the control on the right. Stacks on phones.
+function Row({ title, hint, htmlFor, children }: { title: string; hint?: string; htmlFor?: string; children: React.ReactNode }) {
+  const Title = htmlFor ? "label" : "h3";
+  return (
+    <div className="grid gap-x-8 gap-y-3 border-t border-border py-6 sm:grid-cols-[10rem_1fr]">
+      <div>
+        <Title htmlFor={htmlFor} className="text-sm font-medium">
+          {title}
+        </Title>
+        {hint && <p className="mt-1 text-xs text-pretty text-muted-foreground">{hint}</p>}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
+  );
+}
 
 // Settings float over whatever page you're on (it stays visible behind), so closing drops you right back.
 export function SettingsWindow({
@@ -190,6 +202,10 @@ export function SettingsWindow({
   onClose: () => void;
   account: Account;
 }) {
+  // Keep showing the last page while the window fades out, instead of blanking it first.
+  const [shown, setShown] = useState<SettingsSection>(section ?? "account");
+  if (section && section !== shown) setShown(section);
+  const index = SECTIONS.findIndex((s) => s.id === shown);
   return (
     <Dialog open={section !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="flex h-[min(46rem,calc(100dvh-2rem))] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
@@ -197,66 +213,78 @@ export function SettingsWindow({
         <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
           <nav
             aria-label="Settings sections"
-            className="flex shrink-0 gap-1 overflow-x-auto border-b border-border p-2 sm:w-60 sm:flex-col sm:border-r sm:border-b-0 sm:p-4"
+            className="flex shrink-0 gap-1 overflow-x-auto border-b border-border p-2 sm:w-56 sm:flex-col sm:gap-0.5 sm:border-r sm:border-b-0 sm:px-3 sm:py-5"
           >
-            <p className="hidden px-2.5 pt-1 pb-3 text-sm font-medium sm:block">Settings</p>
-            {SECTIONS.map(({ id, label: text, short, icon: Icon }) => (
+            <p className="hidden px-3 pb-4 font-mono text-xs text-muted-foreground sm:block">settings</p>
+            {SECTIONS.map(({ id, label: text }, i) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => onSection(id)}
-                aria-current={section === id ? "page" : undefined}
+                aria-current={shown === id ? "page" : undefined}
                 className={cn(
-                  "flex h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  section === id
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                  "relative flex h-11 shrink-0 items-center gap-3 rounded-lg sm:h-10 px-3 text-sm whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                  shown === id ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {/* phones: no icons and short labels, so all three tabs fit */}
-                <Icon className="hidden size-4 sm:block" aria-hidden="true" />
-                <span className={cn(short && "hidden sm:inline")}>{text}</span>
-                {short && <span className="sm:hidden">{short}</span>}
+                {shown === id && (
+                  <motion.span
+                    layoutId="settings-tab"
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-lg bg-accent"
+                    transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                  />
+                )}
+                <span className="relative font-mono text-xs tabular-nums opacity-60">0{i + 1}</span>
+                <span className="relative">{text}</span>
               </button>
             ))}
           </nav>
           <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8">
             <AnimatePresence mode="wait" initial={false}>
               <motion.section
-                key={section}
+                key={shown}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
                 className="max-w-2xl"
               >
-                {section === "account" && (
+                <header className="mb-8 flex items-baseline gap-3">
+                  <span className="font-mono text-xs text-muted-foreground tabular-nums">0{index + 1}</span>
+                  <div>
+                    <h2 className={heading}>{SECTIONS[index].label}</h2>
+                    <p className={help}>{SECTIONS[index].blurb}</p>
+                  </div>
+                </header>
+                {shown === "account" && (
                   <>
-                    <h2 className={heading}>Account &amp; appearance</h2>
-                    <p className={cn(help, "mb-6 font-mono")}>{account.email}</p>
-                    <NameForm name={account.name} />
-                    <div className={group}>
-                      <h3 className={label}>Theme</h3>
-                      <p className={cn(help, "mb-4")}>Light, dark, or follow your device.</p>
+                    <Row title="Signed in as">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="min-w-0 truncate font-mono text-sm">{account.email}</p>
+                        <SignOut />
+                      </div>
+                    </Row>
+                    <Row title="Name" hint="What Home calls you." htmlFor="your-name">
+                      <NameForm name={account.name} />
+                    </Row>
+                    <Row title="Theme" hint="Light, dark, or follow your device.">
                       <ThemePicker />
-                    </div>
-                    <div className={group}>
-                      <h3 className={cn(label, "mb-3")}>Sonnet this week</h3>
+                    </Row>
+                    <Row title="This week" hint="How much Sonnet you've used.">
                       <UsageCard />
-                    </div>
-                    <div className={group}>
-                      <SignOut />
-                    </div>
+                    </Row>
                   </>
                 )}
-                {section === "semester" && <SemesterSettings term={account.term} />}
-                {section === "data" && (
+                {shown === "semester" && <SemesterSettings term={account.term} />}
+                {shown === "data" && (
                   <>
-                    <h2 className={heading}>Data &amp; privacy</h2>
-                    <p className={cn(help, "mb-6")}>
-                      Everything you add is private to your account. Your Canvas token is encrypted, and the Google
-                      Calendar link is a secret you can replace any time in Sync.
-                    </p>
+                    <Row title="Privacy">
+                      <p className="text-sm text-pretty text-muted-foreground">
+                        Everything you add is private to your account. Your Canvas token is encrypted, and the Google
+                        Calendar link is a secret you can replace any time in Sync.
+                      </p>
+                    </Row>
                     <ResetData onDone={onClose} />
                   </>
                 )}
@@ -277,12 +305,8 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
   const g = term && termGlance(term, now);
   return (
     <>
-      <h2 className={heading}>Term</h2>
-      <p className={cn(help, "mb-6")}>
-        Sets the weekly bars on Home, the calendar&apos;s heat map, and when class times stop repeating.
-      </p>
       {g ? (
-        <div className="rounded-2xl bg-secondary/60 p-5">
+        <div className="mb-8 rounded-2xl bg-muted/60 p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="font-mono text-2xl font-medium tabular-nums">
               {g.phase === "upcoming" ? (
@@ -312,9 +336,24 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
             aria-valuenow={g.percent}
             aria-valuemin={0}
             aria-valuemax={100}
-            className="mt-4 h-1.5 overflow-hidden rounded-full bg-foreground/10"
+            className="mt-5 flex h-6 gap-1"
           >
-            <div className="h-full rounded-full bg-foreground" style={{ width: `${g.percent}%` }} />
+            {/* one cell per week: done, this week, still to come */}
+            {Array.from({ length: term.weeks }, (_, i) => {
+              const w = i + 1;
+              const past = g.phase === "finished" || (g.phase === "now" && w < g.week);
+              const now = g.phase === "now" && w === g.week;
+              return (
+                <span
+                  key={w}
+                  className={cn(
+                    "flex-1 rounded-[3px]",
+                    past ? "bg-foreground/70" : now ? "bg-foreground" : "bg-foreground/10",
+                    now && "ring-2 ring-foreground/25 ring-offset-2 ring-offset-muted",
+                  )}
+                />
+              );
+            })}
           </div>
           <p className="mt-2 flex justify-between font-mono text-xs text-muted-foreground tabular-nums">
             <span>{day(g.start)}</span>
@@ -322,20 +361,19 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
           </p>
         </div>
       ) : (
-        <p className="rounded-2xl bg-secondary/60 p-5 text-sm text-pretty">
+        <p className="mb-8 rounded-2xl bg-muted/60 p-5 text-sm text-pretty">
           No term yet. Add the first day of classes to turn on weekly progress, the heat map and the Google Calendar
           feed.
         </p>
       )}
-      <div className={group}>
-        <h3 className={cn(label, "mb-4")}>{term ? "Change dates" : "Set dates"}</h3>
+      <Row title={term ? "Change dates" : "Set dates"} hint="Class times stop repeating after the last week.">
         {term && term.weeks <= 2 && (
           <p className="mb-4 rounded-xl bg-secondary px-3 py-2 text-sm">
             Set to {term.weeks} week{term.weeks === 1 ? "" : "s"}? Semesters usually run 15 or 16, quarters about 11.
           </p>
         )}
         <SemesterForm start={term?.start ?? ""} weeks={term?.weeks ?? 16} />
-      </div>
+      </Row>
     </>
   );
 }

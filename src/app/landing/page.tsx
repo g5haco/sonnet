@@ -205,10 +205,10 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
           <Wordmark />
           <p className="flex-1">A student hub for courses, deadlines, grades and focus.</p>
-          <a href="#features" className="hover:text-foreground">
+          <a href="#features" className="inline-flex min-h-11 items-center hover:text-foreground">
             Features
           </a>
-          <Link href="/login" className="hover:text-foreground">
+          <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
             Sign in
           </Link>
         </div>

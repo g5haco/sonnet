@@ -124,7 +124,7 @@ export function CalendarWidget({ items, now, w, h }: { items: Item[]; now: numbe
   const today = new Date(now);
   const due = (d: Date) => items.filter((i) => dayKey(new Date(i.due)) === dayKey(d));
   const link = (
-    <Link href="/calendar" className="hover:text-foreground">
+    <Link href="/calendar" className="hit hover:text-foreground">
       calendar →
     </Link>
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarSync, ChevronDown, Cloud, Copy, ExternalLink, RefreshCw } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { ChevronDown, ChevronRight, Copy, ExternalLink, RefreshCw } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { disconnectCanvas, resetFeed, saveCanvasConnection } from "@/app/actions";
@@ -14,117 +14,125 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { cn } from "@/lib/utils";
 import { FREE } from "@/lib/plan";
 
-type Tone = "on" | "off" | "busy" | "error";
+// on = flowing, ready = wired but idle, busy = syncing now, error = broken, off = not set up.
+type Tone = "on" | "ready" | "busy" | "error" | "off";
 const TONE: Record<Tone, string> = {
   on: "text-done",
-  off: "text-muted-foreground",
-  busy: "text-muted-foreground",
+  ready: "text-foreground",
+  busy: "text-foreground",
   error: "text-destructive",
+  off: "text-muted-foreground",
 };
 
-// Green = connected, red = broken, grey = not set up. Always with words, never color alone.
+// An LED and a word. Color never carries the state alone.
 function Status({ tone, children }: { tone: Tone; children: React.ReactNode }) {
   return (
-    <span className={cn("flex shrink-0 items-center gap-1.5 font-mono text-xs", TONE[tone])}>
-      {tone === "busy" ? (
-        <RefreshCw className="size-3 animate-spin" aria-hidden="true" />
-      ) : (
-        <span
-          className={cn("size-1.5 rounded-full", tone === "off" ? "ring-1 ring-current" : "bg-current")}
-          aria-hidden="true"
-        />
-      )}
+    <span className={cn("flex shrink-0 items-center gap-2 font-mono text-xs", TONE[tone])}>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-2 rounded-[2px]",
+          tone === "off" ? "ring-1 ring-current" : "bg-current",
+          (tone === "on" || tone === "error") && "shadow-[0_0_6px_currentColor]",
+          tone === "busy" && "animate-pulse",
+        )}
+      />
       {children}
     </span>
   );
 }
 
-// One integration: what it does, whether it works, and what to do next. New services add another <Service>.
-function Service({
-  icon: Icon,
+// The wire between two nodes. A dot travels it while data moves; it breaks when a sync fails.
+function Wire({ tone }: { tone: Tone }) {
+  const still = useReducedMotion();
+  const moving = !still && (tone === "on" || tone === "busy");
+  return (
+    <span aria-hidden="true" className={cn("relative flex h-6 min-w-6 flex-1 items-center", TONE[tone])}>
+      {tone === "error" ? (
+        <>
+          <span className="h-px flex-1 bg-current opacity-60" />
+          <span className="px-1 font-mono text-xs leading-none">×</span>
+          <span className="h-px flex-1 bg-current opacity-60" />
+        </>
+      ) : (
+        <span
+          className={cn(
+            "h-px flex-1",
+            tone === "off" ? "border-t border-dashed border-current opacity-50" : "bg-current opacity-40",
+          )}
+        />
+      )}
+      {moving && (
+        <span className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden">
+          <motion.span
+            className="absolute inset-0"
+            initial={{ x: "-100%" }}
+            animate={{ x: "0%" }}
+            transition={{ duration: tone === "busy" ? 0.7 : 2.4, ease: "linear", repeat: Infinity }}
+          >
+            <span className="absolute top-0 right-0 size-1.5 rounded-full bg-current shadow-[0_0_6px_currentColor]" />
+          </motion.span>
+        </span>
+      )}
+      <ChevronRight className="-ml-1 size-3 shrink-0 opacity-60" />
+    </span>
+  );
+}
+
+function Node({ name, role, hub }: { name: string; role: string; hub?: boolean }) {
+  return (
+    <span className="flex shrink-0 flex-col items-center gap-1.5">
+      <span
+        className={cn(
+          "rounded-md px-2.5 py-1.5 font-mono text-xs",
+          hub ? "bg-foreground text-background" : "bg-background ring-1 ring-border",
+        )}
+      >
+        {name}
+      </span>
+      <span className="font-mono text-[11px] text-muted-foreground">{role}</span>
+    </span>
+  );
+}
+
+// One integration as a channel strip: its channel and state on the left, what it does and the controls on the right.
+function Channel({
+  channel,
   name,
-  blurb,
   status,
+  blurb,
   children,
 }: {
-  icon: typeof Cloud;
+  channel: string;
   name: string;
-  blurb: string;
   status: React.ReactNode;
+  blurb: string;
   children: React.ReactNode;
 }) {
   return (
-    <section aria-label={name} className="rounded-2xl border border-border p-4 sm:p-5">
-      <header className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-            <h3 className="text-sm font-medium">{name}</h3>
-            {status}
-          </div>
-          <p className="mt-0.5 text-sm text-pretty text-muted-foreground">{blurb}</p>
-        </div>
-      </header>
-      <div className="mt-4 sm:pl-13">{children}</div>
+    <section
+      aria-label={name}
+      className="grid gap-x-6 gap-y-3 border-t border-border px-5 py-5 sm:grid-cols-[9rem_1fr] sm:px-6"
+    >
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 sm:flex-col sm:items-start">
+        <span className="font-mono text-xs text-muted-foreground">{channel}</span>
+        <h3 className="text-sm font-medium">{name}</h3>
+        <span className="ml-auto sm:ml-0">{status}</span>
+      </div>
+      <div className="min-w-0">
+        <p className="mb-4 max-w-prose text-sm text-pretty text-muted-foreground">{blurb}</p>
+        {children}
+      </div>
     </section>
-  );
-}
-
-// Sync: everything that flows into Sonnet (Canvas) or out of it (the Google Calendar feed).
-// Floats over the current page, like Settings.
-export function SyncWindow({ open, onClose, account }: { open: boolean; onClose: () => void; account: Account }) {
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-2xl">
-        <div className="border-b border-border px-5 pt-5 pb-4 sm:px-6">
-          <DialogTitle className="text-base font-medium">Sync</DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-pretty">
-            What flows into Sonnet, and what it sends out.
-          </DialogDescription>
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 sm:p-4">
-          <CanvasService connection={account.canvas} hasTerm={Boolean(account.term)} />
-          <Service
-            icon={CalendarSync}
-            name="Google Calendar"
-            blurb="Sends classes, due dates and exams to Google Calendar. One-way; Google refreshes it every few hours."
-            status={
-              <Status tone="off">{account.feed ? "Ready to subscribe" : "Needs term dates"}</Status>
-            }
-          >
-            <FeedLink token={account.feed} />
-          </Service>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// Canvas and the feed both live on the semester's settings row, so both need semester dates first.
-function NeedsSemester({ what, className }: { what: string; className?: string }) {
-  const openSettings = useOpenSettings();
-  return (
-    <p className={cn("text-sm text-pretty text-muted-foreground", className)}>
-      {what} needs your term dates.{" "}
-      <button
-        type="button"
-        onClick={() => openSettings("semester")}
-        className="link"
-      >
-        Set them
-      </button>
-    </p>
   );
 }
 
 // The sync in flight, if any: reopening the window mid-sync shows it as syncing instead of allowing a second one.
 let running: Promise<unknown> | null = null;
 
-function CanvasService({ connection, hasTerm }: { connection: Account["canvas"]; hasTerm: boolean }) {
+// Canvas's state, shared by the wire at the top and the channel below.
+function useCanvas(connection: Account["canvas"]) {
   const connected = connection.tokenConnected || Boolean(connection.icsUrl);
-  const [editing, setEditing] = useState(false);
   const [pending, startSync] = useTransition();
   const track = useTasks();
   const syncing = pending || !!running || connection.lastSyncStatus === "syncing"; // this tab's click, or the server's run
@@ -141,42 +149,115 @@ function CanvasService({ connection, hasTerm }: { connection: Account["canvas"];
       await running;
     });
   const failed = connection.lastSyncStatus === "error" || Boolean(connection.lastSyncError);
-  const status =
-    syncing ? (
-      <Status tone="busy">Syncing…</Status>
-    ) : !connected ? (
-      <Status tone="off">Not connected</Status>
-    ) : failed ? (
-      <Status tone="error">Sync failed</Status>
-    ) : (
-      <Status tone="on">Connected</Status>
-    );
+  const tone: Tone = syncing ? "busy" : !connected ? "off" : failed ? "error" : "on";
+  return { connected, syncing, sync, failed, tone };
+}
+type CanvasState = ReturnType<typeof useCanvas>;
+
+const CANVAS_WORD: Record<Tone, string> = {
+  busy: "syncing…",
+  off: "not connected",
+  error: "sync failed",
+  on: "connected",
+  ready: "connected",
+};
+
+// Sync: everything that flows into Sonnet (Canvas) or out of it (the Google Calendar feed), drawn as the
+// signal path it is. Floats over the current page, like Settings.
+export function SyncWindow({ open, onClose, account }: { open: boolean; onClose: () => void; account: Account }) {
+  const canvas = useCanvas(account.canvas);
+  const feedTone: Tone = account.feed ? "ready" : "off";
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-2xl sm:max-w-2xl">
+        <div className="px-5 pt-5 pb-5 sm:px-6">
+          <DialogTitle className="font-sans text-base font-medium">Sync</DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-pretty">
+            What flows into Sonnet, and what it sends out.
+          </DialogDescription>
+          <div
+            role="img"
+            aria-label={`Canvas to Sonnet: ${CANVAS_WORD[canvas.tone]}. Sonnet to Google Calendar: ${account.feed ? "link ready" : "needs term dates"}.`}
+            className="mt-5 flex items-start gap-1 rounded-xl bg-muted/60 px-3 py-4 sm:gap-2 sm:px-5"
+          >
+            <Node name="canvas" role="in" />
+            <Wire tone={canvas.tone} />
+            <Node name="sonnet" role="you" hub />
+            <Wire tone={feedTone} />
+            <Node name="google" role="out" />
+          </div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <CanvasService connection={account.canvas} hasTerm={Boolean(account.term)} state={canvas} />
+          <Channel
+            channel="out · 01"
+            name="Google Calendar"
+            status={<Status tone={feedTone}>{account.feed ? "link ready" : "needs term"}</Status>}
+            blurb="Sends classes, due dates and exams to Google Calendar. One-way; Google refreshes it every few hours."
+          >
+            <FeedLink token={account.feed} />
+          </Channel>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Canvas and the feed both live on the semester's settings row, so both need semester dates first.
+function NeedsSemester({ what, className }: { what: string; className?: string }) {
+  const openSettings = useOpenSettings();
+  return (
+    <p className={cn("text-sm text-pretty text-muted-foreground", className)}>
+      {what} needs your term dates.{" "}
+      <button type="button" onClick={() => openSettings("semester")} className="link">
+        Set them
+      </button>
+    </p>
+  );
+}
+
+function CanvasService({
+  connection,
+  hasTerm,
+  state: { connected, syncing, sync, failed, tone },
+}: {
+  connection: Account["canvas"];
+  hasTerm: boolean;
+  state: CanvasState;
+}) {
+  const [editing, setEditing] = useState(false);
   const last = connection.lastSyncAt
-    ? new Date(connection.lastSyncAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+    ? new Date(connection.lastSyncAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
     : null;
 
   return (
-    <Service
-      icon={Cloud}
+    <Channel
+      channel="in · 01"
       name="Canvas"
+      status={<Status tone={tone}>{CANVAS_WORD[tone]}</Status>}
       blurb="Pulls courses, deadlines, assignment details and scores. Use the token, the calendar feed, or both."
-      status={status}
     >
       {connected && (
         <>
-          <p className="font-mono text-xs text-muted-foreground">
-            {last
-              ? `Last synced ${last}${connection.lastSyncStatus === "success" ? ` · ${connection.lastSyncCount} item${connection.lastSyncCount === 1 ? "" : "s"}` : ""}`
-              : "Not synced yet"}{" "}
-            · syncs daily
-          </p>
+          <dl className="grid max-w-md grid-cols-[1.5fr_1fr_1fr] gap-px overflow-hidden rounded-lg bg-border font-mono text-xs">
+            {[
+              ["last sync", last ?? "never"],
+              ["items", connection.lastSyncStatus === "success" ? String(connection.lastSyncCount) : "—"],
+              ["schedule", "daily"],
+            ].map(([k, v]) => (
+              <div key={k} className="bg-background px-3 py-2">
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd className="mt-0.5 truncate tabular-nums">{v}</dd>
+              </div>
+            ))}
+          </dl>
           {connection.lastSyncError && (
-            <p role="alert" className="mt-2 text-sm text-pretty text-destructive">
+            <p role="alert" className="mt-3 text-sm text-pretty text-destructive">
               {connection.lastSyncError}
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button disabled={syncing} onClick={sync} className="h-9 rounded-full px-4 active:scale-[0.97]">
+            <Button disabled={syncing} onClick={sync} className="h-10 rounded-full px-4 active:scale-[0.97]">
               <RefreshCw className={cn("size-4", syncing && "animate-spin")} aria-hidden="true" />
               {syncing ? "Syncing…" : failed ? "Try again" : "Sync now"}
             </Button>
@@ -184,7 +265,7 @@ function CanvasService({ connection, hasTerm }: { connection: Account["canvas"];
               variant="ghost"
               onClick={() => setEditing((e) => !e)}
               aria-expanded={editing}
-              className="h-9 rounded-full px-4"
+              className="h-10 rounded-full px-4"
             >
               Edit connection
               <ChevronDown
@@ -215,7 +296,7 @@ function CanvasService({ connection, hasTerm }: { connection: Account["canvas"];
           </motion.div>
         )}
       </AnimatePresence>
-    </Service>
+    </Channel>
   );
 }
 

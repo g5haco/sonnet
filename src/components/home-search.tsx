@@ -239,7 +239,7 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
             aria-controls="home-search-results"
             aria-activedescendant={shown && rows[active] ? `hs-${rows[active].key}` : undefined}
             aria-label="Search your work, courses, dates and settings"
-            className="w-full bg-transparent text-sm outline-none"
+            className="h-10 w-full bg-transparent text-sm outline-none"
           />
           {!query && (
             <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center overflow-hidden text-sm text-muted-foreground">
