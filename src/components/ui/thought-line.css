@@ -2,20 +2,10 @@
 .thought-line {
   --tl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --tl-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --tl-font: 16px;
-  --tl-color: currentColor;
-  --tl-glyph: currentColor;
-  --tl-settle: 350ms;
-  --tl-blur: 2px;
-  --tl-shimmer: 1.8s;
-  --tl-done: 0.75;
-  --tl-timer: 0.55;
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
   max-width: 100%;
-  color: var(--tl-color);
-  font-size: var(--tl-font);
   font-weight: 500;
   line-height: 1.2;
 }
@@ -45,7 +35,7 @@
   width: 1.1em;
   height: 1.1em;
   margin-right: 0.2em;
-  color: var(--tl-glyph);
+  color: currentColor;
 }
 .thought-line__glyph svg {
   display: block;
@@ -63,17 +53,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0;
-  filter: blur(var(--tl-blur));
+  filter: blur(2px);
   transition:
-    opacity var(--tl-settle) var(--tl-ease-out),
-    filter var(--tl-settle) var(--tl-ease-out);
+    opacity 350ms var(--tl-ease-out),
+    filter 350ms var(--tl-ease-out);
 }
 .thought-line__text[data-active] {
   opacity: 1;
   filter: blur(0);
 }
 .thought-line__text--done[data-active] {
-  opacity: var(--tl-done);
+  opacity: 0.75;
 }
 .thought-line__breath {
   display: inline-block;
@@ -81,9 +71,9 @@
 .thought-line[data-working] .thought-line__breath[data-shimmer] {
   background: linear-gradient(
     100deg,
-    color-mix(in srgb, var(--tl-color) 50%, transparent) 30%,
-    var(--tl-color) 50%,
-    color-mix(in srgb, var(--tl-color) 50%, transparent) 70%
+    color-mix(in srgb, currentColor 50%, transparent) 30%,
+    currentColor 50%,
+    color-mix(in srgb, currentColor 50%, transparent) 70%
   );
   background-size: 250% 100%;
   background-position: 125% 0;
@@ -91,7 +81,7 @@
   background-clip: text;
   /* fill, not color: currentColor in the gradient must stay the inherited ink */
   -webkit-text-fill-color: transparent;
-  animation: thought-line-shimmer var(--tl-shimmer) linear infinite;
+  animation: thought-line-shimmer 1.8s linear infinite;
 }
 @keyframes thought-line-shimmer {
   to {
@@ -100,13 +90,13 @@
 }
 .thought-line__timer {
   font-variant-numeric: tabular-nums;
-  opacity: var(--tl-timer);
+  opacity: 0.55;
   transition:
-    opacity var(--tl-settle) ease,
-    transform var(--tl-settle) var(--tl-ease-in-out);
+    opacity 350ms ease,
+    transform 350ms var(--tl-ease-in-out);
 }
 .thought-line__timer[data-done] {
-  opacity: var(--tl-done);
+  opacity: 0.75;
 }
 .thought-line__chevron {
   display: inline-flex;
@@ -127,7 +117,7 @@
   grid-template-rows: 0fr;
   width: 0;
   min-width: 100%;
-  transition: grid-template-rows var(--tl-settle) var(--tl-ease-out);
+  transition: grid-template-rows 350ms var(--tl-ease-out);
 }
 .thought-line__trace[data-open] {
   grid-template-rows: 1fr;
@@ -186,7 +176,7 @@
   }
 }
 .thought-line__step-text {
-  transition: opacity var(--tl-settle) ease;
+  transition: opacity 350ms ease;
 }
 .thought-line__step[data-done] .thought-line__step-text {
   opacity: 0.55;
@@ -194,10 +184,10 @@
 @media (prefers-reduced-motion: reduce) {
   .thought-line__text {
     filter: none !important;
-    transition: opacity var(--tl-settle) ease;
+    transition: opacity 350ms ease;
   }
   .thought-line__timer {
-    transition: opacity var(--tl-settle) ease;
+    transition: opacity 350ms ease;
   }
   .thought-line__step {
     transform: none !important;

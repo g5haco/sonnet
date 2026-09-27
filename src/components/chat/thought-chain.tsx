@@ -33,13 +33,14 @@ export function ThoughtChain({ chain, busy }: { chain: Chain; busy: boolean }) {
   const thought = !!chain.reasoning.trim();
 
   return (
-    <div className="mb-2 text-muted-foreground">
+    <div className="mb-2 text-sm text-muted-foreground">
       <ThoughtLine
         working={busy}
         label={thought ? "Thinking…" : "Working…"}
         doneLabel={thought ? "Thought for" : "Worked for"}
         steps={chain.steps}
-        elapsed={busy ? undefined : (chain.ms ?? 0) / 1000}
+        // never "0.0s": old chats saved without a duration read as at least 1s
+        elapsed={busy ? undefined : Math.max(1, (chain.ms ?? 0) / 1000)}
       />
       {!busy && modes.length > 0 && (
         <div className="mt-2 flex gap-1.5">

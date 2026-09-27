@@ -36,11 +36,10 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
   const [hint, setHint] = useState(0);
   const box = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
-  const q = query;
-  const r = useMemo(() => search(q, items, courses, now), [q, items, courses, now]);
+  const r = useMemo(() => search(query, items, courses, now), [query, items, courses, now]);
   // Words the keyword search can't place go to Sonnet after a short pause; answers are kept per query.
   const [ai, setAi] = useState<Record<string, Found>>({});
-  const key = q.trim().toLowerCase();
+  const key = query.trim().toLowerCase();
   const found = r.fuzzy && key in ai ? ai[key] : undefined; // null: Sonnet had nothing to say
   useEffect(() => {
     if (!r.fuzzy || key in ai) return;
@@ -168,19 +167,19 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
     })),
   ];
   // Anything typed can go to Sonnet, always the last card.
-  if (q.trim())
+  if (query.trim())
     rows.push({
       key: "ask",
       wide: true,
       go: done(() => {
-        assistant.send(q.trim());
+        assistant.send(query.trim());
         assistant.show();
       }),
       node: (
         <span className="flex items-center gap-3 text-sm">
           <Sparkles aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
           <span className="min-w-0 truncate">
-            Ask Sonnet <span className="text-muted-foreground">“{q.trim()}”</span>
+            Ask Sonnet <span className="text-muted-foreground">“{query.trim()}”</span>
           </span>
         </span>
       ),
@@ -272,7 +271,7 @@ export function HomeSearch({ items, courses, now }: { items: Item[]; courses: Co
             transition={{ duration: 0.3, ease: EASE }}
             className="absolute top-full left-1/2 z-50 mt-2 max-h-[70vh] w-[min(40rem,calc(100vw-2rem))] -translate-x-1/2 origin-top overflow-y-auto overscroll-contain rounded-2xl border border-border bg-popover p-2 shadow-2xl"
           >
-            {!q.trim() ? (
+            {!query.trim() ? (
               <div className="p-2">
                 <p className="mb-2 font-mono text-xs text-muted-foreground">try</p>
                 <div className="flex flex-wrap gap-2">

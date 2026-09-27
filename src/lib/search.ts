@@ -2,7 +2,7 @@ import { dayKey } from "./course";
 import { endOfWeek, type Item } from "./progress";
 
 // Home's smart search: plain words ("next exam", "overdue pols", "friday", "oct 3", "settings") -> result cards.
-// ponytail: keyword rules, not an AI; Ask Sonnet is the fallback for anything fuzzier.
+// Keyword rules first; words they can't place are handed to Sonnet (smartSearch).
 
 type Course = { id: string; code: string; name: string; hue: number };
 export type Place = { label: string; hint: string; href?: string; settings?: "account" | "semester" | "data" };
@@ -31,7 +31,6 @@ const STATUS: Record<string, "overdue" | "done" | "next"> = {
   next: "next", upcoming: "next", soon: "next", coming: "next", todo: "next",
 };
 const FILLER = new Set(["due", "the", "my", "a", "an", "all", "any", "what", "whats", "what's", "is", "are", "show", "me", "for", "in", "on", "of", "to", "do", "i", "have", "work", "stuff", "things", "items", "up", "this", "week", "when"]);
-const DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -67,7 +66,7 @@ export function search(raw: string, items: Item[], courses: Course[], now: numbe
       if (d.getTime() < today - 60 * 864e5) d = new Date(year + 1, month, +m[2]);
       if (d.getDate() === +m[2]) day = d.getTime();
     } else if (w) {
-      const dow = DAYS.findIndex((d) => d.startsWith(w[1]));
+      const dow = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(w[1].slice(0, 3));
       day = today + (((dow - new Date(now).getDay() + 7) % 7) * 864e5); // the next one, today included
       day = at0(day + 2 * 36e5); // DST-safe snap back to midnight
     }
