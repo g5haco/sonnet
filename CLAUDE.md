@@ -135,3 +135,27 @@ The workflow is:
    - whether I need to commit or push anything
 
 The handoff should be concise but complete enough for a fresh Claude Code conversation to continue immediately.
+
+## Resume Protocol
+
+When I say:
+
+`do resume protocol`
+
+1. Read `CLAUDE.md`.
+2. Read `HANDOFF.md`.
+3. Use Graphify before broad source exploration.
+4. Read only the minimum relevant files.
+5. Use project tools appropriately:
+   - Graphify = locate architecture/files
+   - UI Skills = UI/design critique
+   - Impeccable = substantial UI polish/design-system work
+   - Chisle = keep implementation lean
+   - Ponytail = post-implementation review/simplification
+6. Trust current code over stale handoff information.
+7. Briefly report:
+   - current state
+   - unfinished work
+   - next task
+   - relevant subsystem/files
+8. Continue where the prior session stopped.
