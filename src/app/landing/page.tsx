@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Check, FileText, Presentation } from "lucide-react";
+import { FileText, Presentation } from "lucide-react";
 import Link from "next/link";
 import { Assistant } from "./ai";
 import { Features } from "./features";
@@ -7,6 +7,7 @@ import { Rise, Typed } from "./kit";
 import { SiteNav, Wordmark } from "./nav";
 import { Hero } from "./hero";
 import { Showcase } from "./showcase";
+import { Pricing } from "./pricing";
 
 // The public front page. Signed-out visitors to "/" are rewritten here by the proxy (the URL stays "/"); signed-in
 // ones get Home. Always dark: it's the product's own look. Only real, shipped features; no stats or testimonials.
@@ -80,14 +81,6 @@ const FAQ = [
   ["Do I need to install anything?", "No. It runs in your browser, on a laptop or a phone."],
 ];
 
-const PLAN = [
-  "Sonnet, the AI, with your syllabus, slides and readings",
-  "Canvas sync and the Google Calendar feed",
-  "Calendar, grades and what-if, countdowns",
-  "A customizable Home with 29 widgets",
-  "Focus timer, study days and streaks",
-];
-
 function Primary({ children, href = SIGN_UP }: { children: React.ReactNode; href?: string }) {
   return (
     <Link
@@ -148,31 +141,13 @@ export default function Landing() {
 
         {/* Pricing, FAQ and About: the sky fades to solid as these scroll in (see .sky-deep). */}
         <div className="landing-tail">
-        <section id="pricing" aria-labelledby="pricing-title" className="relative mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
+        <section id="pricing" aria-labelledby="pricing-title" className="relative mx-auto max-w-4xl scroll-mt-24 px-4 pt-24">
           <div aria-hidden="true" className="absolute inset-x-0 top-24 -z-10 mx-auto aspect-square max-w-2xl bg-[radial-gradient(closest-side,oklch(1_0_0/0.06),transparent)]" />
           <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
             <Typed text="Pricing" />
           </h2></Rise>
-          <div className="mx-auto mt-10 max-w-md rounded-2xl border border-border bg-card p-8">
-            <p className="text-sm text-muted-foreground">Student</p>
-            <p className="mt-2 font-heading text-5xl font-semibold">
-              Free <span className="text-base font-normal text-muted-foreground">no card needed</span>
-            </p>
-            <ul className="mt-6 space-y-2 text-sm">
-              {PLAN.map((f) => (
-                <li key={f} className="flex gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-done" aria-hidden="true" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8">
-              <Primary>Get started free</Primary>
-            </div>
-          </div>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Paid plans aren&apos;t decided yet. Today, everything on this page is free.
-          </p>
+          <p className="mx-auto mt-4 max-w-md text-center text-muted-foreground">Free for every student. Go Pro when you want the AI without limits.</p>
+          <Pricing signUp={SIGN_UP} />
         </section>
 
         <section aria-labelledby="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24">
