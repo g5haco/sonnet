@@ -27,19 +27,33 @@ export const needsVision = (last: Turn, toggle: boolean) =>
   /\b(solve|prove|derive|calculate)\b/i.test(typedPart(last.content));
 
 // One non-streamed answer: the reply's text, or null if the key is missing or the call failed.
-export async function complete(request: object): Promise<string | null> {
+export async function complete(request: object, onEnd?: (m: Meter) => unknown): Promise<string | null> {
   const key = process.env.AI_API_KEY;
-  if (!key) return null;
+  if (!key) {
+    await onEnd?.({ billable: false });
+    return null;
+  }
   const json = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(55_000),
-    body: JSON.stringify(request),
+    body: JSON.stringify({ ...request, usage: { include: true } }),
   })
     .then((r) => (r.ok ? r.json() : null))
     .catch(() => null);
-  return String(json?.choices?.[0]?.message?.content ?? "").trim() || null;
+  const text = String(json?.choices?.[0]?.message?.content ?? "").trim() || null;
+  await onEnd?.({ billable: !!text, ...meterOf(json) });
+  return text;
 }
+
+// What one AI call cost, for the usage meter (migration 0015). billable = the student got an AI answer.
+export type Meter = { billable: boolean; model?: string; tokensIn?: number; tokensOut?: number; cost?: number };
+const meterOf = (chunk: { model?: string; usage?: { prompt_tokens?: number; completion_tokens?: number; cost?: number } } | null) => ({
+  model: chunk?.model,
+  tokensIn: chunk?.usage?.prompt_tokens,
+  tokensOut: chunk?.usage?.completion_tokens,
+  cost: chunk?.usage?.cost,
+});
 
 // What the model may ask for. Nothing is saved until the student confirms the card in the chat.
 type Kind = "assignment" | "exam" | "quiz" | "reading";
@@ -649,23 +663,28 @@ export async function streamReply(
   think = false,
   toggle = false, // the Think toggle (think also turns on by itself for tutoring questions)
   search = false, // look things up on the web first; answers carry their sources
+  onEnd?: (m: Meter) => unknown, // once, when the reply is over
 ) {
   const key = process.env.AI_API_KEY;
   const encode = (e: object) => new TextEncoder().encode(JSON.stringify(e) + "\n");
-  const fail = (message: string) =>
-    new Response(encode({ t: "error", v: message }), {
+  const fail = async (message: string) => {
+    await onEnd?.({ billable: false });
+    return new Response(encode({ t: "error", v: message }), {
       status: 200,
       headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
     });
+  };
   // Routing reads what the student typed, not the text of files they attached.
   const question = typedPart(turns.at(-1)?.content ?? "");
   const vision = needsVision(turns.at(-1)!, toggle);
   // {"t":"read"}: the course data was loaded for this answer (the chat shows it as a step)
   const readEvent = loaded ? encode({ t: "read" }) : new Uint8Array();
-  if (tasks && asksTasks(question, tasks.names))
+  if (tasks && asksTasks(question, tasks.names)) {
+    await onEnd?.({ billable: false }); // answered here, no AI
     return new Response(new Blob([readEvent, encode({ t: "text", v: taskAnswer(question, tasks) })]), {
       headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
     });
+  }
   if (!key) return fail("Sonnet isn't set up yet: AI_API_KEY is missing.");
 
   const tools = toolsFor(question);
@@ -692,6 +711,7 @@ export async function streamReply(
         ...(vision ? { model: VISION_MODEL } : MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
         reasoning: think ? { effort: "low" } : vision ? { effort: "minimal" } : { enabled: false },
         stream: true,
+        usage: { include: true }, // the last chunk carries tokens and cost
         max_tokens: think ? 4000 : 3000, // reasoning tokens count against the budget; code and decks need room
         ...(search ? { plugins: [{ id: "web", max_results: 5 }] } : {}),
         ...(tools.length ? { tools } : {}),
@@ -745,6 +765,8 @@ export async function streamReply(
         const sources = new Map<string, string>(); // url -> title, from web search citations
         if (search) out.enqueue(encode({ t: "search", v: question.slice(0, 200) }));
         const calls: { name: string; args: string }[] = []; // tool calls arrive in pieces
+        let billable = false;
+        let meter: Partial<Meter> = {};
         try {
           for (;;) {
             const { value, done } = await reader.read();
@@ -782,8 +804,11 @@ export async function streamReply(
                   break;
                 }
                 out.enqueue(encode({ t: "error", v: "The AI stopped mid-answer. Try again." }));
+                clearTimeout(timer);
+                await onEnd?.({ billable: sent, ...meter });
                 return out.close();
               }
+              if (chunk.usage) meter = meterOf(chunk);
               const delta = chunk.choices?.[0]?.delta ?? {};
               if (delta.reasoning) {
                 if (!thinking) out.enqueue(encode({ t: "think" }));
@@ -820,6 +845,7 @@ export async function streamReply(
           if (deck && !sent && !read)
             out.enqueue(encode({ t: "text", v: "From general knowledge of the subject, not your materials." }));
           if (deck) out.enqueue(encode({ t: "cards", v: deck }));
+          billable = sent || proposals.length > 0 || !!deck;
           if (!sent && !proposals.length && !deck)
             out.enqueue(
               encode({
@@ -830,6 +856,7 @@ export async function streamReply(
               }),
             );
         } catch {
+          billable = sent;
           // Went silent (or the connection dropped). Whatever already streamed stays on screen.
           out.enqueue(
             encode({
@@ -839,6 +866,7 @@ export async function streamReply(
           );
         }
         clearTimeout(timer);
+        await onEnd?.({ billable, ...meter });
         out.close();
       },
     }),

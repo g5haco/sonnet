@@ -12,6 +12,7 @@ import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { UsageCard } from "@/components/usage";
 import { termGlance } from "@/lib/term";
 import { cn } from "@/lib/utils";
 
@@ -238,6 +239,10 @@ export function SettingsWindow({
                       <h3 className={label}>Theme</h3>
                       <p className={cn(help, "mb-4")}>Light, dark, or follow your device.</p>
                       <ThemePicker />
+                    </div>
+                    <div className={group}>
+                      <h3 className={cn(label, "mb-3")}>Sonnet this week</h3>
+                      <UsageCard />
                     </div>
                     <div className={group}>
                       <SignOut />

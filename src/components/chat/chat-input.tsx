@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
 import { useAssistant } from "@/components/app-shell";
 import { ABOUT_ITEM, SHORTCUTS } from "@/components/chat/shortcuts";
+import { UsageLine } from "@/components/usage";
 import { courseColor } from "@/lib/course";
 import { MAX_FILES, readAttachment, type ChatFile } from "@/lib/attach";
 import { cn, isShown } from "@/lib/utils";
@@ -623,6 +624,7 @@ export function ChatInput({
           </motion.div>
         </div>
       </VoiceBeam>
+      <UsageLine busy={busy} />
     </div>
   );
 }

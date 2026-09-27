@@ -1,6 +1,6 @@
 import { lightContext, needsSearch, needsThinking, smallTalk, streamReply, studentContext, type Turn } from "@/lib/ai";
 import { typedPart } from "@/lib/attach";
-import { allowed, LIMITED } from "@/lib/limit";
+import { allowed, LIMITED, settle, spend, SPENT } from "@/lib/limit";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 300; // long answers stream for minutes; Vercel Hobby (Fluid) allows up to 300s
@@ -64,5 +64,8 @@ export async function POST(request: Request) {
   const context = light
     ? lightContext(timeZone)
     : await studentContext(supabase, timeZone, focus, item, body?.syllabus === true);
-  return streamReply(context, turns, think, body?.think === true, search);
+  // One use of the weekly allowance, charged now and refunded if no AI answer comes (see streamReply's onEnd).
+  const use = await spend(supabase, think ? "think" : search ? "search" : "chat");
+  if (!use.ok) return Response.json({ error: SPENT, spent: true }, { status: 429 });
+  return streamReply(context, turns, think, body?.think === true, search, (m) => settle(use.id, m));
 }

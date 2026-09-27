@@ -10,7 +10,7 @@ import {
   syncCanvasUser,
   type CanvasCourse,
 } from "@/lib/canvas";
-import { complete, MODELS } from "@/lib/ai";
+import { complete, MODELS, type Meter } from "@/lib/ai";
 import { extractText, visionText } from "@/lib/extract";
 import { parseSyllabusItems, sameWork, summaryPrompt, syllabusPrompt, weekLines, type Draft } from "@/lib/syllabus";
 import { HUES, nextHue } from "@/lib/course";
@@ -19,7 +19,7 @@ import { aiSearchPrompt, parseAiSearch } from "@/lib/search";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { allowed, LIMITED } from "@/lib/limit";
+import { allowed, LIMITED, settle, spend, SPENT } from "@/lib/limit";
 
 // Every action returns an error message for the UI, or nothing on success.
 // Row-level security scopes all queries to the signed-in user.
@@ -503,7 +503,7 @@ export async function readSyllabus(
   } catch {
     today = new Date().toISOString().slice(0, 10);
   }
-  const reply = await askSyllabus(syllabusPrompt(course, today, weekLines(term?.term_start, term?.term_weeks)), m.body);
+  const reply = await askSyllabus(supabase, syllabusPrompt(course, today, weekLines(term?.term_start, term?.term_weeks)), m.body);
   if ("error" in reply) return reply;
   const items = parseSyllabusItems(reply.text, term?.term_start);
   if (!items.length) return { error: "No dated assignments or exams were found in this file." };
@@ -516,8 +516,15 @@ export async function readSyllabus(
 }
 
 // One non-streamed answer about a syllabus (the paid default model, free ones as fallback).
-async function askSyllabus(system: string, body: string): Promise<{ text: string } | { error: string }> {
+async function askSyllabus(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  system: string,
+  body: string,
+): Promise<{ text: string } | { error: string }> {
   if (!process.env.AI_API_KEY) return { error: "Sonnet isn't set up yet: AI_API_KEY is missing." };
+  const use = await spend(supabase, "syllabus");
+  if (!use.ok) return { error: SPENT };
+  let meter: Meter = { billable: false };
   const ask = () =>
     complete({
       ...(MODELS.length > 1 ? { models: MODELS } : { model: MODELS[0] }),
@@ -529,9 +536,10 @@ async function askSyllabus(system: string, body: string): Promise<{ text: string
         // ponytail: first 40k characters; a longer syllabus would need splitting by section
         { role: "user", content: body.slice(0, 40_000) },
       ],
-    });
+    }, (m) => (meter = m));
   // Models fail now and then: one quiet retry before giving up.
   const text = (await ask()) ?? (await ask());
+  await settle(use.id, meter);
   return text ? { text } : { error: "The AI couldn't read it just now. Try again in a minute." };
 }
 
@@ -550,7 +558,7 @@ export async function summarizeSyllabus(materialId: string): Promise<Result & { 
   if (!m.body?.trim())
     return { error: "No text could be read from this file. Word and PowerPoint files aren't supported yet; upload a PDF or photos instead." };
   const course = (m.courses as unknown as { code: string } | null)?.code ?? "this course";
-  const reply = await askSyllabus(summaryPrompt(course), m.body);
+  const reply = await askSyllabus(supabase, summaryPrompt(course), m.body);
   if ("error" in reply) return reply;
   const body = reply.text.replace(/^```(?:markdown)?\s*|\s*```$/g, "").slice(0, 20_000);
   // Save the new one first, then drop older ones: a failed save never leaves the course without a summary.
@@ -641,6 +649,7 @@ export async function smartSearch(query: string, today: string) {
   const { data: auth } = await supabase.auth.getClaims();
   if (!auth?.claims || !q) return null;
   if (!(await allowed(supabase, "search"))) return null;
+  const use = await spend(supabase, "home-search"); // free, only metered for cost
   const [{ data: courses }, { data: items }] = await Promise.all([
     supabase.from("courses").select("id, code, name").order("created_at"),
     // ponytail: 400 items from two months back on; page by term if someone has more
@@ -666,8 +675,22 @@ export async function smartSearch(query: string, today: string) {
       { role: "system", content: aiSearchPrompt(today.slice(0, 40)) },
       { role: "user", content: `${lines}\n\nSearch: ${q}` },
     ],
-  });
+  }, (m) => settle(use.id, m));
   const picked = reply && parseAiSearch(reply, items.length, courses.length);
   if (!picked) return null;
   return { items: picked.items.map((n) => items[n].id), courses: picked.courses.map((n) => courses[n].id), answer: picked.answer };
+}
+
+// The weekly Sonnet allowance for the chat meter and Settings (migration 0015). Null until it's applied.
+export async function usageStatus() {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("usage_status").maybeSingle<{
+    plan: "free" | "paid";
+    used: number;
+    allowance: number;
+    today: number;
+    daily: number;
+    resets: string;
+  }>();
+  return data ?? null;
 }
