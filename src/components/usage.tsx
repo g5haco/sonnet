@@ -77,7 +77,7 @@ export function UsageCard() {
         />
       </div>
       <p className="text-xs text-muted-foreground">
-        A question is 1, Think harder or web search 2, reading a syllabus 1. Canvas, calendar, grades and Home search
+        A question is 1; Think harder, web search or reading a syllabus is 2. Canvas, calendar, grades and Home search
         are free. Refills {resetDay(u)}; after that runs out, {u.daily} uses a day still work.
       </p>
     </div>
