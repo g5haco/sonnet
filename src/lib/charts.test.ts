@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openByCourse, openByKind, paceByWeek } from "./charts";
+import { paceByWeek } from "./charts";
 import type { Item } from "./progress";
 
 const item = (id: string, due: string, kind: Item["kind"], doneAt: string | null, courseId = "a"): Item => ({
@@ -13,17 +13,6 @@ const items = [
   item("4", "2026-09-20T23:59:00", "assignment", null), // ahead
   item("5", "2026-09-18T23:59:00", "reading", "2026-09-15T10:00:00"), // ahead but done
 ];
-
-test("open work ahead per course and kind; past and done work left out", () => {
-  expect(openByCourse(items, [{ id: "a", code: "A" }, { id: "b", code: "B" }], now)).toEqual([
-    { course: "A", open: 1 },
-    { course: "B", open: 1 },
-  ]);
-  expect(openByKind(items, now)).toEqual([
-    { kind: "assignment", open: 1 },
-    { kind: "exam", open: 1 },
-  ]);
-});
 
 test("pace counts due and done per term week up to this week", () => {
   expect(paceByWeek(items, { start: "2026-08-31", weeks: 16 }, now)).toEqual([

@@ -32,17 +32,13 @@ import {
   type RecentMaterial,
 } from "@/components/widgets";
 import {
-  ClearWidget,
   CountdownWidget,
   ExamsWidget,
-  GapsWidget,
   GradeBarsWidget,
   HoursWidget,
-  LoadWidget,
   OnTimeWidget,
   ScoresWidget,
   SplitWidget,
-  SpotlightWidget,
   TrendWidget,
   type GradePoint,
 } from "@/components/chart-widgets";
@@ -52,24 +48,17 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
 import { DEFAULT_LAYOUT, freeSpot, isProWidget, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
-import { CardWidget, GlassWidget, NowClassWidget, PlantWidget, RollWidget, TermWidget, type DeckGlance } from "@/components/pro-widgets";
+import { GlassWidget, PlantWidget, RollWidget } from "@/components/pro-widgets";
+import { BreatheWidget, BuddyWidget, NoteWidget, SoundWidget, ThreeWidget } from "@/components/study-widgets";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 // Recharts widgets load on demand, only when one is on the grid.
-const RadarWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.RadarWidget));
-const RingsWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.RingsWidget));
 const PaceWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.PaceWidget));
-const MixWidget = dynamic(() => import("@/components/evil-widgets").then((m) => m.MixWidget));
 
 // A side-column-width render (w-80) at 3/4 scale, as tall as the h-44 frame, so charts get a real height.
 const PREVIEW = "flex h-[235px] w-80 origin-top-left scale-[0.75] flex-col *:flex-1";
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
-
-// The widget library's sample deck (the Flashcard widget's preview before you have one).
-const SAMPLE_DECKS: DeckGlance[] = [
-  { title: "BIO 101: Cells", cards: [{ front: "What does the mitochondria do?", back: "Makes ATP, the cell's energy, through cellular respiration." }] },
-];
 
 // A Pro widget on a Free Home: still there (blurred) so nothing jumps, with a way out.
 function Locked({ children }: { children: ReactNode }) {
@@ -95,13 +84,11 @@ export function Dashboard({
   sessions,
   materials = [],
   history = [],
-  decks = [],
   pro = false,
   name,
   layout: saved = DEFAULT_LAYOUT,
 }: {
   name: string;
-  decks?: DeckGlance[];
   pro?: boolean; // Sonnet Pro: every widget; Free: the ones without `pro` in WIDGETS
   layout?: Layout;
   term: Term | null;
@@ -168,10 +155,9 @@ export function Dashboard({
     materials: RecentMaterial[];
     history: GradePoint[];
     meetings?: ClassMeeting[];
-    decks: DeckGlance[];
     term: Term;
   };
-  const render = ({ shown, courses, cards, sessions, materials, history, meetings, decks, term }: Data): Record<WidgetId, ReactNode> => ({
+  const render = ({ shown, courses, cards, sessions, materials, history, meetings, term }: Data): Record<WidgetId, ReactNode> => ({
     progress: <ProgressBlock items={shown} now={now} termStart={new Date(`${term.start}T00:00:00`)} weeks={term.weeks} />,
     next: (
       <UpNext
@@ -266,30 +252,25 @@ export function Dashboard({
     trend: <TrendWidget courses={courses} history={history} />,
     gradebars: <GradeBarsWidget courses={courses} />,
     scores: <ScoresWidget items={shown} />,
-    gaps: <GapsWidget courses={courses} />,
     exams: <ExamsWidget items={shown} now={now} />,
-    spotlight: <SpotlightWidget courses={courses} items={shown} now={now} term={term} />,
     hours: <HoursWidget sessions={sessions} now={now} />,
-    load: <LoadWidget items={shown} now={now} />,
     ontime: <OnTimeWidget items={shown} now={now} term={term} />,
     split: <SplitWidget sessions={sessions} courses={courses} />,
     countdown: <CountdownWidget items={shown} />,
-    clear: <ClearWidget items={shown} now={now} />,
-    radar: <RadarWidget items={shown} courses={courses} now={now} />,
-    rings: <RingsWidget courses={courses} />,
     pace: <PaceWidget items={shown} term={term} now={now} />,
-    mix: <MixWidget items={shown} now={now} />,
-    cards: <CardWidget decks={decks} />,
-    nowclass: <NowClassWidget term={term} now={now} meetings={meetings} />,
-    term: <TermWidget term={term} items={shown} now={now} />,
     roll: <RollWidget items={shown} now={now} />,
     plant: <PlantWidget sessions={sessions} now={now} />,
     glass: <GlassWidget items={shown} now={now} />,
+    three: <ThreeWidget items={shown} now={now} onToggle={toggle} />,
+    sounds: <SoundWidget />,
+    breathe: <BreatheWidget />,
+    note: <NoteWidget />,
+    buddy: <BuddyWidget items={shown} sessions={sessions} now={now} />,
   });
-  const view = render({ shown, courses, cards, sessions, materials, history, decks, term });
+  const view = render({ shown, courses, cards, sessions, materials, history, term });
   // Library previews: a widget with nothing real to show yet (its empty state) swaps to the sample render.
   const fake = adding ? sampleData(now) : null;
-  const sample = fake && render({ ...fake, shown: fake.items, decks: SAMPLE_DECKS });
+  const sample = fake && render({ ...fake, shown: fake.items });
   // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {
     if (!pro && isProWidget(id)) return;

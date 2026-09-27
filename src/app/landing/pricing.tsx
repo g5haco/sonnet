@@ -30,7 +30,7 @@ const PAID = [
   "Everything in Free",
   "Unlimited AI, no weekly allowance",
   "Unlimited courses and flashcard decks",
-  `All ${ids.length} Home widgets, like Study plant, Roll for it and Week glass`,
+  `All ${ids.length} Home widgets, like Soundscape, Study buddy and Roll for it`,
   "Stronger AI for Think harder and syllabus reading",
   "First in line when Sonnet is busy",
 ];

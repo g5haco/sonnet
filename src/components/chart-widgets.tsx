@@ -4,14 +4,12 @@
 // data (courses, work, grades, focus sessions); when there's nothing to draw, the widget says what fills it.
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Fragment, useEffect, useState } from "react";
-import { useAssistant } from "@/components/app-shell";
 import { Block } from "@/components/block";
 import { Fit } from "@/components/fit";
-import { when } from "@/components/up-next";
-import { addDays, sessions as classSessions, startOfDay, type Term } from "@/lib/calendar";
+import { addDays, startOfDay, type Term } from "@/lib/calendar";
 import { courseColor, dayKey, gradeLabel } from "@/lib/course";
 import type { FocusSession } from "@/lib/focus";
-import { endOfWeek, type Item } from "@/lib/progress";
+import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
@@ -157,45 +155,6 @@ export function ScoresWidget({ items }: { items: Item[] }) {
   );
 }
 
-const CUTOFFS = [90, 80, 70, 60];
-
-// How far each course is from the next letter cutoff (90/80/70/60), closest first: where a little work counts.
-export function GapsWidget({ courses }: { courses: Course[] }) {
-  const list = graded(courses)
-    .map((c) => {
-      const up = [...CUTOFFS].reverse().find((k) => k > c.grade);
-      const floor = CUTOFFS.find((k) => k <= c.grade);
-      return { c, up, gap: up ? up - c.grade : Infinity, cushion: floor != null ? c.grade - floor : null };
-    })
-    .sort((a, b) => a.gap - b.gap);
-  return (
-    <Block title="Grade gaps" aside="to 90 / 80 / 70">
-      {list.length === 0 ? (
-        <Empty>Once Canvas syncs grades, this shows how close each course is to the next letter.</Empty>
-      ) : (
-        <ul className="flex flex-1 flex-col justify-evenly gap-2 text-sm">
-          {list.map(({ c, up, gap, cushion }) => (
-            <li key={c.id} className="flex items-center gap-2">
-              <Dot hue={c.hue} />
-              <span className="min-w-0 flex-1 truncate font-mono text-xs">{c.code}</span>
-              <span className="font-mono text-xs tabular-nums">
-                {up ? (
-                  <>
-                    <span className={cn(gap <= 2 && "text-brand")}>+{Math.round(gap * 10) / 10}</span>
-                    <span className="text-muted-foreground"> to {up}</span>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">{cushion != null && `${Math.round(cushion * 10) / 10} above 90`}</span>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Block>
-  );
-}
-
 // Every exam in the next 30 days as a day count, so crunch weeks show up before they arrive.
 export function ExamsWidget({ items, now }: { items: Item[]; now: number }) {
   const list = items
@@ -224,65 +183,6 @@ export function ExamsWidget({ items, now }: { items: Item[]; now: number }) {
           })}
         </ul>
       )}
-    </Block>
-  );
-}
-
-// The course that needs you most this week (most open work due in 7 days): its grade, next item and next class.
-export function SpotlightWidget({
-  courses,
-  items,
-  now,
-  term,
-}: {
-  courses: Course[];
-  items: Item[];
-  now: number;
-  term: Term | null;
-}) {
-  const { meetings } = useAssistant().schedule;
-  const soon = (c: Course) =>
-    items.filter((i) => i.courseId === c.id && !i.doneAt && Date.parse(i.due) > now && Date.parse(i.due) < now + 7 * 864e5);
-  const course = [...courses].sort((a, b) => soon(b).length - soon(a).length)[0];
-  if (!course)
-    return (
-      <Block title="Course spotlight">
-        <Empty>Add a course and the one that needs you most shows up here.</Empty>
-      </Block>
-    );
-  const next = items
-    .filter((i) => i.courseId === course.id && !i.doneAt && Date.parse(i.due) > now)
-    .sort((a, b) => a.due.localeCompare(b.due))[0];
-  const t0 = new Date(now);
-  const days = Array.from({ length: 7 }, (_, k) => addDays(startOfDay(t0), k));
-  const cls = classSessions(
-    meetings.filter((m) => m.courseId === course.id),
-    days,
-    term,
-  )
-    .filter((s) => +s.end > now)
-    .sort((a, b) => +a.start - +b.start)[0];
-  return (
-    <Block title="Course spotlight" aside={`${soon(course).length} due this week`}>
-      <p className="flex items-center gap-2">
-        <Dot hue={course.hue} />
-        <span className="truncate font-mono text-xl font-medium">{course.code}</span>
-        {course.grade != null && <span className="ml-auto font-mono text-sm tabular-nums">{gradeLabel(course.grade)}</span>}
-      </p>
-      <dl className="mt-3 flex flex-1 flex-col justify-evenly gap-1.5 text-sm">
-        <div className="flex gap-2">
-          <dt className="w-12 shrink-0 font-mono text-xs leading-5 text-muted-foreground">next</dt>
-          <dd className="min-w-0 truncate">{next ? `${next.title} · ${when(next.due, now).label}` : "nothing due"}</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-12 shrink-0 font-mono text-xs leading-5 text-muted-foreground">class</dt>
-          <dd className="min-w-0 truncate">
-            {cls
-              ? cls.start.toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })
-              : "no class times"}
-          </dd>
-        </div>
-      </dl>
     </Block>
   );
 }
@@ -332,38 +232,6 @@ export function HoursWidget({ sessions, now }: { sessions: FocusSession[]; now: 
             <span key={h}>{h}</span>
           ))}
         </span>
-      </div>
-    </Block>
-  );
-}
-
-// Open work due per day for the next 14 days: heavy days stand out before they arrive.
-export function LoadWidget({ items, now }: { items: Item[]; now: number }) {
-  const today = startOfDay(new Date(now));
-  const days = Array.from({ length: 14 }, (_, k) => addDays(today, k));
-  const counts = days.map((d) => items.filter((i) => !i.doneAt && dayKey(new Date(i.due)) === dayKey(d)).length);
-  const max = Math.max(1, ...counts);
-  const total = counts.reduce((a, b) => a + b, 0);
-  return (
-    <Block title="Workload" aside="next 14 days">
-      <Big unit="due">{total}</Big>
-      <div
-        className="mt-4 flex min-h-16 flex-1 items-end gap-1"
-        role="img"
-        aria-label={`Open work due per day for the next 14 days: ${counts.join(", ")}.`}
-      >
-        {counts.map((n, k) => (
-          <span
-            key={k}
-            title={`${days[k].toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}: ${n} due`}
-            className={cn("flex-1 rounded-full", k === 0 ? "bg-brand" : n === max && n > 1 ? "bg-foreground/45" : "bg-foreground/15")}
-            style={{ height: `${Math.max(8, (n / max) * 100)}%` }}
-          />
-        ))}
-      </div>
-      <div className="mt-1.5 flex justify-between font-mono text-xs text-muted-foreground" aria-hidden="true">
-        <span>today</span>
-        <span>{days[13].toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
       </div>
     </Block>
   );
@@ -508,30 +376,3 @@ export function CountdownWidget({ items }: { items: Item[] }) {
   );
 }
 
-// This week's work as a meter that fills as you check things off; full = the week is cleared.
-export function ClearWidget({ items, now }: { items: Item[]; now: number }) {
-  const end = endOfWeek(now);
-  const week = items.filter((i) => Date.parse(i.due) <= end && Date.parse(i.due) > end - 7 * 864e5);
-  const done = week.filter((i) => i.doneAt).length;
-  const pct = week.length ? done / week.length : 0;
-  const clear = week.length > 0 && done === week.length;
-  return (
-    <Block title="Week clear" aside={week.length ? `${done} of ${week.length}` : undefined}>
-      {week.length === 0 ? (
-        <Empty>Nothing due this week.</Empty>
-      ) : (
-        <>
-          <Big>{clear ? "Cleared" : `${Math.round(pct * 100)}%`}</Big>
-          <div className="mt-4 min-h-2 flex-1 overflow-hidden rounded-xl bg-foreground/10" role="img" aria-label={`${done} of ${week.length} done this week`}>
-            <motion.div
-              className={cn("h-full rounded-xl", clear ? "bg-done" : "bg-brand")}
-              initial={false}
-              animate={{ width: `${pct * 100}%` }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            />
-          </div>
-        </>
-      )}
-    </Block>
-  );
-}
