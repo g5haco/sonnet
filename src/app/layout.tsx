@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
+import { Abril_Fatface, Archivo, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const plexSans = IBM_Plex_Sans({ variable: "--font-plex-sans", subsets: ["latin"] });
-const plexSerif = IBM_Plex_Serif({ variable: "--font-plex-serif", subsets: ["latin"], weight: ["400", "500", "600"] });
+// Archivo for text, Abril Fatface for headings (it has one weight, so headings never get faux bold; see globals.css).
+const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"] });
+const abril = Abril_Fatface({ variable: "--font-abril", subsets: ["latin"], weight: "400" });
 const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 // Android Chrome: the keyboard shrinks the page instead of covering it (iOS is handled in app-shell).
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexSerif.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${abril.variable} ${plexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full">
