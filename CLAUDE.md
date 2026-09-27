@@ -97,3 +97,41 @@ Use:
 - `HANDOFF.md` for current project state, decision
 - Graphify for code arch
 - source file only for impl detail needed by current task
+## Handoff Protocol
+
+When I say:
+
+`do handoff protocol`
+
+perform the full end-of-session handoff workflow.
+
+The workflow is:
+
+1. Read the current conversation, `CLAUDE.md`, existing `HANDOFF.md`, and relevant repository state.
+2. Use Graphify where useful to verify architecture related to the session's work.
+3. Update `HANDOFF.md` with:
+   - Project Summary
+   - Current State
+   - Completed This Session
+   - Important Decisions
+   - Current Design System
+   - In Progress / Unfinished Work
+   - Known Bugs / Issues
+   - Current Priorities
+   - Testing / Validation Status
+   - Relevant Architecture / Graphify Context
+   - Important Constraints
+   - Next Recommended Task
+   - Tomorrow / New-Session Startup Prompt
+4. Remove stale or redundant information.
+5. Do not duplicate architecture that Graphify can recover cheaply.
+6. Preserve intent, reasoning, unfinished work, and decisions that cannot be inferred from code.
+7. Trust the current repository over stale handoff information.
+8. Do not start new feature work during handoff.
+9. At the end, report:
+   - what sections changed
+   - the next recommended task
+   - whether the repo is clean
+   - whether I need to commit or push anything
+
+The handoff should be concise but complete enough for a fresh Claude Code conversation to continue immediately.
