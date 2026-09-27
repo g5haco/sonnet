@@ -37,7 +37,7 @@ const KINDS: { kind: string; label: string; cost: number }[] = [
   { kind: "chat", label: "Questions", cost: 1 },
   { kind: "think", label: "Think harder", cost: 2 },
   { kind: "search", label: "Web search", cost: 2 },
-  { kind: "syllabus", label: "Syllabus reading", cost: 2 },
+  { kind: "syllabus", label: "Syllabus reading", cost: 3 },
 ];
 
 function Ring({ value, className }: { value: number; className?: string }) {

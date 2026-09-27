@@ -47,7 +47,7 @@ as $$
 $$;
 
 -- Charges one use up front; returns its row id, or null when the allowance is spent.
--- Weights are set here, not by the caller: think/web 2, reading a syllabus 2, Home search's AI free.
+-- Weights are set here, not by the caller: think/web 2, reading a syllabus 3, Home search's AI free.
 create function public.ai_spend(kind text)
 returns bigint
 language plpgsql security definer set search_path = ''
@@ -55,7 +55,7 @@ as $$
 declare
   uid uuid := auth.uid();
   w int := case kind when 'chat' then 1 when 'think' then 2 when 'search' then 2
-                     when 'syllabus' then 2 when 'home-search' then 0 end;
+                     when 'syllabus' then 3 when 'home-search' then 0 end;
   s record;
   new_id bigint;
 begin
