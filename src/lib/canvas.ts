@@ -1,6 +1,7 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { HUES } from "./course";
+import { FREE, isPaid } from "./plan";
 
 export type CanvasCourse = {
   id: string | number;
@@ -252,15 +253,19 @@ export function mapIcsEvents(
     .filter((event) => !canvasItems.some((item) => item.html_url === event.html_url || sameWork(item, event)));
 }
 
+// The code a Canvas course is saved under (shared by the import and the Free-limit skip list).
+const courseCodeOf = (remote: CanvasCourse) => (remote.course_code || remote.name || `Canvas ${remote.id}`).trim().slice(0, 40);
+
 async function getOrCreateCourse(
   admin: SupabaseClient,
   userId: string,
   remote: CanvasCourse,
   index: number,
   existing: { id: string; code: string; canvas_course_id: string | null }[],
-) {
+  room: { left: number },
+): Promise<string | null> {
   const remoteId = String(remote.id);
-  const code = (remote.course_code || remote.name || `Canvas ${remoteId}`).trim().slice(0, 40);
+  const code = courseCodeOf(remote);
   const found = existing.find(
     (course) => course.canvas_course_id === remoteId || course.code.toLowerCase() === code.toLowerCase(),
   );
@@ -268,6 +273,8 @@ async function getOrCreateCourse(
     if (!found.canvas_course_id) await admin.from("courses").update({ canvas_course_id: remoteId }).eq("id", found.id);
     return found.id;
   }
+  if (room.left <= 0) return null; // Free's course limit: this course isn't imported
+  room.left--;
   const { data, error } = await admin
     .from("courses")
     .insert({
@@ -279,6 +286,11 @@ async function getOrCreateCourse(
     })
     .select("id")
     .single();
+  // Another sync (or a new course) took the last Free spot meanwhile: skip, don't fail the sync.
+  if (error?.message.includes("FREE_LIMIT_COURSES")) {
+    room.left = 0;
+    return null;
+  }
   if (error) throw error;
   existing.push({ id: data.id, code, canvas_course_id: remoteId });
   return data.id as string;
@@ -344,9 +356,21 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
       .eq("user_id", userId);
     if (coursesError) throw coursesError;
     const existing = current ?? [];
+    // Free imports up to FREE.courses courses in all (Canvas order); the rest are skipped with their work.
+    const room = { left: (await isPaid(admin, userId)) ? Infinity : Math.max(0, FREE.courses - existing.length) };
+    const skipped = new Set<string>(); // lowercased codes and Canvas ids of courses left out
+    let left = 0; // how many courses that is
+    const isSkipped = (e: IcsEvent) =>
+      (!!e.canvasCourseId && skipped.has(e.canvasCourseId)) || (!!e.courseCode && skipped.has(e.courseCode.toLowerCase()));
     const courseIds = new Map<string, string>();
     for (const [index, course] of canvasCourses.entries()) {
-      const id = await getOrCreateCourse(admin, userId, course, index, existing);
+      const id = await getOrCreateCourse(admin, userId, course, index, existing, room);
+      if (!id) {
+        left++;
+        skipped.add(String(course.id));
+        skipped.add(courseCodeOf(course).toLowerCase());
+        continue;
+      }
       courseIds.set(String(course.id), id);
       // Canvas's own current score (weights applied); null when the course hides totals.
       const grade = course.enrollments?.find((e) => Number.isFinite(e.computed_current_score))?.computed_current_score;
@@ -358,7 +382,9 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
           .upsert({ user_id: userId, course_id: id, day: new Date().toISOString().slice(0, 10), grade });
     }
     // Feed-only users (no token) still get real courses from the " [CODE]" on each feed title.
+    // Feed events of a skipped course stay out (not filed under another course).
     for (const event of ics) {
+      if (isSkipped(event)) continue;
       const known =
         (event.canvasCourseId && courseIds.has(event.canvasCourseId)) ||
         existing.some((c) => c.code.toLowerCase() === event.courseCode?.toLowerCase());
@@ -369,10 +395,18 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
           { id: event.canvasCourseId ?? `ics:${event.courseCode}`, course_code: event.courseCode },
           existing.length,
           existing,
+          room,
         );
+        if (!id) {
+          left++;
+          if (event.canvasCourseId) skipped.add(event.canvasCourseId);
+          skipped.add(event.courseCode.toLowerCase());
+          continue;
+        }
         if (event.canvasCourseId) courseIds.set(event.canvasCourseId, id);
       }
     }
+    ics = ics.filter((e) => !isSkipped(e));
     const codes = new Map(existing.map((c) => [c.code.toLowerCase(), c.id]));
     const unplaced = (event: IcsEvent) =>
       !(event.canvasCourseId && courseIds.has(event.canvasCourseId)) &&
@@ -385,7 +419,8 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         { id: "calendar", course_code: "CANVAS", name: "Canvas Calendar" },
         existing.length,
         existing,
-      );
+        room,
+      ) ?? undefined;
     }
 
     const tokenItems = [...assignments].flatMap(([courseId, rows]) => {
@@ -394,9 +429,11 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         ? rows.map((row) => mapCanvasAssignment(local, row)).filter((row): row is CanvasItem => row !== null)
         : [];
     });
+    // No catch-all course (no room on Free): unplaced feed events are left out rather than misfiled.
+    const placed = fallback ? ics : ics.filter((e) => !unplaced(e));
     const items = [
       ...tokenItems,
-      ...mapIcsEvents(ics, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems, codes),
+      ...mapIcsEvents(placed, courseIds, fallback ?? existing[0]?.id ?? "", tokenItems, codes),
     ].filter((item) => item.course_id);
     if (items.length) {
       const { error } = await admin.from("items").upsert(
@@ -444,7 +481,8 @@ export async function syncCanvasUser(admin: SupabaseClient, userId: string, fetc
         canvas_last_sync_count: items.length,
       })
       .eq("user_id", userId);
-    return { courses: canvasCourses.length, items: items.length };
+    // skipped: courses Free's limit left out
+    return { courses: canvasCourses.length, items: items.length, skipped: left };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Canvas sync failed.";
     await admin

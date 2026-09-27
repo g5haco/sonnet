@@ -52,7 +52,7 @@ const WORKS_WITH = [
 const FAQ = [
   [
     "Is it free?",
-    "Yes. Canvas sync, the calendar, grades, flashcards and the focus timer are free. The AI comes with a weekly allowance that refills every Monday, and you can always see how much is left.",
+    "Yes. Free covers 2 courses, a flashcard deck, the core Home widgets, Canvas sync, the calendar, grades and the focus timer. The AI comes with a weekly allowance that refills every Monday. Sonnet Pro (coming soon) removes the limits and unlocks every widget.",
   ],
   [
     "What does Sonnet know?",

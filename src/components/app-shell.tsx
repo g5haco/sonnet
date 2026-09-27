@@ -257,7 +257,7 @@ export function AppShell({
             patch((m) => ({ ...m, cards: deck, chain: step(m, "Made flashcards") }));
             // Every deck is kept in Flashcards; the chat stores its id so it links there.
             createDeck(deck, (course ?? focus) || "").then((r) => {
-              if (r.error) return console.error("[deck]", r.error);
+              if (r.error) return void toast(r.error); // e.g. Free's one-deck limit; the cards still show here
               dirty.current = true;
               patch((m) => ({ ...m, cards: m.cards && { ...m.cards, id: r.id } }));
             });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, RotateCcw, X } from "lucide-react";
+import { Lock, Plus, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -51,7 +51,8 @@ import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SnapGrid } from "@/components/snap-grid";
 import type { FocusSession } from "@/lib/focus";
-import { DEFAULT_LAYOUT, freeSpot, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { DEFAULT_LAYOUT, freeSpot, isProWidget, WIDGETS, type Layout, type WidgetId } from "@/lib/home";
+import { CardWidget, GlassWidget, NowClassWidget, PlantWidget, RollWidget, TermWidget, type DeckGlance } from "@/components/pro-widgets";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
 
 // Recharts widgets load on demand, only when one is on the grid.
@@ -65,6 +66,26 @@ const PREVIEW = "flex h-[235px] w-80 origin-top-left scale-[0.75] flex-col *:fle
 
 type Course = { id: string; code: string; name: string; hue: number; grade?: number | null };
 
+// The widget library's sample deck (the Flashcard widget's preview before you have one).
+const SAMPLE_DECKS: DeckGlance[] = [
+  { title: "BIO 101: Cells", cards: [{ front: "What does the mitochondria do?", back: "Makes ATP, the cell's energy, through cellular respiration." }] },
+];
+
+// A Pro widget on a Free Home: still there (blurred) so nothing jumps, with a way out.
+function Locked({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative flex h-full w-full" title="Sonnet Pro widget (coming soon). Remove it in Edit.">
+      <div inert aria-hidden="true" className="flex h-full w-full opacity-50 blur-[3px] *:flex-1">
+        {children}
+      </div>
+      <p className="absolute inset-0 m-auto flex h-fit w-fit items-center gap-1.5 rounded-full bg-popover px-3 py-1.5 font-mono text-xs whitespace-nowrap shadow-md ring-1 ring-border">
+        <Lock className="size-3.5 shrink-0" aria-hidden="true" />
+        Pro<span className="sr-only"> widget, coming soon. Remove it in Edit.</span>
+      </p>
+    </div>
+  );
+}
+
 
 export function Dashboard({
   term,
@@ -74,10 +95,14 @@ export function Dashboard({
   sessions,
   materials = [],
   history = [],
+  decks = [],
+  pro = false,
   name,
   layout: saved = DEFAULT_LAYOUT,
 }: {
   name: string;
+  decks?: DeckGlance[];
+  pro?: boolean; // Sonnet Pro: every widget; Free: the ones without `pro` in WIDGETS
   layout?: Layout;
   term: Term | null;
   courses: Course[];
@@ -143,9 +168,10 @@ export function Dashboard({
     materials: RecentMaterial[];
     history: GradePoint[];
     meetings?: ClassMeeting[];
+    decks: DeckGlance[];
     term: Term;
   };
-  const render = ({ shown, courses, cards, sessions, materials, history, meetings, term }: Data): Record<WidgetId, ReactNode> => ({
+  const render = ({ shown, courses, cards, sessions, materials, history, meetings, decks, term }: Data): Record<WidgetId, ReactNode> => ({
     progress: <ProgressBlock items={shown} now={now} termStart={new Date(`${term.start}T00:00:00`)} weeks={term.weeks} />,
     next: (
       <UpNext
@@ -253,13 +279,20 @@ export function Dashboard({
     rings: <RingsWidget courses={courses} />,
     pace: <PaceWidget items={shown} term={term} now={now} />,
     mix: <MixWidget items={shown} now={now} />,
+    cards: <CardWidget decks={decks} />,
+    nowclass: <NowClassWidget term={term} now={now} meetings={meetings} />,
+    term: <TermWidget term={term} items={shown} now={now} />,
+    roll: <RollWidget items={shown} now={now} />,
+    plant: <PlantWidget sessions={sessions} now={now} />,
+    glass: <GlassWidget items={shown} now={now} />,
   });
-  const view = render({ shown, courses, cards, sessions, materials, history, term });
+  const view = render({ shown, courses, cards, sessions, materials, history, decks, term });
   // Library previews: a widget with nothing real to show yet (its empty state) swaps to the sample render.
   const fake = adding ? sampleData(now) : null;
-  const sample = fake && render({ ...fake, shown: fake.items });
+  const sample = fake && render({ ...fake, shown: fake.items, decks: SAMPLE_DECKS });
   // A new widget takes the first free spot on the grid; a full grid says so.
   const add = (id: WidgetId) => {
+    if (!pro && isProWidget(id)) return;
     const spot = freeSpot(layout, id);
     if (!spot) return void toast(`No room for ${WIDGETS[id].label}. Remove or shrink a widget first.`);
     setLayout((l) => [...l, spot]);
@@ -361,7 +394,7 @@ export function Dashboard({
         layout={layout}
         onChange={setLayout}
         editable={editing}
-        render={(id) => view[id]}
+        render={(id) => (!pro && isProWidget(id) ? <Locked>{view[id]}</Locked> : view[id])}
         controls={(id) => (
           <button
             type="button"
@@ -387,11 +420,18 @@ export function Dashboard({
         <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-2xl sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Widgets</DialogTitle>
-            <DialogDescription>Previews use your real data, or sample data until you have some. A new widget takes the first free space; drag it anywhere.</DialogDescription>
+            <DialogDescription>
+              Previews use your real data, or sample data until you have some. A new widget takes the first free space; drag it anywhere.
+              {!pro && " Widgets marked Pro come with Sonnet Pro (coming soon)."}
+            </DialogDescription>
           </DialogHeader>
           <ul className="grid gap-4 sm:grid-cols-2">
-            {(Object.keys(WIDGETS) as WidgetId[]).map((id) => {
+            {/* Free first, then Pro, each in their usual order. */}
+            {(Object.keys(WIDGETS) as WidgetId[])
+              .sort((a, b) => (pro ? 0 : +isProWidget(a) - +isProWidget(b)))
+              .map((id) => {
               const on = layout.some((w) => w.id === id);
+              const locked = !pro && isProWidget(id);
               return (
                 <li key={id} className="flex flex-col gap-3 rounded-2xl bg-muted/40 p-3">
                   {/* A side-column-width render, shrunk to fit and cut off at the bottom. */}
@@ -404,8 +444,17 @@ export function Dashboard({
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="mr-auto text-sm font-medium">{WIDGETS[id].label}</span>
-                    {on ? (
+                    <span className="mr-auto flex items-center gap-2 text-sm font-medium">
+                      {WIDGETS[id].label}
+                      {isProWidget(id) && (
+                        <span className="rounded-full bg-brand/15 px-2 py-0.5 font-mono text-[10px] text-brand">PRO</span>
+                      )}
+                    </span>
+                    {locked ? (
+                      <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                        <Lock className="size-3" aria-hidden="true" /> Pro, soon
+                      </span>
+                    ) : on ? (
                       <span className="font-mono text-xs text-muted-foreground">on Home</span>
                     ) : (
                       <Button type="button" size="sm" onClick={() => add(id)} className="h-8 rounded-full px-3">

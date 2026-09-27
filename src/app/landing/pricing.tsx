@@ -4,6 +4,8 @@ import { CircleCheck, Sparkles, User } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
+import { isProWidget, WIDGETS, type WidgetId } from "@/lib/home";
+import { FREE } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 
 type Prices = { monthly: number; yearly: number };
@@ -12,17 +14,23 @@ type Prices = { monthly: number; yearly: number };
 // Set it, e.g. { monthly: 12, yearly: 115 }, and the Monthly/Annual switch and the discount animation appear.
 const PRO: Prices | null = null;
 
-const FREE = [
+const ids = Object.keys(WIDGETS) as WidgetId[];
+const freeWidgets = ids.filter((id) => !isProWidget(id)).length;
+
+const FREE_LIST = [
   "40 AI uses a week, and 3 a day after that",
   "Sonnet reads your syllabus, slides and readings",
-  "Canvas sync and the Google Calendar feed",
-  "Calendar, grades and what-if",
-  "Flashcards with share links",
+  `${FREE.courses} courses, from Canvas or added by hand`,
+  `${FREE.decks} flashcard deck, with a share link`,
+  `${freeWidgets} Home widgets: progress, up next, grades, calendar and more`,
+  "Canvas sync, the Google Calendar feed, grades and what-if",
   "Focus timer, study days and streaks",
 ];
 const PAID = [
   "Everything in Free",
   "Unlimited AI, no weekly allowance",
+  "Unlimited courses and flashcard decks",
+  `All ${ids.length} Home widgets, like Study plant, Roll for it and Week glass`,
   "Stronger AI for Think harder and syllabus reading",
   "First in line when Sonnet is busy",
 ];
@@ -179,7 +187,7 @@ export function Pricing({ signUp, prices = PRO }: { signUp: string; prices?: Pri
           <Link href={signUp} className={cn(button, "bg-secondary text-foreground hover:opacity-90")}>
             Get started free
           </Link>
-          <Features items={FREE} />
+          <Features items={FREE_LIST} />
         </div>
 
         <div className={card}>
@@ -192,7 +200,7 @@ export function Pricing({ signUp, prices = PRO }: { signUp: string; prices?: Pri
             <User className="size-4 text-muted-foreground" aria-hidden="true" />
             Sonnet Pro
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">For heavy AI users. Study as much as you want, all term.</p>
+          <p className="mt-2 text-sm text-muted-foreground">For every course and every widget. Study as much as you want, all term.</p>
           {prices ? (
             <Price amount={<ProAmount prices={prices} yearly={yearly} />}>
               <p>per month</p>

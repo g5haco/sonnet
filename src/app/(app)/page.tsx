@@ -1,12 +1,13 @@
 import { Dashboard } from "@/components/dashboard";
 import { readLayout } from "@/lib/home";
 import { ITEM_COLS, MEETING_COLS, toCards, toItems, toMeetings } from "@/lib/rows";
+import { isPaid } from "@/lib/plan";
 import { requireUser } from "@/lib/supabase/server";
 
 export default async function Page() {
   const { supabase, name } = await requireUser();
 
-  const [settings, courses, items, meetings, focus, materials, history] = await Promise.all([
+  const [settings, courses, items, meetings, focus, materials, history, decks, pro] = await Promise.all([
     supabase.from("settings").select("*").maybeSingle(),
     supabase.from("courses").select("*").order("created_at"), // "*": grade only exists after migration 0006
     supabase.from("items").select(ITEM_COLS).order("due"),
@@ -20,6 +21,9 @@ export default async function Page() {
     supabase.from("materials").select("id, kind, name, course_id").order("created_at", { ascending: false }).limit(5),
     // Grade trend points, newest 2000.
     supabase.from("grade_history").select("course_id, day, grade").order("day", { ascending: false }).limit(2000),
+    // The Flashcard widget: newest 5 decks.
+    supabase.from("decks").select("id, title, cards").order("updated_at", { ascending: false }).limit(5),
+    isPaid(supabase),
   ]);
   const error = settings.error ?? courses.error ?? items.error ?? meetings.error;
   if (error) throw new Error(`Couldn't load your dashboard: ${error.message}`);
@@ -35,6 +39,8 @@ export default async function Page() {
       sessions={focus.data ?? []}
       materials={materials.data ?? []}
       history={history.data ?? []}
+      decks={decks.data ?? []}
+      pro={pro}
       cards={toCards(courses.data!, all, toMeetings(meetings.data!, courses.data!))}
     />
   );

@@ -20,6 +20,7 @@ import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { allowed, LIMITED, settle, spend, SPENT } from "@/lib/limit";
+import { limitError } from "@/lib/plan";
 
 // Every action returns an error message for the UI, or nothing on success.
 // Row-level security scopes all queries to the signed-in user.
@@ -53,7 +54,8 @@ export async function createCourse(form: FormData): Promise<Result> {
   const { data: taken, error: readError } = await supabase.from("courses").select("hue");
   if (readError) return done(readError, "add the course");
   const { error } = await supabase.from("courses").insert({ code, name, hue: nextHue(taken.map((c) => c.hue)) });
-  return done(error, "add the course");
+  const capped = error && limitError(error.message);
+  return capped ? { error: capped } : done(error, "add the course");
 }
 
 export async function updateCourse(form: FormData): Promise<Result> {
@@ -215,7 +217,7 @@ export async function saveCanvasConnection(form: FormData): Promise<Result> {
   }
 }
 
-export async function syncCanvasNow(): Promise<Result & { count?: number }> {
+export async function syncCanvasNow(): Promise<Result & { count?: number; skipped?: number }> {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
@@ -224,10 +226,11 @@ export async function syncCanvasNow(): Promise<Result & { count?: number }> {
   try {
     const result = await syncCanvasUser(createAdminClient(), userId);
     revalidatePath("/", "layout");
-    return { count: result.items };
+    return { count: result.items, skipped: result.skipped };
   } catch (error) {
     revalidatePath("/", "layout");
-    return { error: error instanceof Error ? error.message : "Canvas sync failed." };
+    const message = error instanceof Error ? error.message : "Canvas sync failed.";
+    return { error: limitError(message) ?? message };
   }
 }
 
@@ -446,7 +449,7 @@ export async function createDeck(deck: { title?: string; cards?: unknown } = {},
     .insert({ title: String(deck.title ?? "").trim().slice(0, 120) || "Untitled deck", cards: cleanCards(deck.cards), course_id: course?.id ?? null })
     .select("id")
     .single();
-  if (error) return { error: `Couldn't save the deck. ${error.message}` };
+  if (error) return { error: limitError(error.message) ?? `Couldn't save the deck. ${error.message}` };
   revalidatePath("/flashcards");
   return { id: data.id };
 }

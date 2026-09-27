@@ -4,8 +4,8 @@
 export const COLS = 12;
 export const ROWS = 6;
 
-// Every widget: its accessible name, default size, and smallest size (in cells).
-type Spec = { label: string; w: number; h: number; minW?: number; minH?: number };
+// Every widget: its accessible name, default size, and smallest size (in cells). pro: Sonnet Pro only.
+type Spec = { label: string; w: number; h: number; minW?: number; minH?: number; pro?: true };
 export const WIDGETS = {
   progress: { label: "Progress", w: 5, h: 2, minW: 3, minH: 2 },
   next: { label: "Up next", w: 5, h: 4, minW: 3, minH: 2 },
@@ -14,32 +14,40 @@ export const WIDGETS = {
   courses: { label: "Courses", w: 4, h: 3, minW: 2, minH: 2 }, // the carousel scales down to fit
   focus: { label: "Study days", w: 2, h: 2 },
   timer: { label: "Focus timer", w: 2, h: 2, minH: 2 },
-  classes: { label: "Today's classes", w: 4, h: 1 },
+  classes: { label: "Today's classes", w: 4, h: 1, pro: true },
   // 1 column wide: today; 1 row tall: this week; bigger: the month.
   calendar: { label: "Calendar", w: 3, h: 1, minW: 1, minH: 1 },
   today: { label: "Due today", w: 3, h: 2 },
   streak: { label: "Streak", w: 2, h: 1 },
-  materials: { label: "Recent materials", w: 3, h: 2 },
-  ask: { label: "Ask about…", w: 4, h: 1 },
-  trend: { label: "Grade trend", w: 4, h: 2, minW: 3 },
-  gradebars: { label: "Grade bars", w: 3, h: 2 },
-  scores: { label: "Recent scores", w: 3, h: 2 },
-  gaps: { label: "Grade gaps", w: 3, h: 2 },
-  exams: { label: "Exam countdowns", w: 3, h: 2 },
-  spotlight: { label: "Course spotlight", w: 3, h: 2 },
-  hours: { label: "Study hours", w: 4, h: 2, minW: 3 },
-  load: { label: "Workload", w: 4, h: 2 },
-  ontime: { label: "On-time rate", w: 3, h: 1 },
-  split: { label: "Time by course", w: 3, h: 2 },
-  countdown: { label: "Next deadline", w: 3, h: 1 },
-  clear: { label: "Week clear", w: 3, h: 1 },
-  radar: { label: "Workload radar", w: 3, h: 3, minW: 3, minH: 2 },
-  rings: { label: "Grade rings", w: 3, h: 3, minW: 2, minH: 2 },
-  pace: { label: "Done vs due", w: 4, h: 2, minW: 3, minH: 2 },
-  mix: { label: "Work mix", w: 3, h: 3, minW: 2, minH: 2 },
+  materials: { label: "Recent materials", w: 3, h: 2, pro: true },
+  ask: { label: "Ask about…", w: 4, h: 1, pro: true },
+  trend: { label: "Grade trend", w: 4, h: 2, minW: 3, pro: true },
+  gradebars: { label: "Grade bars", w: 3, h: 2, pro: true },
+  scores: { label: "Recent scores", w: 3, h: 2, pro: true },
+  gaps: { label: "Grade gaps", w: 3, h: 2, pro: true },
+  exams: { label: "Exam countdowns", w: 3, h: 2, pro: true },
+  spotlight: { label: "Course spotlight", w: 3, h: 2, pro: true },
+  hours: { label: "Study hours", w: 4, h: 2, minW: 3, pro: true },
+  load: { label: "Workload", w: 4, h: 2, pro: true },
+  ontime: { label: "On-time rate", w: 3, h: 1, pro: true },
+  split: { label: "Time by course", w: 3, h: 2, pro: true },
+  countdown: { label: "Next deadline", w: 3, h: 1, pro: true },
+  clear: { label: "Week clear", w: 3, h: 1, pro: true },
+  radar: { label: "Workload radar", w: 3, h: 3, minW: 3, minH: 2, pro: true },
+  rings: { label: "Grade rings", w: 3, h: 3, minW: 2, minH: 2, pro: true },
+  pace: { label: "Done vs due", w: 4, h: 2, minW: 3, minH: 2, pro: true },
+  mix: { label: "Work mix", w: 3, h: 3, minW: 2, minH: 2, pro: true },
+  // Newer widgets (pro-widgets.tsx), all Pro.
+  cards: { label: "Flashcard", w: 3, h: 2, pro: true },
+  nowclass: { label: "Class now", w: 2, h: 2, minH: 2, pro: true },
+  term: { label: "Term progress", w: 3, h: 2, pro: true },
+  roll: { label: "Roll for it", w: 3, h: 2, minH: 2, pro: true },
+  plant: { label: "Study plant", w: 2, h: 2, minH: 2, pro: true },
+  glass: { label: "Week glass", w: 3, h: 2, minH: 2, pro: true },
 } satisfies Record<string, Spec>;
 
 export type WidgetId = keyof typeof WIDGETS;
+export const isProWidget = (id: WidgetId) => !!(WIDGETS[id] as Spec).pro;
 export type Place = { id: WidgetId; x: number; y: number; w: number; h: number };
 export type Layout = Place[];
 

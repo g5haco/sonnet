@@ -12,6 +12,7 @@ import type { Account } from "@/components/settings-forms";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { FREE } from "@/lib/plan";
 
 type Tone = "on" | "off" | "busy" | "error";
 const TONE: Record<Tone, string> = {
@@ -131,7 +132,11 @@ function CanvasService({ connection, hasTerm }: { connection: Account["canvas"];
   const sync = () =>
     startSync(async () => {
       running ??= track("Syncing Canvas", () => slow("syncCanvasNow"), (r) => ({
-        note: `${r.count ?? 0} item${r.count === 1 ? "" : "s"} up to date.`,
+        note:
+          `${r.count ?? 0} item${r.count === 1 ? "" : "s"} up to date.` +
+          (r.skipped
+            ? ` Free keeps ${FREE.courses} courses, so ${r.skipped} more from Canvas ${r.skipped === 1 ? "wasn't" : "weren't"} imported.`
+            : ""),
       })).finally(() => (running = null));
       await running;
     });

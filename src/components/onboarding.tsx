@@ -10,6 +10,7 @@ import { TOUR_KEY } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { FREE } from "@/lib/plan";
 
 const STEPS = ["Name", "Term", "Canvas", "Done"];
 // Quarters run about 11 weeks (10 of classes plus finals), semesters about 16. The number stays editable.
@@ -62,11 +63,13 @@ export function Onboarding({ name: known = "" }: { name?: string }) {
       toast.promise(
         syncCanvasNow().then((r) => {
           if (r.error) throw new Error(r.error);
-          return r.count ?? 0;
+          return r;
         }),
         {
           loading: "Syncing Canvas…",
-          success: (n) => `Canvas synced: ${n} item${n === 1 ? "" : "s"}.`,
+          success: ({ count: n = 0, skipped }) =>
+            `Canvas synced: ${n} item${n === 1 ? "" : "s"}.` +
+            (skipped ? ` Free keeps ${FREE.courses} courses; ${skipped} more weren't imported.` : ""),
           error: (e: Error) => `Canvas sync failed: ${e.message}`,
         },
       );

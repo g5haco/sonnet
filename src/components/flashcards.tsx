@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import type { Deck } from "@/lib/ai";
 import { courseColor } from "@/lib/course";
+import { FREE } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 
 export type Card = { front: string; back: string };
@@ -257,7 +258,7 @@ export function Study({ title, cards, onClose }: { title: string; cards: Card[];
 const count = (n: number) => `${n} ${n === 1 ? "card" : "cards"}`;
 
 // /flashcards: every deck, newest first, filterable by course.
-export function DeckList({ decks, courses }: { decks: DeckRow[]; courses: Course[] }) {
+export function DeckList({ decks, courses, pro = false }: { decks: DeckRow[]; courses: Course[]; pro?: boolean }) {
   const router = useRouter();
   const [filter, setFilter] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -280,6 +281,11 @@ export function DeckList({ decks, courses }: { decks: DeckRow[]; courses: Course
           <p className="mt-1 text-sm text-muted-foreground">
             {decks.length ? "Decks Sonnet made in chat and ones you made. Open one to study, edit or share it." : "Ask Sonnet for flashcards in the chat, or make a deck yourself."}
           </p>
+          {!pro && (
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              {Math.min(decks.length, FREE.decks)} of {FREE.decks} deck on Free · unlimited with Pro (coming soon)
+            </p>
+          )}
         </div>
         <Button onClick={create} disabled={pending} className={PILL}>
           <Plus /> New deck
