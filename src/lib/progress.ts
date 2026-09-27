@@ -13,6 +13,17 @@ export type Item = {
 
 const WEEK = 7 * 864e5;
 
+// Soonest first. Work due at the same moment is grouped by class, the class with the most due that day first.
+export function byDue(items: Item[]): Item[] {
+  const day = (i: Item) => new Date(i.due).toDateString();
+  const perDay = new Map<string, number>();
+  for (const i of items) perDay.set(`${day(i)}|${i.course}`, (perDay.get(`${day(i)}|${i.course}`) ?? 0) + 1);
+  const load = (i: Item) => perDay.get(`${day(i)}|${i.course}`)!;
+  return [...items].sort(
+    (a, b) => Date.parse(a.due) - Date.parse(b.due) || load(b) - load(a) || a.course.localeCompare(b.course),
+  );
+}
+
 // The last moment of this week (Sunday 23:59:59.999, local time).
 export function endOfWeek(now: number) {
   const d = new Date(now);

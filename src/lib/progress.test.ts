@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { progress, verdict, type Item } from "./progress";
+import { byDue, progress, verdict, type Item } from "./progress";
 
 const start = new Date("2026-08-24T00:00:00");
 const at = (day: number) => new Date(start.getTime() + day * 864e5).toISOString();
@@ -61,4 +61,11 @@ test("never 'fully caught up' while any work is still open", () => {
   expect(say([done(late), done(quiz), nextWeek])).toBe("Nothing overdue. Next up: Problem set 5, in 6d.");
   expect(say([done(late), done(quiz), done(nextWeek)])).toBe("Fully caught up. Suspicious.");
   expect(progress([done(late), done(quiz)], start, 4, now).percent).toBe(100);
+});
+
+test("byDue groups same-time work by class, busiest class that day first", () => {
+  const w = (id: string, course: string, due: string): Item => ({ id, title: id, course, hue: 0, kind: "assignment", due, doneAt: null });
+  const late = "2026-09-27T23:59:00";
+  const list = [w("a1", "MATH", late), w("k1", "KINS", late), w("p1", "POLS", "2026-09-27T09:00:00"), w("k2", "KINS", late), w("k3", "KINS", "2026-09-27T12:00:00")];
+  expect(byDue(list).map((i) => i.id)).toEqual(["p1", "k3", "k1", "k2", "a1"]);
 });

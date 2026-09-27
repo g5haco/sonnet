@@ -7,7 +7,7 @@ import { deleteItem, setDone } from "@/app/actions";
 import { Block } from "@/components/block";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { endOfWeek, type Item } from "@/lib/progress";
+import { byDue, endOfWeek, type Item } from "@/lib/progress";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { courseColor } from "@/lib/course";
@@ -117,9 +117,7 @@ export function UpNext({
 }) {
   const [showDone, setShowDone] = useState(false);
   const doneCount = items.filter((i) => i.doneAt).length;
-  const open = items
-    .filter((i) => showDone || !i.doneAt || checked.has(i.id))
-    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
+  const open = byDue(items.filter((i) => showDone || !i.doneAt || checked.has(i.id)));
   const list = open.slice(0, limit);
   // Without onOpen (Home) the whole row is a <label>, so a click anywhere checks it off.
   const Row = onOpen ? "div" : "label";
