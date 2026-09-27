@@ -3,12 +3,13 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { ArrowUp, BookOpenText, FileText, Globe, Lightbulb, Mic, Paperclip, Square, X } from "lucide-react";
+import { BookOpenText, Brain, FileText, Globe, Image as ImageIcon, Mic, Paperclip, Plus, SendHorizontal, Square, X, type LucideIcon } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useMicrophone, VoiceBeam } from "voice-glow";
 import { useAssistant } from "@/components/app-shell";
@@ -74,6 +75,29 @@ export function ChatInput({
   const [files, setFiles] = useState<ChatFile[]>([]);
   const [reading, setReading] = useState(0); // attachments still being prepared
   const picker = useRef<HTMLInputElement>(null);
+  // The + menu: photos or documents. It lives in a portal (the chat box clips), anchored above the + button.
+  const [menu, setMenu] = useState<{ left: number; bottom: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const plusRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const close = (e: Event) =>
+      (e instanceof KeyboardEvent
+        ? e.key === "Escape"
+        : !menuRef.current?.contains(e.target as Node) && !plusRef.current?.contains(e.target as Node)) && setMenu(null);
+    window.addEventListener("pointerdown", close);
+    window.addEventListener("keydown", close);
+    return () => {
+      window.removeEventListener("pointerdown", close);
+      window.removeEventListener("keydown", close);
+    };
+  }, [menu]);
+  const pick = (accept: string) => {
+    setMenu(null);
+    if (!picker.current) return;
+    picker.current.accept = accept;
+    picker.current.click();
+  };
   const wrapper = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const rec = useRef<Recognition | null>(null);
@@ -400,19 +424,70 @@ export function ChatInput({
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                picker.current?.click();
-              }}
-              disabled={files.length >= MAX_FILES}
-              aria-label="Attach a photo or file"
-              title="Attach photos, PDFs or text files (or paste a screenshot)"
-              className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
-            >
-              <Paperclip className="size-4" />
-            </button>
+            {/* +: pick photos or documents; turns into an X while its menu is open. */}
+            <div className="relative">
+              <motion.button
+                ref={plusRef}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const r = e.currentTarget.getBoundingClientRect();
+                  setMenu((m) => (m ? null : { left: r.left, bottom: window.innerHeight - r.top + 8 }));
+                }}
+                whileTap={{ scale: 0.9 }}
+                disabled={files.length >= MAX_FILES}
+                aria-label="Attach"
+                aria-expanded={!!menu}
+                aria-haspopup="menu"
+                title="Attach photos, PDFs or text files (or paste a screenshot)"
+                className={cn(
+                  "grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40",
+                  menu && "bg-accent text-foreground",
+                )}
+              >
+                <motion.span animate={{ rotate: menu ? 45 : 0 }} transition={{ type: "spring", bounce: 0.35, duration: 0.35 }}>
+                  <Plus className="size-4" />
+                </motion.span>
+              </motion.button>
+              {typeof document !== "undefined" && createPortal(
+              <AnimatePresence>
+                {menu && (
+                  <motion.div
+                    ref={menuRef}
+                    role="menu"
+                    style={{ left: menu.left, bottom: menu.bottom }}
+                    initial={{ opacity: 0, y: 6, scale: 0.96, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: 4, scale: 0.97, filter: "blur(2px)", transition: { duration: 0.12 } }}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                    className="fixed z-[100] flex min-w-40 origin-bottom-left flex-col rounded-xl border border-border bg-popover p-1 shadow-xl"
+                  >
+                    {([
+                      ["Photos", ImageIcon, "image/*"],
+                      ["Documents", FileText, ".pdf,.txt,.md"],
+                    ] as const).map(([label, Icon, accept], n) => (
+                      <motion.button
+                        key={label}
+                        type="button"
+                        role="menuitem"
+                        initial={{ opacity: 0, x: -4 }}
+                        animate={{ opacity: 1, x: 0, transition: { delay: 0.04 * n } }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          pick(accept);
+                        }}
+                        className="group/item flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                      >
+                        <Icon className="size-4 transition-transform duration-200 group-hover/item:scale-110" />
+                        {label}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>,
+              document.body,
+              )}
+            </div>
             <input
               ref={picker}
               type="file"
@@ -425,39 +500,21 @@ export function ChatInput({
               }}
             />
             {/* Search: look things up on the web and cite sources. Off = only when the question asks for it. */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSearch((v) => !v);
-              }}
-              aria-pressed={search}
-              aria-label="Search the web"
+            <ModeToggle
+              on={search}
+              onToggle={() => setSearch((v) => !v)}
+              icon={Globe}
+              label="Search"
               title={search ? "Web search on: answers cite their sources" : "Search the web (otherwise only when asked for sources)"}
-              className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                search ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-accent hover:text-foreground",
-              )}
-            >
-              <Globe className="size-4" />
-            </button>
+            />
             {/* Think: force careful (slower) answers. Off = Sonnet decides from the question. */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setThink((v) => !v);
-              }}
-              aria-pressed={think}
-              aria-label="Think harder"
+            <ModeToggle
+              on={think}
+              onToggle={() => setThink((v) => !v)}
+              icon={Brain}
+              label="Think"
               title={think ? "Thinking on: slower, more careful answers" : "Think harder (otherwise Sonnet decides)"}
-              className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                think ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-accent hover:text-foreground",
-              )}
-            >
-              <Lightbulb className={cn("size-4", think && "fill-current")} />
-            </button>
+            />
             {dictation && (
               <button
                 type="button"
@@ -497,7 +554,7 @@ export function ChatInput({
                 aria-label="Send"
                 className="grid size-9 place-items-center rounded-full bg-foreground text-background transition-transform active:scale-95 disabled:bg-accent disabled:text-muted-foreground"
               >
-                <ArrowUp className="size-4" />
+                <SendHorizontal className="size-4" />
               </button>
             </MetalFx>
           </div>
@@ -530,5 +587,45 @@ export function ChatInput({
         </div>
       </VoiceBeam>
     </div>
+  );
+}
+
+// A mode chip: icon only when off; on, it tints and slides its label out.
+function ModeToggle({ on, onToggle, icon: Icon, label, title }: { on: boolean; onToggle: () => void; icon: LucideIcon; label: string; title: string }) {
+  return (
+    <motion.button
+      type="button"
+      layout
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ type: "spring", bounce: 0.25, duration: 0.35 }}
+      aria-pressed={on}
+      aria-label={label}
+      title={title}
+      className={cn(
+        "flex h-9 shrink-0 items-center rounded-full border px-2.5 focus-visible:ring-2 focus-visible:ring-ring",
+        on ? "border-brand/30 bg-brand/15 text-brand" : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+      )}
+    >
+      <motion.span layout="position" animate={{ rotate: on ? [0, -14, 10, 0] : 0 }} transition={{ duration: 0.4 }}>
+        <Icon className="size-4" />
+      </motion.span>
+      <AnimatePresence initial={false}>
+        {on && (
+          <motion.span
+            initial={{ width: 0, opacity: 0, filter: "blur(4px)" }}
+            animate={{ width: "auto", opacity: 1, filter: "blur(0px)" }}
+            exit={{ width: 0, opacity: 0, filter: "blur(4px)" }}
+            transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+            className="overflow-hidden text-sm font-medium whitespace-nowrap"
+          >
+            <span className="pl-1.5">{label}</span>
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
   );
 }
