@@ -7,21 +7,10 @@ Rule: steps marked **[ask]** need approval for a dependency, migration, auth/env
 
 Code-only safety work comes first, then work that needs the user or money.
 
-### 1. Rate limits **[ask: migration 0014]**
-- No new dependency: add a Postgres table `rate_hits(key text, at timestamptz)` and a `security definer` function `take_hit(key, window_s, max) returns boolean` that counts rows in the window, inserts one and returns true or false. Old rows are pruned by the existing Canvas cron.
-- One helper, `limit(key, max, windowS)`, in `src/lib/limit.ts`, called on the server in:
-
-  | Endpoint | Key | Budget (starting guess) |
-  |---|---|---|
-  | `/api/chat` | user | 30/10 min, 200/day |
-  | `smartSearch` (actions.ts) | user | 20/min, 300/day |
-  | `readSyllabus`, `summarizeSyllabus`, `importSyllabus` | user | 20/hour |
-  | `addMaterial` (uploads) | user | 60/hour (keep existing size caps) |
-  | `syncCanvasNow` | user | 6/hour |
-  | `/api/cal` (public ICS) | IP | 60/hour |
-- On a limit hit, return a plain message ("You've hit the hourly limit, try again at 3:40"), never an error mid-stream. The chat checks before streaming starts.
-- Login already gets 429s from Supabase Auth, so nothing is needed there.
-- Test: `limit.test.ts` for the window math, plus one manual 429 run in dev.
+### 1. Rate limits — DONE (code), migration 0014 pending in Supabase
+- `take_hit()` in `0014_rate_limits.sql` plus `allowed()` in `src/lib/limit.ts`; it fails open until the migration is applied.
+- Per user, per hour: chat 60, smartSearch 60, syllabus read/summary 20, file uploads 60, Canvas sync 6.
+- Skipped: `/api/cal` (token-gated, cheap, polled by calendar apps) and per-IP limits (every costly path needs sign-in).
 
 ### 2. Security pass
 - Review RLS on every table: a script lists every table with RLS off or with no policy. Hand-check the policies that cover `user_id`.

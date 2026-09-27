@@ -19,6 +19,7 @@ import { aiSearchPrompt, parseAiSearch } from "@/lib/search";
 import type { Item } from "@/lib/progress";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { allowed, LIMITED } from "@/lib/limit";
 
 // Every action returns an error message for the UI, or nothing on success.
 // Row-level security scopes all queries to the signed-in user.
@@ -219,6 +220,7 @@ export async function syncCanvasNow(): Promise<Result & { count?: number }> {
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;
   if (!userId) return { error: "Sign in again." };
+  if (!(await allowed(supabase, "sync"))) return { error: LIMITED };
   try {
     const result = await syncCanvasUser(createAdminClient(), userId);
     revalidatePath("/", "layout");
@@ -443,6 +445,10 @@ export async function addMaterial(m: {
   if (m.kind === "note" && !m.body?.trim()) return { error: "The note is empty." };
   if (m.kind === "file" && !m.path) return { error: "The upload didn't finish." };
   const supabase = await createClient();
+  if (m.kind === "file" && !(await allowed(supabase, "upload"))) {
+    await supabase.storage.from("materials").remove([m.path!]); // already uploaded; don't keep an orphan
+    return { error: LIMITED };
+  }
   let text: string | null = null;
   // Read the file back (the user's own storage policies apply) so the assistant can use its text.
   // ponytail: extraction runs inline and skips files over 15 MB; move to a background job if uploads get slow.
@@ -482,6 +488,7 @@ export async function readSyllabus(
 ): Promise<Result & { items?: Draft[]; course?: string; known?: number }> {
   if (!UUID.test(materialId)) return { error: "That file isn't available." };
   const supabase = await createClient();
+  if (!(await allowed(supabase, "syllabus"))) return { error: LIMITED };
   const [{ data: m }, { data: term }] = await Promise.all([
     supabase.from("materials").select("body, course_id, courses(code)").eq("id", materialId).maybeSingle(),
     supabase.from("settings").select("term_start, term_weeks").maybeSingle(),
@@ -533,6 +540,7 @@ async function askSyllabus(system: string, body: string): Promise<{ text: string
 export async function summarizeSyllabus(materialId: string): Promise<Result & { id?: string; body?: string }> {
   if (!UUID.test(materialId)) return { error: "That file isn't available." };
   const supabase = await createClient();
+  if (!(await allowed(supabase, "syllabus"))) return { error: LIMITED };
   const { data: m } = await supabase
     .from("materials")
     .select("body, course_id, courses(code)")
@@ -632,6 +640,7 @@ export async function smartSearch(query: string, today: string) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
   if (!auth?.claims || !q) return null;
+  if (!(await allowed(supabase, "search"))) return null;
   const [{ data: courses }, { data: items }] = await Promise.all([
     supabase.from("courses").select("id, code, name").order("created_at"),
     // ponytail: 400 items from two months back on; page by term if someone has more

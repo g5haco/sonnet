@@ -1,5 +1,6 @@
 import { lightContext, needsSearch, needsThinking, smallTalk, streamReply, studentContext, type Turn } from "@/lib/ai";
 import { typedPart } from "@/lib/attach";
+import { allowed, LIMITED } from "@/lib/limit";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 300; // long answers stream for minutes; Vercel Hobby (Fluid) allows up to 300s
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
         .reverse()
     : [];
   if (turns.at(-1)?.role !== "user") return Response.json({ error: "Send a question." }, { status: 400 });
+  if (!(await allowed(supabase, "chat"))) return Response.json({ error: LIMITED }, { status: 429 });
 
   let timeZone = typeof body?.timeZone === "string" ? body.timeZone : "UTC";
   try {
