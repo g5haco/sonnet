@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, RefreshCw, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { StatusMark } from "@/components/ui/status-mark";
 import type { TaskName, Tasks } from "@/app/api/tasks/route";
 
 // Slow work (reading a syllabus, syncing Canvas, uploading) keeps going when its window closes. Each run is a
@@ -29,22 +30,11 @@ function Card({ id, label, state, note, open }: { id: string; label: string; sta
         {...(open && { type: "button" as const, onClick: open })}
         className="flex w-full items-start gap-2.5 rounded-xl p-3 pr-9 text-left focus-visible:ring-2 focus-visible:ring-ring [button&]:cursor-pointer [button&]:hover:bg-accent/60"
       >
-        {state === "running" ? (
-          <RefreshCw className="mt-0.5 size-4 shrink-0 text-muted-foreground motion-safe:animate-spin" aria-hidden="true" />
-        ) : state === "done" ? (
-          <Check className="mt-0.5 size-4 shrink-0 text-done" aria-hidden="true" />
-        ) : (
-          <X className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
-        )}
+        {/* One ring morphs in place: spinning while it works, then a drawn check or cross. */}
+        <StatusMark status={state === "error" ? "failed" : state} size={18} className="mt-px shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1">
           <span className="block font-medium [overflow-wrap:anywhere]">{label}</span>
           {note && <span className={state === "error" ? "text-destructive" : "text-muted-foreground"}>{note}</span>}
-          {state === "running" && (
-            // No percentage: none of these report real progress, so the bar only says "working".
-            <span className="mt-2 block h-1 overflow-hidden rounded-full bg-muted">
-              <span className="block h-full w-1/3 rounded-full bg-done motion-safe:animate-task-slide" />
-            </span>
-          )}
         </span>
       </Body>
       {state !== "running" && (

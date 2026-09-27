@@ -1,0 +1,99 @@
+/* StatusMark (from React Bits): a ring that morphs between pending, running, done, failed and cancelled. */
+.status-mark {
+  --sm-size: 20px;
+  --sm-stroke: 2;
+  --sm-color: currentColor;
+  --sm-done: #22c55e;
+  --sm-error: #ef4444;
+  --sm-fill: 0.06;
+  --sm-draw: 240ms;
+  --sm-muted: 0.55;
+  --sm-check-delay: 120ms;
+  --sm-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --sm-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+.status-mark__glyph {
+  flex: none;
+  overflow: visible;
+  color: var(--sm-color);
+  transition: color 200ms ease;
+}
+.status-mark[data-status="done"] .status-mark__glyph {
+  color: var(--sm-done);
+}
+.status-mark[data-status="failed"] .status-mark__glyph {
+  color: var(--sm-error);
+}
+.status-mark__track {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: var(--sm-stroke);
+  fill-opacity: 0;
+  stroke-opacity: 0;
+  transition:
+    fill-opacity 180ms ease,
+    stroke-opacity 200ms ease;
+}
+.status-mark[data-status="running"] .status-mark__track {
+  stroke-opacity: 0.2;
+}
+.status-mark[data-status="done"] .status-mark__track,
+.status-mark[data-status="failed"] .status-mark__track {
+  fill-opacity: var(--sm-fill);
+}
+.status-mark__ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--sm-stroke);
+  stroke-linecap: round;
+  opacity: var(--sm-muted);
+  transition: opacity 200ms ease;
+}
+.status-mark[data-status="running"] .status-mark__ring,
+.status-mark[data-status="done"] .status-mark__ring,
+.status-mark[data-status="failed"] .status-mark__ring {
+  opacity: 1;
+}
+.status-mark__check,
+.status-mark__cross {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--sm-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.05;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 160ms var(--sm-ease-out),
+    opacity 0ms linear 160ms;
+}
+.status-mark[data-status="done"] .status-mark__check,
+.status-mark[data-status="failed"] .status-mark__cross,
+.status-mark[data-status="cancelled"] .status-mark__cross {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition:
+    stroke-dashoffset var(--sm-draw) var(--sm-ease-out) var(--sm-check-delay),
+    opacity 0ms linear var(--sm-check-delay);
+}
+@keyframes sm-breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-mark[data-indeterminate] .status-mark__ring {
+    animation: sm-breathe 1400ms var(--sm-ease-in-out) infinite;
+  }
+  .status-mark__check,
+  .status-mark__cross {
+    stroke-dashoffset: 0;
+    transition: opacity 200ms ease;
+  }
+}

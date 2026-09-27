@@ -3,7 +3,7 @@
 // Adapted from HextaUI's ai-chat-input (chatbox design.txt): cycling letter-blur placeholder,
 // expands on focus. Changes: shortcut chips instead of Think/Deep Search, voice dictation
 // (Web Speech API + voice-glow), metal send button, textarea, reduced-motion aware.
-import { BookOpenText, Brain, FileText, Globe, Image as ImageIcon, Mic, Paperclip, Plus, SendHorizontal, Square, X, type LucideIcon } from "lucide-react";
+import { BookOpenText, Brain, FileText, Globe, Mic, Paperclip, Plus, SendHorizontal, Square, X, type LucideIcon } from "lucide-react";
 import { MetalFx } from "metal-fx";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
@@ -76,7 +76,7 @@ export function ChatInput({
   const [reading, setReading] = useState(0); // attachments still being prepared
   const picker = useRef<HTMLInputElement>(null);
   // The + menu: photos or documents. It lives in a portal (the chat box clips), anchored above the + button.
-  const [menu, setMenu] = useState<{ left: number; bottom: number } | null>(null);
+  const [menu, setMenu] = useState<{ left: number; bottom: number; width: number } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const plusRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -281,6 +281,7 @@ export function ChatInput({
         className="rounded-3xl"
       >
         <div
+          data-chat-box
           className="@container rounded-3xl bg-secondary transition-shadow focus-within:ring-2 focus-within:ring-ring"
           onClick={() => field.current?.focus()}
           onDragOver={(e) => e.preventDefault()}
@@ -424,19 +425,20 @@ export function ChatInput({
               )}
             </div>
 
-            {/* +: pick photos or documents; turns into an X while its menu is open. */}
+            {/* +: attach files or switch on a mode; turns into an X while its menu is open. */}
             <div className="relative">
               <motion.button
                 ref={plusRef}
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const r = e.currentTarget.getBoundingClientRect();
-                  setMenu((m) => (m ? null : { left: r.left, bottom: window.innerHeight - r.top + 8 }));
+                  // The menu spans the chat box, just above it.
+                  const r = (e.currentTarget.closest("[data-chat-box]") ?? e.currentTarget).getBoundingClientRect();
+                  setMenu((m) => (m ? null : { left: r.left, bottom: window.innerHeight - r.top + 8, width: r.width }));
                 }}
                 whileTap={{ scale: 0.9 }}
                 disabled={files.length >= MAX_FILES}
-                aria-label="Attach"
+                aria-label="Add files and modes"
                 aria-expanded={!!menu}
                 aria-haspopup="menu"
                 title="Attach photos, PDFs or text files (or paste a screenshot)"
@@ -455,31 +457,66 @@ export function ChatInput({
                   <motion.div
                     ref={menuRef}
                     role="menu"
-                    style={{ left: menu.left, bottom: menu.bottom }}
-                    initial={{ opacity: 0, y: 6, scale: 0.96, filter: "blur(4px)" }}
+                    aria-label="Add files and modes"
+                    style={{ left: menu.left, bottom: menu.bottom, width: menu.width }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98, filter: "blur(4px)" }}
                     animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: 4, scale: 0.97, filter: "blur(2px)", transition: { duration: 0.12 } }}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-                    className="fixed z-[100] flex min-w-40 origin-bottom-left flex-col rounded-xl border border-border bg-popover p-1 shadow-xl"
+                    exit={{ opacity: 0, y: 6, scale: 0.98, filter: "blur(2px)", transition: { duration: 0.14 } }}
+                    transition={{ type: "spring", bounce: 0.18, duration: 0.35 }}
+                    onKeyDown={(e) => {
+                      // arrow keys walk the rows
+                      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+                      e.preventDefault();
+                      const rows = [...e.currentTarget.querySelectorAll<HTMLElement>("[role=menuitem],[role=menuitemcheckbox]")];
+                      const at = rows.indexOf(document.activeElement as HTMLElement);
+                      rows[(at + (e.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length]?.focus();
+                    }}
+                    className="fixed z-[100] flex origin-bottom flex-col rounded-3xl border border-border bg-popover p-2 shadow-2xl"
                   >
-                    {([
-                      ["Photos", ImageIcon, "image/*"],
-                      ["Documents", FileText, ".pdf,.txt,.md"],
-                    ] as const).map(([label, Icon, accept], n) => (
+                    {(
+                      [
+                        { label: "Photos & files", hint: "Upload from this device", icon: Paperclip, accept: "image/*,.pdf,.txt,.md" },
+                        { label: "Documents", hint: "PDFs, notes and text files", icon: FileText, accept: ".pdf,.txt,.md" },
+                        { label: "Web search", hint: "Live results, with sources", icon: Globe, on: search, flip: setSearch },
+                        { label: "Think harder", hint: "Slower, more careful answers", icon: Brain, on: think, flip: setThink },
+                      ] as { label: string; hint: string; icon: LucideIcon; accept?: string; on?: boolean; flip?: typeof setThink }[]
+                    ).map(({ label, hint, icon: Icon, accept, on, flip }, n) => (
                       <motion.button
                         key={label}
                         type="button"
-                        role="menuitem"
-                        initial={{ opacity: 0, x: -4 }}
-                        animate={{ opacity: 1, x: 0, transition: { delay: 0.04 * n } }}
+                        role={on === undefined ? "menuitem" : "menuitemcheckbox"}
+                        aria-checked={on}
+                        autoFocus={n === 0}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0, transition: { delay: 0.03 * n, duration: 0.25 } }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          pick(accept);
+                          if (accept) return pick(accept);
+                          flip?.((v) => !v);
+                          setMenu(null);
                         }}
-                        className="group/item flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                        className="group/item flex min-h-11 items-center gap-3 rounded-2xl px-3 text-left text-sm outline-none hover:bg-accent focus-visible:bg-accent"
                       >
-                        <Icon className="size-4 transition-transform duration-200 group-hover/item:scale-110" />
-                        {label}
+                        <Icon
+                          className={cn(
+                            "size-4 shrink-0 transition-[color,scale] duration-200 group-hover/item:scale-110",
+                            on ? "text-brand" : "text-muted-foreground group-hover/item:text-foreground",
+                          )}
+                        />
+                        <span className="shrink-0 font-medium whitespace-nowrap">{label}</span>
+                        <span className="min-w-0 truncate text-muted-foreground">{hint}</span>
+                        {on !== undefined && (
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "ml-auto shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] transition-colors",
+                              on ? "bg-brand/15 text-brand" : "text-muted-foreground",
+                            )}
+                          >
+                            {on ? "on" : "off"}
+                          </span>
+                        )}
                       </motion.button>
                     ))}
                   </motion.div>

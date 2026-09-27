@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, ChevronDown, Globe, Search, Sparkle } from "lucide-react";
+import { Globe, Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { ThinkingOrb } from "thinking-orbs";
+import { ThoughtLine } from "@/components/ui/thought-line";
 import { cn } from "@/lib/utils";
 
 // What the assistant did for one answer: its steps, its reasoning (when the model thinks) and its web search.
@@ -19,50 +19,49 @@ export type Chain = {
 // One step at a time; a step already listed is kept where it is.
 export const addStep = (c: Chain, step: string): Chain => (c.steps.includes(step) ? c : { ...c, steps: [...c.steps, step] });
 
-type Mode = "steps" | "reasoning" | "search";
+type Mode = "reasoning" | "search";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-// Collapsed: the live status while it works, "Thought for 4 seconds" once done. Open: Steps / Reasoning / Search.
+// The ThoughtLine: breathes while it works (steps trace beneath), settles into "Thought for 4.2s". Once done,
+// the reasoning and the web search each open from a small pill under it.
 export function ThoughtChain({ chain, busy }: { chain: Chain; busy: boolean }) {
-  const [open, setOpen] = useState(false);
-  const modes = (["steps", "reasoning", "search"] as Mode[]).filter(
-    (m) => m === "steps" || (m === "reasoning" ? !!chain.reasoning.trim() : !!(chain.query || chain.sources?.length)),
+  const modes = (["reasoning", "search"] as Mode[]).filter((m) =>
+    m === "reasoning" ? !!chain.reasoning.trim() : !!(chain.query || chain.sources?.length),
   );
-  const [mode, setMode] = useState<Mode>("steps");
-  const shown = modes.includes(mode) ? mode : "steps";
-  const seconds = Math.max(1, Math.round((chain.ms ?? 0) / 1000));
-  const title = busy
-    ? `${chain.steps.at(-1) ?? "Working"}…`
-    : `${chain.reasoning.trim() ? "Thought" : "Worked"} for ${seconds} second${seconds === 1 ? "" : "s"}`;
+  const [open, setOpen] = useState<Mode | null>(null);
+  const shown = open && modes.includes(open) ? open : null;
+  const thought = !!chain.reasoning.trim();
 
   return (
-    <div className="mb-2">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="-mx-1 flex max-w-full items-center gap-2 rounded-lg px-1 py-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        {busy ? (
-          <ThinkingOrb state={chain.reasoning ? "solving" : "searching"} size={20} aria-hidden="true" />
-        ) : (
-          <Sparkle className="size-4 shrink-0" aria-hidden="true" />
-        )}
-        {/* a new status slides in; the old one is simply replaced (no exit to pile up on fast updates) */}
-        <motion.span
-          key={title}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: EASE }}
-          className="truncate font-medium"
-        >
-          {title}
-        </motion.span>
-        <ChevronDown className={cn("size-4 shrink-0 transition-transform duration-200", open && "rotate-180")} />
-      </button>
+    <div className="mb-2 text-muted-foreground">
+      <ThoughtLine
+        working={busy}
+        label={thought ? "Thinking…" : "Working…"}
+        doneLabel={thought ? "Thought for" : "Worked for"}
+        steps={chain.steps}
+        elapsed={busy ? undefined : (chain.ms ?? 0) / 1000}
+      />
+      {!busy && modes.length > 0 && (
+        <div className="mt-2 flex gap-1.5">
+          {modes.map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-expanded={shown === m}
+              onClick={() => setOpen((o) => (o === m ? null : m))}
+              className={cn(
+                "h-7 rounded-full border px-2.5 text-xs capitalize focus-visible:ring-2 focus-visible:ring-ring",
+                shown === m ? "border-border bg-secondary text-foreground" : "border-transparent hover:bg-accent hover:text-foreground",
+              )}
+            >
+              {m === "search" ? "sources" : m}
+            </button>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
-        {open && (
+        {shown && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -71,23 +70,6 @@ export function ThoughtChain({ chain, busy }: { chain: Chain; busy: boolean }) {
             className="overflow-hidden"
           >
             <div className="mt-2 ml-2 border-l border-border pl-4 text-sm">
-              {shown === "steps" && (
-                <ol className="flex flex-col gap-1.5">
-                  {chain.steps.map((s, i) => {
-                    const live = busy && i === chain.steps.length - 1;
-                    return (
-                      <li key={s} className={cn("flex items-center gap-2", live ? "text-foreground" : "text-muted-foreground")}>
-                        {live ? (
-                          <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                          <Check className="size-3.5 shrink-0" aria-hidden="true" />
-                        )}
-                        {s}
-                      </li>
-                    );
-                  })}
-                </ol>
-              )}
               {shown === "reasoning" && (
                 <p className="max-h-64 overflow-y-auto whitespace-pre-wrap text-muted-foreground">{chain.reasoning.trim()}</p>
               )}
@@ -120,29 +102,6 @@ export function ThoughtChain({ chain, busy }: { chain: Chain; busy: boolean }) {
                 </div>
               )}
             </div>
-            {modes.length > 1 && (
-              <div role="tablist" aria-label="Show" className="mt-3 inline-flex rounded-full bg-secondary p-1">
-                {modes.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    role="tab"
-                    aria-selected={shown === m}
-                    onClick={() => setMode(m)}
-                    className="relative rounded-full px-3 py-1 text-xs capitalize transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {shown === m && (
-                      <motion.span
-                        layoutId={`chain-tab-${chain.started}`}
-                        className="absolute inset-0 rounded-full bg-background ring-1 ring-border"
-                        transition={{ type: "spring", stiffness: 500, damping: 38 }}
-                      />
-                    )}
-                    <span className={cn("relative", shown === m ? "text-foreground" : "text-muted-foreground")}>{m}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
