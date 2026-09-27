@@ -1,121 +1,109 @@
 # Project Handoff
 
-> Updated 2026-09-26 (end of session 2), code through `593784c`. The code wins over this file. Product truth: `PRODUCT.md`. Plans: `docs/ROADMAP.md` (phases 0–9) and `docs/COMMERCIAL-ROADMAP.md` (phases 10–16, next).
+> Updated 2026-09-26 (end of session 3), code through `1376355`. The code wins over this file. Product truth: `PRODUCT.md`. Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase, step by step).
 
 ## Project Summary
 
 **Sonnet** is a student hub: Canvas sync, calendar, courses, materials, grades, focus timer, a customizable Home, and an AI (also named **Sonnet**) that knows every course down to the syllabus. Built by one college student; live at `https://www.ericwei.me`, multi-user (Supabase RLS). Stack: Next.js 16, Supabase, Vercel (Hobby, Fluid), OpenRouter (free models first), `motion`.
 
-Direction: Phase 9 (polish + public landing) is wrapping up. Next is commercialization, Phase 10 (launch readiness). Pricing is **undecided**.
+Direction: commercialization. **Phase 10 (launch readiness) is in progress.** The pricing shape is agreed; the price number waits for real cost data.
 
 ## Current State
 
-- Live and working. Migrations 0001–0013 applied; none added this session.
+- Live; every commit is pushed to `main`.
+- Migrations 0001–0015 exist. **The user ran 0015** (and was given the `ai_spend` update that sets syllabus = 3). **0014 is unconfirmed**; ask. Nothing is confirmed live with a signed-in user yet.
 - Signed-out `/` rewrites to `/landing`; signed-in `/` is Home.
-- The user verified the rebuilt landing live in Edge (desktop) at the start of this session.
-- Every commit below is pushed to `main` and deployed (Vercel status: success).
 
 ## Completed This Session
 
-- **Home smart search** (`src/components/home-search.tsx`, `src/lib/search.ts`): search bar at the top middle of Home.
-  - Keyword rules: status (overdue, next, done), kind (exam, quiz…), courses, dates (today, friday, oct 3, 10/3, this/next week), pages and settings sections.
-  - Results are cards: day, course, work, place, and "Ask Sonnet".
-  - Animated placeholder, sliding highlight, "/" to focus, arrow keys + Enter.
-- **Fuzzy search goes to Sonnet**: words that match nothing locally (`fuzzy`) call the `smartSearch` server action (end of `src/app/actions.ts`) after 600ms. It sends numbered lines and gets indices + a one-line answer back; results are cached per query.
-  - The prompt was tested live against OpenRouter (3–14s).
-  - The signed-in path is **untested in the app** (the preview has no user).
-- **Hover easing app-wide**: a base-layer `:where(a, button, …)` color transition in `globals.css`; Up next rows nudge 4px on hover.
-- **Landing "And the rest"**: `components/ui/interactive-list-preview.tsx`, a sliding highlight + clip-reveal preview of real screenshots. Rebuilt on `motion` (not GSAP); a plain list on touch; reduced-motion fade.
-- **Landing headings type in** letter by letter (`Typed` in `landing/kit.tsx`), replaying on scroll. Paragraphs still fade.
-- **Chat input**:
-  - A + button opens a full-width menu (Photos & files, Documents, Web search, Think harder); the + rotates to an ×.
-  - Search/Think chips slide their label out when on; paper-plane send.
-  - The menu is portaled to `body`, because the chat box clips its overflow.
-- **ThoughtLine** (`components/ui/thought-line.*`, React Bits, trimmed): the thinking line in `chat/thought-chain.tsx`. It breathes and shimmers with a live clock, lists steps, then settles into "Thought for Xs" (minimum 1s). Reasoning and sources open from pills below it.
-- **StatusMark** (`components/ui/status-mark.*`, React Bits, trimmed to running/done/failed) on the task toast cards (`components/tasks.tsx`); the old sliding bar was removed.
-- **Long-answer bug fixed**: the 55s timeout covered the whole answer.
-  - Now only 45s of silence aborts (`IDLE` in `src/lib/ai.ts`), and the chat route has `maxDuration = 300`.
-  - A partial answer is kept, with a note under it (`app-shell.tsx`).
-- **CLAUDE.md**: added the Handoff Protocol and Resume Protocol.
-- A Ponytail/Chisle audit was run and applied: roughly −120 lines across these new files.
+- **`docs/PHASE-10-PLAN.md`**: the Phase 10 plan, with step 1 marked done.
+- **Hourly rate limits (0014)**: `rate_hits` table plus `take_hit()`. `allowed()` in `src/lib/limit.ts` fails open.
+  - Limits per user per hour: chat 60, smartSearch 60, syllabus AI 20, file uploads 60, Canvas sync 6.
+  - A rejected upload's storage file is deleted.
+- **Weekly allowance + cost metering (0015)**:
+  - Tables `ai_usage` (one row per AI call: kind, weight, model, tokens, cost) and `plans` (no row = free; service role only).
+  - SQL functions `usage_status()`, `ai_spend(kind)` (weights live in SQL) and `ai_settle(...)` (service role only, so students can't refund themselves).
+  - Free: 40 uses/week, weeks start Monday 00:00 UTC. Once the week is spent, 3/day still work. Weights: chat 1, think 2, web search 2, **syllabus 3**; Home search AI costs 0 (metered for cost only).
+  - Paid: shown as unlimited, with a hidden fair-use cap of 1000/week.
+  - A use is charged up front and refunded when no AI answer comes (failure or canned task answer). This works through an `onEnd(Meter)` callback on `streamReply` and `complete` in `lib/ai.ts`; requests send `usage: {include: true}`.
+  - Wired into `/api/chat` (429 + `SPENT` message), `askSyllabus` and `smartSearch` in `actions.ts`.
+- **Credits pill** (`src/components/usage.tsx`):
+  - `UsagePill` sits in the chat toolbar left of +. It shows a ring and the number left; amber at 20% or less; ∞ for paid.
+  - Clicking it opens a popover: left/allowance, a bar, per-kind counts with their costs, the refill day and time in local time, and what's free.
+  - `UsageCard` shows the same details in Settings → Account.
+  - `usageStatus()` action returns the status plus `byKind`.
+- **Fonts**: Archivo (text) and Abril Fatface (headings) replace IBM Plex Sans/Serif. IBM Plex Mono is kept. `.font-heading { font-synthesis-weight: none }`, because Abril has one weight.
 
 ## Important Decisions
 
-- **No new dependencies**: GSAP and Hugeicons were requested but replaced with `motion` and `lucide` (already installed). Keep it that way unless the user asks.
-- **Honest landing**: previews show only real screenshots; rows without one show their icon tile. No inverted/blend effects on screenshots.
-- **The + menu omits** Sales data, Mail and Calendar from the reference design: Sonnet has no such data. Web search/Think appear both in the menu and as chips (user asked for both).
-- **Search stays keyword-first**; the AI is only for leftovers (cost, speed).
-- Earlier decisions still hold:
-  - AI-first landing.
-  - One background layer.
-  - FAQ/About on solid color.
-  - Section shells differ on purpose.
-  - Only headings animate on scroll.
-  - The grade calculator and timer are not showcased.
-- **Tooling**:
-  - Playwright: `playwright-core` + `channel: 'msedge'` from the session scratchpad (the in-app pane renders black after scripted scrolls).
-  - Higgsfield: upload first, then pass the id.
+- **Monetization shape** (agreed with the user):
+  - Free users get a visible weekly allowance with weights; a daily floor keeps them from being shut off.
+  - The paid tier is "unlimited" with a hidden fair-use cap. It will use the stronger model for heavy tasks, get priority when free models fail, and cost about $6–8/month or $20–25/term.
+  - Keep AI cost under ~30% of the price. **Set the price only after 1–2 weeks of `ai_usage` data.**
+- Canvas, calendar, grades, timer and Home search are always free.
+- Rate limiting and metering use Postgres functions, **no new dependencies**. Both fail open when the database call errors.
+- Error tracking and analytics are **deferred** until charging starts. The user asked why they're needed; the answer was "not yet". Plan: Next `onRequestError` + email, no Sentry.
+- Still holding from earlier sessions:
+  - No new dependencies without asking (`motion` and `lucide` only).
+  - Honest landing: real screenshots only.
+  - Search is keyword-first; the AI only handles the leftovers.
 
 ## Current Design System
 
 - **Midnight Study** palette (tokens in `globals.css`): monochrome shell, off-white primary; the landing is always dark.
-- **Color means something**: course hues (`HUES` in `src/lib/course.ts`), status (`--done`, `--warning`, `--destructive`) and data only. `bg-brand` is used only for active modes (chat chips).
-- **Motion**: ease-out curves, low-bounce springs, never `scale(0)`. Everything respects reduced motion. Hover color changes ease at 150ms globally.
-- **Must not regress**:
-  - 44px tap targets on phones.
-  - No horizontal overflow at 375px.
-  - No hydration mismatches.
-  - Readable contrast over the sky.
+- **Type**: Archivo for text, Abril Fatface for `font-heading`, IBM Plex Mono for mono and the wordmark.
+- **Color means something**: course hues, status (`--done`, `--warning`, `--destructive`) and data only. The credits pill uses `text-warning` when low.
+- **Motion**: ease-out, low-bounce springs, never `scale(0)`, reduced motion respected. Hover color changes ease at 150ms.
+- **Must not regress**: 44px tap targets on phones, no overflow at 375px, no hydration mismatches, readable contrast over the sky.
 
 ## In Progress / Unfinished Work
 
 - **Untested live, signed in**:
-  - The AI fallback in Home search.
-  - The long-answer fix with a real 60s+ answer.
-  - ThoughtLine in a real chat.
-  - StatusMark on a real task (sync/upload).
+  - The credits pill and Settings card.
+  - The allowance: charge, refund, 429 when spent.
+  - The hourly limits.
+  - Home search AI, long answers, ThoughtLine, StatusMark (carried over from session 2).
+- **Abril Fatface** may look heavy on small in-app titles (`text-base`/`text-xl` headings). Not checked signed in; the fallback is Abril for landing headlines only.
 - **Needs the user**:
-  - Rewrite the About text in their own words.
-  - Decide the pricing shape.
-- **Deferred**: Google sign-in (Supabase provider + OAuth), then re-enable the button in `login/form.tsx`.
-- **Planned, not approved**: `docs/COMMERCIAL-ROADMAP.md` phases 10–16, grade goals (migration), saving the syllabus chip (migration).
+  - About text.
+  - Legal review of the privacy/terms drafts (once written).
+  - Accounts for Resend, uptime checks and Google OAuth.
+  - Secret rotation.
+- Phase 10 steps 2–9 are not started (see `docs/PHASE-10-PLAN.md`).
 
 ## Known Bugs / Issues
 
-- **`smartSearch` has no rate limit**: a signed-in user could loop it and spend AI credits. Belongs in Phase 10 rate limiting.
-- Dev-only hydration warnings on preview pages: `VoiceBeam` (chat input) and `MetalFx` (send button). Pre-existing, not from this session.
-- Local `next build` fails on the untracked `login/course-preview` (`useSearchParams` without Suspense). Rename it `_course-preview` to build; `rm -rf .next/dev/types` first.
+- Weeks reset Monday 00:00 UTC, which is Sunday evening in the US. The UI shows the local day and time; per-user time zones come later if needed.
+- `visionText` (photo uploads) calls the AI but isn't metered.
+- On a retry, only the last attempt's cost is logged.
+- Dev-only hydration warnings from `VoiceBeam` and `MetalFx` (pre-existing).
+- Local `next build` fails on the untracked `login/course-preview`. Rename it `_course-preview`; `rm -rf .next/dev/types` first.
 - Free AI models are flaky (429/503). `graphify update .` can segfault (a background rebuild runs on commit).
-- **Windows editing**: `sed -i` and plain Python writes can convert CRLF files. `globals.css` has mixed line endings, so edit it byte-safely (read and write bytes).
+- **Windows editing**: `globals.css` has mixed line endings; edit it byte-safely.
+- `ChatInput` can't render outside `AppShell`, because the `useAssistant` context isn't exported. Preview pages must mock around it.
 
 ## Current Priorities
 
-1. Signed-in live check of this session's chat and search work (see Unfinished).
-2. Phase 10 plan (hosting, legal pages, monitoring, **rate limits incl. `smartSearch`**), proposed before any change.
-3. User decides pricing (drives Phase 11 metering); user's About text.
+1. Signed-in live check of the credits pill, the allowance and the session 2 AI work.
+2. **Phase 10 step 2: security pass.** RLS review of every table, CSP header (report-only first), `supply-chain-risk-auditor` + `npm audit`, and a secret-rotation checklist for the user.
+3. Phase 10 step 3: account deletion and data export (touches auth, so ask first).
+4. After 1–2 weeks: read the `ai_usage` costs, then set the price (Phase 11/12).
 
 ## Testing / Validation Status
 
-- `npm test`: 53/53 passing (includes new `src/lib/search.test.ts`). `tsc` and `eslint src` are clean at `00485c9`.
-- `npm run build`: not run this session; Vercel production builds succeeded.
-- **Browser** (local dev, Playwright + Edge, 1440 and 375):
-  - search cards, keyboard, blur-close, `/`
-  - landing list preview + phone fallback
-  - typed headings
-  - chat toolbar and menu
-  - ThoughtLine/StatusMark on a temporary page
-  - no overflow
-- **Not tested**: anything needing a signed-in user (see Unfinished); Safari; Firefox; real phones.
+- `npm test`: 53/53. `tsc` and `eslint` are clean on the touched files at `1376355`.
+- **Browser**: the credits pill and popover were checked on a throwaway preview page with mock data (700px wide, dark). The landing fonts were checked locally with no overflow.
+- **Not tested**: anything signed in; the SQL functions against the real database; Safari, Firefox, real phones.
+- Useful SQL once live: `select kind, count(*), avg(cost), sum(cost) from ai_usage where settled group by kind;`
 
 ## Relevant Architecture / Graphify Context
 
-- **Search**: `lib/search.ts` holds pure logic plus `aiSearchPrompt` and `parseAiSearch`. `smartSearch` is in `app/actions.ts`; the UI is `components/home-search.tsx`, mounted in the `dashboard.tsx` header.
-- **Chat streaming**: `streamReply` in `lib/ai.ts` (idle timeout, retries) → `/api/chat` → the `send` loop in `app-shell.tsx` → `chat/chat-panel.tsx` + `chat/thought-chain.tsx`.
-- **Landing**: `app/landing/*`; `kit.tsx` holds shared motion, `Typed` and `SectionHead` (it imports no section).
-- **New public routes** must be added to the allowlist in `src/proxy.ts`.
-- Queries:
-  - `graphify query "How does a chat answer stream from the model to the thought line?"`
-  - `graphify query "What does the landing kit export and who uses it?"`
+- **Limits and metering**: `src/lib/limit.ts` (`allowed`, `spend`, `settle`, `LIMITED`, `SPENT`) sits on `migrations/0014` + `0015`. It's called from `api/chat/route.ts` and from `smartSearch`, `askSyllabus`, `addMaterial` and `syncCanvasNow` in `app/actions.ts`.
+- **AI**: `lib/ai.ts` exports `complete(request, onEnd?)` and `streamReply(..., onEnd?)`, and the `Meter` type.
+- **Usage UI**: `components/usage.tsx` → `chat/chat-input.tsx` (pill) and `settings-forms.tsx` (card).
+- **Granting paid by hand**: `insert into plans (user_id) values ('<uuid>');`
+- **New public routes** go in the `src/proxy.ts` allowlist (needed for `/privacy` and `/terms`).
+- Query: `graphify query "How does an AI call get charged and settled against the weekly allowance?"`
 
 ## Important Constraints
 
@@ -124,23 +112,18 @@ Direction: Phase 9 (polish + public landing) is wrapping up. Next is commerciali
   - writing a migration
   - removing a feature
   - changing focus-timer behavior, chat storage, Supabase/env/API routes/auth or billing
-- **Migrations**: give the user SQL to paste into Supabase; never write to Supabase or enter passwords.
+- **Migrations**: give the user the SQL to paste into Supabase, and **always also give a `create or replace` / delta version** for when the earlier SQL was already run. (The user was frustrated at having to ask for this.)
+- Never write to Supabase or enter passwords.
 - **Commits**: commit + push every important change to `main`; run tsc, lint and tests first; say "untested" when true.
-- **Preview pages**: `src/app/login/*-preview/` are untracked (`.git/info/exclude`) and must never be committed. Delete throwaway preview pages after use.
-- Test screenshots go in the scratchpad. Don't Prettier whole files. User-approved designs are authoritative.
+- **Preview pages**: `src/app/login/*-preview/` are untracked and must never be committed; delete them after use.
+- **Communication**: terse, and give copy-paste commands directly.
 
 ## Next Recommended Task
 
-**Signed-in live check, then the Phase 10 plan.**
-- **Goal**: on `https://www.ericwei.me`, signed in:
-  - a vague Home search (e.g. "anatomy stuff") returns Sonnet picks
-  - a long chat task streams past 60s without cutting off
-  - the thought line settles correctly
-  - a Canvas sync shows the StatusMark spin → check
-
-  Fix anything broken, then propose the Phase 10 plan (include `smartSearch` rate limiting).
-- **Why**: this session's AI-facing work is only verified on preview pages without a user.
-- **Done when**: all four behave live (or fixes are pushed), and a Phase 10 plan is proposed for approval.
+**Phase 10 step 2: security pass.**
+- **Goal**: every table has RLS with correct `user_id` policies, a CSP header ships in report-only mode, dependency audit findings are triaged, and the user gets a secret-rotation checklist.
+- **Why**: it's code-only, needs nothing from the user, and must be done before charging.
+- **Done when**: an RLS report exists (fixes proposed as a migration, with approval), CSP is live in report-only with no violations on landing, chat or settings, and the audit is clean or its findings are documented.
 
 ## Tomorrow / New-Session Startup Prompt
 
