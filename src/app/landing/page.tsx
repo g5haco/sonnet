@@ -3,7 +3,7 @@ import { Check, FileText, Presentation } from "lucide-react";
 import Link from "next/link";
 import { Assistant } from "./ai";
 import { Features } from "./features";
-import { Rise } from "./kit";
+import { Rise, Typed } from "./kit";
 import { SiteNav, Wordmark } from "./nav";
 import { Hero } from "./hero";
 import { Showcase } from "./showcase";
@@ -144,7 +144,7 @@ export default function Landing() {
         <section id="pricing" aria-labelledby="pricing-title" className="relative mx-auto max-w-3xl scroll-mt-24 px-4 pt-24">
           <div aria-hidden="true" className="absolute inset-x-0 top-24 -z-10 mx-auto aspect-square max-w-2xl bg-[radial-gradient(closest-side,oklch(1_0_0/0.06),transparent)]" />
           <Rise><h2 id="pricing-title" className="text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-            Pricing
+            <Typed text="Pricing" />
           </h2></Rise>
           <div className="mx-auto mt-10 max-w-md rounded-2xl border border-border bg-card p-8">
             <p className="text-sm text-muted-foreground">Student</p>
@@ -170,7 +170,7 @@ export default function Landing() {
 
         <section aria-labelledby="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24">
           <Rise><h2 id="faq" className="scroll-mt-28 text-center font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-            Questions and answers
+            <Typed text="Questions and answers" />
           </h2></Rise>
           <div className="faq mt-10 divide-y divide-border border-y border-border">
             {FAQ.map(([q, a]) => (
@@ -188,7 +188,7 @@ export default function Landing() {
         </section>
 
         <section id="about" aria-labelledby="about-title" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-24">
-          <Rise><h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">About</h2></Rise>
+          <Rise><h2 id="about-title" className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl"><Typed text="About" /></h2></Rise>
           <div className="mt-6 space-y-4 text-lg text-pretty text-muted-foreground">
             <p>
               Sonnet is built by one college student who got tired of juggling Canvas, a calendar app, a grade

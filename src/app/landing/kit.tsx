@@ -26,10 +26,46 @@ export const RISE = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: EASE } },
 };
 
+// Headings type themselves in, a letter at a time, each time they scroll into view. Screen readers get the plain
+// text; reduced motion shows it whole. `after`: letters to wait for first (the text typed before this one).
+const TYPE_SPEED = 0.035; // seconds per letter
+export function Typed({ text, after = 0 }: { text: string; after?: number }) {
+  const still = useReducedMotion();
+  if (still) return <>{text}</>;
+  let n = after;
+  return (
+    <>
+      <span className="sr-only">{text}</span>
+      <motion.span aria-hidden="true" variants={{ hidden: {}, visible: {} }}>
+        {text.split(/(\s+)/).map((word, w) =>
+          /^\s+$/.test(word) ? (
+            word
+          ) : (
+            // a word never breaks across lines mid-typing
+            <span key={w} className="inline-block whitespace-nowrap">
+              {[...word].map((ch, c) => (
+                <motion.span
+                  key={c}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { duration: 0.01, delay: n++ * TYPE_SPEED } },
+                  }}
+                >
+                  {ch}
+                </motion.span>
+              ))}
+            </span>
+          ),
+        )}
+      </motion.span>
+    </>
+  );
+}
+
 export function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <MotionConfig reducedMotion="user">
-      <motion.div className={className} variants={RISE} initial="hidden" whileInView="visible" viewport={{ amount: 0.5 }}>
+      <motion.div className={className} initial="hidden" whileInView="visible" viewport={{ amount: 0.5 }}>
         {children}
       </motion.div>
     </MotionConfig>
@@ -63,9 +99,12 @@ export function SectionHead({
         <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
         {badge}
       </motion.span>
-      <motion.h2 variants={RISE} className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
-        {title} <span className="text-muted-foreground">{muted}</span>
-      </motion.h2>
+      <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl">
+        <Typed text={title} after={4} />{" "}
+        <span className="text-muted-foreground">
+          <Typed text={muted} after={4 + title.length} />
+        </span>
+      </h2>
       <motion.p variants={RISE} className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">
         {children}
       </motion.p>

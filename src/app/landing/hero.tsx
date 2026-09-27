@@ -5,7 +5,7 @@ import { MotionConfig, motion, type Variants } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { EASE } from "./kit";
+import { EASE, Typed } from "./kit";
 
 
 const stagger: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } } };
@@ -45,12 +45,9 @@ export function Hero({ signUp }: { signUp: string }) {
           </span>
           Made for students on Canvas <span aria-hidden="true">→</span>
         </motion.a>
-        <motion.h1
-          variants={rise}
-          className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl"
-        >
-          All your classes, one calm place.
-        </motion.h1>
+        <h1 className="font-heading text-5xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-7xl">
+          <Typed text="All your classes, one calm place." after={4} />
+        </h1>
         <motion.p variants={rise} className="mx-auto mt-6 max-w-xl text-lg text-pretty text-white/80">
           Sonnet is an AI that has read your syllabus, slides and readings, and knows every deadline, grade and class
           time. Plus your Canvas work, calendar and grades in one calm place.
