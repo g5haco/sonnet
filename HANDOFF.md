@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-09-27 (end of session 5), code through `ac4eb01`. The code wins over this file. Product truth: `PRODUCT.md`. Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-09-27 (end of session 5), code through the photo revert after `c069f99`. The code wins over this file. Product truth: `PRODUCT.md`. Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
 
 ## Project Summary
 
@@ -47,11 +47,12 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress.**
   - **Fonts:** Geist (text and headings; headings are semibold with -0.03em tracking via a base-layer `:where(.font-heading)` rule) and Geist Mono. Archivo, Abril Fatface and IBM Plex Mono are gone.
   - **Icons:** `lucide-react` is replaced by `@phosphor-icons/react` through `src/components/icons.tsx`, which keeps the old names, defaults to 24px and uses the SSR build. `components.json` `iconLibrary` is `phosphor`.
   - **GSAP:** `landing/scrub-text.tsx` (ScrollTrigger) brightens the About paragraphs word by word; it's static under reduced motion.
-  - **Photos:** Higgsfield (Z Image) generated three night photos: `public/landing/library.webp` behind the hero, `campus.webp` for the scrolled backdrop and the closing CTA, and `desk.webp` in About. The real product screenshots stay in the hero. `night.webp` was deleted.
+  - **Photos:** generated night photos (library, campus, desk) were tried and **reverted at the user's request**. The user likes the nature vibe, so the landing keeps the dusk meadow (`/login/meadow.webp`) and the night meadow (`/landing/night.webp`).
 
 ## Important Decisions
 
-- **Honest landing page:** real screenshots stay above the fold; the photos are atmosphere only (the user chose this).
+- **Honest landing page:** real screenshots stay above the fold.
+- **Keep the nature imagery** (meadow at dusk and at night). The user rejected the campus/library stock look; don't swap it for stock or generated photos.
 - **The taste skill applies to the landing page only.** The app follows PRODUCT.md, and the skill itself says dashboards are out of scope. The app keeps sentence case (no Title Case), mono readouts and course colors.
 - **Icons go through `@/components/icons` only.** Add new icons by mapping a name there; never import Phosphor directly.
 - **The CSP stays report-only** until a week of real use shows no violations; then rename the header to `Content-Security-Policy`. A report endpoint (a new API route) was offered and needs the user's OK.
@@ -74,7 +75,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress.**
   - GSAP only in isolated landing leaves (`scrub-text.tsx`).
   - Reduced motion is respected everywhere.
   - On SVG children, use motion's `scale`/`rotate`/`y` props, not `transform` strings.
-- **Landing backdrop:** the library photo, then the campus photo, then solid, driven by scroll-timeline CSS (`.sky-*` in `globals.css`).
+- **Landing backdrop:** the dusk meadow, then the night meadow, then solid, driven by scroll-timeline CSS (`.sky-*` in `globals.css`). The nature vibe is part of the brand.
 - **Must not regress:** 44px tap targets on phones (use `hit` for small text links), no overflow at 375px, no hydration mismatches.
 
 ## In Progress / Unfinished Work
@@ -122,7 +123,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress.**
 ## Testing / Validation Status
 
 - `npm test` passes 53/53. `tsc` is clean. `eslint` shows only the known error in the untracked `login/dash-preview`.
-- **Browser checks** (mock previews and landing, desktop and 375px): Sync and Settings in every state, tap targets, materials rows, the Pace chart, the Up next item view, no CSP violations, the hero measured at 2 lines with the CTA above the fold, Geist and Phosphor rendering, the GSAP scrub, and the three photos loading with 200s.
+- **Browser checks** (mock previews and landing, desktop and 375px): Sync and Settings in every state, tap targets, materials rows, the Pace chart, the Up next item view, no CSP violations, the hero measured at 2 lines with the CTA above the fold, Geist and Phosphor rendering, and the GSAP scrub.
 - **Not tested:** anything signed in, the real database, Safari/Firefox/phones, and the visual quality of Phosphor at every icon spot (the pane was hidden for most screenshots).
 - One reviewer sub-agent reviewed the Sync/Settings diff and found no bugs.
 
