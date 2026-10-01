@@ -202,6 +202,12 @@ export default function Landing() {
           <a href="#features" className="inline-flex min-h-11 items-center hover:text-foreground">
             Features
           </a>
+          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-foreground">
+            Privacy
+          </Link>
+          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-foreground">
+            Terms
+          </Link>
           <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
             Sign in
           </Link>

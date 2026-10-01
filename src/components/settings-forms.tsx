@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
+import { deleteAccount, resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
 import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { UsageCard } from "@/components/usage";
 import { termGlance } from "@/lib/term";
@@ -285,7 +285,17 @@ export function SettingsWindow({
                         Calendar link is a secret you can replace any time in Sync.
                       </p>
                     </Row>
+                    <Row title="Export" hint="Everything Sonnet stores about you, as one JSON file. Uploaded files are listed, not included.">
+                      <a
+                        href="/api/export"
+                        download
+                        className={cn(buttonVariants({ variant: "secondary" }), "h-11 rounded-full px-5")}
+                      >
+                        Download my data
+                      </a>
+                    </Row>
                     <ResetData onDone={onClose} />
+                    <DeleteAccount email={account.email} />
                   </>
                 )}
               </motion.section>
@@ -446,6 +456,90 @@ function ResetData({ onDone }: { onDone: () => void }) {
           className="mt-5 h-10 rounded-full border-destructive/40 px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           Reset all data…
+        </Button>
+      )}
+    </section>
+  );
+}
+
+// Permanent: files, every row and the login itself go. Typing both the email and DELETE keeps it deliberate.
+function DeleteAccount({ email }: { email: string }) {
+  const [open, setOpen] = useState(false);
+  const [typedEmail, setTypedEmail] = useState("");
+  const [word, setWord] = useState("");
+  const [error, setError] = useState("");
+  const [pending, start] = useTransition();
+  const ready = typedEmail.trim().toLowerCase() === email.toLowerCase() && word === "DELETE";
+  const remove = () =>
+    start(async () => {
+      const r = await deleteAccount(word, typedEmail); // on success the server redirects to "/"
+      if (r?.error) setError(r.error);
+    });
+  const cancel = () => {
+    setOpen(false);
+    setError("");
+    setTypedEmail("");
+    setWord("");
+  };
+
+  return (
+    <section aria-labelledby="delete-title" className="mt-6 rounded-2xl border border-destructive/40 p-5">
+      <h3 id="delete-title" className="text-sm font-medium text-destructive">
+        Delete my account
+      </h3>
+      <p className={help}>
+        Permanently deletes your login and everything in it: courses, work, materials and uploaded files, chats,
+        flashcards, focus history and your Canvas connection. Download your data first. This can&apos;t be undone.
+      </p>
+      {open ? (
+        <form
+          autoComplete="off"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (ready) remove();
+          }}
+          className="mt-5 flex flex-col gap-3"
+        >
+          <div className="flex flex-col gap-2">
+            <label htmlFor="delete-email" className={label}>
+              Your email
+            </label>
+            <input
+              id="delete-email"
+              type="email"
+              value={typedEmail}
+              onChange={(e) => setTypedEmail(e.target.value)}
+              placeholder={email}
+              className={field}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="delete-word" className={label}>
+              Type DELETE
+            </label>
+            <input id="delete-word" value={word} onChange={(e) => setWord(e.target.value)} className={field} />
+          </div>
+          <FormError text={error} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="submit"
+              disabled={!ready || pending}
+              className="h-11 rounded-full bg-destructive px-5 text-white hover:bg-destructive/90"
+            >
+              {pending ? "Deleting…" : "Delete my account forever"}
+            </Button>
+            <Button type="button" variant="ghost" onClick={cancel} disabled={pending} className="h-11 rounded-full px-4">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <Button
+          variant="outline"
+          onClick={() => setOpen(true)}
+          className="mt-5 h-10 rounded-full border-destructive/40 px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          Delete account…
         </Button>
       )}
     </section>

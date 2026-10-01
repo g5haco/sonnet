@@ -259,6 +259,37 @@ export async function disconnectCanvas(): Promise<Result> {
   }
 }
 
+// Uploads live at <user id>/<course id>/<file>; storage policies only reach the user's own folder.
+async function removeFiles(client: Pick<Awaited<ReturnType<typeof createClient>>, "storage">, userId: string) {
+  const bucket = client.storage.from("materials");
+  const names = async (folder: string) => {
+    const all: { name: string; id: string | null }[] = [];
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await bucket.list(folder, { limit: 1000, offset });
+      if (error) return { error: error.message };
+      all.push(...(data ?? []));
+      if ((data?.length ?? 0) < 1000) return { all };
+    }
+  };
+  const top = await names(userId);
+  if (top.error) return { error: top.error };
+  const paths: string[] = [];
+  for (const entry of top.all ?? []) {
+    if (entry.id) {
+      paths.push(`${userId}/${entry.name}`); // a file (folders have no id)
+      continue;
+    }
+    const files = await names(`${userId}/${entry.name}`);
+    if (files.error) return { error: files.error };
+    paths.push(...(files.all ?? []).map((f) => `${userId}/${entry.name}/${f.name}`));
+  }
+  for (let i = 0; i < paths.length; i += 1000) {
+    const { error } = await bucket.remove(paths.slice(i, i + 1000));
+    if (error) return { error: error.message };
+  }
+  return {};
+}
+
 // Settings → Data: wipes the academic data but keeps the account (login, name). Canvas is disconnected
 // first, or the daily sync would import everything again. Deleting courses cascades to their items, class
 // times and materials; deleting the settings row clears the semester, the feed token and Canvas sync status.
@@ -272,24 +303,8 @@ export async function resetAllData(confirm: string): Promise<Result> {
   const canvas = await disconnectCanvas();
   if (canvas.error) return canvas;
 
-  // Uploads live at <user id>/<course id>/<file>; storage policies only reach the user's own folder.
-  // ponytail: one page (1000) per folder; paginate if anyone ever uploads more to a single course.
-  const bucket = supabase.storage.from("materials");
-  const { data: top, error: listError } = await bucket.list(userId, { limit: 1000 });
-  if (listError) return { error: `Couldn't reset your files. ${listError.message}` };
-  const paths: string[] = [];
-  for (const entry of top ?? []) {
-    if (entry.id)
-      paths.push(`${userId}/${entry.name}`); // a file (folders have no id)
-    else {
-      const { data: files } = await bucket.list(`${userId}/${entry.name}`, { limit: 1000 });
-      paths.push(...(files ?? []).map((f) => `${userId}/${entry.name}/${f.name}`));
-    }
-  }
-  if (paths.length) {
-    const { error } = await bucket.remove(paths);
-    if (error) return { error: `Couldn't reset your files. ${error.message}` };
-  }
+  const removed = await removeFiles(supabase, userId);
+  if (removed.error) return { error: `Couldn't reset your files. ${removed.error}` };
 
   for (const table of ["courses", "chats", "settings"] as const) {
     const { error } = await supabase.from(table).delete().eq("user_id", userId);
@@ -297,6 +312,31 @@ export async function resetAllData(confirm: string): Promise<Result> {
   }
   revalidatePath("/", "layout");
   return {};
+}
+
+// Settings → Data: permanently deletes the account. Files go first (a user who still owns storage objects
+// can't be deleted); then the auth user, whose removal cascades to every table (see the migrations).
+// The service-role key is used only here and only for this user, whose id comes from the verified session.
+export async function deleteAccount(confirm: string, email: string): Promise<Result> {
+  if (confirm !== "DELETE") return { error: "Type DELETE to confirm." };
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  const mine = data?.claims.email;
+  if (!userId || !mine) return { error: "Sign in again." };
+  if (email.trim().toLowerCase() !== String(mine).toLowerCase()) return { error: "That isn't your email." };
+
+  try {
+    const admin = createAdminClient();
+    const removed = await removeFiles(admin, userId);
+    if (removed.error) return { error: `Couldn't delete your files. ${removed.error}` };
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (error) return { error: `Couldn't delete your account. ${error.message}` };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Couldn't delete your account." };
+  }
+  await supabase.auth.signOut().catch(() => {}); // clears the cookies; the session's user is already gone
+  redirect("/");
 }
 
 // Stored on the account (auth user metadata), so it needs no table. Refreshing the session puts it in

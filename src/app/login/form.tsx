@@ -107,6 +107,20 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
         </p>
       </form>
 
+      {mode === "up" && (
+        <p className="text-center text-xs text-muted-foreground">
+          By creating an account you agree to the{" "}
+          <Link href="/terms" className="link">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="link">
+            Privacy
+          </Link>
+          .
+        </p>
+      )}
+
       <p className="text-center text-sm text-muted-foreground">
         {mode === "up" ? "Already have an account? " : "New here? "}
         <Link
