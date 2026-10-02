@@ -11,7 +11,7 @@ import { field, FormError, label, useSubmit } from "@/components/create-forms";
 import type { Account } from "@/components/settings-forms";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { FREE } from "@/lib/plan";
 
 // on = flowing, ready = wired but idle, busy = syncing now, error = broken, off = not set up.
@@ -141,7 +141,7 @@ function useCanvas(connection: Account["canvas"]) {
     startSync(async () => {
       running ??= track("Syncing Canvas", () => slow("syncCanvasNow"), (r) => ({
         note:
-          `${r.count ?? 0} item${r.count === 1 ? "" : "s"} up to date.` +
+          `${r.count ?? 0} item${plural(r.count ?? 0)} up to date.` +
           (r.skipped
             ? ` Free keeps ${FREE.courses} courses, so ${r.skipped} more from Canvas ${r.skipped === 1 ? "wasn't" : "weren't"} imported.`
             : ""),

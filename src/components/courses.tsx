@@ -20,7 +20,7 @@ import { WorkView } from "@/components/work-view";
 import type { ClassMeeting, Term } from "@/lib/calendar";
 import { courseColor, gradeLabel, HUES, meetingLabel, needOnFinal, WEEKDAYS } from "@/lib/course";
 import { endOfWeek, progress, type Item } from "@/lib/progress";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 
 // All courses as tilt cards. A card opens its course; the last tile adds one.
 export function CoursesGrid({ courses }: { courses: CourseCard[] }) {
@@ -406,7 +406,7 @@ function CourseSettings({
                 autoFocus
                 className="h-10 rounded-full px-4"
               >
-                {deleting ? "Deleting…" : `Delete it and ${items} item${items === 1 ? "" : "s"}`}
+                {deleting ? "Deleting…" : `Delete it and ${items} item${plural(items)}`}
               </Button>
             ) : (
               <Button type="button" variant="ghost" onClick={() => setConfirming(true)} className="h-10 rounded-full px-4">

@@ -15,11 +15,13 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Current State
 
-- Live at `4eb8f00` plus five local commits: `ccf9aa0` (spec), `53956db` (M0/P1), `94852c9` (M1 shell), `f7deec4` (M2) and the M3/M4 commit. **Not pushed:** the user said desktop milestones wait for their word. **Nothing is deployed**, so the enforced CSP, the `/auth/desktop` route, the focus fixes and the materials fix aren't live. Pushing to `main` deploys the web part; the installed app loads the live site, so its email links need that deploy first.
+- **Pushed to `origin/main` at `ca241df`** (the user ran `git push`, session 8): the spec, M0/P1, the M1 shell, M2 and M3/M4. That deploys the web part (enforced CSP, `/auth/desktop`, the focus fix, the materials fix). **Not checked:** whether Vercel finished, and whether the live site works under the enforced CSP. One later local commit holds the ponytail cleanup (unpushed).
 - The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
 - **Signed-in testing, session 8 (the user signed in by hand, twice, in the desktop app, once on the live site in the installed build).** Seen working: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload, password sign-in, sign-out, a real emailed sign-in link, and real Explorer file drops. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and anything on Vercel.
 
 ## Completed This Session
+
+- **Ponytail audit and cleanup (session 8, end):** the seven plural-"s" expressions became one `plural()` in `lib/utils.ts`, and the Rust crate now builds only `rlib` (`staticlib` and `cdylib` are mobile-only). tsc, lint, 64 web tests, 13 Rust tests, the web build and the release installer all pass. Nothing else found.
 
 - **M3 + M4 + CSP enforcement (Windows; facts in the spec under M3, M4 and §15).**
   - **Email-link sign-in now works in the desktop app** (user-approved: the `tauri-plugin-deep-link` crate, `serde_json`, a new `/auth/desktop` page, the login form and actions). The email's PKCE code can't be redeemed in the system browser, so `/auth/desktop` bounces it to `sonnet://auth/callback?code=…`; the app accepts it only if the login page started a sign-in in the last 15 minutes (`auth_begin`, the second native command, refused off `/login`), once, then redeems it in its own webview. A late or cold-start link shows the expired message. Verified with a real emailed link.
@@ -110,8 +112,8 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - group Up next by day instead of the exact due time.
 - **Audit leftovers (not done):**
   - `ash-burst-button.tsx` (391 lines + `matter-js`) serves only the reset confetti;
-  - `ui/*.tsx` imports `cn` from the package instead of `@/lib/utils`;
-  - the plural-"s" expression is repeated 7 times.
+  - removing it would drop the reset confetti, so it needs the user's OK. The ponytail audit (session 8) found nothing else to cut: every dependency is imported and no source file is orphaned.
+  - `ui/*.tsx` imports `cn` from the package instead of `@/lib/utils` (vendored files; the same function, left alone).
 
 ## Known Bugs / Issues
 
@@ -229,7 +231,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M3/M4 is committed locally and not pushed.
+**Wait for the user's word.** M3/M4 is pushed; the cleanup commit is local.
 - **Is the desktop foundation ready for Focus Sense? Yes, with two conditions that don't block starting:** it builds only on the desktop shell, and the user should (1) add the Supabase redirect and push so email links work from the installed app, and (2) run the installer once on a clean machine.
 - **Focus Sense first steps** (spec §12, and the user's own scope): native work stays in `src-tauri/`, each new command is path-gated in Rust like `auth_begin`, and the CSP stays enforced. Do not add Accessibility, screen capture, active-window tracking or Strict Mode before the user's go-ahead.
 

@@ -14,7 +14,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { UsageCard } from "@/components/usage";
 import { termGlance } from "@/lib/term";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 
 // Reset-all-data animation pulls in matter-js; load it only when Settings opens.
 const DoubtButton = dynamic(() => import("@/components/evil-buttons/doubt-button"));
@@ -336,7 +336,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
                 : g.phase === "finished"
                   ? `ended ${day(g.end)}`
                   : g.weeksLeft
-                    ? `${g.weeksLeft} week${g.weeksLeft === 1 ? "" : "s"} left`
+                    ? `${g.weeksLeft} week${plural(g.weeksLeft)} left`
                     : "last week"}
             </p>
           </div>
@@ -379,7 +379,7 @@ function SemesterSettings({ term }: { term: Account["term"] }) {
       <Row title={term ? "Change dates" : "Set dates"} hint="Class times stop repeating after the last week.">
         {term && term.weeks <= 2 && (
           <p className="mb-4 rounded-xl bg-secondary px-3 py-2 text-sm">
-            Set to {term.weeks} week{term.weeks === 1 ? "" : "s"}? Semesters usually run 15 or 16, quarters about 11.
+            Set to {term.weeks} week{plural(term.weeks)}? Semesters usually run 15 or 16, quarters about 11.
           </p>
         )}
         <SemesterForm start={term?.start ?? ""} weeks={term?.weeks ?? 16} />

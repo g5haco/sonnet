@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import type { Proposal } from "@/lib/ai";
 import { addDays, parseDay, range, sessions, startOfDay } from "@/lib/calendar";
 import { courseColor, dayKey, meetingLabel } from "@/lib/course";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 
 type Entry = NonNullable<ChatMessage["proposals"]>[number];
 type ClassTime = { weekdays: number[]; starts: string; ends: string; location: string };
@@ -333,7 +333,7 @@ function Body({ p, current }: { p: Proposal; current?: string }) {
         <>
           <p className={cn(title, "font-mono")}>{p.code}</p>
           <p className={detail}>
-            Its {p.items} item{p.items === 1 ? "" : "s"} and class times go with it, for good.
+            Its {p.items} item{plural(p.items)} and class times go with it, for good.
           </p>
         </>
       );
@@ -423,7 +423,7 @@ function Week({
           </span>
         )}
         {dayLine.length ? `That day: ${dayLine.join(" · ")}.` : "Nothing else that day."}{" "}
-        {weekCount > 0 && `${weekCount} other thing${weekCount === 1 ? "" : "s"} due that week.`}
+        {weekCount > 0 && `${weekCount} other thing${plural(weekCount)} due that week.`}
       </>
     );
   }

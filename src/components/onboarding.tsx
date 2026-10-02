@@ -9,7 +9,7 @@ import { field, FormError, label } from "@/components/create-forms";
 import { TOUR_KEY } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, plural } from "@/lib/utils";
 import { FREE } from "@/lib/plan";
 
 const STEPS = ["Name", "Term", "Canvas", "Done"];
@@ -68,7 +68,7 @@ export function Onboarding({ name: known = "" }: { name?: string }) {
         {
           loading: "Syncing Canvas…",
           success: ({ count: n = 0, skipped }) =>
-            `Canvas synced: ${n} item${n === 1 ? "" : "s"}.` +
+            `Canvas synced: ${n} item${plural(n)}.` +
             (skipped ? ` Free keeps ${FREE.courses} courses; ${skipped} more weren't imported.` : ""),
           error: (e: Error) => `Canvas sync failed: ${e.message}`,
         },
