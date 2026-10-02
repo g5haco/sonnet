@@ -11,7 +11,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, committed, not pushed** (spec: "Focus Sense F1"). Classification, scoring, blocking and the overlay have not started.
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, pushed at `59ee619`** (spec: "Focus Sense F1"). Classification, scoring, blocking and the overlay have not started.
 
 ## Current State
 
@@ -165,7 +165,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## Current Priorities
 
 1. **Deploy the web changes and set the Supabase redirect** (see Needs the user), then re-check sign-in, an email link from the installed app, and the CSP on Vercel. Then the delete-account check with a throwaway account.
-2. **Focus Sense:** push F1 when the user says so (deploys the timer hook and settings rows; inert in browsers), then test it signed in on the live site with the installed app. Next milestone: classification (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
+2. **Focus Sense:** F1 is pushed; check the deploy, then test it signed in on the live site with the installed app. Next milestone: classification (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
@@ -243,7 +243,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** Focus Sense F1 is committed, not pushed.
+**Wait for the user's word.** Focus Sense F1 is pushed (`59ee619`); check the Vercel deploy, then test it signed in with the installed app.
 - **Ready for classification/scoring?** Yes on Windows: real per-session event data, a stable schema, opt-in, exclusions and bounded storage exist. Before scoring relies on durations, decide how to treat a missing stop marker (hard kill) and pauses (stop/start markers already bracket them).
 - **Next milestone** (user's scope): ON_TASK / DISTRACTING / UNCERTAIN classification over F1 events. Keep native work in `src-tauri/`, path-gate every new command, keep the CSP enforced. Do not add screenshots, OCR, Accessibility, blocking, the overlay or Strict Mode before the user's go-ahead.
 
