@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-10-02 (session 7), code through the M0/P1 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-10-02 (session 8), code through the M1 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
 
 ## Project Summary
 
@@ -11,34 +11,26 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Guardian is the first native feature). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0 and P1 are done; M1 (the Tauri shell) is next and not started.**
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Guardian is the first native feature). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1 and M1 are done. M2 (shared app boot) is next and not started.** Focus Guardian has not started.
 
 ## Current State
 
-- Live at `4eb8f00` plus session 7's local commits: `ccf9aa0` (spec) and the M0/P1 commit. **Not pushed:** the user said don't push this milestone. Nothing is deployed, so the new CSP and timer aren't live yet.
-- The user ran migrations 0001–0017. Session 7 needed none.
-- **Nothing from sessions 2–7 has been tested signed in.** That includes export and delete, and now the nonce CSP on signed-in pages and the focus-timer save success path.
+- Live at `4eb8f00` plus three local commits: `ccf9aa0` (spec), `53956db` (M0/P1) and the M1 shell commit. **Not pushed:** the user said desktop milestones wait for their word. Nothing is deployed, so the new CSP and timer aren't live yet. The web app is unchanged by M1.
+- The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
+- **Nothing from sessions 2–8 has been tested signed in.** That includes export and delete, the nonce CSP on signed-in pages, the focus-timer save success path, and now **password sign-in inside the desktop shell** (the shell was only checked up to the login page; the rules forbid typing a password).
 
 ## Completed This Session
 
-- **Desktop architecture decided.**
-  - A 32-agent Arena run was stopped in round 1. The user accepted candidate `a016` after its claims were checked against the repo.
-  - The result is `DESKTOP_ARCHITECTURE_SPEC.md`, approved and committed (`ccf9aa0`): Tauri 2 thin shell over the live site, a typed bridge, a small Rust layer, no static export, direct download, GitHub Releases for updates, Electron only as a macOS fallback. Lecture Listener is deferred.
-  - `.arena/` holds the run record. It's excluded locally in `.git/info/exclude`.
-- **M0: nonce CSP and the `/login` redirect.**
-  - `src/lib/csp.ts` builds the policy and `src/proxy.ts` sets it per request.
-    - Dynamic pages get `script-src 'self' 'nonce-…' '<theme hash>' 'strict-dynamic'`.
-    - The prerendered `/landing` (and signed-out `/`), `/privacy` and `/terms` keep a no-nonce `'unsafe-inline'` policy, so they stay static.
-    - `connect-src` adds `ipc: http://ipc.localhost` for the future desktop bridge.
-    - Still **report-only** (`ENFORCE = false`). The static CSP header was removed from `next.config.ts`.
-  - `next-themes`' inline script is allowed by hash. `npm run build` now runs `scripts/check-csp-hash.mjs`, which fails the build if that hash drifts.
-  - The proxy sends signed-in users from `/login` to `/`, carrying refreshed cookies.
-- **P1: focus sessions no longer get lost.**
-  - `finish()` now queues the session in `localStorage` (`sonnet-focus-pending`) before clearing the run.
-  - `flush()`/`enqueue()` in `lib/focus.ts` retry on mount and on `online`, serialized across tabs with a Web Lock. There's an in-memory fallback when storage is blocked.
-  - `logFocus` skips rows that already exist (same `started_at`) and marks invalid sessions `final`, so they're dropped instead of retried.
-  - 5 new tests.
-- One reviewer sub-agent checked the diff. Fixed its findings: cross-tab duplicates (Web Lock), blocked storage (memory fallback), permanent errors retrying forever (`final`). The static-404 note is recorded as a known gap.
+- **M1: the Tauri 2 desktop shell** (`src-tauri/`; facts and the dependency table are in `DESKTOP_ARCHITECTURE_SPEC.md` under M1).
+  - A window that loads the site: `localhost:3000/login` in debug, `https://www.ericwei.me/login` in release.
+  - Navigation lock, external links to the system browser, an offline page, single instance, window state, a tray, close-to-tray, reload-on-show (hidden 15 minutes or more), logging, and one command, `app_info`.
+  - `npm run desktop:dev` and `npm run desktop:build`. Ignore entries for git, Vercel (`.vercelignore`), ESLint and Graphify.
+  - Dependencies approved and added: `@tauri-apps/cli` (dev) plus the Rust crates `tauri`, `tauri-build`, and the single-instance, window-state, log and opener plugins, `log` and `serde`. All Apache-2.0/MIT.
+- **Two spec corrections found by testing.**
+  - Tauri matches `remote.urls` against the request `Origin` only. Path-scoped capabilities don't work, and a root `/` is a wildcard. Capabilities are origin-wide, and each command must check `webview.url().path()` itself (`bridge_path_allowed`).
+  - The opener plugin injects a click handler that swallows `target=_blank` clicks. It is turned off.
+- **One reviewer pass fixed 4 defects:** the opener click handler, a hostile `sonnet-offline` URL that site content could use (now only the shell's own offline URL is accepted, with a site-page `to`), `window.open('')` blanking the app (`about:blank` no longer navigates), and the macOS sleep clock (`SystemTime` instead of `Instant`).
+- Earlier (session 7): the desktop architecture (Arena run, spec `ccf9aa0`), M0 (nonce CSP, report-only) and P1 (durable focus-session logging), commit `53956db`.
 
 ## Important Decisions
 
@@ -51,6 +43,9 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 - **Icons go through `@/components/icons` only.** Map new names there; never import Phosphor directly.
 - **The CSP stays report-only** (`ENFORCE` in `lib/csp.ts`) until the user's signed-in checks show no violations: sign in and out, email links, Server Actions, chat streaming, Canvas, uploads. Then set `ENFORCE = true`. Never regress auth, Server Actions or public pages to satisfy the CSP. A report endpoint (a new API route) needs the user's OK.
 - **Desktop decisions are locked in `DESKTOP_ARCHITECTURE_SPEC.md` §16.** Native bridge privileges beyond `app_info`/notify wait for the enforced, validated CSP.
+- **Every future native command must gate on the page path in Rust** (`bridge_path_allowed`), because capabilities can't. Never list a root `/` capability URL.
+- **The `opener` plugin is Rust-only.** Keep `open_js_links_on_click(false)` and grant no opener permission to pages.
+- **Don't log full URLs in the shell.** They can carry sign-in tokens. Log the origin.
 - **Static public pages stay static.** They get a no-nonce CSP rather than becoming dynamic. A dynamic `not-found` was tried and rejected, because it made every static page dynamic.
 - **Price:** stays hidden until `ai_usage` shows real costs (AI is about $7/user/month by the user's estimate).
 - **Limits live in the database**, and Canvas imports the first 2 courses. Quick note and Today's three are stored per device, in localStorage.
@@ -88,7 +83,9 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - **a signed-in check on a preview or production deploy with the nonce CSP**, watching the console for `[Report Only]` violations. That gates `ENFORCE = true`;
   - Skew Protection: Vercel's docs limit it to Pro/Enterprise, and it isn't active on production. If the plan is upgraded later: Project → Settings → Advanced → Skew Protection. Until then the desktop reload fallback (spec §11) applies;
   - a real Safari/WebKit pass on a Mac or iPhone (not done; the Playwright browsers aren't installed);
-  - approval for M1's dependencies (the Rust toolchain, `@tauri-apps/cli`).
+  - **a password sign-in check inside the desktop shell** (`npm run desktop:dev`, or the built `sonnet-desktop.exe`): sign in, confirm it lands on `/`, then close to the tray and reopen;
+  - a Mac to build and run the shell (M5); macOS is configured but untested;
+  - approval to push the desktop commits.
 - **Offered, not yet decided:**
   - make Reset all data also clear decks and focus history. It currently deletes `courses`, `chats` and `settings`; decks and focus sessions only have their course unlinked, and `ai_usage` stays;
   - let Free students pick which 2 Canvas courses to keep;
@@ -102,6 +99,14 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - the plural-"s" expression is repeated 7 times.
 
 ## Known Bugs / Issues
+
+- **Desktop shell gaps (M1):**
+  - A load that fails after the server answers (HTTP 5xx, a mid-load drop) shows WebView2's own error page, not the offline page. The offline page covers an unreachable server only.
+  - There's no reload after system wake, only after a long hide.
+  - Icons are upscaled from the 512 px web mark. Regenerate from 1024 px before release.
+  - Not exercised: the tray's right-click menu (Open/Quit), a physical tray click, real Ctrl+click on a link, installing the NSIS installer.
+  - No signing, no updater.
+- **Desktop dev:** `tauri dev` starts Next on port 3000 itself, so stop any other dev server first. After running it, delete `.next/dev` before `npm run build`, or the build fails on stale type stubs for the preview pages.
 
 - Saving a deck from an old chat twice (after a reload) creates a duplicate.
 - **CSP known gap:** the prerendered 404 (an unknown URL while signed in) gets the nonce policy. Once enforced it shows without JavaScript, but its Home link still works. `/_global-error` is the same.
@@ -126,13 +131,23 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## Current Priorities
 
 1. **The user's signed-in check of sessions 2–7** on a deploy: export and delete (throwaway account), plus the nonce CSP console check. Then enforce the CSP.
-2. **Desktop M1: the Tauri shell** (spec §13). It needs dependency approval. M1, M2, M4 and M5 can proceed while the CSP is report-only. M3 and M6 wait for the enforced CSP.
+2. **Desktop M2: shared app boot** (spec §13). M2, M4 and M5 can proceed while the CSP is report-only. M3 and M6 wait for the enforced CSP.
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
 6. After 1–2 weeks: read the `ai_usage` costs, set `PRO`, then Stripe. Vercel and Supabase Pro are needed before charging.
 
 ## Testing / Validation Status
+
+- **M1 (Windows, run for real):**
+  - `cargo test`: 9 pass (navigation lock, hostile offline URLs, path gate, capability shape). `cargo clippy`: clean.
+  - `npm run desktop:dev`: the window opened `/login`; same-site links stayed inside; a `target=_blank` link, `window.open` and a top-level navigation to another site opened the default browser (Brave), logging the origin only.
+  - Close hid the window and kept the process; a second launch showed it; a short hide kept the page, a long hide reloaded it.
+  - With the server down the offline page appeared, kept the return page, and recovered by itself when the server came back. Window state restored across a kill and relaunch. The tray toggle worked (driven with the tray's window message).
+  - IPC: `app_info` allowed on the site, refused on `/f`, `/landing`, `/auth`, `/privacy`, `/terms`. Opener and window-state commands denied.
+  - `npm run desktop:build`: the release exe (about 4.4 MB) and the NSIS per-user installer (about 1.4 MiB) built. The release exe loaded the live site's `/login` and `app_info` worked. The installer was not installed.
+  - **Not done:** a password sign-in, a literal Wi-Fi-off test (the offline page was tested by pointing a debug build at a dead local origin), anything on macOS.
+- **Web after M1:** `npm test` 60/60, `tsc` clean, `npm run build` passes with the CSP hash check and the same static routes. `npm run lint` reports one error, in the untracked `login/dash-preview` page (never committed); tracked code is clean.
 
 - `npm test` passes 60/60, including the new csp and focus tests. `tsc` is clean. `eslint` is clean on the changed files. `npm run build` passes, and the hash check matches. Static routes are unchanged: `/landing`, `/privacy`, `/terms` and `/_not-found` are still prerendered.
 - **CSP checks on a local production build** (`next start`):
@@ -163,7 +178,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 - **Landing:** `app/landing/page.tsx` plus `hero.tsx`, `ai.tsx`, `showcase.tsx`, `features.tsx`, `pricing.tsx`, `kit.tsx`.
 - **Security:** the CSP is built in `lib/csp.ts` (`ENFORCE`, `STATIC`, `THEME_SCRIPT_HASH`) and set in `proxy.ts`, with the build check in `scripts/check-csp-hash.mjs`. The route allowlist and the `/login` redirect are in `proxy.ts`. The full review is in `docs/SECURITY.md`.
 - **Focus timer:** `components/focus-timer.tsx` (`finish`, `save`, the pending queue), `lib/focus.ts` (`enqueue`, `flush`), and `logFocus` in `app/actions.ts`.
-- **Desktop:** `DESKTOP_ARCHITECTURE_SPEC.md` is authoritative. There is no desktop code yet.
+- **Desktop:** `DESKTOP_ARCHITECTURE_SPEC.md` is authoritative. The shell is `src-tauri/` (`src/lib.rs`: the navigation lock `classify`, the offline page and `refresh`, tray and lifecycle, `app_info` and `bridge_path_allowed`; `offline/offline.html`; `capabilities/main.json`; `tauri.conf.json`). Graphify ignores it. There is no web-side desktop code yet (`src/lib/desktop/` starts in M6).
 - **Rate limits and AI metering:** `lib/limit.ts` (migrations 0014, 0015, 0017).
 
 ## Important Constraints
@@ -171,15 +186,16 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 - **Ask before:** adding a dependency, writing a migration, removing a feature, or changing focus-timer behavior, chat storage, Supabase/env/API routes/auth or billing.
 - **Migrations:** give the SQL to paste, **plus a `create or replace` / delta version**.
 - Never write to Supabase or enter passwords. Spending Higgsfield credits needs the user's OK.
-- **Commits:** commit every important change; run tsc, lint and tests first; say "untested" when true. Push to `main` as before, **except** desktop milestones, which wait for the user's word (session 7: M0/P1 committed, not pushed).
+- **Commits:** commit every important change; run tsc, lint and tests first; say "untested" when true. Push to `main` as before, **except** desktop milestones, which wait for the user's word (sessions 7 and 8: M0/P1 and M1 committed, not pushed).
 - **Preview pages:** `src/app/login/*-preview/` are untracked (`.git/info/exclude`) and must never be committed.
 - **Communication:** terse; give copy-paste commands.
 
 ## Next Recommended Task
 
-**Stop here until the user decides.** The user asked to stop before M1.
-- **Option A:** the user pushes or deploys M0/P1 and runs the signed-in CSP console check (DevTools console, look for `[Report Only]`). If it's clean, set `ENFORCE = true` in `lib/csp.ts`.
-- **Option B: desktop M1, the Tauri shell** (spec §13). Ask first for the Rust toolchain and the `@tauri-apps/cli` dev dependency. Build `src-tauri/` with a main window at `/login`, a navigation lock, an offline page, single instance, a tray and reload-on-show. No native commands beyond `app_info`.
+**Wait for the user's word on M2.** M1 is committed locally and not pushed.
+- **First, the user's password sign-in check in the shell** (see "Needs the user"). It's the one M1 criterion that couldn't be run.
+- **M2: shared app boot** (spec §13). Run the 7 signed-in pages, chat streaming, Canvas sync, file upload, the export download and the focus timer inside WebView2. Check the mic button (hide it where `SpeechRecognition` is missing) and focus-noise `AudioContext` in a hidden window. Expect a few webview-specific fixes. Note that materials open in the system browser (`target=_blank` to a signed URL).
+- Do not start Focus Guardian or M3/M6 before the CSP is enforced.
 
 ## Tomorrow / New-Session Startup Prompt
 

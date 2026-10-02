@@ -7,7 +7,9 @@
     "build": "next build && node scripts/check-csp-hash.mjs",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -37,6 +39,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "~2.12.1",
     "@types/matter-js": "^0.20.2",
     "@types/node": "^24.13.6",
     "@types/react": "^19",

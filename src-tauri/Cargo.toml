@@ -1,0 +1,30 @@
+[package]
+name = "sonnet-desktop"
+version = "0.1.0"
+description = "Sonnet desktop shell: a Tauri 2 window over the live Sonnet site"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[lib]
+name = "sonnet_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+tauri = { version = "2.12", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2.5"
+tauri-plugin-window-state = "2.5"
+tauri-plugin-log = "2.10"
+tauri-plugin-opener = "2.7"
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

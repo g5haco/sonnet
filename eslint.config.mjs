@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Desktop shell (Rust); nothing to lint.
+    "src-tauri/**",
   ]),
 ]);
 

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonnet</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px;
+    background: #121212; color: #ecebe8;
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 360px; }
+  .mark { font-size: 40px; font-weight: 700; letter-spacing: -0.05em; margin: 0 0 20px; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+  p { margin: 0 0 20px; color: #9b9a96; }
+  button {
+    font: inherit; font-weight: 500; color: #121212; background: #ecebe8;
+    border: 0; border-radius: 8px; padding: 10px 16px; min-height: 44px; cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid #ecebe8; outline-offset: 2px; }
+  .status { margin: 16px 0 0; font: 12px ui-monospace, "Cascadia Mono", Consolas, monospace; color: #9b9a96; }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark" aria-hidden="true">s.</div>
+  <h1>Can't reach Sonnet</h1>
+  <p>Check your internet connection. Sonnet reconnects on its own as soon as it's back.</p>
+  <button id="retry" type="button">Try again</button>
+  <div class="status" id="status" role="status"></div>
+</main>
+<script>
+  // The shell passes the page to return to as ?to=. Only http(s) is followed;
+  // the shell's navigation lock still has the final say.
+  var to = null;
+  try {
+    var u = new URL(new URLSearchParams(location.search).get("to"));
+    if (u.protocol === "https:" || u.protocol === "http:") to = u.href;
+  } catch (e) {}
+
+  var statusEl = document.getElementById("status");
+  var busy = false;
+  var timer = null;
+
+  function check() {
+    if (!to || busy) return;
+    busy = true;
+    statusEl.textContent = "Checking…";
+    // Probe the site root, never the page itself: a one-use link must not be consumed here.
+    fetch(new URL("/", to).href, { mode: "no-cors", cache: "no-store" })
+      .then(function () { clearInterval(timer); location.replace(to); })
+      .catch(function () { statusEl.textContent = "Still offline."; })
+      .finally(function () { busy = false; });
+  }
+
+  document.getElementById("retry").addEventListener("click", check);
+  window.addEventListener("online", check);
+  timer = setInterval(check, 5000);
+</script>
+</body>
+</html>

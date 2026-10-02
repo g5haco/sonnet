@@ -248,6 +248,8 @@ Every step has a one-click override. A "pause guardian" control always works. At
    - **Native bridge privileges are not expanded beyond `app_info` and notify until the enforced CSP has been validated.**
 2. **Rust validation:** every command validates its input, with one malformed-input unit test per command.
 3. **Remote URL scoping:** capability `remote.urls` are path-scoped to exact routes, not the whole origin.
+   - **Corrected by M1 (tested on Windows, Tauri 2.12.1):** this does not work. On the IPC protocol Tauri matches `remote.urls` against the request `Origin` header, which has no path. A path pattern never matches, and a root `/` pattern is treated as a wildcard. Capabilities therefore scope by **origin** only.
+   - **Replacement rule:** every command takes the `Webview` and checks `webview.url().path()` against its own allowlist (`bridge_path_allowed` in `src-tauri/src/lib.rs`). The ring table above describes this per-command gate, not capability files.
 4. **Navigation lock:** the main window can't leave `www.ericwei.me`. External http/https links open in the system browser. Other schemes are dropped.
 5. **Deep links:** `sonnet://auth/callback` is accepted only while a one-use, 15-minute handoff is pending, with exact parameters (see the handoff flow below).
 6. **Flashcard audit:** confirm flashcard text renders as text before the bridge ships. Canvas HTML and chat markdown are already safe (§3).
@@ -481,7 +483,39 @@ Each milestone ships on its own and keeps the web app working.
 - **Done when:** `npm run desktop:dev` opens Sonnet locally, password sign-in lands on `/`, external links open the browser, and the offline page shows with Wi-Fi off.
 - **Tests:** manual smoke test. `next build` is unaffected.
 - **Rollback:** delete `src-tauri/` and the scripts. The web is untouched.
-- **Needs user OK:** Rust crates, the `@tauri-apps/cli` dev dependency.
+- **Needs user OK:** Rust crates, the `@tauri-apps/cli` dev dependency. *(Given 2026-10-02.)*
+- **Implemented (session 8).** Facts from the build and the Windows run:
+  - **Shell:** `src-tauri/src/lib.rs`. One window `main`, created in Rust. Debug loads `http://localhost:3000/login`; release loads `https://www.ericwei.me/login`. Debug-only env overrides: `SONNET_DESKTOP_ORIGIN` (test the offline page), `SONNET_DESKTOP_STALE_SECS` (test reload-on-show).
+  - **Navigation lock:** same-origin and `about:blank` stay in the window. Other `http(s)` URLs, including `window.open` and `target=_blank`, go to the system browser. Every other scheme is dropped. Logs hold the origin only, never the path or query (they can carry sign-in tokens). 9 unit tests (lookalike hosts, hostile offline URLs, the path gate, the capability shape).
+  - **Offline page:** `src-tauri/offline/offline.html`, served by a custom protocol (`sonnet-offline`, `http://sonnet-offline.localhost` on Windows) so it works under `tauri dev` too. It polls the site root every 5 s and on the `online` event (never the return page itself, so a one-use link isn't consumed), and returns to the page it came from. Shown when a TCP probe to the site fails at startup or on show. The lock accepts only the shell's own URL for it (exact host, no port, path `/`, one `to` that is a page of the site); site content linking to it any other way is dropped.
+  - **`window.open`:** only a real site page replaces the window. `about:blank` (what `window.open('')` sends) is denied. `target=_blank` links to other sites open in the system browser. This needed `tauri-plugin-opener`'s own click handler turned off (`open_js_links_on_click(false)`): it swallows those clicks and then fails the ACL check.
+  - **Reload-on-show:** hidden for 15 minutes or more, then reload. The hide time is wall-clock (`SystemTime`), because `Instant` stops during sleep on macOS. Always runs the probe, so a window left on the offline page recovers on show. **Not implemented:** reload after system wake while the window is visible.
+  - **Lifecycle:** single instance (a second launch shows the window), window state saved on hide (size, position, maximized, fullscreen; not visibility), close hides to the tray, tray left-click toggles, the tray menu has Open and Quit, and a macOS dock click shows the window. Log file: `%LOCALAPPDATA%\me.ericwei.sonnet\logs\sonnet.log` (3 files of 1 MB).
+  - **Native surface:** one command, `app_info` (`{shell, bridge: 1, os, caps: []}`). `tauri-plugin-opener` is initialised for Rust use only; its commands are denied to pages (tested). Same for the window-state plugin.
+  - **Capability:** `capabilities/main.json` grants `allow-app-info` to `https://www.ericwei.me`, `local: false`. Debug builds add a `dev` capability at runtime. See the correction under §7 item 3: path rules are enforced by `bridge_path_allowed` (denies `/f`, `/landing`, `/auth`, `/privacy`, `/terms`).
+  - **Tauri treats the dev URL as a local origin,** so under `tauri dev` the localhost page is "local", not remote.
+  - **Packaging:** `npm run desktop:build` produced `Sonnet_0.1.0_x64-setup.exe` (1.44 MiB, NSIS, per-user) and a 4.4 MB `sonnet-desktop.exe`. The installer was built but not installed. `bundle.targets` is `["nsis","app","dmg"]`. Windows built only NSIS, with no error. The first NSIS build downloads Tauri's NSIS tooling.
+  - **Dependencies:** see the table below.
+  - **Not covered by M1 (known):**
+    - A load that fails after the TCP probe succeeds (HTTP 5xx, a connection that drops mid-load) shows WebView2's own error page, not the offline page.
+    - Icons are upscaled from the 512 px web mark. Regenerate from a 1024 px source before release.
+    - macOS is configured but never built or run.
+    - No code signing, no auto-update, no Skew Protection.
+    - The tray's right-click menu and a physical tray click were not exercised; the left-click handler was driven with the tray's own window message.
+
+  | Dependency | Version | Purpose | License | In the shipped app |
+  |---|---|---|---|---|
+  | `@tauri-apps/cli` (npm, dev) | 2.12.1 | `tauri dev` / `tauri build` | Apache-2.0 OR MIT | No |
+  | `tauri` (crate) | 2.12.1 | The shell and webview. Feature `tray-icon`. | Apache-2.0 OR MIT | Yes |
+  | `tauri-build` (build dep) | 2.7.1 | Build script, app-command permissions | Apache-2.0 OR MIT | No |
+  | `tauri-plugin-single-instance` | 2.5.2 | One running copy | Apache-2.0 OR MIT | Yes |
+  | `tauri-plugin-window-state` | 2.5.0 | Remember size and position | Apache-2.0 OR MIT | Yes |
+  | `tauri-plugin-log` | 2.10.0 | Log file and console | Apache-2.0 OR MIT | Yes |
+  | `tauri-plugin-opener` | 2.7.0 | Open external links in the system browser (Rust only, no page access) | Apache-2.0 OR MIT | Yes |
+  | `log` | 0.4.34 | Log macros | MIT OR Apache-2.0 | Yes |
+  | `serde` | 1.0.229 | Serialise `app_info` | MIT OR Apache-2.0 | Yes |
+
+  The Rust lockfile resolves 467 packages in total, about 219 of them on the Windows runtime path. Their licenses weren't audited. Run `cargo-deny` or an equivalent before the first public release.
 
 ### M2. Shared app boot
 - **Goal:** prove the full app runs unchanged inside the shell.
@@ -595,7 +629,7 @@ The architecture is approved. The claims below are **not** verified. They are pl
 |---|---|---|
 | Tauri idle footprint (about 10–30 MB above the page) and installer size (about 5–15 MB) | Windows + macOS test | Measure at M4 and M5 |
 | ≤1% idle CPU and ≤250 MB total memory are achievable with WebView2 | Windows test | Measure at M7. WebView2 spawns several processes. |
-| Path-scoped `remote.urls` in Tauri 2 capabilities match exactly as described, including subpaths | Framework docs + test | Read the current Tauri 2 docs at M1, then the refusal test at M6 |
+| ~~Path-scoped `remote.urls` in Tauri 2 capabilities match exactly as described, including subpaths~~ **Disproved at M1:** matching is by `Origin` only (no path), and a root `/` is a wildcard. Path rules are enforced in Rust per command (§7). | Framework test | Done (M1). Re-run the refusal test per command at M6. |
 | Tauri IPC from a remote origin needs `ipc: http://ipc.localhost` in `connect-src` | Framework test | Watch the CSP reports at M6 |
 | Nonce CSP plus `'strict-dynamic'` works with Next 16.3 here, without breaking `motion`, GSAP or Vercel scripts | Web test | M0 report-only period |
 | Skew Protection is available on this project's Vercel plan (Vercel's docs limit it to Pro/Enterprise) and covers Server Actions | Service check | Check the Vercel plan and settings (M0). Not blocking. |

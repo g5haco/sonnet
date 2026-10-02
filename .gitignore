@@ -49,3 +49,6 @@ graphify-out/.graphify_root
 graphify-out/cost.json
 graphify-out/20*/
 graphify-out/*.sig
+
+# desktop shell (Tauri)
+src-tauri/target/
