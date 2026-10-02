@@ -424,7 +424,7 @@ Each milestone ships on its own and keeps the web app working.
 - **Files:**
   - `src/proxy.ts` (nonce CSP, report-only first)
   - `next.config.ts` (remove the static CSP header once the proxy sends it)
-  - `src/app/login/page.tsx` (signed-in redirect to `/`)
+  - signed-in redirect from `/login` to `/` (implemented in `src/proxy.ts`, not `login/page.tsx`: it reuses the proxy's `getClaims` result and carries refreshed cookies)
   - Vercel Skew Protection setting (only if the plan supports it)
   - a flashcard-rendering check (renders as text)
   - a Safari/WebKit pass over the signed-in app
@@ -441,6 +441,12 @@ Each milestone ships on its own and keeps the web app working.
 - **Tests:** `npm test`, `tsc`, `eslint`, a Vercel preview build. Manually: sign in and out, use a magic link, run a Server Action, stream a chat, load the public pages, and check the console for CSP reports. After enforcing, an injected inline `<script>` on a preview is blocked.
 - **Rollback:** revert the commit. The CSP falls back to the current report-only header, and the login redirect is 2 lines.
 - **Needs user OK:** proxy and CSP change, auth-page change, Vercel setting.
+- **Implementation facts (2026-10-02)** [Confirmed]:
+  - **Where the policy lives:** `src/lib/csp.ts` builds it and `src/proxy.ts` sets it on both the request and the response. Next reads the nonce from the request header, including `Content-Security-Policy-Report-Only`. `ENFORCE = false`.
+  - **Prerendered pages:** `/landing` (and signed-out `/`), `/privacy` and `/terms` get a policy without a nonce that keeps `'unsafe-inline'`, so they stay static. This is the narrower option allowed in §7. No native command is ever granted on these routes.
+  - **Theme script:** the `next-themes` inline script in the root layout is allowed by `sha256` hash. A nonce would require reading headers in the root layout, which makes every page dynamic. `npm run build` runs `scripts/check-csp-hash.mjs`, which fails the build if the hash drifts. `next dev` doesn't minify that script, so dev reports it; judge the policy on a production build.
+  - **Known gap:** the prerendered 404 (an unknown URL while signed in) gets the nonce policy, so once enforced it renders without JavaScript. Its Home link still works. Making it dynamic made every static page dynamic, so that fix was rejected.
+  - **Skew Protection:** not active on production. Live asset URLs have no `?dpl=` marker, and HANDOFF records Vercel Pro as not yet bought. The §11 fallback applies.
 
 ### P1. Focus-session durability fix (prerequisite, before M6)
 - **Goal:** a failed `logFocus` must not lose a session. Today `finish()` in `components/focus-timer.tsx` clears the persisted run (`store(null)`) before `logFocus` returns. [Confirmed]
@@ -455,6 +461,11 @@ Each milestone ships on its own and keeps the web app working.
 - **Tests:** a unit test for the failure → retry → single-log path, plus a manual offline stop.
 - **Rollback:** revert the commit, which restores today's behavior.
 - **Needs user OK:** focus-timer change.
+- **Implementation facts (2026-10-02)** [Confirmed]:
+  - **Queue:** `sonnet-focus-pending` in `localStorage`, with an in-memory fallback when storage is blocked. Sessions go through `enqueue` and `flush` in `src/lib/focus.ts`.
+  - **When it retries:** on mount and on the `online` event, serialized across tabs with a Web Lock.
+  - **Server side:** `logFocus` returns success if a row with the same `started_at` already exists. It marks invalid sessions `final`, so they're dropped instead of retried.
+  - **Not covered:** two requests racing past the server's check-then-insert. The lock covers the realistic case; a unique index would need a migration.
 
 ### M1. Desktop shell
 - **Goal:** a Tauri window that loads the site.

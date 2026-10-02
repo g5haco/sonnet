@@ -734,15 +734,19 @@ export async function deleteMaterial(id: string): Promise<Result> {
 
 // ---- Focus timer ----
 // One finished (or stopped) focus session; the heatmap and streak on Home read these.
-export async function logFocus(s: { startedAt: string; minutes: number }): Promise<Result> {
+// final: the session itself is invalid, so the timer's retry queue drops it instead of trying again.
+export async function logFocus(s: { startedAt: string; minutes: number }): Promise<Result & { final?: true }> {
   const started = Date.parse(s.startedAt);
-  if (!Number.isInteger(s.minutes) || s.minutes < 1 || s.minutes > 240) return { error: "That session's length is off." };
+  if (!Number.isInteger(s.minutes) || s.minutes < 1 || s.minutes > 240)
+    return { error: "That session's length is off.", final: true };
   if (!Number.isFinite(started) || started > Date.now() + 60_000 || started < Date.now() - 2 * 864e5)
-    return { error: "That session's time is off." };
+    return { error: "That session's time is off.", final: true };
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("focus_sessions")
-    .insert({ started_at: new Date(started).toISOString(), minutes: s.minutes });
+  const startedAt = new Date(started).toISOString();
+  // A retry after a lost response must not log the session twice: one session per start time.
+  const { data: saved } = await supabase.from("focus_sessions").select("id").eq("started_at", startedAt).limit(1);
+  if (saved?.length) return {};
+  const { error } = await supabase.from("focus_sessions").insert({ started_at: startedAt, minutes: s.minutes });
   return done(error, "save the session");
 }
 

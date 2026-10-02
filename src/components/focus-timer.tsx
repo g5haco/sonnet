@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import { logFocus } from "@/app/actions";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { Button } from "@/components/ui/button";
+import { enqueue, flush, type PendingLog } from "@/lib/focus";
 import { cn } from "@/lib/utils";
 
 const LENGTH = 25; // minutes per focus session
 const KEY = "sonnet-focus"; // the running session survives page changes and reloads
+const PENDING = "sonnet-focus-pending"; // finished sessions not saved yet; retried until the server confirms
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
 
 type Run = { start: number };
@@ -46,6 +48,20 @@ const store = (run: Run | null) => {
     else localStorage.removeItem(KEY);
   } catch {}
 };
+const loadPending = (): PendingLog[] => {
+  try {
+    const queue = JSON.parse(localStorage.getItem(PENDING) ?? "[]");
+    return Array.isArray(queue) ? queue : [];
+  } catch {
+    return [];
+  }
+};
+const storePending = (queue: PendingLog[]) => {
+  try {
+    if (queue.length) localStorage.setItem(PENDING, JSON.stringify(queue));
+    else localStorage.removeItem(PENDING);
+  } catch {}
+};
 
 const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).toISOString().slice(14, 19);
 
@@ -61,7 +77,58 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   const y = useMotionValue(0);
   const bounds = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setRun(load()), []); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
+  // The queue lives in localStorage; memory holds it only when storage is blocked or full, so a finished session
+  // is still sent (it just won't survive a reload).
+  const memory = useRef<PendingLog[]>([]);
+  const readQueue = () => memory.current.reduce(enqueue, loadPending());
+  const writeQueue = (queue: PendingLog[]) => {
+    storePending(queue);
+    const kept = loadPending();
+    memory.current = queue.every((q) => kept.some((k) => k.startedAt === q.startedAt)) ? [] : queue;
+  };
+
+  // Sends queued sessions, oldest first. One pass at a time across tabs (a Web Lock, so two tabs coming back
+  // online can't both send the same session) and per tab; anything queued meanwhile joins the running pass.
+  // Sessions just finished here (announce) get the usual toast; older ones saved on retry get a quiet note, and
+  // their failures stay silent until the next try.
+  const saving = useRef(false);
+  const announce = useRef(new Set<string>());
+  const save = async () => {
+    if (saving.current) return;
+    saving.current = true;
+    const pass = async () => {
+      const tried = new Set<string>();
+      for (;;) {
+        const todo = readQueue().filter((q) => !tried.has(q.startedAt));
+        if (!todo.length) break;
+        todo.forEach((q) => tried.add(q.startedAt));
+        const { sent, dropped, failed } = await flush(todo, logFocus);
+        const gone = new Set([...sent, ...dropped, ...failed.filter((f) => f.final).map((f) => f.log)].map((q) => q.startedAt));
+        writeQueue(readQueue().filter((q) => !gone.has(q.startedAt)));
+        for (const s of sent) {
+          if (!announce.current.delete(s.startedAt)) toast.success(`Saved an earlier ${s.minutes}-min focus session.`);
+          else toast.success(s.minutes >= LENGTH ? `${LENGTH} minutes done. Take a break.` : `${s.minutes} min logged.`);
+        }
+        for (const f of failed)
+          if (announce.current.delete(f.log.startedAt))
+            toast.error(f.final ? f.error : `${f.error} It's kept and will save later.`);
+      }
+    };
+    try {
+      if (navigator.locks) await navigator.locks.request("sonnet-focus-pending", pass);
+      else await pass();
+    } finally {
+      saving.current = false;
+    }
+  };
+
+  useEffect(() => {
+    setRun(load()); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
+    save();
+    const retry = () => void save();
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- mount only; save reads refs and storage
   useEffect(() => {
     if (!run) return;
     setTick(Date.now()); // eslint-disable-line react-hooks/set-state-in-effect
@@ -69,13 +136,16 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(id);
   }, [run]);
 
+  // Queue the session before clearing the run, so there's always a saved copy until the server confirms.
   const finish = async (r: Run, minutes: number) => {
     setRun(null);
+    if (minutes >= 1) {
+      const log = { startedAt: new Date(r.start).toISOString(), minutes };
+      writeQueue(enqueue(readQueue(), log));
+      announce.current.add(log.startedAt);
+    }
     store(null);
-    if (minutes < 1) return;
-    const res = await logFocus({ startedAt: new Date(r.start).toISOString(), minutes });
-    if (res.error) toast.error(res.error);
-    else toast.success(minutes >= LENGTH ? `${LENGTH} minutes done. Take a break.` : `${minutes} min logged.`);
+    await save();
   };
 
   const left = run ? LENGTH * 60_000 - (Math.max(tick, run.start) - run.start) : LENGTH * 60_000;
