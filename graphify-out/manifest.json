@@ -120,9 +120,9 @@
     "semantic_hash": ""
   },
   "src/components/app-shell.tsx": {
-    "mtime": 1790485102.4483726,
-    "seen": 1790485562.2262836,
-    "ast_hash": "e1975a7c80e426a244bf6c197c3237b5",
+    "mtime": 1790977835.9475896,
+    "seen": 1790983314.8595529,
+    "ast_hash": "8cd0ca7af239a3a08873f54d72b4620c",
     "semantic_hash": ""
   },
   "src/components/block.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "HANDOFF.md": {
-    "mtime": 1790976673.0176861,
-    "seen": 1790976723.1207836,
-    "ast_hash": "ca74a3c31a093d6d0903b27bef0a116a",
+    "mtime": 1790983223.0283408,
+    "seen": 1790983314.8595529,
+    "ast_hash": "af51d31be32f51fc3a79324bf96063f1",
     "semantic_hash": ""
   },
   "PRODUCT.md": {
@@ -594,9 +594,9 @@
     "semantic_hash": ""
   },
   "src/components/focus-timer.tsx": {
-    "mtime": 1790975588.2108474,
-    "seen": 1790976723.1207836,
-    "ast_hash": "4ac3dbfc52b7cb75d67f6de57b9202a8",
+    "mtime": 1790977820.0663755,
+    "seen": 1790983314.8595529,
+    "ast_hash": "83c277c2744a3fc8acc2c4f25c215038",
     "semantic_hash": ""
   },
   "src/components/chat/thought-chain.tsx": {
@@ -1026,9 +1026,9 @@
     "semantic_hash": ""
   },
   "DESKTOP_ARCHITECTURE_SPEC.md": {
-    "mtime": 1790976638.0029345,
-    "seen": 1790976723.1207836,
-    "ast_hash": "f36b654f5b6831854d3ee46cf27806d8",
+    "mtime": 1790983199.9579842,
+    "seen": 1790983314.8595529,
+    "ast_hash": "d224556be8750dbc275003b48562b518",
     "semantic_hash": ""
   },
   "scripts/check-csp-hash.mjs": {
@@ -1080,21 +1080,159 @@
     "semantic_hash": ""
   },
   "src/components/desktop/focus-sense-settings.tsx": {
-    "mtime": 1790976473.242146,
-    "seen": 1790976723.1207836,
-    "ast_hash": "7257d24c360e20a67bf14c38384d7022",
+    "mtime": 1790977870.4492176,
+    "seen": 1790983314.8595529,
+    "ast_hash": "50483ad70288b6f8d0bf52d5e70f4a47",
     "semantic_hash": ""
   },
   "src/lib/desktop/focus-sense.test.ts": {
-    "mtime": 1790976486.2167044,
-    "seen": 1790976723.1207836,
-    "ast_hash": "d5bb4f54939c688f18d890ad50529e4d",
+    "mtime": 1790977451.2976334,
+    "seen": 1790983314.8595529,
+    "ast_hash": "7a23ddd51e6bfcfd3d00a02c5a4e2a6b",
     "semantic_hash": ""
   },
   "src/lib/desktop/focus-sense.ts": {
-    "mtime": 1790976468.6395292,
-    "seen": 1790976723.1207836,
-    "ast_hash": "76e2005ad53be1302e8170dbf62810a6",
+    "mtime": 1790977448.7181697,
+    "seen": 1790983314.8595529,
+    "ast_hash": "61963832fd8746a03219db9639f92209",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/baselines.ts": {
+    "mtime": 1790978490.6622515,
+    "seen": 1790983314.8595529,
+    "ast_hash": "b25b375a2673edb1ea17437eaee04508",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/benchmark.test.ts": {
+    "mtime": 1790982982.6965616,
+    "seen": 1790983314.8595529,
+    "ast_hash": "9ddbb6213696ec9a01f96a2b8b5310be",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/dataset.dev.json": {
+    "mtime": 1790978344.3709111,
+    "seen": 1790983314.8595529,
+    "ast_hash": "ab2caf89ea9455031f6cefd9403e22a3",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/dataset.heldout.json": {
+    "mtime": 1790978444.835424,
+    "seen": 1790983314.8595529,
+    "ast_hash": "7cdb47da5ab43e2d3704ff0952387743",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/dataset2.dev.json": {
+    "mtime": 1790981032.3493247,
+    "seen": 1790983314.8595529,
+    "ast_hash": "7bf168494efab97a7f28dce8c76c8ea4",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/dataset2.heldout.json": {
+    "mtime": 1790981145.843112,
+    "seen": 1790983314.8595529,
+    "ast_hash": "a75a381ce68b6e88b71a0bf6b62f2e9d",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/harness.ts": {
+    "mtime": 1790981173.469023,
+    "seen": 1790983314.8595529,
+    "ast_hash": "de7d55e7b80b01dcba1a213c73ea57f0",
+    "semantic_hash": ""
+  },
+  "src/components/desktop/focus-context-picker.tsx": {
+    "mtime": 1790977794.657309,
+    "seen": 1790983314.8595529,
+    "ast_hash": "e0ba5ab26e74355cf2c89c104a2bfa5e",
+    "semantic_hash": ""
+  },
+  "src/components/desktop/focus-session-debug.tsx": {
+    "mtime": 1790977858.5585415,
+    "seen": 1790983314.8595529,
+    "ast_hash": "61e0b5ddae07cca5a50c20bd1740e1cf",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/classify.test.ts": {
+    "mtime": 1790983065.408306,
+    "seen": 1790983314.8595529,
+    "ast_hash": "ba43082e81ada8e845e70db4e6253f9e",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/classify.ts": {
+    "mtime": 1790983035.7006328,
+    "seen": 1790983314.8595529,
+    "ast_hash": "1a926f99d319a8a86f63e0141fefe1c6",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/context.test.ts": {
+    "mtime": 1790977776.0376165,
+    "seen": 1790983314.8595529,
+    "ast_hash": "099c551df042b0955750c70436dfa4b5",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/context.ts": {
+    "mtime": 1790977768.9437792,
+    "seen": 1790983314.8595529,
+    "ast_hash": "47ab72a0f765aca6bdfb0f45e7cb0c5c",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/heuristics.ts": {
+    "mtime": 1790983034.1193376,
+    "seen": 1790983314.8595529,
+    "ast_hash": "8e29877024719e1dbda663f671d04006",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/lexicon.ts": {
+    "mtime": 1790983011.7382834,
+    "seen": 1790983314.8595529,
+    "ast_hash": "a872b826af3f46acc32c01a9e8a8fd6d",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/rules.ts": {
+    "mtime": 1790982998.8813076,
+    "seen": 1790983314.8595529,
+    "ast_hash": "9ac6bc0ccc6b500f4fd85d616fb53151",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/score.test.ts": {
+    "mtime": 1790983110.4917357,
+    "seen": 1790983314.8595529,
+    "ast_hash": "8fde8e1af88c9c93c1c0ee2b9b2bb062",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/score.ts": {
+    "mtime": 1790983092.9555998,
+    "seen": 1790983314.8595529,
+    "ast_hash": "05f7ab61612ffed38f94c068570f55ee",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/semantic.test.ts": {
+    "mtime": 1790979323.8085477,
+    "seen": 1790983314.8595529,
+    "ast_hash": "530da6dc29512dbcc24bb003c85c79c6",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/semantic.ts": {
+    "mtime": 1790979323.8070192,
+    "seen": 1790983314.8595529,
+    "ast_hash": "be684c75d05e7784d07926b7fc413546",
+    "semantic_hash": ""
+  },
+  "src/lib/desktop/sense/types.ts": {
+    "mtime": 1790977442.42691,
+    "seen": 1790983314.8595529,
+    "ast_hash": "8025dc9b3e1d71d590a5287aa7e2b436",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/README.md": {
+    "mtime": 1790983009.8512528,
+    "seen": 1790983314.8595529,
+    "ast_hash": "8f045d753187b02fb525fd0317072c0e",
+    "semantic_hash": ""
+  },
+  "bench/focus-sense/RESULTS.md": {
+    "mtime": 1790983005.5183742,
+    "seen": 1790983314.8595529,
+    "ast_hash": "0fdebc3161af663c5c7fc6ccf6068aee",
     "semantic_hash": ""
   }
 }

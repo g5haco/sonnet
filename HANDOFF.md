@@ -11,7 +11,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, pushed at `59ee619`** (spec: "Focus Sense F1"). **M6B (classification and focus metrics) is built, benchmarked and tested on Windows, committed, not pushed** (spec: "Focus Sense M6B"). Blocking, Strict Mode, notifications, the overlay and the Focus Report have not started.
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, pushed at `59ee619`** (spec: "Focus Sense F1"). **M6B (classification and focus metrics) is built, benchmarked and tested on Windows, pushed at `dd64985`** (spec: "Focus Sense M6B"). Blocking, Strict Mode, notifications, the overlay and the Focus Report have not started.
 
 ## Current State
 
@@ -172,7 +172,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## Current Priorities
 
 1. **Deploy the web changes and set the Supabase redirect** (see Needs the user), then re-check sign-in, an email link from the installed app, and the CSP on Vercel. Then the delete-account check with a throwaway account.
-2. **Focus Sense:** M6B is committed, not pushed (desktop milestone: wait for the user). Then test F1 + M6B signed in on the live site with the installed app. Next milestone: the intervention/product experience (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
+2. **Focus Sense:** M6B is pushed (`dd64985`). Check the deploy, then test F1 + M6B signed in on the live site with the installed app. Next milestone: the intervention/product experience (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
@@ -253,7 +253,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M6B is committed, not pushed.
+**Wait for the user's word.** M6B is pushed (`dd64985`).
 - **Ready for the intervention/product milestone?** Yes, for notice-level feedback built on `isEnforceable` and the session metrics. Before any enforcement: wire and measure the semantic layer (with the user's OK), and validate on real signed-in sessions.
 - **Next milestone** (user's scope): intervention/product experience. Keep native work in `src-tauri/`, path-gate every new command, keep the CSP enforced. Do not add screenshots, OCR, Accessibility, blocking, the overlay or Strict Mode before the user's go-ahead.
 
