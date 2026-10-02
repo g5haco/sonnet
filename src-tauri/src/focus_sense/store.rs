@@ -97,7 +97,7 @@ impl Store {
             }
         };
         seqs.insert(e.session_id.clone(), last);
-        let cap = if e.kind == Kind::Context { MAX_EVENTS_PER_SESSION } else { MAX_EVENTS_PER_SESSION + MARKER_SLACK };
+        let cap = if matches!(e.kind, Kind::Context | Kind::Heartbeat) { MAX_EVENTS_PER_SESSION } else { MAX_EVENTS_PER_SESSION + MARKER_SLACK };
         if last >= cap {
             return Ok(false);
         }
@@ -181,6 +181,7 @@ mod tests {
             platform: "windows".into(),
             kind,
             source: Source::ForegroundWindow,
+            idle: false,
             app_name: Some("Notepad".into()),
             process_name: Some("notepad.exe".into()),
             window_title: Some("notes".into()),

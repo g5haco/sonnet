@@ -6,7 +6,7 @@ const bridge = (impl: (command: string, args?: unknown) => unknown) => {
   vi.stubGlobal("window", { __TAURI_INTERNALS__: { invoke } });
   return invoke;
 };
-const status = { supported: true, enabled: true, exclusions: [], monitoring: null, paused: false };
+const status = { supported: true, enabled: true, exclusions: [], monitoring: null, paused: false, latest: null };
 const event = (seq: number): FocusActivityEvent => ({
   seq,
   timestamp: seq,
@@ -19,6 +19,7 @@ const event = (seq: number): FocusActivityEvent => ({
   windowTitle: null,
   redacted: null,
   confidence: "none",
+  idle: false,
 });
 
 afterEach(() => {

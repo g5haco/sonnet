@@ -1,0 +1,656 @@
+[
+  {
+    "id": "yt-bio-mitosis", "category": "youtube",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Mitosis vs. Meiosis: Side by Side Comparison - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Video on exactly the quiz topic (cell division)."
+  },
+  {
+    "id": "yt-minecraft-hardcore", "category": "youtube",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(4) I Survived 100 Days in Hardcore Minecraft - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Gaming entertainment video, unrelated to chemistry."
+  },
+  {
+    "id": "yt-chemical-brothers", "category": "youtube", "hard": true,
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Chemical Brothers - Galvanize (Official Video) - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A music video; 'Chemical' and 'Galvanize' are band and song names, not galvanic-cell content."
+  },
+  {
+    "id": "yt-unity-jump", "category": "youtube", "hard": true,
+    "context": { "goal": "implement player movement for the platformer prototype", "courseName": "CS 3540 Game Design and Development", "assignmentTitle": "Prototype 2: Platformer Movement", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Better Jumping in Unity With Four Lines of Code - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Game-dev tutorial on platformer jumping: exactly the prototype's task, in a game design course."
+  },
+  {
+    "id": "yt-limiting-reactant", "category": "youtube",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Limiting Reactant Practice Problem (Advanced) - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Limiting-reactant practice is core stoichiometry."
+  },
+  {
+    "id": "yt-lofi-radio", "category": "youtube", "hard": true,
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "lofi hip hop radio 📚 beats to relax/study to - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A study-music stream in the foreground: not the math itself, but not clear leisure either."
+  },
+  {
+    "id": "yt-crashcourse-reconstruction", "category": "youtube",
+    "context": { "goal": "write the reconstruction reading response", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Reading Response: Reconstruction", "assignmentKind": "reading" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "Reconstruction and 1876: Crash Course US History #22 - YouTube — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Educational video on Reconstruction, the response's topic."
+  },
+  {
+    "id": "yt-hotel-challenge", "category": "youtube",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "$1 vs $1,000,000 Hotel Room! - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Entertainment challenge video; leisure under any study session."
+  },
+  {
+    "id": "yt-fourier-series", "category": "youtube", "hard": true,
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "But what is a Fourier series? From heat flow to drawing with circles | DE4 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Educational, but a math video during psych midterm prep: leisure learning, not this session's study."
+  },
+  {
+    "id": "yt-spanish-preterite", "category": "youtube",
+    "context": { "goal": "practice Spanish preterite vs imperfect" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "Preterite vs Imperfect in Spanish: The Ultimate Guide - YouTube - Personal - Microsoft​ Edge", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Lesson on exactly the stated goal."
+  },
+  {
+    "id": "dc-cs-help", "category": "discord",
+    "context": { "goal": "finish the hash table project", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Project 3: Hash Tables", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#project-3-help | CS 2420 Fall 2026 - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course server's help channel for this project."
+  },
+  {
+    "id": "dc-valorant-lfg", "category": "discord",
+    "context": { "goal": "review for the chem exam", "courseName": "CHEM 1210 General Chemistry" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#valorant-lfg | The Squad - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Looking for a game group on a friends' server."
+  },
+  {
+    "id": "dc-bare", "category": "discord",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "Discord", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "No server or channel shown; could be a study server or friends."
+  },
+  {
+    "id": "dc-dm", "category": "discord", "hard": true,
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "@jordan_k - Discord", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A direct message with an unknown person: could be a classmate on the homework or a social chat."
+  },
+  {
+    "id": "dc-psych-memes", "category": "discord", "hard": true,
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#memes | UofU Psychology Club - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A memes channel; the psychology server name is a keyword trap."
+  },
+  {
+    "id": "rd-learnprogramming", "category": "reddit",
+    "context": { "goal": "debug the segfault in my linked list", "courseName": "CS 2420 Data Structures" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Why does my linked list segfault when deleting the last node? : r/learnprogramming - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A thread about the exact bug being debugged."
+  },
+  {
+    "id": "rd-aww", "category": "reddit",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/aww on Reddit: My cat learned to open the fridge - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Cute-animal subreddit; leisure."
+  },
+  {
+    "id": "rd-calculus-ratio", "category": "reddit",
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/calculus on Reddit: How do I know when to use the ratio test vs the root test? - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Ratio and root tests are series convergence tests."
+  },
+  {
+    "id": "rd-home-feed", "category": "reddit",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Reddit - Dive into anything - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "The Reddit home feed: open-ended leisure browsing."
+  },
+  {
+    "id": "rd-askhistorians-okies", "category": "reddit", "hard": true,
+    "context": { "goal": "find sources for the Dust Bowl paper", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Research Paper: The Dust Bowl Migration", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/AskHistorians on Reddit: How did Californians react to the Okies arriving in the 1930s? - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "'Okies' were the Dust Bowl migrants; a historians' thread on the paper's topic."
+  },
+  {
+    "id": "lms-canvas-quiz", "category": "lms",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Quiz 4: Cell Division: BIOL 1610 Intro Biology - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment itself on Canvas."
+  },
+  {
+    "id": "lms-canvas-assignments", "category": "lms",
+    "context": { "goal": "catch up on homework" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Assignments: MATH 1220-002 Calculus II - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A course's assignment list during a homework session."
+  },
+  {
+    "id": "lms-canvas-other-course", "category": "lms", "hard": true,
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Module 3 Discussion: Rhetorical Situations: ENGL 2010 Intermediate Writing - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Coursework for another course: not leisure, but not this session's task."
+  },
+  {
+    "id": "lms-blackboard-reading", "category": "lms",
+    "context": { "goal": "write the reconstruction reading response", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Reading Response: Reconstruction", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Reading Response: Reconstruction – HIST-1700-01 – Blackboard Learn - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment page on Blackboard."
+  },
+  {
+    "id": "lms-moodle-course", "category": "lms",
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "Course: MATH 1220 Calculus II | Moodle — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "This course's Moodle page."
+  },
+  {
+    "id": "lms-canvas-announcements", "category": "lms",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Announcements: PSY 1010 General Psychology - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "This course's announcements (e.g. what the midterm covers)."
+  },
+  {
+    "id": "pdf-acrobat-handout", "category": "pdf",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "Acrobat.exe", "appName": "Adobe Acrobat", "windowTitle": "Lab3_Galvanic_Cells_Handout.pdf - Adobe Acrobat Reader (64-bit)", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The lab's own handout."
+  },
+  {
+    "id": "pdf-chrome-foner", "category": "pdf", "hard": true,
+    "context": { "goal": "write the reconstruction reading response", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Reading Response: Reconstruction", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Foner_GiveMeLiberty_Ch15.pdf - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Chapter 15 of Foner's survey textbook is the Reconstruction chapter (no shared keywords)."
+  },
+  {
+    "id": "pdf-edge-fantasy", "category": "pdf",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "2026_Fantasy_Draft_Cheat_Sheet.pdf - Personal - Microsoft​ Edge", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Fantasy sports cheat sheet."
+  },
+  {
+    "id": "pdf-sumatra-scan", "category": "pdf", "hard": true,
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "SumatraPDF.exe", "appName": "SumatraPDF", "windowTitle": "scan0042.pdf - SumatraPDF", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An unnamed scan; nothing says what it is."
+  },
+  {
+    "id": "pdf-syllabus", "category": "pdf",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "CS2420_Syllabus_Fall2026.pdf - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A course syllabus; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "pdf-stewart-ch7", "category": "pdf",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "Acrobat.exe", "appName": "Adobe Acrobat", "windowTitle": "Stewart_Calculus_8e_Ch7.pdf - Adobe Acrobat Reader (64-bit)", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The calculus textbook's chapter 7 (techniques of integration), matching WebAssign 7.1."
+  },
+  {
+    "id": "rs-wiki-citric-acid", "category": "research", "hard": true,
+    "context": { "goal": "review cellular respiration", "courseName": "BIOL 1610 Intro Biology" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Citric acid cycle - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The citric acid cycle is a stage of cellular respiration (no shared keywords)."
+  },
+  {
+    "id": "rs-so-open-addressing", "category": "research",
+    "context": { "goal": "finish the hash table project", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Project 3: Hash Tables", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "c++ - How to implement a hash table with open addressing? - Stack Overflow - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Stack Overflow question on the project's data structure."
+  },
+  {
+    "id": "rs-khan-ibp", "category": "research",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Integration by parts intro (video) | Khan Academy - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Khan Academy lesson on the homework topic."
+  },
+  {
+    "id": "rs-google-reduction-potential", "category": "research",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "standard reduction potential table copper zinc - Google Search - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Searching for data a copper-zinc galvanic cell report needs."
+  },
+  {
+    "id": "rs-google-tour-dates", "category": "research",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "taylor swift tour dates 2027 - Google Search - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Concert search; leisure."
+  },
+  {
+    "id": "rs-jstor-okie", "category": "research", "hard": true,
+    "context": { "goal": "find sources for the Dust Bowl paper", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Research Paper: The Dust Bowl Migration", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Okie Migration and California Agriculture on JSTOR - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A journal article on the Okie (Dust Bowl) migration."
+  },
+  {
+    "id": "rs-wiki-pokemon", "category": "research", "hard": true,
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "List of Pokémon - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Wikipedia, but a game-franchise list unrelated to cell division."
+  },
+  {
+    "id": "rs-pubmed-sleep", "category": "research",
+    "context": { "goal": "find peer-reviewed articles on sleep and memory consolidation", "courseName": "PSY 1010 General Psychology" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "sleep memory consolidation - Search Results - PubMed - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Literature search on the stated topic."
+  },
+  {
+    "id": "rs-wiki-breaking-bad", "category": "research", "hard": true,
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Breaking Bad - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A TV series article; the link to chemistry is only thematic."
+  },
+  {
+    "id": "rs-scholar-reinforcement", "category": "research",
+    "context": { "goal": "find sources on schedules of reinforcement", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Research Summary: Operant Conditioning", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "schedules of reinforcement operant conditioning - Google Scholar - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Scholar search on the assignment topic."
+  },
+  {
+    "id": "ide-vscode-hash", "category": "ide",
+    "context": { "goal": "finish the hash table project", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Project 3: Hash Tables", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "hash_table.cpp - cs2420-project3 - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Editing the project's source."
+  },
+  {
+    "id": "ide-vscode-discord-bot", "category": "ide", "hard": true,
+    "context": { "goal": "finish the hash table project", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Project 3: Hash Tables", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "bot.py - discord-music-bot - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A hobby Discord bot, not the hash table project; the IDE is the trap."
+  },
+  {
+    "id": "ide-pycharm-stat", "category": "ide",
+    "context": {},
+    "activity": { "processName": "pycharm64.exe", "appName": "PyCharm", "windowTitle": "stat2000-hw4 – analysis.py", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A statistics homework project; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "ide-vscode-my-app", "category": "ide", "hard": true,
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "index.ts - my-app - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An unnamed coding project during calculus homework: other coursework or a side project, can't tell."
+  },
+  {
+    "id": "ide-rstudio-hw4", "category": "ide",
+    "context": { "courseName": "STAT 2000 Intro Statistics", "assignmentTitle": "HW 4: Confidence Intervals", "assignmentKind": "assignment" },
+    "activity": { "processName": "rstudio.exe", "appName": "RStudio", "windowTitle": "stat2000-hw4 - main - RStudio", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The homework's R project."
+  },
+  {
+    "id": "ide-unity-platformer", "category": "ide", "hard": true,
+    "context": { "goal": "implement player movement for the platformer prototype", "courseName": "CS 3540 Game Design and Development", "assignmentTitle": "Prototype 2: Platformer Movement", "assignmentKind": "assignment" },
+    "activity": { "processName": "Unity.exe", "appName": "Unity Editor", "windowTitle": "Platformer - SampleScene - Windows, Mac, Linux - Unity 6.1 <DX11>", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The game engine is the course's tool and the project is the platformer prototype."
+  },
+  {
+    "id": "calc-math", "category": "calculator",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "ApplicationFrameHost.exe", "appName": "Application Frame Host", "windowTitle": "Calculator", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Calculator during math homework."
+  },
+  {
+    "id": "calc-chem", "category": "calculator",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "ApplicationFrameHost.exe", "appName": "Application Frame Host", "windowTitle": "Calculator", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Stoichiometry is arithmetic-heavy."
+  },
+  {
+    "id": "calc-hist", "category": "calculator", "hard": true,
+    "context": { "goal": "write the reconstruction reading response", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Reading Response: Reconstruction", "assignmentKind": "reading" },
+    "activity": { "processName": "ApplicationFrameHost.exe", "appName": "Application Frame Host", "windowTitle": "Calculator", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A neutral tool: a reading response needs no arithmetic, but a calculator isn't leisure."
+  },
+  {
+    "id": "doc-word-lab-report", "category": "docs",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": "Lab 3 Report - Galvanic Cells.docx - Word", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Writing the report itself."
+  },
+  {
+    "id": "doc-gdocs-dust-bowl", "category": "docs",
+    "context": { "goal": "find sources for the Dust Bowl paper", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Research Paper: The Dust Bowl Migration", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Dust Bowl Migration - Research Paper Draft - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The paper's draft."
+  },
+  {
+    "id": "doc-onenote-cell-cycle", "category": "docs",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "ONENOTE.EXE", "appName": "Microsoft OneNote", "windowTitle": "Chapter 12 - The Cell Cycle - OneNote", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Notes on the cell cycle, the quiz topic."
+  },
+  {
+    "id": "doc-notion-finals", "category": "docs",
+    "context": { "goal": "plan my study schedule for finals week" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": "Finals Week Plan - Notion", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Exactly the stated planning goal."
+  },
+  {
+    "id": "doc-obsidian-memory", "category": "docs",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "Obsidian.exe", "appName": "Obsidian", "windowTitle": "Memory Models - psych-notes - Obsidian v1.9.10", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Psychology course notes during midterm prep."
+  },
+  {
+    "id": "doc-word-document1", "category": "docs", "hard": true,
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": "Document1 - Word", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A blank new document; nothing says what it's for."
+  },
+  {
+    "id": "doc-gdocs-rhetorical", "category": "docs",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "ENGL 2010 Essay 2 - Rhetorical Analysis - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A course essay; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "mus-spotify-espresso", "category": "music",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Sabrina Carpenter - Espresso", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Pop music app in the foreground; leisure."
+  },
+  {
+    "id": "mus-spotify-mozart", "category": "music", "hard": true,
+    "context": { "goal": "listening journal on sonata form", "courseName": "MUSC 1110 Music Theory I", "assignmentTitle": "Listening Journal 3: Sonata Form", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Wolfgang Amadeus Mozart - Piano Sonata No. 16 in C Major, K. 545: I. Allegro", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A sonata-form movement: the listening journal's subject."
+  },
+  {
+    "id": "mus-spotify-home", "category": "music",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Spotify Premium", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Browsing a music app; unrelated to biology."
+  },
+  {
+    "id": "mus-spotify-podcast", "category": "music", "hard": true,
+    "context": { "goal": "study memory and forgetting for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Why We Forget - Hidden Brain", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A psychology podcast episode on forgetting, the midterm topic."
+  },
+  {
+    "id": "msg-whatsapp", "category": "messaging",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "WhatsApp.exe", "appName": "WhatsApp", "windowTitle": "WhatsApp", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "WhatsApp never shows the chat; could be a study group or friends."
+  },
+  {
+    "id": "msg-slack-ta", "category": "messaging",
+    "context": { "goal": "finish the hash table project", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Project 3: Hash Tables", "assignmentKind": "assignment" },
+    "activity": { "processName": "slack.exe", "appName": "Slack", "windowTitle": "project-3 (Channel) - CS 2420 TAs - Slack", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course workspace's channel for this project."
+  },
+  {
+    "id": "msg-teams-office-hours", "category": "messaging",
+    "context": { "goal": "attend virtual office hours", "courseName": "ECON 2010 Principles of Microeconomics" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": "Office Hours - ECON 2010 | Microsoft Teams", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course's office hours, the stated goal."
+  },
+  {
+    "id": "msg-slack-climbing", "category": "messaging",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "slack.exe", "appName": "Slack", "windowTitle": "memes (Channel) - Climbing Gym Crew - Slack", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A social workspace's memes channel."
+  },
+  {
+    "id": "msg-instagram-dm", "category": "messaging",
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(2) Instagram • Chats - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Instagram direct messages: social."
+  },
+  {
+    "id": "msg-teams-soccer", "category": "messaging", "hard": true,
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": "Chat | Intramural Soccer Team | Microsoft Teams", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Teams is a school tool, but this is a social sports chat."
+  },
+  {
+    "id": "game-valorant", "category": "gaming",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "VALORANT-Win64-Shipping.exe", "appName": "VALORANT", "windowTitle": "VALORANT", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Playing a game."
+  },
+  {
+    "id": "game-steam-store", "category": "gaming",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "steamwebhelper.exe", "appName": "Steam", "windowTitle": "Steam", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Game launcher and store."
+  },
+  {
+    "id": "game-twitch", "category": "gaming",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "xQc - Twitch - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Watching a streamer."
+  },
+  {
+    "id": "game-celeste-playtest", "category": "gaming", "hard": true,
+    "context": { "goal": "play and analyze Celeste chapter 1 for the playtest report", "courseName": "CS 3540 Game Design and Development", "assignmentTitle": "Playtest Report: Celeste Level Design", "assignmentKind": "assignment" },
+    "activity": { "processName": "Celeste.exe", "appName": "Celeste", "windowTitle": "Celeste", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment is to play and analyze this game."
+  },
+  {
+    "id": "game-minecraft", "category": "gaming",
+    "context": {},
+    "activity": { "processName": "javaw.exe", "appName": "Java(TM) Platform SE binary", "windowTitle": "Minecraft* 1.21.4 - Singleplayer", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Playing a game; leisure under any study session."
+  },
+  {
+    "id": "soc-instagram", "category": "social",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Instagram - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Social media feed."
+  },
+  {
+    "id": "soc-tiktok", "category": "social",
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "TikTok - Make Your Day - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Short-video feed."
+  },
+  {
+    "id": "soc-x-home", "category": "social",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(12) Home / X - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Social media home timeline."
+  },
+  {
+    "id": "soc-facebook-study-group", "category": "social", "hard": true,
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(3) CHEM 1210 Fall 2026 Study Group | Facebook - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The class's own study group; Facebook is only the venue."
+  },
+  {
+    "id": "soc-x-loc-lange", "category": "social", "hard": true,
+    "context": { "goal": "find sources for the Dust Bowl paper", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Research Paper: The Dust Bowl Migration", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Library of Congress on X: \"Dorothea Lange's photographs of migrant families on California highways, 1936\" / X - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An archive's post of primary-source photos of the migration the paper covers."
+  },
+  {
+    "id": "sw-task-switching", "category": "switching",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Task Switching", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The Alt-Tab switcher: a transition, not an activity."
+  },
+  {
+    "id": "sw-explorer-course-folder", "category": "switching",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "BIOL 1610 - File Explorer", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Opening the course's own folder."
+  },
+  {
+    "id": "sw-explorer-downloads", "category": "switching",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Downloads - File Explorer", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A generic folder; could be fetching a worksheet or anything."
+  },
+  {
+    "id": "sw-settings", "category": "switching",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "SystemSettings.exe", "appName": "Settings", "windowTitle": "Settings", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "System settings: neither study nor leisure."
+  },
+  {
+    "id": "sw-search", "category": "switching",
+    "context": {},
+    "activity": { "processName": "SearchHost.exe", "appName": "Search", "windowTitle": "Search", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The Windows search flyout: a transition."
+  },
+  {
+    "id": "amb-dashboard", "category": "ambiguous",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Dashboard - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Could be the Canvas dashboard or any site's dashboard."
+  },
+  {
+    "id": "amb-zoom-meeting", "category": "ambiguous",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "Zoom.exe", "appName": "Zoom Workplace", "windowTitle": "Zoom Meeting", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A call with unknown people: review session or social."
+  },
+  {
+    "id": "amb-excel-book1", "category": "ambiguous",
+    "context": { "goal": "elasticity problem set", "courseName": "ECON 2010 Principles of Microeconomics" },
+    "activity": { "processName": "EXCEL.EXE", "appName": "Microsoft Excel", "windowTitle": "Book1 - Excel", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A new blank workbook; plausibly for the problem set, nothing confirms it."
+  },
+  {
+    "id": "amb-chegg", "category": "ambiguous", "hard": true,
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Solved: A 25.0 g sample of zinc reacts with excess HCl. How many | Chegg.com - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A stoichiometry problem matching the problem set (academic integrity is out of scope)."
+  },
+  {
+    "id": "amb-chatgpt", "category": "ambiguous",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "ChatGPT - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A chatbot with no conversation title; could be about anything."
+  },
+  {
+    "id": "amb-weather", "category": "ambiguous",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "10-Day Weather Forecast for Salt Lake City, UT - The Weather Channel | Weather.com - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Casual browsing unrelated to the lab report."
+  },
+  {
+    "id": "gb-newtab-chrome", "category": "generic-browser",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "New Tab - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An empty tab: a transition."
+  },
+  {
+    "id": "gb-google-home", "category": "generic-browser",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Google - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The search page before a query."
+  },
+  {
+    "id": "gb-gmail-inbox", "category": "generic-browser",
+    "context": { "goal": "integration by parts homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.1: Integration by Parts", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Inbox (23) - a.rivera@example.edu - Gmail - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An inbox: course mail or personal mail, can't tell."
+  },
+  {
+    "id": "gb-outlook-professor", "category": "generic-browser",
+    "context": { "goal": "find sources for the Dust Bowl paper", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Research Paper: The Dust Bowl Migration", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Re: Research paper topic approval - Mail - Outlook - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An email thread about this research paper."
+  },
+  {
+    "id": "gb-firefox-blank", "category": "generic-browser",
+    "context": {},
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A browser with no page title."
+  },
+  {
+    "id": "priv-excluded-discord", "category": "private",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": null, "redacted": "excluded", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The student excluded this app; excluded contexts are not judged."
+  },
+  {
+    "id": "priv-incognito", "category": "private",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": null, "redacted": "private", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A private window; the title is withheld."
+  },
+  {
+    "id": "priv-excluded-unknown", "category": "private",
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": null, "appName": null, "windowTitle": null, "redacted": "excluded", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Excluded and fully withheld."
+  },
+  {
+    "id": "priv-inprivate-edge", "category": "private",
+    "context": {},
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": null, "redacted": "private", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An InPrivate window; the title is withheld."
+  },
+  {
+    "id": "miss-noproc-wiki", "category": "missing",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": null, "appName": null, "windowTitle": "Mitosis - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "No process, but the title alone settles it."
+  },
+  {
+    "id": "miss-chrome-no-title", "category": "missing",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": null, "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A browser with an unreadable title."
+  },
+  {
+    "id": "miss-all-null", "category": "missing",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": null, "appName": null, "windowTitle": null, "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A window with nothing readable."
+  },
+  {
+    "id": "miss-spotify-empty-title", "category": "missing",
+    "context": { "goal": "write the galvanic cell lab report", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 3 Report: Galvanic Cells", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "No title, but a music app in the foreground has no link to the lab report."
+  },
+  {
+    "id": "idle-lock-screen", "category": "idle",
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": null, "appName": null, "windowTitle": null, "redacted": null, "hasWindow": false },
+    "expected": "UNCERTAIN", "rationale": "No foreground window (lock screen); idleness is scored elsewhere."
+  },
+  {
+    "id": "idle-left-lecture", "category": "idle",
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "BIOL 1610 Lecture 14 - Meiosis - Panopto - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The context left open is this course's lecture; idleness is scored separately."
+  },
+  {
+    "id": "idle-left-netflix", "category": "idle",
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Stranger Things | Netflix - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "The context left open is a TV show; idleness is scored separately."
+  },
+  {
+    "id": "mis-word-fantasy-football", "category": "misuse", "hard": true,
+    "context": { "goal": "finish the stoichiometry problem set", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 4: Stoichiometry", "assignmentKind": "assignment" },
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": "Fantasy football draft notes.docx - Word", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A study app used for fantasy sports."
+  },
+  {
+    "id": "mis-gdocs-dnd", "category": "misuse", "hard": true,
+    "context": { "goal": "review mitosis and meiosis for quiz 4", "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Quiz 4: Cell Division", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "D&D Campaign - Session 12 Notes - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A docs app used for a tabletop game campaign."
+  },
+  {
+    "id": "mis-excel-spring-break", "category": "misuse", "hard": true,
+    "context": { "goal": "practice series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "EXCEL.EXE", "appName": "Microsoft Excel", "windowTitle": "Spring Break Budget.xlsx - Excel", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A spreadsheet for vacation planning."
+  },
+  {
+    "id": "mis-notion-psych-club-party", "category": "misuse", "hard": true,
+    "context": { "goal": "study chapters 5-7 for the psych midterm", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Midterm 2", "assignmentKind": "exam" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": "Psych Club Halloween Party Planning - Notion", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Club party planning; 'Psych' is a keyword trap."
+  }
+]

@@ -1,0 +1,428 @@
+[
+  {
+    "id": "yt-crashcourse-photosynthesis", "category": "youtube",
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Photosynthesis: Crash Course Biology #8 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Educational video on an exam topic."
+  },
+  {
+    "id": "yt-nba-highlights", "category": "youtube",
+    "context": { "goal": "trig substitution homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.3: Trigonometric Substitution", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Lakers vs Celtics Full Game Highlights | Jan 23, 2026 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Sports highlights."
+  },
+  {
+    "id": "yt-cod-ww2-trailer", "category": "youtube", "hard": true,
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Call of Duty: WWII - Official Reveal Trailer - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A game trailer: shares 'WWII' with the essay but is marketing, not a source."
+  },
+  {
+    "id": "yt-milgram", "category": "youtube",
+    "context": { "goal": "read the chapter on obedience and conformity", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Chapter 14 Reading: Social Psychology", "assignmentKind": "reading" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "The Milgram Obedience Experiment (1962 Documentary Footage) - YouTube — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The classic obedience study the chapter covers."
+  },
+  {
+    "id": "yt-bach-chorale-score", "category": "youtube", "hard": true,
+    "context": { "goal": "analyze cadences in Bach chorales", "courseName": "MUSC 1110 Music Theory I", "assignmentTitle": "Analysis 2: Chorale Cadences", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Bach - Chorale BWV 269 \"Aus meines Herzens Grunde\" (with score) - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A score video of a Bach chorale: the analysis material."
+  },
+  {
+    "id": "yt-premed-vlog", "category": "youtube", "hard": true,
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Day in My Life as a Pre-Med Student at UCLA - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A lifestyle vlog; 'student' and 'pre-med' sound academic but it's entertainment."
+  },
+  {
+    "id": "dc-genchem-pset", "category": "discord",
+    "context": { "goal": "finish problem set 6", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 6: Thermochemistry", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#pset-6 | Gen Chem Study Group - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The class study group's channel for this problem set."
+  },
+  {
+    "id": "dc-hypixel-guild", "category": "discord",
+    "context": { "goal": "outline the research paper", "courseName": "HIST 1700 American Civilization" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#general | Hypixel Skyblock Guild - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A game guild's server."
+  },
+  {
+    "id": "dc-godot-help", "category": "discord", "hard": true,
+    "context": { "goal": "fix the collision bug in my Godot prototype", "courseName": "CS 3540 Game Design and Development", "assignmentTitle": "Prototype 3: Top-Down Shooter", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#help-gdscript | Godot Engine - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The engine's help channel while fixing a bug in a Godot course project."
+  },
+  {
+    "id": "rd-chemhelp-hess", "category": "reddit",
+    "context": { "goal": "finish problem set 6", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 6: Thermochemistry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Hess's law problem - why do I flip the sign on the second equation? : r/chemhelp - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Hess's law is thermochemistry; a homework-help thread."
+  },
+  {
+    "id": "rd-nba-wemby", "category": "reddit",
+    "context": { "goal": "read the chapter on obedience and conformity", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Chapter 14 Reading: Social Psychology", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/nba on Reddit: [Highlight] Wembanyama blocks three shots in one possession - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Sports subreddit."
+  },
+  {
+    "id": "rd-chemistrymemes", "category": "reddit", "hard": true,
+    "context": { "goal": "study for the chemistry final", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Final Exam", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/chemistrymemes on Reddit: when the lab TA says 'just eyeball it' - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Memes; the 'chemistry' in the subreddit name is a keyword trap."
+  },
+  {
+    "id": "lms-canvas-lab5", "category": "lms",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "Lab 5: Binary Search Trees: CS 2420 Data Structures - Personal - Microsoft​ Edge", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment itself on Canvas."
+  },
+  {
+    "id": "lms-blackboard-lecture", "category": "lms",
+    "context": { "goal": "review the elasticity lecture slides", "courseName": "ECON 2010 Principles of Microeconomics", "assignmentTitle": "Quiz 5: Elasticity", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Lecture 9 Recording - Price Elasticity – ECON-2010-02 – Blackboard Learn - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "This course's lecture on the quiz topic."
+  },
+  {
+    "id": "lms-moodle-other-course", "category": "lms", "hard": true,
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Assignment: Essay 2 Peer Review | ENGL 2010 | Moodle - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Coursework for another course: not leisure, but not this session's task."
+  },
+  {
+    "id": "lms-canvas-modules-nocontext", "category": "lms",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Modules: PHYS 2210 Physics for Scientists I - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A course's modules page; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "pdf-acrobat-loftus", "category": "pdf",
+    "context": { "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Article Summary: Loftus & Palmer (1974)", "assignmentKind": "reading" },
+    "activity": { "processName": "Acrobat.exe", "appName": "Adobe Acrobat", "windowTitle": "Loftus_Palmer_1974_Reconstruction_of_Automobile_Destruction.pdf - Adobe Acrobat Reader (64-bit)", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The article being summarized."
+  },
+  {
+    "id": "pdf-firefox-elden-ring", "category": "pdf",
+    "context": { "goal": "study for the data structures midterm", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Midterm 1", "assignmentKind": "exam" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "EldenRing_Complete_Strategy_Guide.pdf — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A video game strategy guide."
+  },
+  {
+    "id": "pdf-edge-generic", "category": "pdf", "hard": true,
+    "context": { "goal": "finish problem set 6", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 6: Thermochemistry", "assignmentKind": "assignment" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "Document (3).pdf - Personal - Microsoft​ Edge", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A generically named download; nothing says what it is."
+  },
+  {
+    "id": "pdf-foxit-slides", "category": "pdf",
+    "context": { "goal": "review the elasticity lecture slides", "courseName": "ECON 2010 Principles of Microeconomics", "assignmentTitle": "Quiz 5: Elasticity", "assignmentKind": "quiz" },
+    "activity": { "processName": "FoxitPDFReader.exe", "appName": "Foxit PDF Reader", "windowTitle": "Lecture09_Elasticity_Slides.pdf - Foxit PDF Reader", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The lecture slides named in the goal."
+  },
+  {
+    "id": "rs-wiki-rosie", "category": "research", "hard": true,
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Rosie the Riveter - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Rosie the Riveter is the WWII home front icon (no shared keywords)."
+  },
+  {
+    "id": "rs-so-bst-delete", "category": "research",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "java - Deleting a node with two children from a binary search tree - Stack Overflow — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Stack Overflow question on the lab's data structure."
+  },
+  {
+    "id": "rs-khan-enthalpy", "category": "research",
+    "context": { "goal": "finish problem set 6", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Problem Set 6: Thermochemistry", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Enthalpy of reaction (article) | Khan Academy - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Enthalpy of reaction is thermochemistry."
+  },
+  {
+    "id": "rs-google-keyboard", "category": "research",
+    "context": { "goal": "trig substitution homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.3: Trigonometric Substitution", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "best mechanical keyboard under 100 - Google Search - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Shopping search."
+  },
+  {
+    "id": "rs-wiki-oppenheimer-film", "category": "research", "hard": true,
+    "context": { "goal": "projectile motion homework", "courseName": "PHYS 2210 Physics for Scientists I", "assignmentTitle": "Mastering Physics HW 3: Projectile Motion", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Oppenheimer (film) - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A movie article; the physics link is only thematic."
+  },
+  {
+    "id": "rs-nature-photosynthesis", "category": "research",
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Regulation of photosynthetic light harvesting | Nature Plants - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A journal article on photosynthesis."
+  },
+  {
+    "id": "ide-intellij-bst", "category": "ide",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "idea64.exe", "appName": "IntelliJ IDEA", "windowTitle": "cs2420-lab5 – BinarySearchTree.java", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Editing the lab's source."
+  },
+  {
+    "id": "ide-vscode-modpack", "category": "ide", "hard": true,
+    "context": { "goal": "study for the data structures midterm", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Midterm 1", "assignmentKind": "exam" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "config.json - minecraft-modpack - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Configuring a game modpack; the IDE is the trap."
+  },
+  {
+    "id": "ide-vscode-notebook", "category": "ide",
+    "context": { "goal": "finish the regression lab", "courseName": "STAT 2000 Intro Statistics", "assignmentTitle": "Lab 6: Simple Linear Regression", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "regression_lab.ipynb - stat-labs - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The lab's notebook."
+  },
+  {
+    "id": "ide-vscode-other-course", "category": "ide", "hard": true,
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "linked_list.cpp - cs2420-project2 - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Coursework for another course: not leisure, but not this session's task."
+  },
+  {
+    "id": "calc-desmos-polar", "category": "calculator",
+    "context": { "goal": "graph polar curves for homework 10.3", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Desmos | Graphing Calculator - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A graphing calculator for graphing curves."
+  },
+  {
+    "id": "calc-ti-smartview", "category": "calculator",
+    "context": { "goal": "work through the price elasticity problems", "courseName": "ECON 2010 Principles of Microeconomics" },
+    "activity": { "processName": "TI-SmartView CE.exe", "appName": "TI-SmartView CE", "windowTitle": "TI-SmartView CE for the TI-84 Plus Family", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Calculator emulator during numeric problems."
+  },
+  {
+    "id": "doc-word-essay3", "category": "docs",
+    "context": { "courseName": "ENGL 2010 Intermediate Writing", "assignmentTitle": "Essay 3: Argument Synthesis", "assignmentKind": "assignment" },
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": "Essay3_ArgumentSynthesis_draft2.docx - Word", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The essay's draft."
+  },
+  {
+    "id": "doc-gdocs-psych-notes", "category": "docs",
+    "context": { "goal": "read the chapter on obedience and conformity", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Chapter 14 Reading: Social Psychology", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "PSY 1010 Ch 14 Notes - Social Psychology - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Notes on the assigned chapter."
+  },
+  {
+    "id": "doc-onenote-series", "category": "docs",
+    "context": { "goal": "summarize the series convergence tests", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "ONENOTE.EXE", "appName": "Microsoft OneNote", "windowTitle": "Series Tests Summary - Calc II - OneNote", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Exactly the stated summary."
+  },
+  {
+    "id": "doc-obsidian-daily", "category": "docs", "hard": true,
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "Obsidian.exe", "appName": "Obsidian", "windowTitle": "2026-10-02 - vault - Obsidian v1.9.10", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A daily note; its content is unknown."
+  },
+  {
+    "id": "doc-word-anatomy-nocontext", "category": "docs",
+    "context": {},
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": "Anatomy Lab 4 - Muscles of the Upper Limb.docx - Word", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A lab write-up; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "mus-spotify-kendrick", "category": "music",
+    "context": { "goal": "trig substitution homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.3: Trigonometric Substitution", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Kendrick Lamar - Not Like Us", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Pop music app in the foreground; leisure."
+  },
+  {
+    "id": "mus-spotify-bach", "category": "music", "hard": true,
+    "context": { "goal": "analyze cadences in Bach chorales", "courseName": "MUSC 1110 Music Theory I", "assignmentTitle": "Analysis 2: Chorale Cadences", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Johann Sebastian Bach - Wer nur den lieben Gott läßt walten, BWV 93: VII. Choral", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A Bach chorale movement: listening for the cadence analysis."
+  },
+  {
+    "id": "mus-apple-music", "category": "music",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "AppleMusic.exe", "appName": "Apple Music", "windowTitle": "Apple Music", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Browsing a music app; unrelated to the lab."
+  },
+  {
+    "id": "msg-slack-lab-section", "category": "messaging",
+    "context": { "goal": "write up the lab with my partner", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Lab 4 Report: Calorimetry", "assignmentKind": "assignment" },
+    "activity": { "processName": "slack.exe", "appName": "Slack", "windowTitle": "lab-section-04 (Channel) - CHEM 1210 Fall 2026 - Slack", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course workspace's lab-section channel."
+  },
+  {
+    "id": "msg-messenger-app", "category": "messaging",
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "Messenger.exe", "appName": "Messenger", "windowTitle": "Messenger", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "No conversation shown; could be a classmate or friends."
+  },
+  {
+    "id": "msg-teams-fantasy", "category": "messaging",
+    "context": { "goal": "study for the data structures midterm", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Midterm 1", "assignmentKind": "exam" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": "Chat | Fantasy League Banter | Microsoft Teams", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A social fantasy-sports chat."
+  },
+  {
+    "id": "msg-snapchat-web", "category": "messaging",
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Snapchat - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Social messaging."
+  },
+  {
+    "id": "game-league-client", "category": "gaming",
+    "context": { "goal": "read the chapter on obedience and conformity", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Chapter 14 Reading: Social Psychology", "assignmentKind": "reading" },
+    "activity": { "processName": "LeagueClientUx.exe", "appName": "League of Legends", "windowTitle": "League of Legends", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Game client."
+  },
+  {
+    "id": "game-epic-launcher", "category": "gaming",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "EpicGamesLauncher.exe", "appName": "Epic Games Launcher", "windowTitle": "Epic Games Launcher", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Game launcher."
+  },
+  {
+    "id": "game-hoi4", "category": "gaming", "hard": true,
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "hoi4.exe", "appName": "Hearts of Iron IV", "windowTitle": "Hearts of Iron IV", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A WWII strategy game: the era matches, but playing it isn't drafting the essay."
+  },
+  {
+    "id": "game-roblox-studio", "category": "gaming", "hard": true,
+    "context": { "goal": "build level 1 of the obby", "courseName": "CS 3540 Game Design and Development", "assignmentTitle": "Level Design Project: Obstacle Course", "assignmentKind": "assignment" },
+    "activity": { "processName": "RobloxStudioBeta.exe", "appName": "Roblox Studio", "windowTitle": "Obby_Level1 - Roblox Studio", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Building the assigned level in the course's game editor."
+  },
+  {
+    "id": "soc-instagram-reels", "category": "social",
+    "context": { "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Article Summary: Loftus & Palmer (1974)", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Reels • Instagram - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Short-video feed."
+  },
+  {
+    "id": "soc-tiktok-photosynthesis", "category": "social", "hard": true,
+    "context": { "courseName": "BIOL 1610 Intro Biology", "assignmentTitle": "Exam 2: Photosynthesis and Respiration", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Photosynthesis in 60 seconds 🌱 #biology #studytok | TikTok - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An on-topic clip, but inside TikTok's feed: genuinely mixed."
+  },
+  {
+    "id": "soc-fb-marketplace", "category": "social",
+    "context": { "goal": "graph polar curves for homework 10.3", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "(2) Marketplace | Facebook — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Shopping on a social site."
+  },
+  {
+    "id": "soc-linkedin-feed", "category": "social",
+    "context": { "goal": "review the elasticity lecture slides", "courseName": "ECON 2010 Principles of Microeconomics", "assignmentTitle": "Quiz 5: Elasticity", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(4) Feed | LinkedIn - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Scrolling a social feed."
+  },
+  {
+    "id": "sw-task-view", "category": "switching",
+    "context": { "goal": "study for the data structures midterm", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Midterm 1", "assignmentKind": "exam" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Task View", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The Win+Tab switcher: a transition."
+  },
+  {
+    "id": "sw-explorer-cancun", "category": "switching", "hard": true,
+    "context": { "goal": "outline the research paper", "courseName": "HIST 1700 American Civilization" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Spring Break Cancun 2026 - File Explorer", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Browsing vacation photos."
+  },
+  {
+    "id": "sw-start-menu", "category": "switching",
+    "context": { "goal": "work through the price elasticity problems", "courseName": "ECON 2010 Principles of Microeconomics" },
+    "activity": { "processName": "StartMenuExperienceHost.exe", "appName": "Windows Start Experience Host", "windowTitle": "Start", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The Start menu: a transition."
+  },
+  {
+    "id": "amb-gemini", "category": "ambiguous",
+    "context": { "goal": "trig substitution homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.3: Trigonometric Substitution", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Gemini - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A chatbot with no conversation title; could be about anything."
+  },
+  {
+    "id": "amb-google-meet", "category": "ambiguous",
+    "context": { "goal": "study for the chemistry final", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Final Exam", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Meet - ghq-xbtr-pqe - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A call with unknown people: review session or social."
+  },
+  {
+    "id": "amb-netflix-roma", "category": "ambiguous", "hard": true,
+    "context": { "goal": "rewatch Roma for the analysis paper", "courseName": "FILM 2100 Film Analysis", "assignmentTitle": "Analysis Paper: Roma (2018)", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Roma | Netflix - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Watching the assigned film for a film course; Netflix is only the venue."
+  },
+  {
+    "id": "amb-weather-geog", "category": "ambiguous", "hard": true,
+    "context": { "goal": "weather map lab", "courseName": "GEOG 1000 Physical Geography", "assignmentTitle": "Lab 4: Reading Weather Maps", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Hourly Weather Forecast for Denver, CO - The Weather Channel | Weather.com - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Forecast data for a weather-map lab."
+  },
+  {
+    "id": "gb-newtab-edge", "category": "generic-browser",
+    "context": { "goal": "read the chapter on obedience and conformity", "courseName": "PSY 1010 General Psychology", "assignmentTitle": "Chapter 14 Reading: Social Psychology", "assignmentKind": "reading" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "New tab - Personal - Microsoft​ Edge", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An empty tab: a transition."
+  },
+  {
+    "id": "gb-outlook-inbox", "category": "generic-browser",
+    "context": { "goal": "study for the chemistry final", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Final Exam", "assignmentKind": "exam" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": "Mail - Jordan Lee - Outlook — Mozilla Firefox", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An inbox: course mail or personal mail, can't tell."
+  },
+  {
+    "id": "gb-gmail-lab-partner", "category": "generic-browser",
+    "context": { "goal": "finish the BST lab", "courseName": "CS 2420 Data Structures", "assignmentTitle": "Lab 5: Binary Search Trees", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Re: Lab 5 partner - BST insert bug - a.rivera@example.edu - Gmail - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An email with the lab partner about this lab."
+  },
+  {
+    "id": "priv-excluded-whatsapp", "category": "private",
+    "context": { "goal": "trig substitution homework", "courseName": "MATH 1220 Calculus II", "assignmentTitle": "WebAssign 7.3: Trigonometric Substitution", "assignmentKind": "assignment" },
+    "activity": { "processName": "WhatsApp.exe", "appName": "WhatsApp", "windowTitle": null, "redacted": "excluded", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The student excluded this app; excluded contexts are not judged."
+  },
+  {
+    "id": "priv-firefox-private", "category": "private",
+    "context": { "goal": "outline the research paper", "courseName": "HIST 1700 American Civilization" },
+    "activity": { "processName": "firefox.exe", "appName": "Firefox", "windowTitle": null, "redacted": "private", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A private window; the title is withheld."
+  },
+  {
+    "id": "miss-noproc-minecraft-launcher", "category": "missing",
+    "context": { "goal": "graph polar curves for homework 10.3", "courseName": "MATH 1220 Calculus II" },
+    "activity": { "processName": null, "appName": null, "windowTitle": "Minecraft Launcher", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "No process, but the title alone shows a game launcher."
+  },
+  {
+    "id": "miss-word-no-title", "category": "missing",
+    "context": { "courseName": "ENGL 2010 Intermediate Writing", "assignmentTitle": "Essay 3: Argument Synthesis", "assignmentKind": "assignment" },
+    "activity": { "processName": "WINWORD.EXE", "appName": "Microsoft Word", "windowTitle": null, "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Word is plausible for the essay, but the document is unknown."
+  },
+  {
+    "id": "idle-no-window", "category": "idle",
+    "context": { "goal": "finish the sampling distributions homework", "courseName": "STAT 2000 Intro Statistics", "assignmentTitle": "HW 5: Sampling Distributions", "assignmentKind": "assignment" },
+    "activity": { "processName": null, "appName": null, "windowTitle": null, "redacted": null, "hasWindow": false },
+    "expected": "UNCERTAIN", "rationale": "No foreground window; idleness is scored elsewhere."
+  },
+  {
+    "id": "idle-left-essay", "category": "idle",
+    "context": { "goal": "draft the WWII home front essay", "courseName": "HIST 1700 American Civilization", "assignmentTitle": "Essay: The Home Front in WWII", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "WWII Home Front Essay - Draft 1 - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The context left open is the essay draft; idleness is scored separately."
+  },
+  {
+    "id": "mis-notion-japan", "category": "misuse", "hard": true,
+    "context": { "goal": "study for the chemistry final", "courseName": "CHEM 1210 General Chemistry", "assignmentTitle": "Final Exam", "assignmentKind": "exam" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": "Japan Trip Itinerary - Notion", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A notes app used for trip planning."
+  },
+  {
+    "id": "mis-gdocs-fanfic", "category": "misuse", "hard": true,
+    "context": { "goal": "outline the research paper", "courseName": "HIST 1700 American Civilization" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Hogwarts AU fic - chapter 7 - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A docs app used for fan fiction."
+  },
+  {
+    "id": "mis-excel-fantasy-basketball", "category": "misuse", "hard": true,
+    "context": { "goal": "finish the sampling distributions homework", "courseName": "STAT 2000 Intro Statistics", "assignmentTitle": "HW 5: Sampling Distributions", "assignmentKind": "assignment" },
+    "activity": { "processName": "EXCEL.EXE", "appName": "Microsoft Excel", "windowTitle": "Fantasy Basketball Stats 2026-27.xlsx - Excel", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A fantasy-league spreadsheet, not the homework; 'Stats' is a keyword trap."
+  }
+]

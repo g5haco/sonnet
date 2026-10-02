@@ -1,0 +1,674 @@
+[
+  {
+    "id": "v2-yt-hr-diagram", "category": "youtube",
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Hertzsprung-Russell Diagram Explained - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The H-R diagram is the core tool for stellar evolution."
+  },
+  {
+    "id": "v2-yt-sn2-mechanism", "category": "youtube",
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "SN2 Reaction Mechanism - Backside Attack and Inversion - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Explains the exact mechanism in the problem set."
+  },
+  {
+    "id": "v2-yt-stellar-blade", "category": "youtube", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Stellar Blade - Full Boss Fight Gameplay (No Commentary) - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Video game footage; 'Stellar' is the game's name, not astronomy."
+  },
+  {
+    "id": "v2-yt-bolt-slowmo", "category": "youtube", "hard": true,
+    "context": { "goal": "analyze sprint start mechanics for the lab", "courseName": "KINES 3500 Sports Biomechanics", "assignmentTitle": "Lab 3: Sprint Start Kinematics", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Usain Bolt 100m World Record Berlin 2009 Super Slow Motion - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Slow-motion footage of an elite sprint start is the lab's material; sports video used for study."
+  },
+  {
+    "id": "v2-yt-nba-dunks", "category": "youtube", "hard": true,
+    "context": { "goal": "analyze sprint start mechanics for the lab", "courseName": "KINES 3500 Sports Biomechanics", "assignmentTitle": "Lab 3: Sprint Start Kinematics", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Top 50 Dunks of the 2025-26 NBA Season - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A sports highlight reel, not sprint starts; the biomechanics course makes it look plausible."
+  },
+  {
+    "id": "v2-yt-3b1b-eigen", "category": "youtube",
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "Eigenvectors and eigenvalues | Chapter 14, Essence of linear algebra - YouTube - Personal - Microsoft\u200b Edge", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A lesson on the homework topic."
+  },
+  {
+    "id": "v2-yt-tokyo-vlog", "category": "youtube", "hard": true,
+    "context": { "goal": "practice kanji for chapter 7", "courseName": "JPN 2010 Intermediate Japanese", "assignmentTitle": "Chapter 7 Kanji Quiz", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Living Alone in Tokyo | Cozy Week in My Life 🇯🇵 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A lifestyle vlog with an English title; Japan is the setting, not kanji practice."
+  },
+  {
+    "id": "v2-yt-lecture-12", "category": "youtube", "hard": true,
+    "context": { "courseName": "ENVS 2100 Climate Science" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Lecture 12 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A generically named lecture; could be this course's or any other."
+  },
+  {
+    "id": "v2-yt-true-crime", "category": "youtube",
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "True Crime Stories to Fall Asleep To - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Entertainment storytelling."
+  },
+  {
+    "id": "v2-yt-durkheim-crashcourse", "category": "youtube",
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Durkheim on Suicide & Society: Crash Course Sociology #5 - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Exactly the reading's subject."
+  },
+  {
+    "id": "v2-yt-cowboy-bebop", "category": "youtube", "hard": true,
+    "context": { "goal": "listen for the listening quiz on bebop", "courseName": "MUSC 2100 Jazz History", "assignmentTitle": "Listening Quiz 2: Bebop", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Cowboy Bebop (Netflix) - Official Trailer - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A TV show trailer; 'Bebop' is in the title but it isn't bebop jazz."
+  },
+  {
+    "id": "v2-dc-cs3500-ps3", "category": "discord",
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#ps3-formula-evaluator | CS 3500 Fall 2026 - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course server's channel for this assignment."
+  },
+  {
+    "id": "v2-dc-orgo-offtopic", "category": "discord", "hard": true,
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#off-topic | Orgo Survivors 2026 - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "The off-topic channel of a class server: social chat despite the course name."
+  },
+  {
+    "id": "v2-dc-study-hall", "category": "discord", "hard": true,
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#study-room-2 | Math Study Hall - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A math study server's study room: Discord used for studying."
+  },
+  {
+    "id": "v2-dc-weekend-squad", "category": "discord",
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "Weekend Squad - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A friends' group chat."
+  },
+  {
+    "id": "v2-dc-kanji-channel", "category": "discord",
+    "context": { "goal": "practice kanji for chapter 7", "courseName": "JPN 2010 Intermediate Japanese", "assignmentTitle": "Chapter 7 Kanji Quiz", "assignmentKind": "quiz" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#kanji-practice | Japanese Language Learners - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A kanji practice channel of a language-learning server."
+  },
+  {
+    "id": "v2-dc-smp-announcements", "category": "discord",
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#announcements | SMP Season 5 - Discord", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A game server's announcements."
+  },
+  {
+    "id": "v2-dc-dm-ta", "category": "discord", "hard": true,
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "@cs4150-ta-maria - Discord", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A direct message with the course's TA (the handle names the course)."
+  },
+  {
+    "id": "v2-dc-bio-club-general", "category": "discord", "hard": true,
+    "context": { "goal": "review gram staining and bacterial morphology", "courseName": "BIOL 2420 Microbiology", "assignmentTitle": "Lab Practical 1", "assignmentKind": "exam" },
+    "activity": { "processName": "Discord.exe", "appName": "Discord", "windowTitle": "#general | Biology Majors Club - Discord", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A club's general channel: could be academic or social."
+  },
+  {
+    "id": "v2-rd-carbocation", "category": "reddit",
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Why is tertiary carbocation favored in SN1? : r/OrganicChemistry - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A question on the problem set's topic."
+  },
+  {
+    "id": "v2-rd-red-giant", "category": "reddit", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/askastronomy on Reddit: What actually happens when a star becomes a red giant? - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Red giants are a stage of stellar evolution."
+  },
+  {
+    "id": "v2-rd-starfield", "category": "reddit", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/Starfield on Reddit: Best ship builds after the latest update - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A video game subreddit; space theme only."
+  },
+  {
+    "id": "v2-rd-csharp-stacks", "category": "reddit",
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "How do I evaluate an infix expression with two stacks in C#? : r/csharp - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Infix evaluation is what a formula evaluator does."
+  },
+  {
+    "id": "v2-rd-popular", "category": "reddit",
+    "context": { "goal": "Thevenin equivalent homework", "courseName": "ECE 2210 Electric Circuits", "assignmentTitle": "HW 5: Thevenin and Norton Equivalents", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Popular posts on Reddit - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Reddit's popular feed: open-ended browsing."
+  },
+  {
+    "id": "v2-rd-student-nurse", "category": "reddit", "hard": true,
+    "context": { "goal": "memorize beta blocker side effects", "courseName": "NURS 2100 Pharmacology", "assignmentTitle": "Exam 3: Cardiovascular Drugs", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/StudentNurse on Reddit: Mnemonics for beta blocker side effects? - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Study help on exactly the goal."
+  },
+  {
+    "id": "v2-rd-aita", "category": "reddit", "hard": true,
+    "context": { "goal": "draft the trolley problem paper", "courseName": "PHIL 2050 Ethics", "assignmentTitle": "Paper 1: Consequentialism and the Trolley Problem", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "r/AmItheAsshole on Reddit: AITA for not inviting my roommate to my birthday? - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Interpersonal drama for entertainment; 'moral judgment' is the trap, the paper is about consequentialism."
+  },
+  {
+    "id": "v2-ide-vs-evaluator", "category": "ide",
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "devenv.exe", "appName": "Microsoft Visual Studio", "windowTitle": "FormulaEvaluator - Microsoft Visual Studio", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment's solution open in the IDE."
+  },
+  {
+    "id": "v2-ide-knapsack", "category": "ide",
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "knapsack.py - cs4150-ps6 - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Knapsack is a classic DP problem, in the problem set's project."
+  },
+  {
+    "id": "v2-ide-portfolio", "category": "ide", "hard": true,
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "Hero.tsx - portfolio-site - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A personal portfolio site: not this problem set, but career work rather than leisure."
+  },
+  {
+    "id": "v2-ide-stardew-mod", "category": "ide", "hard": true,
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "ModEntry.cs - StardewMod - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A game mod; it's C# like the course, which is the trap."
+  },
+  {
+    "id": "v2-ide-matlab-thevenin", "category": "ide",
+    "context": { "goal": "Thevenin equivalent homework", "courseName": "ECE 2210 Electric Circuits", "assignmentTitle": "HW 5: Thevenin and Norton Equivalents", "assignmentKind": "assignment" },
+    "activity": { "processName": "MATLAB.exe", "appName": "MATLAB", "windowTitle": "Editor - C:\\Users\\student\\ECE2210\\thevenin_check.m", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A script checking the homework's Thevenin results."
+  },
+  {
+    "id": "v2-ide-fed-funds-notebook", "category": "ide", "hard": true,
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "fed_funds_rate.ipynb - JupyterLab - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The federal funds rate is the main monetary policy tool (no shared keywords)."
+  },
+  {
+    "id": "v2-ide-powershell", "category": "ide",
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "WindowsTerminal.exe", "appName": "Windows Terminal", "windowTitle": "Administrator: Windows PowerShell", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A shell with no hint of what's being run."
+  },
+  {
+    "id": "v2-ide-shadow-map", "category": "ide",
+    "context": { "goal": "implement shadow mapping", "courseName": "CS 4600 Computer Graphics", "assignmentTitle": "Project 4: Shadow Mapping", "assignmentKind": "assignment" },
+    "activity": { "processName": "Code.exe", "appName": "Visual Studio Code", "windowTitle": "shadow_map.frag - cs4600-p4 - Visual Studio Code", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The project's shader."
+  },
+  {
+    "id": "v2-lms-canvas-ps5", "category": "lms",
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Problem Set 5: Substitution Reactions: CHEM 2310 Organic Chemistry I - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment on Canvas."
+  },
+  {
+    "id": "v2-lms-grades-other", "category": "lms", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Grades for Sam Patel: ECON 2020 Macroeconomics - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Another course's gradebook: school admin, not this session's task, not leisure."
+  },
+  {
+    "id": "v2-lms-brightspace-paper", "category": "lms",
+    "context": { "goal": "draft the trolley problem paper", "courseName": "PHIL 2050 Ethics", "assignmentTitle": "Paper 1: Consequentialism and the Trolley Problem", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Paper 1: Consequentialism and the Trolley Problem - PHIL 2050 - Brightspace - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment on Brightspace."
+  },
+  {
+    "id": "v2-lms-gradescope-ps6", "category": "lms",
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "PS6: Dynamic Programming | Gradescope - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Submitting or reviewing this problem set."
+  },
+  {
+    "id": "v2-lms-quizzes-nocontext", "category": "lms",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Quizzes: LING 1069 Language and Linguistics - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A course's quiz page; with no stated goal, coursework counts as study."
+  },
+  {
+    "id": "v2-lms-piazza", "category": "lms",
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "hw8 q3 - is the zero vector an eigenvector? | MATH 2250 | Piazza - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course forum thread on this homework."
+  },
+  {
+    "id": "v2-pdf-durkheim", "category": "pdf",
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "Acrobat.exe", "appName": "Adobe Acrobat", "windowTitle": "Durkheim_Suicide_Excerpt.pdf - Adobe Acrobat Reader (64-bit)", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assigned reading."
+  },
+  {
+    "id": "v2-pdf-statics-hw7", "category": "pdf",
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "ME2030_HW7.pdf - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The homework sheet."
+  },
+  {
+    "id": "v2-pdf-concert-tickets", "category": "pdf",
+    "context": { "goal": "listen for the listening quiz on bebop", "courseName": "MUSC 2100 Jazz History", "assignmentTitle": "Listening Quiz 2: Bebop", "assignmentKind": "quiz" },
+    "activity": { "processName": "msedge.exe", "appName": "Microsoft Edge", "windowTitle": "Olivia_Rodrigo_Tickets_Nov14.pdf - Personal - Microsoft\u200b Edge", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Pop concert tickets, unrelated to jazz listening."
+  },
+  {
+    "id": "v2-pdf-hamlet-other-course", "category": "pdf", "hard": true,
+    "context": { "goal": "draft the trolley problem paper", "courseName": "PHIL 2050 Ethics", "assignmentTitle": "Paper 1: Consequentialism and the Trolley Problem", "assignmentKind": "assignment" },
+    "activity": { "processName": "Acrobat.exe", "appName": "Adobe Acrobat", "windowTitle": "Hamlet_Folger_Edition.pdf - Adobe Acrobat Reader (64-bit)", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A literature text, likely another course's reading: not leisure, not this paper."
+  },
+  {
+    "id": "v2-pdf-phone-scan", "category": "pdf", "hard": true,
+    "context": { "goal": "memorize beta blocker side effects", "courseName": "NURS 2100 Pharmacology", "assignmentTitle": "Exam 3: Cardiovascular Drugs", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "IMG_20261001_0932.pdf - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A phone scan with a timestamp name; content unknown."
+  },
+  {
+    "id": "v2-pdf-vasari", "category": "pdf",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "SumatraPDF.exe", "appName": "SumatraPDF", "windowTitle": "Vasari_Lives_of_the_Artists_Botticelli.pdf - SumatraPDF", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Vasari's life of Botticelli: a primary source for the paper."
+  },
+  {
+    "id": "v2-calc-wolfram-eigen", "category": "calculator",
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "eigenvalues {{2,1},{1,2}} - Wolfram|Alpha - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Checking an eigenvalue computation."
+  },
+  {
+    "id": "v2-calc-speedcrunch", "category": "calculator",
+    "context": { "goal": "calculate NPV for the case", "courseName": "FIN 3040 Corporate Finance", "assignmentTitle": "Case 2: Capital Budgeting", "assignmentKind": "assignment" },
+    "activity": { "processName": "SpeedCrunch.exe", "appName": "SpeedCrunch", "windowTitle": "SpeedCrunch", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A calculator while computing NPV."
+  },
+  {
+    "id": "v2-calc-wolfram-christmas", "category": "calculator", "hard": true,
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "how many days until christmas - Wolfram|Alpha - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A study tool used for a personal, idle query."
+  },
+  {
+    "id": "v2-calc-geogebra-art", "category": "calculator", "hard": true,
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "GeoGebra Calculator Suite - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A math tool in an art paper session: maybe proportions or perspective, maybe something else."
+  },
+  {
+    "id": "v2-trap-gravity-falls", "category": "trap", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Gravity Falls Season 2 Episode 4 - Disney+ - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A cartoon; 'Gravity' is a physics-sounding title word."
+  },
+  {
+    "id": "v2-trap-muse-resistance", "category": "trap", "hard": true,
+    "context": { "goal": "Thevenin equivalent homework", "courseName": "ECE 2210 Electric Circuits", "assignmentTitle": "HW 5: Thevenin and Norton Equivalents", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Resistance (Muse album) - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A rock album article; 'Resistance' is the circuits trap."
+  },
+  {
+    "id": "v2-trap-good-place-trolley", "category": "trap", "hard": true,
+    "context": { "goal": "draft the trolley problem paper", "courseName": "PHIL 2050 Ethics", "assignmentTitle": "Paper 1: Consequentialism and the Trolley Problem", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Good Place: The Trolley Problem | Netflix - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A sitcom episode about the paper's exact topic: often assigned, but still entertainment."
+  },
+  {
+    "id": "v2-trap-bridge-game", "category": "trap", "hard": true,
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "BridgeConstructorPortal.exe", "appName": "Bridge Constructor Portal", "windowTitle": "Bridge Constructor Portal", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A bridge-building game; trusses are the theme, but it's a game."
+  },
+  {
+    "id": "v2-trap-270towin", "category": "trap", "hard": true,
+    "context": { "goal": "prep for the debate on the Electoral College", "courseName": "POLS 1100 American National Government", "assignmentTitle": "In-class Debate: Electoral College", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "270toWin - 2024 Presidential Election Interactive Map - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An electoral-vote map (270 is the Electoral College threshold); no shared keywords."
+  },
+  {
+    "id": "v2-trap-invisible-gorilla", "category": "trap", "hard": true,
+    "context": { "goal": "study attention and working memory for the midterm", "courseName": "PSY 3460 Cognitive Psychology", "assignmentTitle": "Midterm", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Invisible Gorilla: How Our Intuitions Deceive Us - Google Books - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The book on the inattentional-blindness study; an odd title, on topic."
+  },
+  {
+    "id": "v2-trap-untitled-tab", "category": "trap",
+    "context": { "goal": "outline my scholarship essay" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Untitled - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A page with no title."
+  },
+  {
+    "id": "v2-trap-robinhood", "category": "trap", "hard": true,
+    "context": { "goal": "calculate NPV for the case", "courseName": "FIN 3040 Corporate Finance", "assignmentTitle": "Case 2: Capital Budgeting", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "NVDA Stock Price & News - Robinhood - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Personal stock-watching; finance-flavoured but not the capital budgeting case."
+  },
+  {
+    "id": "v2-trap-minecraft-education", "category": "trap", "hard": true,
+    "context": { "goal": "build the lesson demo in Minecraft Education", "courseName": "EDU 3200 Educational Technology", "assignmentTitle": "Game-Based Lesson Prototype", "assignmentKind": "assignment" },
+    "activity": { "processName": "Minecraft.Windows.exe", "appName": "Minecraft Education", "windowTitle": "Minecraft Education", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The assignment is built in this game."
+  },
+  {
+    "id": "v2-trap-baking-chemistry", "category": "trap", "hard": true,
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Baking Soda vs Baking Powder: The Chemistry Explained - Sally's Baking Addiction - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A baking blog; 'Chemistry' is the keyword trap."
+  },
+  {
+    "id": "v2-trap-copy-of-final", "category": "trap",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Copy of Copy of Final - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A generically named doc; could be the paper or anything."
+  },
+  {
+    "id": "v2-idle-kaltura-lecture", "category": "idle-playback", "idle": true,
+    "context": { "goal": "review gram staining and bacterial morphology", "courseName": "BIOL 2420 Microbiology", "assignmentTitle": "Lab Practical 1", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "BIOL 2420 Lecture 9 - Gram Staining and Cell Walls - Kaltura - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "This course's lecture left playing; the content is on task."
+  },
+  {
+    "id": "v2-idle-random-blocks", "category": "idle-playback", "idle": true,
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "(2) Minecraft but Every Block is Random - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A gaming video left playing; the content is leisure."
+  },
+  {
+    "id": "v2-idle-fed-explainer", "category": "idle-playback", "idle": true, "hard": true,
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Why the Fed Can't Just Print Money - Planet Money - YouTube - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An explainer on the Federal Reserve and money creation: monetary policy without the words."
+  },
+  {
+    "id": "v2-idle-the-office", "category": "idle-playback", "idle": true,
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "The Office | Netflix - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A sitcom left autoplaying."
+  },
+  {
+    "id": "v2-idle-twitch-chatting", "category": "idle-playback", "idle": true,
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Just Chatting - Twitch - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A livestream left playing."
+  },
+  {
+    "id": "v2-idle-phys-lecture-other", "category": "idle-playback", "idle": true, "hard": true,
+    "context": { "goal": "Thevenin equivalent homework", "courseName": "ECE 2210 Electric Circuits", "assignmentTitle": "HW 5: Thevenin and Norton Equivalents", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "PHYS 2220 Lecture 7 - Capacitance - Panopto - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Another course's lecture on a related topic: coursework, but not this homework."
+  },
+  {
+    "id": "v2-sw-program-manager", "category": "switching",
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Program Manager", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "The bare desktop: a transition."
+  },
+  {
+    "id": "v2-sw-explorer-hw7", "category": "switching",
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "ME 2030 HW7 - File Explorer", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The homework's folder."
+  },
+  {
+    "id": "v2-sw-explorer-steamapps", "category": "switching", "hard": true,
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "steamapps - File Explorer", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Browsing installed game files."
+  },
+  {
+    "id": "v2-sw-power-options", "category": "switching",
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "explorer.exe", "appName": "Windows Explorer", "windowTitle": "Power Options", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A system control panel: neither study nor leisure."
+  },
+  {
+    "id": "v2-sw-powertoys-run", "category": "switching",
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "PowerToys.PowerLauncher.exe", "appName": "PowerToys Run", "windowTitle": "PowerToys Run", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "An app launcher: a transition."
+  },
+  {
+    "id": "v2-sw-steam-news-popup", "category": "switching", "hard": true,
+    "context": { "goal": "listen for the listening quiz on bebop", "courseName": "MUSC 2100 Jazz History", "assignmentTitle": "Listening Quiz 2: Bebop", "assignmentKind": "quiz" },
+    "activity": { "processName": "steamwebhelper.exe", "appName": "Steam", "windowTitle": "Steam - News (1 of 12)", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Steam's startup news popup opens by itself; launcher flicker, not a choice to play."
+  },
+  {
+    "id": "v2-sw-snipping-tool", "category": "switching",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "SnippingTool.exe", "appName": "Snipping Tool", "windowTitle": "Snipping Tool", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Capturing something; what isn't known."
+  },
+  {
+    "id": "v2-mp-drive-phil", "category": "multipurpose",
+    "context": { "goal": "draft the trolley problem paper", "courseName": "PHIL 2050 Ethics", "assignmentTitle": "Paper 1: Consequentialism and the Trolley Problem", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "PHIL 2050 - Google Drive - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course's Drive folder."
+  },
+  {
+    "id": "v2-mp-drive-root", "category": "multipurpose",
+    "context": { "goal": "study attention and working memory for the midterm", "courseName": "PSY 3460 Cognitive Psychology", "assignmentTitle": "Midterm", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "My Drive - Google Drive - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Drive's root: about to open something, unknown what."
+  },
+  {
+    "id": "v2-mp-notion-art-notes", "category": "multipurpose",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": "Renaissance Art Lecture Notes - Notion", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course's notes."
+  },
+  {
+    "id": "v2-mp-notion-habits", "category": "multipurpose", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": "Habit Tracker 2026 - Notion", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Personal organization: not study, not really leisure."
+  },
+  {
+    "id": "v2-mp-chatgpt-sn1-sn2", "category": "multipurpose",
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "SN1 vs SN2 Comparison - ChatGPT - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A chatbot conversation on the problem set's topic."
+  },
+  {
+    "id": "v2-mp-claude-worldbuilding", "category": "multipurpose", "hard": true,
+    "context": { "goal": "Thevenin equivalent homework", "courseName": "ECE 2210 Electric Circuits", "assignmentTitle": "HW 5: Thevenin and Norton Equivalents", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Fantasy Novel Worldbuilding Ideas - Claude - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "An AI assistant used for a hobby novel."
+  },
+  {
+    "id": "v2-mp-mail-review-session", "category": "multipurpose",
+    "context": { "goal": "memorize beta blocker side effects", "courseName": "NURS 2100 Pharmacology", "assignmentTitle": "Exam 3: Cardiovascular Drugs", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Exam 3 review session time? - jlee@example.edu - Example University Mail - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "An email about this exam's review session."
+  },
+  {
+    "id": "v2-mp-mail-order-shipped", "category": "multipurpose", "hard": true,
+    "context": { "goal": "dynamic programming problem set", "courseName": "CS 4150 Algorithms", "assignmentTitle": "PS6: Dynamic Programming", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Your order has shipped! - jlee@example.edu - Example University Mail - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A shopping notification in the school mailbox."
+  },
+  {
+    "id": "v2-mp-teams-hw7", "category": "multipurpose",
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": "HW 7 questions | ME 2030 Statics | Microsoft Teams", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The course team's thread on this homework."
+  },
+  {
+    "id": "v2-mp-teams-calendar", "category": "multipurpose",
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": "Calendar | Microsoft Teams", "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A calendar view: scheduling, unknown for what."
+  },
+  {
+    "id": "v2-mp-slack-hackathon-random", "category": "multipurpose", "hard": true,
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "slack.exe", "appName": "Slack", "windowTitle": "random (Channel) - HackUtah 2026 - Slack", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A hackathon workspace's random channel: social chat, not the assignment."
+  },
+  {
+    "id": "v2-mp-gdocs-debate-prep", "category": "multipurpose",
+    "context": { "goal": "prep for the debate on the Electoral College", "courseName": "POLS 1100 American National Government", "assignmentTitle": "In-class Debate: Electoral College", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Electoral College Debate Prep (Team B) - Google Docs - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "The team's prep doc for this debate."
+  },
+  {
+    "id": "v2-rs-nasa-stars", "category": "research",
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Star Basics - NASA Science - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Reference material on stars."
+  },
+  {
+    "id": "v2-rs-shunting-yard", "category": "research", "hard": true,
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "c# - Shunting-yard algorithm with unary minus - Stack Overflow - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Shunting-yard parses formulas; no shared keywords."
+  },
+  {
+    "id": "v2-rs-scholar-anomie", "category": "research",
+    "context": { "goal": "write the response on Durkheim's Suicide", "courseName": "SOC 1010 Intro Sociology", "assignmentTitle": "Reading Response 3: Durkheim", "assignmentKind": "reading" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Durkheim anomie suicide rates - Google Scholar - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A literature search on the reading's argument."
+  },
+  {
+    "id": "v2-rs-trade-rumors", "category": "research",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "lakers trade rumors - Google Search - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Sports gossip search."
+  },
+  {
+    "id": "v2-rs-wiki-propranolol", "category": "research", "hard": true,
+    "context": { "goal": "memorize beta blocker side effects", "courseName": "NURS 2100 Pharmacology", "assignmentTitle": "Exam 3: Cardiovascular Drugs", "assignmentKind": "exam" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Propranolol - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Propranolol is a beta blocker; no shared keywords."
+  },
+  {
+    "id": "v2-rs-wiki-charlie-parker", "category": "research", "hard": true,
+    "context": { "goal": "listen for the listening quiz on bebop", "courseName": "MUSC 2100 Jazz History", "assignmentTitle": "Listening Quiz 2: Bebop", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Charlie Parker - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Charlie Parker co-founded bebop; no shared keywords."
+  },
+  {
+    "id": "v2-rs-investopedia-npv", "category": "research",
+    "context": { "goal": "calculate NPV for the case", "courseName": "FIN 3040 Corporate Finance", "assignmentTitle": "Case 2: Capital Budgeting", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Net Present Value (NPV): What It Means and Steps to Calculate It - Investopedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Reference on the case's calculation."
+  },
+  {
+    "id": "v2-soc-pinterest-ux", "category": "social", "hard": true,
+    "context": { "goal": "collect onboarding screen references for the redesign", "courseName": "DES 2300 UX Design", "assignmentTitle": "Project 2: Onboarding Redesign", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Onboarding UI | Pinterest - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A board of onboarding designs: collecting references, as the goal says."
+  },
+  {
+    "id": "v2-soc-x-council", "category": "social", "hard": true,
+    "context": { "goal": "track breaking coverage of the city council vote", "courseName": "JOUR 2400 Digital Journalism", "assignmentTitle": "Live Coverage Assignment", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Metro City Council (@MetroCityCouncil) / X - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "Following the council's own account is the live-coverage task."
+  },
+  {
+    "id": "v2-soc-x-explore", "category": "social",
+    "context": {},
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Explore / X - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Browsing trending social posts."
+  },
+  {
+    "id": "v2-soc-threads", "category": "social",
+    "context": { "goal": "practice kanji for chapter 7", "courseName": "JPN 2010 Intermediate Japanese", "assignmentTitle": "Chapter 7 Kanji Quiz", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Home • Threads - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A social feed."
+  },
+  {
+    "id": "v2-soc-fb-party", "category": "social",
+    "context": { "goal": "calculate NPV for the case", "courseName": "FIN 3040 Corporate Finance", "assignmentTitle": "Case 2: Capital Budgeting", "assignmentKind": "assignment" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Halloween Costume Party | Facebook - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A social event page."
+  },
+  {
+    "id": "v2-game-fortnite", "category": "gaming",
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "FortniteClient-Win64-Shipping.exe", "appName": "Fortnite", "windowTitle": "Fortnite", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Playing a game."
+  },
+  {
+    "id": "v2-game-ksp", "category": "gaming", "hard": true,
+    "context": { "goal": "study stellar evolution for exam 2", "courseName": "ASTR 1040 Intro Astronomy", "assignmentTitle": "Exam 2: Stars and Stellar Evolution", "assignmentKind": "exam" },
+    "activity": { "processName": "KSP_x64.exe", "appName": "Kerbal Space Program", "windowTitle": "Kerbal Space Program", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A space game: rocketry, not stars, and not assigned."
+  },
+  {
+    "id": "v2-game-chess-lsat", "category": "gaming",
+    "context": { "goal": "LSAT logic games practice" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "Live Chess - Chess.com - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Playing chess online; 'logic games' are LSAT puzzles, not chess."
+  },
+  {
+    "id": "v2-game-osu", "category": "gaming",
+    "context": { "goal": "finish the spreadsheet formula evaluator", "courseName": "CS 3500 Software Practice", "assignmentTitle": "PS3: Formula Evaluator", "assignmentKind": "assignment" },
+    "activity": { "processName": "osu!.exe", "appName": "osu!", "windowTitle": "osu!", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A rhythm game."
+  },
+  {
+    "id": "v2-game-shadow-tactics", "category": "gaming", "hard": true,
+    "context": { "goal": "implement shadow mapping", "courseName": "CS 4600 Computer Graphics", "assignmentTitle": "Project 4: Shadow Mapping", "assignmentKind": "assignment" },
+    "activity": { "processName": "Shadow Tactics.exe", "appName": "Shadow Tactics", "windowTitle": "Shadow Tactics: Blades of the Shogun", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A stealth game; 'Shadow' is the keyword trap."
+  },
+  {
+    "id": "v2-mus-spotify-koko", "category": "music", "hard": true,
+    "context": { "goal": "listen for the listening quiz on bebop", "courseName": "MUSC 2100 Jazz History", "assignmentTitle": "Listening Quiz 2: Bebop", "assignmentKind": "quiz" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Charlie Parker - Ko-Ko", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "A landmark bebop recording: listening for the quiz."
+  },
+  {
+    "id": "v2-mus-spotify-chappell", "category": "music",
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Chappell Roan - Good Luck, Babe!", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "Pop music app in the foreground."
+  },
+  {
+    "id": "v2-mus-spotify-eno", "category": "music",
+    "context": { "goal": "study for the macro quiz on monetary policy", "courseName": "ECON 2020 Macroeconomics", "assignmentTitle": "Quiz 6: Monetary Policy", "assignmentKind": "quiz" },
+    "activity": { "processName": "Spotify.exe", "appName": "Spotify", "windowTitle": "Brian Eno - An Ending (Ascent)", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "A music app in the foreground, unrelated to the course."
+  },
+  {
+    "id": "v2-mus-ytmusic-yoasobi", "category": "music", "hard": true,
+    "context": { "goal": "practice kanji for chapter 7", "courseName": "JPN 2010 Intermediate Japanese", "assignmentTitle": "Chapter 7 Kanji Quiz", "assignmentKind": "quiz" },
+    "activity": { "processName": "chrome.exe", "appName": "Google Chrome", "windowTitle": "YOASOBI - Idol - YouTube Music - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "DISTRACTING", "rationale": "J-pop for pleasure; Japanese-language content isn't kanji practice."
+  },
+  {
+    "id": "v2-pm-excluded-notion", "category": "private-missing",
+    "context": { "goal": "compare Botticelli and Leonardo for the paper", "courseName": "ARTH 2710 Renaissance Art", "assignmentTitle": "Visual Analysis Paper", "assignmentKind": "assignment" },
+    "activity": { "processName": "Notion.exe", "appName": "Notion", "windowTitle": null, "redacted": "excluded", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Excluded by the student; not judged."
+  },
+  {
+    "id": "v2-pm-private-brave", "category": "private-missing",
+    "context": { "goal": "eigenvalue homework", "courseName": "MATH 2250 Linear Algebra and Differential Equations", "assignmentTitle": "HW 8: Eigenvalues and Eigenvectors", "assignmentKind": "assignment" },
+    "activity": { "processName": "brave.exe", "appName": "Brave Browser", "windowTitle": null, "redacted": "private", "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "A private window; title withheld."
+  },
+  {
+    "id": "v2-pm-teams-no-title", "category": "private-missing",
+    "context": { "goal": "finish the truss problems", "courseName": "ME 2030 Statics", "assignmentTitle": "HW 7: Method of Joints", "assignmentKind": "assignment" },
+    "activity": { "processName": "ms-teams.exe", "appName": "Microsoft Teams", "windowTitle": null, "redacted": null, "hasWindow": true },
+    "expected": "UNCERTAIN", "rationale": "Teams with an unreadable title: class or social, can't tell."
+  },
+  {
+    "id": "v2-pm-noproc-stroop", "category": "private-missing", "hard": true,
+    "context": { "goal": "study attention and working memory for the midterm", "courseName": "PSY 3460 Cognitive Psychology", "assignmentTitle": "Midterm", "assignmentKind": "exam" },
+    "activity": { "processName": null, "appName": null, "windowTitle": "Stroop effect - Wikipedia - Google Chrome", "redacted": null, "hasWindow": true },
+    "expected": "ON_TASK", "rationale": "No process, but the Stroop effect is a classic attention topic."
+  },
+  {
+    "id": "v2-pm-no-window", "category": "private-missing", "idle": true,
+    "context": { "goal": "work through SN1 vs SN2 practice problems", "courseName": "CHEM 2310 Organic Chemistry I", "assignmentTitle": "Problem Set 5: Substitution Reactions", "assignmentKind": "assignment" },
+    "activity": { "processName": null, "appName": null, "windowTitle": null, "redacted": null, "hasWindow": false },
+    "expected": "UNCERTAIN", "rationale": "No foreground window."
+  }
+]

@@ -50,10 +50,19 @@ mod win {
         fn GetWindowTextLengthW(hwnd: Handle) -> i32;
         fn GetWindowTextW(hwnd: Handle, text: *mut u16, max: i32) -> i32;
         fn GetWindowThreadProcessId(hwnd: Handle, pid: *mut u32) -> u32;
+        fn GetLastInputInfo(info: *mut LastInputInfo) -> i32;
+    }
+
+    /// LASTINPUTINFO: only the tick of the last keyboard/mouse input, never the input itself.
+    #[repr(C)]
+    struct LastInputInfo {
+        size: u32,
+        time: u32,
     }
 
     #[link(name = "kernel32")]
     extern "system" {
+        fn GetTickCount() -> u32;
         fn OpenProcess(access: u32, inherit: i32, pid: u32) -> Handle;
         fn QueryFullProcessImageNameW(process: Handle, flags: u32, name: *mut u16, size: *mut u32) -> i32;
         fn CloseHandle(handle: Handle) -> i32;
@@ -86,8 +95,9 @@ mod win {
         fn sample(&mut self) -> Sample {
             // SAFETY: no arguments; returns a window handle or null.
             let hwnd = unsafe { GetForegroundWindow() };
+            let idle = idle_ms().is_some_and(|ms| ms >= super::super::IDLE_AFTER_MS);
             if hwnd.is_null() {
-                return Sample::default();
+                return Sample { idle, ..Sample::default() };
             }
             let mut pid = 0;
             // SAFETY: `pid` is a valid out pointer; a stale hwnd makes the call fail and leave it 0.
@@ -99,8 +109,19 @@ mod win {
             // Our own window's title would be fetched with a message to our UI thread, which can be
             // blocked joining this thread at exit. Other processes' titles are read without messages.
             let window_title = if pid == std::process::id() { None } else { title(hwnd) };
-            Sample { has_window: true, process_name: self.process_name.clone(), app_name: self.app_name.clone(), window_title }
+            Sample { has_window: true, process_name: self.process_name.clone(), app_name: self.app_name.clone(), window_title, idle }
         }
+    }
+
+    /// Milliseconds since the last keyboard or mouse input anywhere in this session (the system idle timer).
+    fn idle_ms() -> Option<u64> {
+        let mut info = LastInputInfo { size: std::mem::size_of::<LastInputInfo>() as u32, time: 0 };
+        // SAFETY: `info` is a valid LASTINPUTINFO with its size set.
+        if unsafe { GetLastInputInfo(&mut info) } == 0 {
+            return None;
+        }
+        // SAFETY: no arguments. Both values are 32-bit tick counts, so the difference wraps correctly.
+        Some(u64::from(unsafe { GetTickCount() }.wrapping_sub(info.time)))
     }
 
     impl Foreground {

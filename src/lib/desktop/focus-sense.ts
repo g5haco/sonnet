@@ -7,8 +7,11 @@ export type FocusActivityEvent = {
   timestamp: number;
   sessionId: string;
   platform: "windows" | "macos";
-  kind: "context" | "start" | "stop";
+  // heartbeat: written after 60 s without a change, so the last moment the monitor was alive is known.
+  kind: "context" | "start" | "stop" | "heartbeat";
   source: "foreground-window" | "monitor";
+  // No keyboard or mouse input for IDLE_AFTER_MS (the system idle timer; no input is read). Changing it writes an event.
+  idle: boolean;
   appName: string | null;
   processName: string | null;
   windowTitle: string | null;
@@ -21,7 +24,13 @@ export type FocusSenseStatus = {
   exclusions: string[];
   monitoring: { sessionId: string; startedAt: number; until: number } | null;
   paused: boolean; // the user paused the latest session; the timer can't restart it
+  latest: string | null; // the latest session started in this run of the app (the only one `events` serves)
 };
+
+// The native monitor's thresholds (src-tauri/src/focus_sense/monitor.rs). An `idle: true` event is written this long
+// after the last input; a heartbeat after this long without any other event.
+export const IDLE_AFTER_MS = 120_000;
+export const HEARTBEAT_MS = 60_000;
 
 type Invoke = (command: string, args?: unknown) => Promise<unknown>;
 

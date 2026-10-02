@@ -53,14 +53,14 @@ pub fn apply(sample: Sample, exclusions: &[String]) -> (Sample, Option<Redaction
     let process_name = clean(sample.process_name, NAME_MAX);
     let lower = process_name.as_deref().map(str::to_lowercase).unwrap_or_default();
     if !lower.is_empty() && (SENSITIVE.contains(&lower.as_str()) || exclusions.iter().any(|e| e.eq_ignore_ascii_case(&lower))) {
-        return (Sample { has_window: sample.has_window, ..Sample::default() }, Some(Redaction::Excluded));
+        return (Sample { has_window: sample.has_window, idle: sample.idle, ..Sample::default() }, Some(Redaction::Excluded));
     }
     // Checked before truncation, so a long title keeps its browser suffix.
     let title = clean(sample.window_title, usize::MAX);
     let private = BROWSERS.contains(&lower.as_str()) && title.as_deref().is_some_and(private_title);
     // Fail closed: with no process name (elevated, protected) exclusions can't be checked, so no title either.
     let window_title = if private || process_name.is_none() { None } else { clean(title, TITLE_MAX) };
-    let s = Sample { has_window: sample.has_window, process_name, app_name: clean(sample.app_name, NAME_MAX), window_title };
+    let s = Sample { has_window: sample.has_window, process_name, app_name: clean(sample.app_name, NAME_MAX), window_title, idle: sample.idle };
     (s, private.then_some(Redaction::Private))
 }
 
@@ -86,6 +86,7 @@ mod tests {
             process_name: Some(process.into()),
             app_name: Some("App".into()),
             window_title: Some(title.into()),
+            idle: false,
         }
     }
 
@@ -121,8 +122,15 @@ mod tests {
     }
 
     #[test]
+    fn idle_survives_redaction() {
+        let s = Sample { idle: true, ..sample("KeePassXC.exe", "vault") };
+        assert!(apply(s.clone(), &[]).0.idle);
+        assert!(apply(Sample { process_name: Some("notepad.exe".into()), ..s }, &[]).0.idle);
+    }
+
+    #[test]
     fn an_unreadable_process_keeps_no_title() {
-        let s = Sample { has_window: true, process_name: None, app_name: None, window_title: Some("Secret".into()) };
+        let s = Sample { has_window: true, process_name: None, app_name: None, window_title: Some("Secret".into()), idle: false };
         let (out, r) = apply(s, &[]);
         assert_eq!((out.window_title.as_deref(), r), (None, None));
         assert_eq!(confidence(&out, r), Confidence::Partial);

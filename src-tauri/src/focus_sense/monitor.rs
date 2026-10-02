@@ -13,11 +13,14 @@ use std::{
         Arc, Mutex, MutexGuard, PoisonError,
     },
     thread::JoinHandle,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 pub type Sink = Arc<dyn Fn(ActivityEvent) + Send + Sync>;
 pub const POLL: Duration = Duration::from_millis(1000);
+/// A heartbeat after this many polls with nothing written (60 s at `POLL`), so a session that ends without a stop
+/// marker (a hard kill) still shows when the monitor was last alive. Mirrored as HEARTBEAT_MS in focus-sense.ts.
+pub const HEARTBEAT_POLLS: u32 = 60;
 
 /// What the page sees of a running monitor. Times in ms since the epoch.
 #[derive(serde::Serialize, Clone, Debug, PartialEq)]
@@ -124,6 +127,7 @@ fn event(session_id: &str, kind: Kind, source: Source, s: Sample, redacted: Opti
         platform: sensor::PLATFORM.to_string(),
         kind,
         source,
+        idle: s.idle,
         app_name: s.app_name,
         process_name: s.process_name,
         window_title: s.window_title,
@@ -145,6 +149,7 @@ fn run(
     let marker = |kind| event(&session_id, kind, Source::Monitor, Sample::default(), None, Confidence::None);
     sink(marker(Kind::Start));
     let mut last = None;
+    let mut written = Instant::now();
     let reason = loop {
         if now_ms() >= until {
             break "expired";
@@ -155,6 +160,11 @@ fn run(
             let c = privacy::confidence(&s, r);
             sink(event(&session_id, Kind::Context, Source::ForegroundWindow, s, r, c));
             last = Some(seen);
+            written = Instant::now();
+        } else if written.elapsed() >= poll * HEARTBEAT_POLLS {
+            let idle = Sample { idle: seen.0.idle, ..Sample::default() };
+            sink(event(&session_id, Kind::Heartbeat, Source::Monitor, idle, None, Confidence::None));
+            written = Instant::now();
         }
         match rx.recv_timeout(poll.min(Duration::from_millis(until.saturating_sub(now_ms())))) {
             Ok(Msg::Refresh(u, e)) => (until, exclusions) = (u, e),
@@ -169,8 +179,6 @@ fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::Instant;
-
     const FAST: Duration = Duration::from_millis(10);
     const FAR: u64 = 60 * 60 * 1000;
 
@@ -186,7 +194,7 @@ mod tests {
     }
 
     fn app(process: &str, title: &str) -> Sample {
-        Sample { has_window: true, process_name: Some(process.into()), app_name: None, window_title: Some(title.into()) }
+        Sample { has_window: true, process_name: Some(process.into()), app_name: None, window_title: Some(title.into()), idle: false }
     }
 
     fn script(samples: Vec<Sample>) -> Box<dyn Sensor> {
@@ -207,6 +215,24 @@ mod tests {
 
     fn wait() {
         std::thread::sleep(Duration::from_millis(150));
+    }
+
+    #[test]
+    fn idle_changes_are_events_and_quiet_stretches_get_heartbeats() {
+        let (sink, log) = collector();
+        let m = Monitor::default();
+        let a = app("a.exe", "A");
+        let idle = Sample { idle: true, ..a.clone() };
+        // 10 ms polls: a heartbeat after 600 ms without a write.
+        m.start_with("s".into(), now_ms() + FAR, vec![], sink, script(vec![a.clone(), idle, a]), FAST).unwrap();
+        std::thread::sleep(Duration::from_millis(1500));
+        m.stop();
+        let events = log.lock().unwrap();
+        let idles: Vec<bool> = events.iter().filter(|e| e.kind == Kind::Context).map(|e| e.idle).collect();
+        assert_eq!(idles, vec![false, true, false]);
+        let beats: Vec<&ActivityEvent> = events.iter().filter(|e| e.kind == Kind::Heartbeat).collect();
+        assert!((1..=3).contains(&beats.len()), "{} heartbeats", beats.len());
+        assert!(beats.iter().all(|b| b.source == Source::Monitor && b.process_name.is_none() && b.window_title.is_none()));
     }
 
     #[test]

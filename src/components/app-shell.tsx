@@ -25,7 +25,7 @@ import { shortcutsFor } from "@/components/chat/shortcuts";
 import { addStep, type Chain } from "@/components/chat/thought-chain";
 import { FocusProvider } from "@/components/focus-timer";
 
-type Course = { id: string; code: string; hue: number };
+type Course = { id: string; code: string; name?: string; hue: number };
 
 // Any page can open the Create flows (e.g. the dashboard's "Add your first course").
 // `due` pre-fills the date (datetime-local "YYYY-MM-DDTHH:mm"), e.g. from a calendar slot; `course` pre-picks
@@ -442,7 +442,7 @@ export function AppShell({
               detachSyllabus,
             }}
           >
-            <FocusProvider>
+            <FocusProvider courses={courses} items={schedule.items}>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <Sidebar
                 onCreate={create}

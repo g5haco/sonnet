@@ -7,11 +7,14 @@ import { toast } from "sonner";
 import { logFocus } from "@/app/actions";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { Button } from "@/components/ui/button";
+import { FocusContextPicker } from "@/components/desktop/focus-context-picker";
 import { focusSense, focusSessionId } from "@/lib/desktop/focus-sense";
+import { bindContext } from "@/lib/desktop/sense/context";
 import { enqueue, flush, type PendingLog } from "@/lib/focus";
+import type { Item } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
-const LENGTH = 25; // minutes per focus session
+export const LENGTH = 25; // minutes per focus session
 const KEY = "sonnet-focus"; // the running session survives page changes and reloads
 const PENDING = "sonnet-focus-pending"; // finished sessions not saved yet; retried until the server confirms
 const SPRING = { type: "spring", stiffness: 420, damping: 36 } as const;
@@ -23,7 +26,9 @@ type Focus = {
   open: boolean;
   setOpen: (open: boolean) => void;
   toggle: () => void; // start a session, or stop (and log) the running one
+  study: Study; // the courses and work the desktop "Working on" picker offers
 };
+type Study = { courses: { id: string; code: string; name?: string }[]; items: Item[] };
 
 const FocusContext = createContext<Focus>({
   run: null,
@@ -31,6 +36,7 @@ const FocusContext = createContext<Focus>({
   open: false,
   setOpen: () => {},
   toggle: () => {},
+  study: { courses: [], items: [] },
 });
 export const useFocus = () => useContext(FocusContext);
 
@@ -68,7 +74,11 @@ const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).
 
 // One timer for the whole app (it lives in the shell, so it keeps running on every page). The sidebar button
 // opens a floating panel that stays until closed; a session logs when it finishes, or when stopped after a minute.
-export function FocusProvider({ children }: { children: React.ReactNode }) {
+export function FocusProvider({
+  children,
+  courses = [],
+  items = [],
+}: { children: React.ReactNode } & Partial<Study>) {
   const [run, setRun] = useState<Run | null>(null);
   const [loaded, setLoaded] = useState(false); // the stored run has been read
   const [open, setOpen] = useState(false);
@@ -140,6 +150,7 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
     const s = run?.start ?? null;
     if (!loaded || sensed.current === s || !focusSense.available()) return;
     sensed.current = s;
+    if (run) bindContext(focusSessionId(run.start)); // the "Working on" pick becomes this session's (once)
     void (run ? focusSense.start(focusSessionId(run.start), run.start + LENGTH * 60_000) : focusSense.stop());
   }, [run, loaded]);
   useEffect(() => {
@@ -176,7 +187,7 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <FocusContext.Provider value={{ run, left, open, setOpen, toggle }}>
+    <FocusContext.Provider value={{ run, left, open, setOpen, toggle, study: { courses, items } }}>
       {children}
       <div ref={bounds} className="pointer-events-none fixed inset-2 z-40" aria-hidden="true" />
       <AnimatePresence>
@@ -222,7 +233,7 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
 
 // The ring and Start/Stop, shared by the floating panel and Home's Focus timer widget: both drive the one timer.
 export function FocusDial({ className }: { className?: string }) {
-  const { run, left, toggle } = useFocus();
+  const { run, left, toggle, study } = useFocus();
   const used = Math.floor((LENGTH * 60_000 - left) / 1000); // whole seconds into the session
   return (
     <div className={className}>
@@ -242,6 +253,7 @@ export function FocusDial({ className }: { className?: string }) {
           </span>
         </span>
       </AnimatedCircularProgressBar>
+      {!run && <FocusContextPicker courses={study.courses} items={study.items} />}
       <Button
         variant={run ? "secondary" : "default"}
         className="mt-4 h-10 w-full rounded-full transition-[background-color,transform] active:scale-[0.97]"

@@ -6,7 +6,9 @@ import { FormError } from "@/components/create-forms";
 import { Row } from "@/components/settings-forms";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FocusSessionDebug } from "@/components/desktop/focus-session-debug";
 import { focusSense, type FocusSenseStatus } from "@/lib/desktop/focus-sense";
+import { clearContexts } from "@/lib/desktop/sense/context";
 
 const help = "text-sm text-pretty text-muted-foreground";
 
@@ -63,6 +65,7 @@ export function FocusSenseSettings() {
       const s = await focusSense.clear();
       setConfirming(false);
       if (!s) return void toast.error("Couldn't clear Focus Sense data. Try again.");
+      clearContexts();
       setStatus(s);
       toast("Focus Sense data cleared.");
     });
@@ -116,6 +119,11 @@ export function FocusSenseSettings() {
           Save
         </Button>
       </Row>
+      {status.latest && (
+        <Row title="Latest session" hint="How Focus Sense read it: activity, labels, reasons and the score. Developer view.">
+          <FocusSessionDebug key={status.latest} sessionId={status.latest} />
+        </Row>
+      )}
       <Row title="Focus Sense data" hint="Sessions older than 30 days are removed on their own.">
         {confirming ? (
           <div className="flex flex-col gap-3">

@@ -32,6 +32,9 @@ pub struct ActivityEvent {
     pub platform: String,
     pub kind: Kind,
     pub source: Source,
+    /// See `Sample::idle`. Absent in files written before M6B, which read as false.
+    #[serde(default)]
+    pub idle: bool,
     /// The app's own name (Windows: the exe's FileDescription, e.g. "Google Chrome").
     pub app_name: Option<String>,
     /// The executable's file name, e.g. "chrome.exe".
@@ -45,8 +48,10 @@ pub struct ActivityEvent {
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Kind {
-    /// The foreground context changed (or was first seen).
+    /// The foreground context or the idle flag changed (or was first seen).
     Context,
+    /// Nothing changed for `monitor::HEARTBEAT`: the monitor was still alive at this time.
+    Heartbeat,
     /// Monitoring began for this session.
     Start,
     /// Monitoring ended: the session stopped, the user paused or turned it off, or it expired.
@@ -87,7 +92,12 @@ pub struct Sample {
     pub process_name: Option<String>,
     pub app_name: Option<String>,
     pub window_title: Option<String>,
+    /// No keyboard or mouse input for `IDLE_AFTER_MS` (the system idle timer; no input is read).
+    pub idle: bool,
 }
+
+/// Idle after this long without keyboard or mouse input. Mirrored as IDLE_AFTER_MS in src/lib/desktop/focus-sense.ts.
+pub const IDLE_AFTER_MS: u64 = 120_000;
 
 /// Saved in the app data folder. Off until the user turns it on.
 #[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
@@ -117,6 +127,8 @@ pub struct Status {
     pub monitoring: Option<monitor::Running>,
     /// The user paused sensing for the latest session; the timer restarting it (a reload) is ignored.
     pub paused: bool,
+    /// The latest session the timer started in this run of the app: the only one `focus_sense_events` serves.
+    pub latest: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -228,6 +240,7 @@ impl FocusSense {
             exclusions: config.exclusions,
             monitoring: self.monitor.current(),
             paused: c.paused.is_some() && c.paused == c.latest,
+            latest: c.latest.clone(),
         }
     }
 }
@@ -421,6 +434,7 @@ mod tests {
             platform: "windows".into(),
             kind: Kind::Context,
             source: Source::ForegroundWindow,
+            idle: true,
             app_name: Some("Notepad".into()),
             process_name: Some("notepad.exe".into()),
             window_title: None,
@@ -429,7 +443,7 @@ mod tests {
         };
         assert_eq!(
             serde_json::to_string(&e).unwrap(),
-            r#"{"seq":1,"timestamp":5,"sessionId":"1","platform":"windows","kind":"context","source":"foreground-window","appName":"Notepad","processName":"notepad.exe","windowTitle":null,"redacted":"private","confidence":"partial"}"#
+            r#"{"seq":1,"timestamp":5,"sessionId":"1","platform":"windows","kind":"context","source":"foreground-window","idle":true,"appName":"Notepad","processName":"notepad.exe","windowTitle":null,"redacted":"private","confidence":"partial"}"#
         );
     }
 }
