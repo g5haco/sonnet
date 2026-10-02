@@ -300,6 +300,10 @@ fn build_main_window(app: &AppHandle) -> tauri::Result<()> {
     let win_site = site.clone();
     WebviewWindowBuilder::new(app, MAIN, WebviewUrl::External(first))
         .title("Sonnet")
+        // Tauri otherwise replaces WebView2's drop handler on Windows, so files dragged in from
+        // Explorer never reach the page's HTML5 drop zones (chat attachments, materials).
+        // A drop that misses a zone should navigate to file://, which the navigation lock drops.
+        .disable_drag_drop_handler()
         .inner_size(1280.0, 800.0)
         .min_inner_size(480.0, 600.0)
         .on_navigation(move |url| match classify(url, &nav_site) {

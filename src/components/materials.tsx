@@ -397,7 +397,9 @@ export function Materials({ course, materials }: { course: { id: string; code: s
       tab?.close();
       return toast.error("Couldn't open that file.");
     }
+    // No blank tab (the desktop app doesn't hand out about:blank windows): open the file itself.
     if (tab) tab.location.href = data.signedUrl;
+    else window.open(data.signedUrl, "_blank", "noopener");
   };
 
   return (

@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-10-02 (session 8), code through the M1 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-10-02 (session 8), code through the M2 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
 
 ## Project Summary
 
@@ -11,15 +11,20 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Guardian is the first native feature). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1 and M1 are done. M2 (shared app boot) is next and not started.** Focus Guardian has not started.
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Guardian is the first native feature). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1 and M2 are done.** M3 (auth handoff) and M6 (native bridge) wait for the enforced CSP; M4 (Windows packaging proof) and M5 (macOS) don't. Focus Guardian has not started.
 
 ## Current State
 
-- Live at `4eb8f00` plus three local commits: `ccf9aa0` (spec), `53956db` (M0/P1) and the M1 shell commit. **Not pushed:** the user said desktop milestones wait for their word. Nothing is deployed, so the new CSP and timer aren't live yet. The web app is unchanged by M1.
+- Live at `4eb8f00` plus four local commits: `ccf9aa0` (spec), `53956db` (M0/P1), `94852c9` (M1 shell) and the M2 commit. **Not pushed:** the user said desktop milestones wait for their word. Nothing is deployed, so the new CSP, timer and the materials fix aren't live yet. M2's only web change is two lines in `materials.tsx`.
 - The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
-- **Nothing from sessions 2–8 has been tested signed in.** That includes export and delete, the nonce CSP on signed-in pages, the focus-timer save success path, and now **password sign-in inside the desktop shell** (the shell was only checked up to the login page; the rules forbid typing a password).
+- **Signed-in testing, session 8 (user signed in by hand in the desktop shell; sign-in persisted across an app restart).** Seen working there, against a local dev server and a local production build: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and the nonce CSP on a real deploy (Home, Courses, Calendar, Chat and Flashcards loaded in a local production build with no `[Report Only]` message in the console, but that isn't Vercel and the other screens were only seen under `next dev`).
 
 ## Completed This Session
+
+- **M2: the existing app inside the desktop shell** (Windows/WebView2; facts in `DESKTOP_ARCHITECTURE_SPEC.md` under M2).
+  - Two incompatibilities fixed. **Materials did nothing on click:** `materials.tsx` pre-opens `window.open("", "_blank")`, which the shell denies, so the shared code now falls back to opening the signed URL (two lines; a browser that grants the blank tab behaves exactly as before). **File drops from Explorer:** Tauri's drop handler replaces WebView2's, so `.disable_drag_drop_handler()` is now set. **That one was not verified with a real OS drop.**
+  - Everything else on the list worked unchanged. Dictation degrades: `SpeechRecognition` exists but ends in `error: network`, so the button shows and a toast explains.
+  - One reviewer pass (see Testing).
 
 - **M1: the Tauri 2 desktop shell** (`src-tauri/`; facts and the dependency table are in `DESKTOP_ARCHITECTURE_SPEC.md` under M1).
   - A window that loads the site: `localhost:3000/login` in debug, `https://www.ericwei.me/login` in release.
@@ -73,7 +78,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## In Progress / Unfinished Work
 
 - **Needs the user:**
-  - a signed-in check of everything since session 2: Sync/Settings, Up next, the Pace chart, fonts and icons, and **export and delete**. Use a throwaway account for delete;
+  - a signed-in check of **delete account and reset data** (throwaway account). The other session 2–7 screens were seen working signed in during session 8;
   - a contact email to publish on the legal pages;
   - a legal review of privacy/terms (open questions: minimum age, governing law, liability cap, student-data wording, free AI providers possibly keeping prompts);
   - accounts for Resend, uptime monitoring and Google OAuth;
@@ -83,7 +88,8 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - **a signed-in check on a preview or production deploy with the nonce CSP**, watching the console for `[Report Only]` violations. That gates `ENFORCE = true`;
   - Skew Protection: Vercel's docs limit it to Pro/Enterprise, and it isn't active on production. If the plan is upgraded later: Project → Settings → Advanced → Skew Protection. Until then the desktop reload fallback (spec §11) applies;
   - a real Safari/WebKit pass on a Mac or iPhone (not done; the Playwright browsers aren't installed);
-  - **a password sign-in check inside the desktop shell** (`npm run desktop:dev`, or the built `sonnet-desktop.exe`): sign in, confirm it lands on `/`, then close to the tray and reopen;
+  - **drag a file from Explorer into the chat box and onto a course's Materials in the desktop app** (the drop-handler fix is unverified), and click a material to confirm it opens in the browser;
+  - a signed-in sign-out and a throwaway-account delete from inside the shell;
   - a Mac to build and run the shell (M5); macOS is configured but untested;
   - approval to push the desktop commits.
 - **Offered, not yet decided:**
@@ -99,6 +105,15 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - the plural-"s" expression is repeated 7 times.
 
 ## Known Bugs / Issues
+
+- **Web, found in M2 (not WebView2-specific):**
+  - React error #418 on every signed-in page of a production build. A hydration mismatch in the `MetalFx` send button (the server renders its fallback, the client renders the canvas). It also reproduces in plain Chromium. Pre-existing; not fixed.
+  - With `SUPABASE_SECRET_KEY` missing, a chat answer dies mid-stream (`ERR_INCOMPLETE_CHUNKED_ENCODING`) instead of failing open, because the metering write runs inside the stream. Production has the key, so this only bites a local setup. A local `.env.local` has no service key; use a placeholder value to test chat locally.
+  - The app syncs Canvas on page loads, and Settings → Sync → Sync now shares the hourly limit with it, so a burst of page loads can use the hour's quota.
+- **Desktop, found in M2:**
+  - The mic button stays visible in WebView2 although dictation can't work, and its toast says "browser".
+  - A download saves silently to Downloads; whether WebView2 shows its flyout is unknown.
+  - A pending WebView2 permission bubble appears as a second `page` target on the debug port. A test script must pick the large one.
 
 - **Desktop shell gaps (M1):**
   - A load that fails after the server answers (HTTP 5xx, a mid-load drop) shows WebView2's own error page, not the offline page. The offline page covers an unreachable server only.
@@ -131,13 +146,20 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## Current Priorities
 
 1. **The user's signed-in check of sessions 2–7** on a deploy: export and delete (throwaway account), plus the nonce CSP console check. Then enforce the CSP.
-2. **Desktop M2: shared app boot** (spec §13). M2, M4 and M5 can proceed while the CSP is report-only. M3 and M6 wait for the enforced CSP.
+2. **Desktop: M4 (Windows packaging proof) and M5 (macOS)** can proceed while the CSP is report-only. M3 and M6 wait for the enforced CSP (priority 1).
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
 6. After 1–2 weeks: read the `ai_usage` costs, set `PRO`, then Stripe. Vercel and Supabase Pro are needed before charging.
 
 ## Testing / Validation Status
+
+- **M2 (Windows):**
+  - `npm test` 60/60, `tsc` clean, `eslint` clean on `materials.tsx` (the repo's one lint error is still the untracked `dash-preview`), `npm run build` passes with the CSP hash check, `cargo test` 9/9 and clippy clean, and `npm run desktop:build` produced the release exe and installer.
+  - Live in the shell (see "Current State" for the list). The fix for materials was reproduced first ("dropped new window (about)", nothing opened), then confirmed (the signed URL opened in the default browser).
+  - Chat: a direct `/api/chat` fetch streamed incrementally in WebView2, and the UI showed the answer. The test chats, test file and export file were deleted afterwards. One 1-minute focus session was logged on purpose, and the clipboard was overwritten with a test string.
+  - **Not done:** a real OS file drop, a Canvas import, sign-out, anything on macOS, the native file-picker dialog.
+  - **One reviewer pass on the M2 diff:** no material defects. It confirmed the materials fallback can't double-open or leak a blank tab, and that a `file://` drop is cancelled by the navigation lock before it commits. Two doc wording nits were fixed. A side effect to know: a link dragged from another browser onto the window now acts as a navigation (an `https` link opens in the system browser). Linux isn't a target; WebKitGTK may block the fallback `window.open`.
 
 - **M1 (Windows, run for real):**
   - `cargo test`: 9 pass (navigation lock, hostile offline URLs, path gate, capability shape). `cargo clippy`: clean.
@@ -192,10 +214,10 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word on M2.** M1 is committed locally and not pushed.
-- **First, the user's password sign-in check in the shell** (see "Needs the user"). It's the one M1 criterion that couldn't be run.
-- **M2: shared app boot** (spec §13). Run the 7 signed-in pages, chat streaming, Canvas sync, file upload, the export download and the focus timer inside WebView2. Check the mic button (hide it where `SpeechRecognition` is missing) and focus-noise `AudioContext` in a hidden window. Expect a few webview-specific fixes. Note that materials open in the system browser (`target=_blank` to a signed URL).
-- Do not start Focus Guardian or M3/M6 before the CSP is enforced.
+**Wait for the user's word.** M2 is committed locally and not pushed.
+- **Is the desktop foundation ready for Focus Guardian's native capabilities? Almost.** The web app runs in WebView2 and the shell is stable. Before M6/Focus Guardian: (1) the user's manual file-drop check, (2) the signed-in CSP check on a deploy and `ENFORCE = true` (the bridge beyond `app_info` waits for it), (3) M3 (auth handoff for email links) and M4 (a clean-machine install of the NSIS installer), and (4) a Mac run for the same checks (M5).
+- **Next milestone by dependency:** M4 (Windows packaging proof: install the NSIS build on a clean Windows 10/11 machine, check WebView2 and SmartScreen, measure size and idle use). It doesn't need the CSP.
+- Do not start Focus Guardian, Strict Mode, screen capture or active-window tracking.
 
 ## Tomorrow / New-Session Startup Prompt
 

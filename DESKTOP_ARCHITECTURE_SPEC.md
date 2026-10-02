@@ -83,7 +83,7 @@
 | Deploy identity | There is no `deploymentId` in `next.config.ts`. | Nothing protects a window that outlives a deploy today. |
 | Focus timer | `FocusProvider` lives in `components/focus-timer.tsx` and is mounted inside `components/app-shell.tsx`. The run is `{ start }` in `localStorage` key `sonnet-focus`, restored by `load()`. `toggle()` starts a run or stops it. **`finish()` clears the stored run before awaiting `logFocus`.** | **A durability bug:** any failed `logFocus` (a network error, a stale action ID, a closed window) loses that session. It must be fixed (§13, P1) before Focus Guardian depends on the timer. |
 | HTML sinks | The only `dangerouslySetInnerHTML` is static JSON-LD on `/login`. Canvas HTML goes through `components/canvas-html.tsx`, which builds elements and avoids `dangerouslySetInnerHTML`. Chat uses `react-markdown` + `remark-gfm` **without** `rehype-raw`, so raw HTML is escaped. | The XSS surface is already small. Flashcard rendering is not yet audited. |
-| Microphone | **No `getUserMedia` anywhere.** Chat dictation is feature-detected `SpeechRecognition` / `webkitSpeechRecognition` in `chat/chat-input.tsx`. | No proven capture path exists in either webview. |
+| Microphone | Chat dictation is feature-detected `SpeechRecognition` / `webkitSpeechRecognition` in `chat/chat-input.tsx`, and starting it also runs voice-glow's `useMicrophone` (the visual glow) on a microphone stream. | WebView2 (M2): `getUserMedia` works once the user allows it; speech recognition fails with `network`. WKWebView untested. |
 | Browser-only state | `localStorage` holds the focus run, Quick note, Today's three and the tour flag. | It persists in the Tauri webview profile. |
 | Repo | No `src-tauri/`, no `.vercelignore`, no Tauri dependency. Next docs present: `content-security-policy.md`, `static-exports.md`, `deploymentId.md`. | The project starts from zero on desktop. |
 
@@ -527,6 +527,23 @@ Each milestone ships on its own and keeps the web app working.
 - **Done when:** all 7 signed-in pages, chat streaming, Canvas sync, file upload, export download and the focus timer work in WebView2. The mic button hides where `SpeechRecognition` is missing.
 - **Tests:** the manual page checklist, and a console free of new errors.
 - **Rollback:** revert the individual fixes.
+- **Implemented (session 8, Windows/WebView2 only).** Signed in as the user, in the shell against a local dev server and a local production build. Facts:
+  - **Worked unchanged:**
+    - Pages: Home, Courses, a course with its work list, an assignment's detail panel, Calendar, Chat, Flashcards and a deck, the Settings window and the Sync window.
+    - Session: a password sign-in persisted across a full app restart (the shell went from `/login` straight to `/`).
+    - Data flows: chat answers streamed incrementally as NDJSON; a materials upload went browser to Supabase storage and was listed; the export link saved `sonnet-export-<date>.json` to Downloads with no dialog; the Canvas "Sync now" server action round-tripped.
+    - Focus timer: the run was restored after a reload, and a stop after more than a minute logged ("1 min logged", `logFocus` completed, the pending queue emptied). This is the P1 success path, now seen signed in.
+    - Lifecycle: close-to-tray and a long-hide reload kept the session; clipboard `writeText` works.
+  - **Incompatibilities found and fixed:**
+    1. **Materials did nothing on click.** `materials.tsx` calls `window.open("", "_blank")` and later sets the tab's location. The shell denies `about:blank` windows (M1), so the call returned null and the code silently did nothing. Fix, shared and two lines: when no blank tab is granted, open the signed URL with `window.open(url, "_blank", "noopener")`. In the shell that reaches `on_new_window` and opens the system browser. Browsers that grant the blank tab behave exactly as before.
+    2. **File drops from Explorer reach no drop zone.** By default Tauri replaces WebView2's drop handler on Windows (its docs: `disable_drag_drop_handler` "is required to use HTML5 drag and drop APIs on the frontend on Windows"). The chat and materials use HTML5 drop zones. Fix: `.disable_drag_drop_handler()` in `build_main_window`. **Not verified with a real OS drop** (Explorer automation was refused and a scripted OLE drag never started). Indirect evidence only: the set of native windows with an OLE drop target changed, to the plain Chromium registration. A file dropped outside a zone will try `file://`, which the navigation lock drops. Test by dragging a file into the chat box.
+  - **Dictation:** `SpeechRecognition` and `webkitSpeechRecognition` both exist in WebView2, so the mic button shows. `start()` fires `audiostart` and then `error: "network"`, the same failure as Brave. The existing handler shows a toast ("This browser doesn't offer speech recognition… Win + H") and the app stays usable. Not changed: the button stays and the toast says "browser". WebView2's default asks the user for the microphone at the moment of use (the stored allow decision for `localhost:3000` was set by the user's click).
+  - **Not caused by WebView2:** React error #418 (a hydration mismatch) on every signed-in page of a production build. It comes from the `MetalFx` send button (server renders its fallback, the client renders the canvas), and the built-in Chromium browser logs the same mismatch on a mock page.
+  - **Audio and timers while hidden to the tray** (12 s): an `AudioContext` stayed `running`, its clock advanced and a 1 s interval kept ticking. `document.visibilityState` stays `visible` when the window is hidden. No throttling was seen. Longer hides weren't measured. The audible output itself wasn't heard.
+  - **Downloads:** the file saves silently. Whether WebView2 shows its own download flyout wasn't observable.
+  - **Clipboard:** `readText` hangs on a permission prompt. The app never calls it.
+  - **Not tested:** a real Canvas import (the hourly limit was already used, and the local server has no `SUPABASE_SECRET_KEY`), the native file-picker dialog, sign-out, Safari/WebKit, a physical drag-and-drop.
+  - **Test-harness note:** a pending WebView2 permission bubble shows up as a second `page` target on the debug port. Pick the target with the large viewport, or a script will drive the bubble.
 
 ### M3. Auth and data verification
 - **Goal:** sessions and data behave identically to the browser, and email-based sign-in works.
@@ -637,12 +654,12 @@ The architecture is approved. The claims below are **not** verified. They are pl
 | Ad-hoc-signed macOS apps lose the Accessibility grant on update | macOS test | M5 and M6 on real hardware |
 | Carbon hotkeys need no Input Monitoring permission | macOS test | M6 |
 | The signed-in app works in WKWebView and Safari (never tested). **A failure here is the only trigger for the Electron fallback.** | macOS test | M0 Safari pass, M5 |
-| `SpeechRecognition` exists in WebView2 and WKWebView | Windows + macOS test | M2 |
-| `AudioContext` focus noise plays in a hidden webview | Windows + macOS test | M2 |
+| `SpeechRecognition` exists in WebView2 and WKWebView | Windows + macOS test | M2. **WebView2: exists, but `start()` ends in `error: network` (unsupported).** WKWebView untested. |
+| `AudioContext` focus noise plays in a hidden webview | Windows + macOS test | M2. **WebView2: stays `running` for the 12 s tested; audible output not heard.** macOS untested. |
 | UI Automation and Accessibility can read the browser domain reliably | Windows + macOS test | M6. A browser-extension companion is the fallback. |
 | WebView2 is present on target Windows 10 machines | Windows test | M4 clean VM |
 | Antivirus tolerates an unsigned app that watches windows | Windows test | M4 |
-| Hidden-webview timer throttling doesn't break the focus run | Windows + macOS test | M6 skew test |
+| Hidden-webview timer throttling doesn't break the focus run | Windows + macOS test | M6 skew test. WebView2 (M2): a 1 s interval kept ticking and `visibilityState` stayed `visible` for 12 s hidden; longer hides and macOS untested. |
 | GitHub Releases works as the updater source (asset URLs, rate limits, public access) | Service test | M6 update test (N to N+1) |
 
 ## 16. Authoritative Implementation Decisions
