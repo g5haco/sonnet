@@ -1,261 +1,136 @@
 # Project Handoff
 
-> Updated 2026-10-02 (session 9), code through the Focus Sense M6B commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-10-02 (end of session 9), code through `0d70976` on `origin/main`. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`** (milestone facts live there: M1–M4, "Focus Sense F1", "Focus Sense M6B"). Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`. Benchmark: `bench/focus-sense/` (`README.md`, `RESULTS.md`).
 
 ## Project Summary
 
 **Sonnet** is a student hub: Canvas sync, calendar, courses, materials, grades, a focus timer, a customizable Home of widgets, flashcards, and an AI (also named **Sonnet**) that knows every course down to the syllabus. It's built by one college student and is live and multi-user at `https://www.ericwei.me` (Supabase RLS). Stack: Next.js 16, Supabase, Vercel, OpenRouter (free models first), `motion`, GSAP (landing only).
 
-Direction: commercialization. **Phase 10 (launch readiness) is in progress: steps 1–4 of 9 are done.**
-- Done: rate limits and Free/Pro limits, the security pass, account deletion and export, and the legal pages (drafts).
-- Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
-- Pro can't be bought yet: there's no Stripe and the price is hidden.
-
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, pushed at `59ee619`** (spec: "Focus Sense F1"). **M6B (classification and focus metrics) is built, benchmarked and tested on Windows, pushed at `dd64985`** (spec: "Focus Sense M6B"). Blocking, Strict Mode, notifications, the overlay and the Focus Report have not started.
+Two tracks:
+- **Commercialization, Phase 10 (launch readiness): steps 1–4 of 9 done** (rate limits and Free/Pro limits, security pass, account deletion and export, draft legal pages). Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade. Pro can't be bought yet (no Stripe, price hidden).
+- **Desktop app** (Tauri 2 shell over the live site, Windows/macOS). Foundation M0–M4 done on Windows, CSP enforced. **Focus Sense** (the first native feature): **F1 sensing** (`59ee619`) and **M6B classification + focus metrics** (`dd64985`) are built, tested on Windows and pushed. Not started: intervention/product experience (notices, overlay, Strict Mode, blocking, Focus Report), macOS (M5).
 
 ## Current State
 
-- **Pushed to `origin/main` at `ca241df`** (the user ran `git push`, session 8): the spec, M0/P1, the M1 shell, M2 and M3/M4. That deploys the web part (enforced CSP, `/auth/desktop`, the focus fix, the materials fix). **Not checked:** whether Vercel finished, and whether the live site works under the enforced CSP. `5099e66` (the ponytail cleanup and this handoff) was pushed right after.
-- The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
-- **Signed-in testing, session 8 (the user signed in by hand, twice, in the desktop app, once on the live site in the installed build).** Seen working: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload, password sign-in, sign-out, a real emailed sign-in link, and real Explorer file drops. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and anything on Vercel.
+- `main` = `origin/main` = `0d70976`. Session 9 pushed F1 and M6B, so Vercel is deploying the timer's Focus Sense hook, the desktop-only "Working on" picker and the Settings rows (all inert in browsers). **Not checked:** that the Vercel deploys finished, and that the live site works under the enforced CSP (pushed in session 8, never verified on Vercel).
+- The working tree is clean apart from `graphify-out/*`, which the post-commit graphify hook rewrites in the background (commit it with the next change, as before).
+- Migrations 0001–0017 applied by the user. Sessions 7–9 needed none.
+- Signed-in screens were seen working in the desktop app in session 8 (Home, Courses, Calendar, Chat streaming, Flashcards, Settings, Sync, uploads, export, focus save path, sign-in/out, email link, file drops). **Never tested signed in:** delete account, reset data, a real Canvas import, Focus Sense (F1 + M6B), anything on Vercel.
+- This machine: Focus Sense is turned off and its data cleared; no test windows or dev servers left running.
 
-## Completed This Session
+## Completed This Session (9)
 
-- **Focus Sense M6B: classification and deterministic focus metrics (session 9; facts in the spec under "Focus Sense M6B").** Lead plus four workers (classifier, independent benchmark, scoring, one reviewer).
-  - Classifier `src/lib/desktop/sense/` (rules, heuristics, subject lexicon, optional semantic provider boundary; offline in the app). Scoring `score.ts` (timeline, missing-stop rule, smoothing, metrics, verified minutes, focus score). Session context (`context.ts` + the timer's desktop-only "Working on" picker). Debug view in Settings → Data → Latest session.
-  - Native: `idle` flag (`GetLastInputInfo`), 60 s heartbeat events, `status.latest`. No new commands or permissions.
-  - Benchmark `bench/focus-sense/`: v1 failed its held-out gate (77.5% vs 79.0%) and is spent; fresh v2, tuned once on dev, held-out run once: 77.9% exact vs gate 73.6%, 0 enforceable false positives. `RESULTS.md` records both and the leakage review.
-  - Reviewer fixes: sleep/silent gaps now unmonitored, UNCERTAIN never credited, slip budget, idle distraction stays distraction, safety caps on enforceable paths (streaming sites, game-design sessions, Minecraft Education, media-study courses), cloud provider kept out of client imports, bench report only rewritten by held-out runs.
-  - Untouched by design: the timer's rules, `logFocus`, focus history, Supabase.
-- **Focus Sense F1, sensing foundation (session 9, Windows; facts in the spec under "Focus Sense F1").** Run as a lead plus three workers (native sensing; storage and web bridge; one review pass).
-  - Rust `src-tauri/src/focus_sense/` (`mod`, `sensor`, `privacy`, `monitor`, `store`): a 1-second foreground-window poll (raw Win32 FFI, **no new crates**) writing a change-only event per session to `<LocalAppData>/me.ericwei.sonnet/focus-sense/sessions/<run.start>.jsonl`. Six path-gated commands, `focus_sense_{status,configure,start,stop,events,clear}`; the capability grants those and nothing else.
-  - Web: `src/lib/desktop/focus-sense.ts` (typed, ordered, null in browsers), a 13-line additive hook in `focus-timer.tsx` (start with a run, stop without, no timer-rule change), and `src/components/desktop/focus-sense-settings.tsx` in Settings → Data (desktop only: opt-in checkbox, never-record list, pause for this session, clear data). `Row` is now exported from `settings-forms.tsx`.
-  - Review fixes: bridge calls queued in order plus one Rust control lock (a quick Start→Stop could leave a monitor running); pause survives a reload; `events` only serves the latest session; session ids digits only (no `COM1`); an unreadable process loses its title (fail closed).
-  - **User-changed decision:** raw activity is now stored on disk and readable by the page (§16 updated).
-- **Ponytail audit and cleanup (session 8, end):** the seven plural-"s" expressions became one `plural()` in `lib/utils.ts`, and the Rust crate now builds only `rlib` (`staticlib` and `cdylib` are mobile-only). tsc, lint, 64 web tests, 13 Rust tests, the web build and the release installer all pass. Nothing else found.
-
-- **M3 + M4 + CSP enforcement (Windows; facts in the spec under M3, M4 and §15).**
-  - **Email-link sign-in now works in the desktop app** (user-approved: the `tauri-plugin-deep-link` crate, `serde_json`, a new `/auth/desktop` page, the login form and actions). The email's PKCE code can't be redeemed in the system browser, so `/auth/desktop` bounces it to `sonnet://auth/callback?code=…`; the app accepts it only if the login page started a sign-in in the last 15 minutes (`auth_begin`, the second native command, refused off `/login`), once, then redeems it in its own webview. A late or cold-start link shows the expired message. Verified with a real emailed link.
-  - **CSP enforced** after a signed-in sweep across every page and flow with zero violations (a control proved the listener works), repeated after enforcing.
-  - **Installer validated on this machine** (not a clean VM): per-user install, Start Menu, icon, single instance, tray, close-to-tray, window state, live site, session persistence, uninstall (leaves unrelated data and the profile), reinstall. The machine was restored afterwards.
-  - **Real drag-and-drop confirmed:** the user dragged a file from Explorer into the chat and the materials uploader, and the page received the drops (the M2 fix works).
-  - Reviewer pass: no way past the pending gate. Fixed: `token_hash` dropped from the handoff, the late-link message, and the opt-in debug registration. Not fixed: nothing material.
-- Earlier this session: M2 (two incompatibilities fixed), M1 (the shell), M0/P1.
-
-- **M2: the existing app inside the desktop shell** (Windows/WebView2; facts in `DESKTOP_ARCHITECTURE_SPEC.md` under M2).
-  - Two incompatibilities fixed. **Materials did nothing on click:** `materials.tsx` pre-opens `window.open("", "_blank")`, which the shell denies, so the shared code now falls back to opening the signed URL (two lines; a browser that grants the blank tab behaves exactly as before). **File drops from Explorer:** Tauri's drop handler replaces WebView2's, so `.disable_drag_drop_handler()` is now set. **That one was not verified with a real OS drop.**
-  - Everything else on the list worked unchanged. Dictation degrades: `SpeechRecognition` exists but ends in `error: network`, so the button shows and a toast explains.
-  - One reviewer pass (see Testing).
-
-- **M1: the Tauri 2 desktop shell** (`src-tauri/`; facts and the dependency table are in `DESKTOP_ARCHITECTURE_SPEC.md` under M1).
-  - A window that loads the site: `localhost:3000/login` in debug, `https://www.ericwei.me/login` in release.
-  - Navigation lock, external links to the system browser, an offline page, single instance, window state, a tray, close-to-tray, reload-on-show (hidden 15 minutes or more), logging, and one command, `app_info`.
-  - `npm run desktop:dev` and `npm run desktop:build`. Ignore entries for git, Vercel (`.vercelignore`), ESLint and Graphify.
-  - Dependencies approved and added: `@tauri-apps/cli` (dev) plus the Rust crates `tauri`, `tauri-build`, and the single-instance, window-state, log and opener plugins, `log` and `serde`. All Apache-2.0/MIT.
-- **Two spec corrections found by testing.**
-  - Tauri matches `remote.urls` against the request `Origin` only. Path-scoped capabilities don't work, and a root `/` is a wildcard. Capabilities are origin-wide, and each command must check `webview.url().path()` itself (`bridge_path_allowed`).
-  - The opener plugin injects a click handler that swallows `target=_blank` clicks. It is turned off.
-- **One reviewer pass fixed 4 defects:** the opener click handler, a hostile `sonnet-offline` URL that site content could use (now only the shell's own offline URL is accepted, with a site-page `to`), `window.open('')` blanking the app (`about:blank` no longer navigates), and the macOS sleep clock (`SystemTime` instead of `Instant`).
-- Earlier (session 7): the desktop architecture (Arena run, spec `ccf9aa0`), M0 (nonce CSP, report-only) and P1 (durable focus-session logging), commit `53956db`.
+- **Focus Sense F1, sensing foundation** (spec "Focus Sense F1"). Rust `src-tauri/src/focus_sense/` polls the foreground window once a second (raw Win32 FFI, no new crates), applies privacy rules, and writes change-only JSONL per session under `<LocalAppData>/me.ericwei.sonnet/focus-sense/`. Six path-gated commands `focus_sense_{status,configure,start,stop,events,clear}`. Web bridge `src/lib/desktop/focus-sense.ts` (ordered calls, null in browsers), additive timer hook, Settings → Data rows (opt-in, never-record list, pause for this session, clear). Reviewed; fixes applied (call ordering + Rust control lock, pause survives reload, events only for the latest session, digit-only session ids, fail-closed titles).
+- **Focus Sense M6B, classification + metrics** (spec "Focus Sense M6B"). Run as lead + workers: classifier, independent benchmark, scoring, reviewer.
+  - Classifier `src/lib/desktop/sense/` (abstain gates → rules → heuristics with a ~830-term subject lexicon → optional semantic provider, offline in the app). `isEnforceable` = DISTRACTING ≥ 0.9 from rule/heuristic.
+  - Scoring `score.ts`: timeline, missing-stop/silent-gap rule (90 s grace), smoothing, metrics, verified minutes, auditable focus score.
+  - Session context `context.ts` + the timer's desktop-only "Working on" picker (course, assignment, goal; localStorage). Debug view: Settings → Data → Latest session.
+  - Native: `idle` flag (`GetLastInputInfo`, 120 s), 60 s heartbeats, `status.latest`.
+  - Benchmark: v1 failed its held-out gate (77.5% vs 79.0%) and is spent; fresh v2 (189 examples), tuned once on dev, held-out run once: **77.9% exact (gate 73.6%), 93.8% decisive, 37.7% abstain, 0 enforceable false positives**, 20.8% would need the semantic layer. Baselines: keyword 63.6%, blocklist 54.5%.
+  - Reviewer fixes: sleep/silent gaps unmonitored, UNCERTAIN never credited, slip budget, idle distraction stays distraction, enforceability caps (streaming sites, game-design sessions, Minecraft Education, media-study courses), cloud provider kept out of client imports, bench report written only by held-out runs. A leakage concern (four held-out-only terms) was checked: the tuning worker never opened the held-out file; details in `RESULTS.md`.
 
 ## Important Decisions
 
-- **Delete is immediate, not a grace period.** A 30-day restore flow would need a migration and a cron job; not worth it before real users exist.
-- **Export is JSON only.** A ZIP of the uploaded files was declined (a dependency, and heavy on Vercel's time limits).
-- **Legal text claims only what the code does.** Re-verify `privacy/page.tsx` whenever data flows change: a new AI provider, analytics, email, sharing or storage.
-- **Honest landing page:** real screenshots stay above the fold.
-- **Keep the nature imagery** (dusk and night meadow). Don't swap it for stock or generated photos.
-- **The taste skill applies to the landing page only.** The app follows PRODUCT.md (sentence case, mono readouts, course colors).
-- **Icons go through `@/components/icons` only.** Map new names there; never import Phosphor directly.
-- **The CSP is enforced** (`ENFORCE = true` in `lib/csp.ts`, session 8), after zero violations signed in and out on a production build in the desktop app. Set it back to `false` to debug a violation. Never regress auth, Server Actions or public pages to satisfy it. Not verified on Vercel itself, and Google sign-in will need a `form-action 'self'` check when it ships. A report endpoint (a new API route) needs the user's OK.
-- **Desktop decisions are locked in `DESKTOP_ARCHITECTURE_SPEC.md` §16.** The enforced CSP is validated, so the bridge may grow, one path-gated command at a time (`auth_begin` is the second after `app_info`). The sign-in handoff passes a PKCE `code` only, never a `token_hash`.
-- **A debug exe registers `sonnet://` only if `SONNET_DESKTOP_REGISTER_SCHEME` is set,** and a test machine's `HKCU\Software\Classes\sonnet` should be removed afterwards. The installer owns the key for installed builds.
-- **Every future native command must gate on the page path in Rust** (`bridge_path_allowed`), because capabilities can't. Never list a root `/` capability URL.
-- **The `opener` plugin is Rust-only.** Keep `open_js_links_on_click(false)` and grant no opener permission to pages.
-- **Don't log full URLs in the shell.** They can carry sign-in tokens. Log the origin.
-- **Static public pages stay static.** They get a no-nonce CSP rather than becoming dynamic. A dynamic `not-found` was tried and rejected, because it made every static page dynamic.
-- **Price:** stays hidden until `ai_usage` shows real costs (AI is about $7/user/month by the user's estimate).
-- **Limits live in the database**, and Canvas imports the first 2 courses. Quick note and Today's three are stored per device, in localStorage.
-- **Held from earlier sessions:**
-  - ask before adding a dependency;
-  - honest copy;
-  - metering fails open;
-  - error tracking waits until charging starts.
+- **Focus Sense (sessions 9):**
+  - Raw activity is stored locally per session and the page may read the **latest** session's events (user-changed decision, spec §16). Nothing goes to Supabase or any server.
+  - **The semantic/AI layer stays offline in the app.** `openRouterProvider` exists only in `semantic.ts` for measurement. Wiring it needs a server route, a privacy-page change and the user's OK; it was never run on benchmark data (user's instruction).
+  - **Benchmark discipline:** a held-out split runs once and is then spent; tune on dev only; gates are fixed (exact ≥ strongest baseline + 10 points; enforceable FP ≤ 1% of legit study). v1 and v2 held-out are both spent: the next tuning round needs a fresh set.
+  - Enforcement is future work and may act only on `isEnforceable` (never on a semantic verdict alone). M6B enforces nothing.
+  - Scoring is deterministic and conservative: verified minutes count only time ON_TASK before and after smoothing, active and monitored; idle and UNCERTAIN are neutral; hands-off lecture watching is not credited (accepted to keep timer farming failing).
+  - The web timer stays the single source of truth; its rules, `logFocus` and focus history are untouched.
+- **Desktop (locked in spec §16):** every native command gates on the page path in Rust (`bridge_path_allowed`); capabilities scope by origin only, so origin + enforced CSP is the real boundary (a same-origin script can rewrite `history`). Never list a root `/` capability URL. The `opener` plugin is Rust-only. Don't log full URLs. The sign-in handoff passes a PKCE `code` only. A debug exe registers `sonnet://` only with `SONNET_DESKTOP_REGISTER_SCHEME`.
+- **CSP is enforced** (`ENFORCE = true` in `lib/csp.ts`). Never regress auth, Server Actions or public pages to satisfy it; static public pages stay static (no-nonce CSP). Google sign-in will need a `form-action 'self'` check. A report endpoint needs the user's OK.
+- **Product/legal:** delete is immediate; export is JSON only; legal text claims only what the code does (re-verify `privacy/page.tsx` on any data-flow change, including any Focus Sense data leaving the device); honest landing (real screenshots); keep the nature imagery; taste skill on the landing only; icons only via `@/components/icons`.
+- **Pricing/limits:** price hidden until `ai_usage` shows real costs (~$7/user/month estimate); limits live in the database; Canvas imports the first 2 courses; Quick note and Today's three are per device.
+- **Held from earlier sessions:** ask before adding a dependency; honest copy; metering fails open; error tracking waits until charging starts.
 
 ## Current Design System
 
-- **Palette:** Midnight Study (tokens in `globals.css`). A monochrome shell with an off-white primary; the landing is always dark (`.landing dark`).
-- **Type:** Geist for text and headings (`font-heading` = Geist 600, tight tracking) and Geist Mono for readouts, labels and numbers.
-- **Icons:** Phosphor, regular weight, through `components/icons.tsx`.
-- **Color carries meaning:** course hues, status (`--done`, `--warning`, `--destructive`) and data.
-- **Motion:**
-  - ease-out `[0.23,1,0.32,1]` with low-bounce springs, using `motion`.
-  - GSAP only in isolated landing leaves (`scrub-text.tsx`).
-  - Reduced motion is respected everywhere.
-  - On SVG children, use motion's `scale`/`rotate`/`y` props, not `transform` strings.
-- **Landing backdrop:** the dusk meadow, then the night meadow, then solid, driven by scroll-timeline CSS (`.sky-*`).
-- **Must not regress:** 44px tap targets on phones (use `hit` for small text links), no overflow at 375px, no hydration mismatches.
-- **Button:** there is no `asChild`. For a link styled as a button, use `buttonVariants` on an `<a>`.
+- **Palette:** Midnight Study (tokens in `globals.css`): monochrome shell, off-white primary; the landing is always dark (`.landing dark`).
+- **Type:** Geist (headings `font-heading` = Geist 600, tight tracking) and Geist Mono for readouts, labels and numbers.
+- **Icons:** Phosphor, regular weight, via `components/icons.tsx`.
+- **Color carries meaning:** course hues, status (`--done`, `--warning`, `--destructive`) and data. The Focus Sense debug view uses `text-done` / `text-destructive` / muted for ON_TASK / DISTRACTING / UNCERTAIN.
+- **Motion:** ease-out `[0.23,1,0.32,1]`, low-bounce springs via `motion`; GSAP only in landing leaves (`scrub-text.tsx`); reduced motion respected; on SVG children use motion's `scale`/`rotate`/`y` props.
+- **Landing backdrop:** dusk meadow → night meadow → solid, scroll-timeline CSS (`.sky-*`).
+- **Must not regress:** 44px tap targets on phones (`hit` for small text links), no overflow at 375px, no hydration mismatches (desktop-only UI renders after mount via `useSyncExternalStore(..., () => false)`).
+- **Button:** no `asChild`; for a link styled as a button use `buttonVariants` on an `<a>`. Form fields use the `field` style (`h-11 rounded-full bg-secondary`).
 
 ## In Progress / Unfinished Work
 
 - **Needs the user:**
-  - a signed-in check of **delete account and reset data** (throwaway account). The other session 2–7 screens were seen working signed in during session 8;
-  - **the Supabase redirect entry for the desktop email link** (not applied, I never change production Supabase): Authentication → URL Configuration → Redirect URLs, add `https://www.ericwei.me/auth/desktop`. (`http://localhost:3000/auth/desktop` already works.) Then push to deploy: the live site has neither `/auth/desktop` nor the enforced CSP yet. Keep the email template as the default;
-  - **a clean Windows 10/11 machine or VM** for the installer (SmartScreen, WebView2 bootstrapper, antivirus), and OK for a GitHub Actions workflow (`desktop.yml`) to build the installer; the interactive wizard and the uninstaller's "delete app data" choice haven't been clicked through;
-  - a contact email to publish on the legal pages;
-  - a legal review of privacy/terms (open questions: minimum age, governing law, liability cap, student-data wording, free AI providers possibly keeping prompts);
-  - accounts for Resend, uptime monitoring and Google OAuth;
-  - a choice of error tracking (Sentry or no-dependency) and analytics (Plausible or PostHog);
-  - rotating secrets per `docs/SECURITY.md`;
-  - OK for a CSP report endpoint;
-  - Skew Protection: Vercel's docs limit it to Pro/Enterprise, and it isn't active on production. If the plan is upgraded later: Project → Settings → Advanced → Skew Protection. Until then the desktop reload fallback (spec §11) applies;
-  - a real Safari/WebKit pass on a Mac or iPhone (not done; the Playwright browsers aren't installed);
-  - a throwaway-account delete from inside the shell;
-  - a Mac to build and run the shell (M5); macOS is configured but untested;
-  - approval to push the desktop commits.
-- **Offered, not yet decided:**
-  - make Reset all data also clear decks and focus history. It currently deletes `courses`, `chats` and `settings`; decks and focus sessions only have their course unlinked, and `ai_usage` stays;
-  - let Free students pick which 2 Canvas courses to keep;
-  - sync Quick note and Today's three across devices (a migration);
-  - fix the duplicate deck from re-saving an old chat's deck;
-  - an unshare option for flashcard decks (there is none today);
-  - group Up next by day instead of the exact due time.
-- **Audit leftovers (not done):**
-  - `ash-burst-button.tsx` (391 lines + `matter-js`) serves only the reset confetti;
-  - removing it would drop the reset confetti, so it needs the user's OK. The ponytail audit (session 8) found nothing else to cut: every dependency is imported and no source file is orphaned.
-  - `ui/*.tsx` imports `cn` from the package instead of `@/lib/utils` (vendored files; the same function, left alone).
+  - **Supabase redirect for the desktop email link** (I never change production Supabase): Authentication → URL Configuration → Redirect URLs, add `https://www.ericwei.me/auth/desktop`. Keep the default email template;
+  - a signed-in check of **delete account and reset data** (throwaway account), and of **Focus Sense on the live site with the installed app**;
+  - **scope for the next Focus Sense milestone** (intervention/product experience), and a decision on wiring the semantic layer (server route + privacy text);
+  - **a clean Windows 10/11 machine or VM** for the installer (SmartScreen, WebView2 bootstrapper, antivirus), and OK for a GitHub Actions `desktop.yml` installer build;
+  - a Mac for M5 (macOS configured, untested; Focus Sense has no macOS sensor);
+  - a contact email for the legal pages, and a legal review (minimum age, governing law, liability cap, student-data wording, free AI providers possibly keeping prompts, on-device observation by the desktop app);
+  - accounts for Resend, uptime monitoring and Google OAuth; a choice of error tracking (Sentry or no-dependency) and analytics (Plausible or PostHog); rotating secrets per `docs/SECURITY.md`; OK for a CSP report endpoint;
+  - Skew Protection (Vercel Pro/Enterprise only; not active). Until then the desktop reload fallback (spec §11) applies;
+  - a real Safari/WebKit pass on a Mac or iPhone.
+- **Offered, not decided:** Reset all data also clearing decks and focus history; letting Free students pick their 2 Canvas courses; syncing Quick note / Today's three (migration); fixing the duplicate deck from re-saving an old chat's deck; an unshare option for decks; grouping Up next by day; a "Resume" control after "Pause for this session" (today pause lasts the rest of the session).
+- **Audit leftovers:** `ash-burst-button.tsx` (391 lines + `matter-js`) serves only the reset confetti (removal needs the user's OK); `ui/*.tsx` import `cn` from the package (vendored, left alone).
 
 ## Known Bugs / Issues
 
-- **Focus Sense M6B limits** (full list in the spec): hands-off lecture watching becomes IDLE after 2 min and isn't credited; ~38% of contexts stay UNCERTAIN offline; titles can't separate a TV show from a topic or name unknown games; lexicon is English/US-centric; rapid alternation credits the on-task blips; semantic layer not wired (needs a server route, privacy text and the user's OK) and its request rate/latency unmeasured.
-- **Focus Sense F1 limits** (full list in the spec): polling, not event-driven (§12 item 4 not met); the setting and data are per computer, not per account; UWP apps show as `ApplicationFrameHost.exe`; private windows are caught only by title marker; a hard kill leaves no stop marker; pause is forgotten on app restart; a sign-out mid-session leaves the monitor running until the timer's end plus 2 minutes; turning it on mid-session waits for the next session. The path gate can be passed by a same-origin script that rewrites `history` (spec §7), so the origin plus the CSP is the real boundary.
-- **Found in M3/M4:** Supabase's email limit is about two links an hour per address, so repeated tests get "Too many links". The app syncs Canvas on page loads, which shares the hourly Sync limit. The installed exe is named `sonnet-desktop.exe`. Installing over leftover files works. Leftover `code-verifier` cookies pile up from each link request (existing web behavior).
-
-- **Web, found in M2 (not WebView2-specific):**
-  - React error #418 on every signed-in page of a production build. A hydration mismatch in the `MetalFx` send button (the server renders its fallback, the client renders the canvas). It also reproduces in plain Chromium. Pre-existing; not fixed.
-  - With `SUPABASE_SECRET_KEY` missing, a chat answer dies mid-stream (`ERR_INCOMPLETE_CHUNKED_ENCODING`) instead of failing open, because the metering write runs inside the stream. Production has the key, so this only bites a local setup. A local `.env.local` has no service key; use a placeholder value to test chat locally.
-  - The app syncs Canvas on page loads, and Settings → Sync → Sync now shares the hourly limit with it, so a burst of page loads can use the hour's quota.
-- **Desktop, found in M2:**
-  - The mic button stays visible in WebView2 although dictation can't work, and its toast says "browser".
-  - A download saves silently to Downloads; whether WebView2 shows its flyout is unknown.
-  - A pending WebView2 permission bubble appears as a second `page` target on the debug port. A test script must pick the large one.
-
-- **Desktop shell gaps (M1):**
-  - A load that fails after the server answers (HTTP 5xx, a mid-load drop) shows WebView2's own error page, not the offline page. The offline page covers an unreachable server only.
-  - There's no reload after system wake, only after a long hide.
-  - Icons are upscaled from the 512 px web mark. Regenerate from 1024 px before release.
-  - Not exercised: the tray's right-click menu (Open/Quit), a physical tray click, real Ctrl+click on a link, installing the NSIS installer.
-  - No signing, no updater.
-- **Desktop dev:** `tauri dev` starts Next on port 3000 itself, so stop any other dev server first. After running it, delete `.next/dev` before `npm run build`, or the build fails on stale type stubs for the preview pages.
-
-- Saving a deck from an old chat twice (after a reload) creates a duplicate.
-- **CSP known gap:** the prerendered 404 (an unknown URL while signed in) gets the nonce policy. Once enforced it shows without JavaScript, but its Home link still works. `/_global-error` is the same.
-- **Focus log:** two requests racing past `logFocus`'s check-then-insert could still double-log. The Web Lock covers the realistic case; a unique index would need a migration.
-- A signed-in user following an expired link to `/login?expired=1` now lands on `/` and doesn't see the note.
-- The Canvas free cap follows Canvas order: deleting a course just re-imports it.
-- Weeks reset Monday 00:00 UTC. `visionText` isn't metered. On a retry, only the last attempt's cost is logged.
-- If account delete errors with a database error, suspect Supabase refusing to delete a user who still owns storage objects. Files are removed first, so it shouldn't happen.
+- **Focus Sense** (full lists in the spec):
+  - M6B: hands-off lecture watching turns IDLE after 2 min and isn't credited; ~38% of contexts stay UNCERTAIN offline; titles can't tell a TV show from a topic or name unknown games; lexicon is English/US-centric; rapid alternation credits the on-task blips; semantic request rate/latency unmeasured.
+  - F1: 1 s polling, not event-driven (§12 item 4 unmet); setting and data are per computer, not per account; UWP apps report `ApplicationFrameHost.exe`; private windows caught only by title marker; pause forgotten on app restart; a sign-out mid-session leaves the monitor running until the timer's end + 2 min; turning it on mid-session waits for the next session.
+- **Desktop:** a load failing after the server answers shows WebView2's own error page; no reload after system wake; icons upscaled from 512 px (regenerate from 1024 px); the mic button shows in WebView2 though dictation can't work; downloads save silently; no signing or updater; tray right-click menu and a real installer run on a clean machine not exercised.
+- **Web:** React #418 hydration mismatch in the `MetalFx` send button on signed-in production pages (pre-existing); with `SUPABASE_SECRET_KEY` missing locally a chat answer dies mid-stream (use a placeholder key); Canvas sync on page loads shares the hourly Sync limit; Supabase sends ~2 email links/hour/address; duplicate deck from re-saving an old chat's deck; prerendered 404 and `/_global-error` get the nonce policy; `logFocus` check-then-insert could double-log under a race (unique index would need a migration); `/login?expired=1` while signed in lands on `/` without the note; Canvas free cap follows Canvas order; weeks reset Monday 00:00 UTC; `visionText` not metered; retries log only the last attempt's cost.
 - **Dev only:**
-  - `next dev` reports one CSP violation (the unminified theme script). Judge the CSP on a production build;
-  - a local `next build` fails on the untracked `login/*-preview` pages. Hide them first: rename each to `_name` (an App Router private folder), then rename back;
-  - hydration warnings from `VoiceBeam`/`MetalFx`;
-  - the Next dev-tools badge sits over the phone menu button in previews;
-  - the browser pane can't screenshot or emulate mobile while it's hidden (use DOM measurements).
-- Free AI models are flaky. `graphify update .` sometimes segfaults; the git hook rebuilds in the background anyway.
-- **Windows editing:**
-  - Most source files use CRLF, and `globals.css` has *mixed* endings. New files this session are LF.
-  - Edit with the Edit tool, or with Python reading and writing `newline=''` **and `encoding='utf-8'`**. `open(p, 'w')` truncates the file before an encoding error, so always pass utf-8. `sed -i` has stripped CRs before.
-  - In Bash, `grep -c $'\r'` doesn't count CRs reliably; use `od -c`.
-  - Write Python to a scratch file; heredocs mangle backslashes.
+  - `tauri dev` starts Next on port 3000 itself (stop other dev servers first). Stopping a backgrounded `next dev`/`tauri dev` can leave a node process holding 3000: find it with `netstat -ano | grep :3000` and stop that pid.
+  - Before `npm run build`: delete `.next/dev`, and hide the untracked `login/*-preview` pages (rename each to `_name`, then back).
+  - `next dev` reports one CSP violation (unminified theme script); judge the CSP on a production build. Hydration warnings from `VoiceBeam`/`MetalFx`. The browser pane can't screenshot while hidden.
+  - Free AI models are flaky; `graphify update .` sometimes segfaults (the git hook rebuilds anyway).
+- **Windows editing:** most source files are CRLF, some mixed (`globals.css`, `app-shell.tsx`); new files are LF. Use the Edit tool, or Python with `newline=''` and `encoding='utf-8'` written to a scratch file (heredocs mangle backslashes and some quoting). `sed -i` can strip or add CRs; check with `cat -A`/`od -c`.
 
 ## Current Priorities
 
-1. **Deploy the web changes and set the Supabase redirect** (see Needs the user), then re-check sign-in, an email link from the installed app, and the CSP on Vercel. Then the delete-account check with a throwaway account.
-2. **Focus Sense:** M6B is pushed (`dd64985`). Check the deploy, then test F1 + M6B signed in on the live site with the installed app. Next milestone: the intervention/product experience (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
-3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
-4. **Contact email and legal review**, which block charging.
-5. Steps 6–8: analytics, Resend, Google sign-in.
-6. After 1–2 weeks: read the `ai_usage` costs, set `PRO`, then Stripe. Vercel and Supabase Pro are needed before charging.
+1. **Verify the deploys:** Vercel finished, the live site works under the enforced CSP, then set the Supabase redirect and check an email link from the installed app. Then the throwaway-account delete check.
+2. **Focus Sense signed-in validation** with the installed app on the live site (enable, pick a course, run a session, read Settings → Data → Latest session). Then the next milestone once the user scopes it.
+3. **Desktop chores:** clean-machine install, CI installer workflow (needs OK), M5 (macOS).
+4. **Phase 10 step 5: monitoring** (needs the user's Sentry/no-dependency choice and an uptime account).
+5. **Contact email and legal review** (block charging; include the desktop app's on-device observation).
+6. Steps 6–8: analytics, Resend, Google sign-in. After 1–2 weeks of `ai_usage`: set `PRO`, then Stripe (needs Vercel and Supabase Pro).
 
 ## Testing / Validation Status
 
-- **Focus Sense M6B (Windows 11):** `npm test` 143 passed (3 benchmark tests skipped by design: held-out gate and semantic run), `tsc` clean, eslint clean on tracked and new files, `npm run build` passes with the CSP hash check, `cargo test` 38/38, clippy clean, `npm run desktop:build` built the release exe and installer. Benchmark as above (`bench/focus-sense/RESULTS.md`).
-  - Live: a 12-minute desktop-dev session on `/login/dash-preview` with the picker set to CHEM 1210 + a goal. Labels matched what was in front (VALORANT DISTRACTING 0.95, Stoichiometry Wikipedia ON_TASK 0.85, a YouTube let's-play search DISTRACTING 0.92, Task Switching/Notepad/Claude UNCERTAIN); the off/on gap scored UNMONITORED; heartbeats present. The user's real activity (a running game) was interleaved with the scripted switches, so the score (2) reflects their actual session; the data was cleared and sensing turned back off afterwards. Plain browser: timer unchanged, no picker, no bridge calls, no Focus Sense storage.
-  - **Not tested:** signed in, the live site, a hands-off idle stretch with real input stopped, the semantic layer, macOS.
-- **Focus Sense F1 (Windows 11, `desktop:dev`, signed out on `/login/dash-preview` and `/login/settings-preview`, driven over the WebView2 debug port):**
-  - `cargo test` 36/36, clippy `-D warnings` clean, `npm test` 70/70, `tsc` clean, eslint clean on tracked and new files, `npm run build` passes with the CSP hash check, `npm run desktop:build` produced the release exe and a 1.49 MiB NSIS installer.
-  - Live: no monitor at startup; all six commands refused on `/login`; malformed, unknown-field, traversal and ended-session inputs refused; opener and event-listen refused. Timer Start armed the monitor with `run.start` as the id; with Sonnet hidden in the tray, switching to Claude, Notepad (excluded → blanked), and two Windows Terminal windows produced one event per change and no duplicates over minutes. Reload kept the same monitor. Stop ended it (stop marker, thread gone). Pause survived a reload. Turning it off stopped it; start while off was refused. Five rapid Start→Stop pairs left nothing running (7 starts, 7 stops in the log). A hard kill and relaunch started nothing until the page with the still-running timer resumed the same session (seq continued). Clear removed every session file and kept the config. In a plain browser the timer works as before, no bridge calls, and Settings shows no Focus Sense rows.
-  - CPU (debug build, shell process): about 31 ms per minute while monitoring, 0 ms idle. Storage: about 250 bytes per event.
-  - **Not tested:** the release exe's sensing against the live site (the live site lacks the new web code until deployed), signed-in pages, an elevated foreground window, Edge InPrivate live (unit-tested only), a clean machine, antivirus, macOS. Test data was cleared and the setting turned back off on this machine.
-- **M3/M4 (Windows):** `npm test` 64/64, `tsc` clean, `eslint` clean on the changed files (the one repo error is the untracked `dash-preview`), `npm run build` passes with the CSP hash check and `/auth/desktop` dynamic, `cargo test` 13/13, clippy clean, `npm run desktop:build` produced the release exe and a 1.46 MiB NSIS installer, and the final release exe loads the live `/login`.
-  - Live: password sign-in, sign-out, sign-in persistence across restarts, a real email link (before the code-only change), forged and malformed `sonnet://` links, the late-link message, signed-in and signed-out CSP sweeps (production build, enforced), real Explorer drops, and the installer lifecycle above. Your dev profile was moved aside and restored; **your localhost session was signed out by the last test**, so sign in again.
-  - **Not done:** a clean VM, sign-up confirmation, Google, macOS, Vercel, a second real email link after the code-only change (rate limit).
-
-- **M2 (Windows):**
-  - `npm test` 60/60, `tsc` clean, `eslint` clean on `materials.tsx` (the repo's one lint error is still the untracked `dash-preview`), `npm run build` passes with the CSP hash check, `cargo test` 9/9 and clippy clean, and `npm run desktop:build` produced the release exe and installer.
-  - Live in the shell (see "Current State" for the list). The fix for materials was reproduced first ("dropped new window (about)", nothing opened), then confirmed (the signed URL opened in the default browser).
-  - Chat: a direct `/api/chat` fetch streamed incrementally in WebView2, and the UI showed the answer. The test chats, test file and export file were deleted afterwards. One 1-minute focus session was logged on purpose, and the clipboard was overwritten with a test string.
-  - **Not done:** a real OS file drop, a Canvas import, sign-out, anything on macOS, the native file-picker dialog.
-  - **One reviewer pass on the M2 diff:** no material defects. It confirmed the materials fallback can't double-open or leak a blank tab, and that a `file://` drop is cancelled by the navigation lock before it commits. Two doc wording nits were fixed. A side effect to know: a link dragged from another browser onto the window now acts as a navigation (an `https` link opens in the system browser). Linux isn't a target; WebKitGTK may block the fallback `window.open`.
-
-- **M1 (Windows, run for real):**
-  - `cargo test`: 9 pass (navigation lock, hostile offline URLs, path gate, capability shape). `cargo clippy`: clean.
-  - `npm run desktop:dev`: the window opened `/login`; same-site links stayed inside; a `target=_blank` link, `window.open` and a top-level navigation to another site opened the default browser (Brave), logging the origin only.
-  - Close hid the window and kept the process; a second launch showed it; a short hide kept the page, a long hide reloaded it.
-  - With the server down the offline page appeared, kept the return page, and recovered by itself when the server came back. Window state restored across a kill and relaunch. The tray toggle worked (driven with the tray's window message).
-  - IPC: `app_info` allowed on the site, refused on `/f`, `/landing`, `/auth`, `/privacy`, `/terms`. Opener and window-state commands denied.
-  - `npm run desktop:build`: the release exe (about 4.4 MB) and the NSIS per-user installer (about 1.4 MiB) built. The release exe loaded the live site's `/login` and `app_info` worked. The installer was not installed.
-  - **Not done:** a password sign-in, a literal Wi-Fi-off test (the offline page was tested by pointing a debug build at a dead local origin), anything on macOS.
-- **Web after M1:** `npm test` 60/60, `tsc` clean, `npm run build` passes with the CSP hash check and the same static routes. `npm run lint` reports one error, in the untracked `login/dash-preview` page (never committed); tracked code is clean.
-
-- `npm test` passes 60/60, including the new csp and focus tests. `tsc` is clean. `eslint` is clean on the changed files. `npm run build` passes, and the hash check matches. Static routes are unchanged: `/landing`, `/privacy`, `/terms` and `/_not-found` are still prerendered.
-- **CSP checks on a local production build** (`next start`):
-  - The headers are correct per route.
-  - On `/login`, `/login?mode=signup`, `/login?expired=1` and `/f/<bad>`, every executable script carries the nonce or matches the hash, and there are no inline handlers.
-  - The bundles contain no `eval` or `new Function`. Client requests are same-origin or Supabase only.
-  - Client navigation `/login` → `/privacy` → `/terms` → `/login`, plus a sign-in Server Action round-trip (a validation error, with no Supabase call), produced **zero violations**. An inline-handler control was reported, so reporting works.
-  - `/auth/confirm` with a bogus `code` or `token_hash` still redirects to `/login?expired=1`.
-- **P1 live check** (dev, mock dashboard preview, signed out so RLS rejects the insert):
-  - Stopping a session showed "…It's kept and will save later."
-  - The run was cleared and the session stayed queued.
-  - A reload and an `online` event each retried once, silently, keeping one queued copy.
-  - The success path is covered by unit tests only.
-- **Not tested:**
-  - anything signed in: the signed-in pages under the nonce CSP, chat streaming, uploads, a real magic link, the timer's success path;
-  - Safari/WebKit;
-  - phones;
-  - Vercel itself (nothing deployed).
+- **At `0d70976` (Windows 11):** `npm test` 143 passed, 3 skipped by design (benchmark held-out gate and semantic run); `tsc` clean; eslint clean on tracked and new files; `npm run build` passes with the CSP hash check; `cargo test` 38/38; clippy `-D warnings` clean; `npm run desktop:build` built the release exe and a 1.49 MiB NSIS installer.
+- **Focus Sense, live in `desktop:dev`** (signed out, on `/login/*-preview`, driven over the WebView2 debug port):
+  - F1: path gate refuses every command on `/login`; malformed/unknown/traversal inputs refused; monitoring follows the timer, continues while hidden in the tray, survives reloads, stops promptly (thread gone), pause survives reload, no orphan monitor after a hard kill + relaunch; clear removes session files. Shell CPU ~31 ms/min while monitoring (≈0.05% of a core, debug build), 0 idle.
+  - M6B: a 12-minute session with the picker set to CHEM 1210 classified VALORANT DISTRACTING 0.95, a stoichiometry Wikipedia page ON_TASK 0.85, a YouTube let's-play search DISTRACTING 0.92, Task Switching/Notepad/Claude UNCERTAIN; the off/on gap was UNMONITORED; heartbeats present. The user's real game session was interleaved with the scripted switches (score 2 reflects it); data cleared afterwards.
+  - Plain browser: timer unchanged, no picker or Focus Sense rows, no bridge calls, no Focus Sense storage.
+- **Earlier milestones (facts in the spec):** M1–M4 validated on this machine (shell, offline page, tray, single instance, window state, navigation lock, email-link sign-in with a real link, CSP sweeps signed in and out, installer lifecycle, real Explorer drops).
+- **Not tested anywhere:** anything on Vercel; Focus Sense signed in or against the live site; a hands-off idle stretch with input truly stopped; an elevated foreground window; the semantic layer; a clean machine or antivirus; macOS, Safari/WebKit, phones; sign-up confirmation and Google sign-in.
 
 ## Relevant Architecture / Graphify Context
 
-- **Account data:** `app/actions.ts` (`deleteAccount`, `resetAllData`, `removeFiles`), `app/api/export/route.ts`, and `components/settings-forms.tsx` (`DeleteAccount`, `ResetData`, the Data tab). `lib/supabase/admin.ts` is the service-role client (server only).
-- **Legal:** `app/legal.tsx` (`LegalPage`, `Section`, `CONTACT`, `UPDATED`), `app/privacy/page.tsx`, `app/terms/page.tsx`. Public routes are listed in `proxy.ts`.
-- **Cascade:** every user table references `auth.users on delete cascade`. `decks` and `focus_sessions` use `on delete set null` for `course_id` only.
-- **Icons:** `components/icons.tsx`.
-- **Sync/Settings:** `components/sync-window.tsx` and `components/settings-forms.tsx`.
-- **Home:** `dashboard.tsx`, `up-next.tsx`, `chart-widgets.tsx`, `lib/progress.ts` (`byDue`).
-- **Landing:** `app/landing/page.tsx` plus `hero.tsx`, `ai.tsx`, `showcase.tsx`, `features.tsx`, `pricing.tsx`, `kit.tsx`.
-- **Security:** the CSP is built in `lib/csp.ts` (`ENFORCE`, `STATIC`, `THEME_SCRIPT_HASH`) and set in `proxy.ts`, with the build check in `scripts/check-csp-hash.mjs`. The route allowlist and the `/login` redirect are in `proxy.ts`. The full review is in `docs/SECURITY.md`.
-- **Focus timer:** `components/focus-timer.tsx` (`finish`, `save`, the pending queue), `lib/focus.ts` (`enqueue`, `flush`), and `logFocus` in `app/actions.ts`.
-- **Desktop:** `DESKTOP_ARCHITECTURE_SPEC.md` is authoritative. The shell is `src-tauri/` (`src/lib.rs`: the navigation lock `classify`, the offline page and `refresh`, tray and lifecycle, `app_info` and `bridge_path_allowed`; `offline/offline.html`; `capabilities/main.json`; `tauri.conf.json`). Graphify ignores it. Focus Sense lives in `src-tauri/src/focus_sense/`. Web-side desktop code: `src/lib/desktop/` (`index.ts` auth handoff, `focus-sense.ts` bridge) and `src/components/desktop/`.
-- **Testing the shell signed out:** `/login/*-preview` pages render the app shell (timer included) and pass the bridge gate. Launch with `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222 npm run desktop:dev` and drive the page over CDP; in Git Bash set `MSYS_NO_PATHCONV=1` or `/login/...` arguments get rewritten. Remove any test entry from `sonnet-focus-pending` afterwards, or it logs to the next signed-in account.
-- **Rate limits and AI metering:** `lib/limit.ts` (migrations 0014, 0015, 0017).
+Use `graphify query` first (it doesn't index `src-tauri/`).
+- **Focus Sense, native:** `src-tauri/src/focus_sense/` — `mod.rs` (event types, validation, the six commands, `page_allowed`, control lock), `sensor.rs` (Win32 foreground/idle), `privacy.rs` (exclusions, redaction, fail-closed), `monitor.rs` (one thread, heartbeats, expiry), `store.rs` (JSONL, caps, retention). Wired in `src-tauri/src/lib.rs`; permissions in `build.rs` + `capabilities/main.json`.
+- **Focus Sense, web:** `src/lib/desktop/focus-sense.ts` (bridge, event/status types, `IDLE_AFTER_MS`, `HEARTBEAT_MS`), `src/lib/desktop/sense/` (`types.ts` contract, `classify.ts` + `rules.ts` + `heuristics.ts` + `lexicon.ts`, `semantic.ts`, `score.ts`, `context.ts`), `src/components/desktop/` (`focus-sense-settings.tsx`, `focus-context-picker.tsx`, `focus-session-debug.tsx`), hooks in `components/focus-timer.tsx` (`bindContext`, start/stop) and `components/app-shell.tsx` (passes courses/items to `FocusProvider`).
+- **Benchmark:** `bench/focus-sense/` — `dataset*.json` (v1, v2), `baselines.ts`, `harness.ts`, `benchmark.test.ts` (`FOCUS_SENSE_HELDOUT=1` runs the gated held-out; `FOCUS_SENSE_SEMANTIC=1` the AI run), `RESULTS.md`.
+- **Desktop shell:** `src-tauri/src/lib.rs` (navigation lock `classify`, offline page/`refresh`, tray/lifecycle, `app_info`, `bridge_path_allowed`), `auth.rs` (email-link handoff), `offline/offline.html`, `tauri.conf.json`. Auth handoff web side: `src/lib/desktop/index.ts`, `src/app/auth/desktop/`.
+- **Testing the shell signed out:** `/login/*-preview` pages render the app shell (timer included) and pass the bridge gate. Launch with `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222 npm run desktop:dev`, drive the page over CDP (Node's global `WebSocket`); in Git Bash set `MSYS_NO_PATHCONV=1`. Afterwards remove any test entry from `sonnet-focus-pending` (or it logs to the next signed-in account), clear Focus Sense data and turn it off. Don't script window switches while the user is actively using the machine.
+- **Focus timer:** `components/focus-timer.tsx` (`finish`, `save`, pending queue), `lib/focus.ts`, `logFocus` in `app/actions.ts`.
+- **Account data:** `app/actions.ts` (`deleteAccount`, `resetAllData`, `removeFiles`), `app/api/export/route.ts`, `components/settings-forms.tsx` (Data tab, exported `Row`); `lib/supabase/admin.ts` (service role, server only).
+- **Security:** CSP in `lib/csp.ts` + `proxy.ts`, build check `scripts/check-csp-hash.mjs`; review in `docs/SECURITY.md`. Rate limits/metering: `lib/limit.ts`.
+- **Other:** legal (`app/legal.tsx`, `privacy/`, `terms/`), Home (`dashboard.tsx`, `up-next.tsx`, `chart-widgets.tsx`, `lib/progress.ts`), landing (`app/landing/*`), icons (`components/icons.tsx`), Sync/Settings (`sync-window.tsx`, `settings-forms.tsx`). Cascade: every user table references `auth.users on delete cascade`; `decks` and `focus_sessions` set `course_id` null.
 
 ## Important Constraints
 
-- **Ask before:** adding a dependency, writing a migration, removing a feature, or changing focus-timer behavior, chat storage, Supabase/env/API routes/auth or billing.
-- **Migrations:** give the SQL to paste, **plus a `create or replace` / delta version**.
-- Never write to Supabase or enter passwords. Spending Higgsfield credits needs the user's OK.
-- **Commits:** commit every important change; run tsc, lint and tests first; say "untested" when true. Push to `main` as before, **except** desktop milestones, which wait for the user's word (sessions 7 and 8: M0/P1 and M1 committed, not pushed).
+- **Ask before:** adding a dependency, writing a migration, removing a feature, changing focus-timer behavior, chat storage, Supabase/env/API routes/auth or billing, or sending Focus Sense data off the device.
+- **Migrations:** give the SQL to paste, plus a `create or replace` / delta version.
+- Never write to production Supabase or enter passwords. Spending Higgsfield credits needs the user's OK.
+- **Commits:** commit every important change; run tsc, lint and tests first; say "untested" when true. Push to `main` for normal work; **desktop milestones wait for the user's word** (F1 and M6B were pushed on request).
+- **Benchmark:** never tune on a held-out split; a run held-out is spent.
 - **Preview pages:** `src/app/login/*-preview/` are untracked (`.git/info/exclude`) and must never be committed.
 - **Communication:** terse; give copy-paste commands.
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M6B is pushed (`dd64985`).
-- **Ready for the intervention/product milestone?** Yes, for notice-level feedback built on `isEnforceable` and the session metrics. Before any enforcement: wire and measure the semantic layer (with the user's OK), and validate on real signed-in sessions.
-- **Next milestone** (user's scope): intervention/product experience. Keep native work in `src-tauri/`, path-gate every new command, keep the CSP enforced. Do not add screenshots, OCR, Accessibility, blocking, the overlay or Strict Mode before the user's go-ahead.
+**Wait for the user's word.** Everything is pushed (`0d70976`).
+- First, cheap and unblocking: verify the Vercel deploy and the live CSP, then a signed-in Focus Sense session with the installed app.
+- **Next Focus Sense milestone** (needs the user's scope): the intervention/product experience on top of `isEnforceable` and the session metrics (notice-level first). Before any enforcement: wire and measure the semantic layer (with the user's OK) and validate on real signed-in sessions. Keep native work in `src-tauri/`, path-gate every new command, keep the CSP enforced; no screenshots, OCR, Accessibility, blocking, overlay or Strict Mode before the user's go-ahead.
 
 ## Tomorrow / New-Session Startup Prompt
 
