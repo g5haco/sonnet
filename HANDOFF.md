@@ -15,7 +15,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Current State
 
-- **Pushed to `origin/main` at `ca241df`** (the user ran `git push`, session 8): the spec, M0/P1, the M1 shell, M2 and M3/M4. That deploys the web part (enforced CSP, `/auth/desktop`, the focus fix, the materials fix). **Not checked:** whether Vercel finished, and whether the live site works under the enforced CSP. One later local commit holds the ponytail cleanup (unpushed).
+- **Pushed to `origin/main` at `ca241df`** (the user ran `git push`, session 8): the spec, M0/P1, the M1 shell, M2 and M3/M4. That deploys the web part (enforced CSP, `/auth/desktop`, the focus fix, the materials fix). **Not checked:** whether Vercel finished, and whether the live site works under the enforced CSP. `5099e66` (the ponytail cleanup and this handoff) was pushed right after.
 - The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
 - **Signed-in testing, session 8 (the user signed in by hand, twice, in the desktop app, once on the live site in the installed build).** Seen working: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload, password sign-in, sign-out, a real emailed sign-in link, and real Explorer file drops. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and anything on Vercel.
 
@@ -231,7 +231,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M3/M4 is pushed; the cleanup commit is local.
+**Wait for the user's word.** M3/M4 and the cleanup are pushed.
 - **Is the desktop foundation ready for Focus Sense? Yes, with two conditions that don't block starting:** it builds only on the desktop shell, and the user should (1) add the Supabase redirect and push so email links work from the installed app, and (2) run the installer once on a clean machine.
 - **Focus Sense first steps** (spec §12, and the user's own scope): native work stays in `src-tauri/`, each new command is path-gated in Rust like `auth_begin`, and the CSP stays enforced. Do not add Accessibility, screen capture, active-window tracking or Strict Mode before the user's go-ahead.
 
