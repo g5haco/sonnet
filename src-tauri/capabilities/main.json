@@ -1,11 +1,11 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
-  "description": "app_info for the main window on the live site. Tauri checks remote URLs against the request Origin only, so this is origin-wide: path rules live in Rust (bridge_path_allowed).",
+  "description": "app_info and auth_begin for the main window on the live site. Tauri checks remote URLs against the request Origin only, so this is origin-wide: path rules live in Rust (bridge_path_allowed).",
   "windows": ["main"],
   "local": false,
   "remote": {
     "urls": ["https://www.ericwei.me"]
   },
-  "permissions": ["allow-app-info"]
+  "permissions": ["allow-app-info", "allow-auth-begin"]
 }

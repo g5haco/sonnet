@@ -1,5 +1,7 @@
-//! Sonnet desktop shell (M1): one window over the live site. No local server,
-//! no second UI. The only native command is `app_info`.
+//! Sonnet desktop shell: one window over the live site. No local server, no second UI.
+//! Native commands: `app_info` and `auth_begin` (the email-link sign-in handoff, see `auth`).
+
+mod auth;
 
 use std::{
     net::{TcpStream, ToSocketAddrs},
@@ -14,8 +16,9 @@ use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     webview::NewWindowResponse,
-    AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder, WindowEvent,
+    AppHandle, Manager, State, Url, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 const MAIN: &str = "main";
@@ -86,6 +89,43 @@ async fn app_info(webview: tauri::Webview) -> Result<AppInfo, String> {
         },
         caps: Vec::new(),
     })
+}
+
+/// The page asks for an emailed-link sign-in to be accepted by the app. Only the sign-in page may.
+#[tauri::command]
+async fn auth_begin(webview: tauri::Webview, handoff: State<'_, auth::Handoff>) -> Result<(), String> {
+    let url = webview.url().map_err(|e| e.to_string())?;
+    if !is_site_page(&url, &site_origin()) || url.path() != "/login" {
+        return Err("not available on this page".into());
+    }
+    handoff.begin();
+    log::info!("sign-in handoff started");
+    Ok(())
+}
+
+/// A `sonnet://` link reached the app. Only a well-formed sign-in callback is acted on, and its code is
+/// used only if the sign-in page started one. Logs never carry the code.
+fn handle_deep_link(app: &AppHandle, url: &Url) {
+    let Some(code) = auth::parse_callback(url) else {
+        log::info!("ignored a sonnet:// link: not a sign-in callback");
+        return;
+    };
+    let Some(win) = app.get_webview_window(MAIN) else { return };
+    let site = site_origin();
+    let target = if app.state::<auth::Handoff>().consume() {
+        log::info!("sign-in callback accepted");
+        auth::confirm_url(&site, &code)
+    } else {
+        // A real link that arrives late (or after a restart) can't be used. Say so; the code is never read.
+        log::info!("sign-in callback with none pending: showing the expired message");
+        let mut login = site.join("/login").expect("login url joins");
+        login.set_query(Some("expired=1"));
+        login
+    };
+    let _ = win.navigate(target);
+    let _ = win.show();
+    let _ = win.unminimize();
+    let _ = win.set_focus();
 }
 
 /// The site the window loads. Release builds always use production. Debug builds
@@ -346,7 +386,8 @@ fn add_dev_capability(app: &AppHandle) -> tauri::Result<()> {
             .window(MAIN)
             .local(origin == DEV_ORIGIN)
             .remote(origin)
-            .permission("allow-app-info"),
+            .permission("allow-app-info")
+            .permission("allow-auth-begin"),
     )
 }
 
@@ -378,6 +419,8 @@ pub fn run() {
         // click handler is off: it would swallow `target=_blank` clicks (then be denied) before
         // they reach `on_new_window`.
         .plugin(tauri_plugin_opener::Builder::new().open_js_links_on_click(false).build())
+        // After single-instance, which forwards a second launch's `sonnet://` argument to it.
+        .plugin(tauri_plugin_deep_link::init())
         .register_uri_scheme_protocol(OFFLINE_SCHEME, |_ctx, _req| {
             Response::builder()
                 .header("Content-Type", "text/html; charset=utf-8")
@@ -388,7 +431,8 @@ pub fn run() {
                 .expect("offline response builds")
         })
         .manage(Shell::default())
-        .invoke_handler(tauri::generate_handler![app_info])
+        .manage(auth::Handoff::default())
+        .invoke_handler(tauri::generate_handler![app_info, auth_begin])
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 if window.label() == MAIN {
@@ -405,7 +449,20 @@ pub fn run() {
                 site_origin().origin().ascii_serialization()
             );
             #[cfg(debug_assertions)]
-            add_dev_capability(handle)?;
+            {
+                add_dev_capability(handle)?;
+                // Installed builds register the scheme in the installer. A debug exe registers itself only
+                // when asked, because that points the user's sonnet:// links at the dev exe.
+                if std::env::var_os("SONNET_DESKTOP_REGISTER_SCHEME").is_some() {
+                    handle.deep_link().register_all()?;
+                }
+            }
+            let link_handle = handle.clone();
+            handle.deep_link().on_open_url(move |event| {
+                for url in event.urls() {
+                    handle_deep_link(&link_handle, &url);
+                }
+            });
             build_tray(handle)?;
             build_main_window(handle)?;
             Ok(())
@@ -513,10 +570,11 @@ mod tests {
     }
 
     #[test]
-    fn packaged_capability_is_origin_scoped() {
+    fn packaged_capability_names_only_the_two_commands() {
         let cap = include_str!("../capabilities/main.json");
         assert!(cap.contains("\"https://www.ericwei.me\""));
         assert!(cap.contains("\"local\": false"));
-        assert!(cap.contains("allow-app-info") && !cap.contains("opener") && !cap.contains("window-state"));
+        assert!(cap.contains("allow-app-info") && cap.contains("allow-auth-begin"));
+        assert!(!cap.contains("opener") && !cap.contains("window-state") && !cap.contains("deep-link"));
     }
 }

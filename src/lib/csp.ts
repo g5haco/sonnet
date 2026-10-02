@@ -4,8 +4,10 @@
 // so their inline bootstrap has no nonce; the listed ones keep 'unsafe-inline' rather than lose static rendering. The
 // desktop app never grants native commands on those routes.
 
-// Flip once real use (signed in, email links, actions, chat) shows no violations in the browser console.
-export const ENFORCE = false;
+// Enforced after signed-in use in the desktop app (a production build) showed no violations on any page or flow:
+// Home, courses, assignments, calendar, flashcards, chat streaming, settings, sync, upload, export, the focus timer
+// and the auth redirects. Set false to fall back to report-only while debugging a violation.
+export const ENFORCE = true;
 export const CSP_HEADER = ENFORCE ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only";
 
 // Prerendered HTML routes ("/" signed out is rewritten to /landing). Keep in sync with the build's ○ routes.

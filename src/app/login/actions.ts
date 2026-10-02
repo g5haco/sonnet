@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 
 type LoginState = { ok: boolean; message: string } | null;
 
+// Emailed links land on /auth/confirm. From the desktop app they land on /auth/desktop, which hands the code back to
+// the app (the code can only be redeemed where the sign-in started). The form adds `client=desktop` only inside the app.
+const callback = (form: FormData) => (form.get("client") === "desktop" ? "/auth/desktop" : "/auth/confirm");
+
 // Google: Supabase sends the student to Google, then back to /auth/confirm with a code (the provider has to be
 // turned on in Supabase → Authentication → Providers).
 export async function google() {
@@ -28,7 +32,7 @@ export async function signUp(_: LoginState, form: FormData): Promise<LoginState>
   const { data, error } = await (await createClient()).auth.signUp({
     email,
     password,
-    options: { data: { name }, emailRedirectTo: `${origin}/auth/confirm` },
+    options: { data: { name }, emailRedirectTo: `${origin}${callback(form)}` },
   });
   if (error?.status === 429) return { ok: false, message: "Too many attempts. Try again in a few minutes." };
   if (error) return { ok: false, message: `Couldn't create the account: ${error.message}` };
@@ -40,7 +44,7 @@ export async function signUp(_: LoginState, form: FormData): Promise<LoginState>
 export async function signIn(_: LoginState, form: FormData): Promise<LoginState> {
   const email = String(form.get("email") ?? "").trim();
   if (!email.includes("@")) return { ok: false, message: "That doesn't look like an email address." };
-  if (form.get("intent") === "link") return sendLink(email);
+  if (form.get("intent") === "link") return sendLink(email, callback(form));
 
   const password = String(form.get("password") ?? "");
   if (!password) return { ok: false, message: "Enter your password, or use the email link." };
@@ -51,13 +55,13 @@ export async function signIn(_: LoginState, form: FormData): Promise<LoginState>
   redirect("/");
 }
 
-async function sendLink(email: string): Promise<LoginState> {
+async function sendLink(email: string, path: string): Promise<LoginState> {
   const origin = (await headers()).get("origin");
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     // Links are for existing accounts; new ones sign up with a password or Google.
-    options: { emailRedirectTo: `${origin}/auth/confirm`, shouldCreateUser: false },
+    options: { emailRedirectTo: `${origin}${path}`, shouldCreateUser: false },
   });
   if (error?.code === "otp_disabled" || /signups not allowed/i.test(error?.message ?? ""))
     return { ok: false, message: "There's no account for that email." };

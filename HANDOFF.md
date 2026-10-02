@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-10-02 (session 8), code through the M2 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-10-02 (session 8), code through the M3/M4 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
 
 ## Project Summary
 
@@ -11,15 +11,23 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Guardian is the first native feature). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1 and M2 are done.** M3 (auth handoff) and M6 (native bridge) wait for the enforced CSP; M4 (Windows packaging proof) and M5 (macOS) don't. Focus Guardian has not started.
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). Focus Sense has not started.
 
 ## Current State
 
-- Live at `4eb8f00` plus four local commits: `ccf9aa0` (spec), `53956db` (M0/P1), `94852c9` (M1 shell) and the M2 commit. **Not pushed:** the user said desktop milestones wait for their word. Nothing is deployed, so the new CSP, timer and the materials fix aren't live yet. M2's only web change is two lines in `materials.tsx`.
+- Live at `4eb8f00` plus five local commits: `ccf9aa0` (spec), `53956db` (M0/P1), `94852c9` (M1 shell), `f7deec4` (M2) and the M3/M4 commit. **Not pushed:** the user said desktop milestones wait for their word. **Nothing is deployed**, so the enforced CSP, the `/auth/desktop` route, the focus fixes and the materials fix aren't live. Pushing to `main` deploys the web part; the installed app loads the live site, so its email links need that deploy first.
 - The user ran migrations 0001–0017. Sessions 7 and 8 needed none.
-- **Signed-in testing, session 8 (user signed in by hand in the desktop shell; sign-in persisted across an app restart).** Seen working there, against a local dev server and a local production build: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and the nonce CSP on a real deploy (Home, Courses, Calendar, Chat and Flashcards loaded in a local production build with no `[Report Only]` message in the console, but that isn't Vercel and the other screens were only seen under `next dev`).
+- **Signed-in testing, session 8 (the user signed in by hand, twice, in the desktop app, once on the live site in the installed build).** Seen working: Home, Courses, a course and an assignment panel, Calendar, Chat streaming, Flashcards, Settings, Sync, a materials upload, the export download, the focus timer's save path, close-to-tray and long-hide reload, password sign-in, sign-out, a real emailed sign-in link, and real Explorer file drops. **Still untested signed in:** delete account and reset data (use a throwaway account), a real Canvas import, and anything on Vercel.
 
 ## Completed This Session
+
+- **M3 + M4 + CSP enforcement (Windows; facts in the spec under M3, M4 and §15).**
+  - **Email-link sign-in now works in the desktop app** (user-approved: the `tauri-plugin-deep-link` crate, `serde_json`, a new `/auth/desktop` page, the login form and actions). The email's PKCE code can't be redeemed in the system browser, so `/auth/desktop` bounces it to `sonnet://auth/callback?code=…`; the app accepts it only if the login page started a sign-in in the last 15 minutes (`auth_begin`, the second native command, refused off `/login`), once, then redeems it in its own webview. A late or cold-start link shows the expired message. Verified with a real emailed link.
+  - **CSP enforced** after a signed-in sweep across every page and flow with zero violations (a control proved the listener works), repeated after enforcing.
+  - **Installer validated on this machine** (not a clean VM): per-user install, Start Menu, icon, single instance, tray, close-to-tray, window state, live site, session persistence, uninstall (leaves unrelated data and the profile), reinstall. The machine was restored afterwards.
+  - **Real drag-and-drop confirmed:** the user dragged a file from Explorer into the chat and the materials uploader, and the page received the drops (the M2 fix works).
+  - Reviewer pass: no way past the pending gate. Fixed: `token_hash` dropped from the handoff, the late-link message, and the opt-in debug registration. Not fixed: nothing material.
+- Earlier this session: M2 (two incompatibilities fixed), M1 (the shell), M0/P1.
 
 - **M2: the existing app inside the desktop shell** (Windows/WebView2; facts in `DESKTOP_ARCHITECTURE_SPEC.md` under M2).
   - Two incompatibilities fixed. **Materials did nothing on click:** `materials.tsx` pre-opens `window.open("", "_blank")`, which the shell denies, so the shared code now falls back to opening the signed URL (two lines; a browser that grants the blank tab behaves exactly as before). **File drops from Explorer:** Tauri's drop handler replaces WebView2's, so `.disable_drag_drop_handler()` is now set. **That one was not verified with a real OS drop.**
@@ -46,8 +54,9 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 - **Keep the nature imagery** (dusk and night meadow). Don't swap it for stock or generated photos.
 - **The taste skill applies to the landing page only.** The app follows PRODUCT.md (sentence case, mono readouts, course colors).
 - **Icons go through `@/components/icons` only.** Map new names there; never import Phosphor directly.
-- **The CSP stays report-only** (`ENFORCE` in `lib/csp.ts`) until the user's signed-in checks show no violations: sign in and out, email links, Server Actions, chat streaming, Canvas, uploads. Then set `ENFORCE = true`. Never regress auth, Server Actions or public pages to satisfy the CSP. A report endpoint (a new API route) needs the user's OK.
-- **Desktop decisions are locked in `DESKTOP_ARCHITECTURE_SPEC.md` §16.** Native bridge privileges beyond `app_info`/notify wait for the enforced, validated CSP.
+- **The CSP is enforced** (`ENFORCE = true` in `lib/csp.ts`, session 8), after zero violations signed in and out on a production build in the desktop app. Set it back to `false` to debug a violation. Never regress auth, Server Actions or public pages to satisfy it. Not verified on Vercel itself, and Google sign-in will need a `form-action 'self'` check when it ships. A report endpoint (a new API route) needs the user's OK.
+- **Desktop decisions are locked in `DESKTOP_ARCHITECTURE_SPEC.md` §16.** The enforced CSP is validated, so the bridge may grow, one path-gated command at a time (`auth_begin` is the second after `app_info`). The sign-in handoff passes a PKCE `code` only, never a `token_hash`.
+- **A debug exe registers `sonnet://` only if `SONNET_DESKTOP_REGISTER_SCHEME` is set,** and a test machine's `HKCU\Software\Classes\sonnet` should be removed afterwards. The installer owns the key for installed builds.
 - **Every future native command must gate on the page path in Rust** (`bridge_path_allowed`), because capabilities can't. Never list a root `/` capability URL.
 - **The `opener` plugin is Rust-only.** Keep `open_js_links_on_click(false)` and grant no opener permission to pages.
 - **Don't log full URLs in the shell.** They can carry sign-in tokens. Log the origin.
@@ -79,17 +88,17 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 - **Needs the user:**
   - a signed-in check of **delete account and reset data** (throwaway account). The other session 2–7 screens were seen working signed in during session 8;
+  - **the Supabase redirect entry for the desktop email link** (not applied, I never change production Supabase): Authentication → URL Configuration → Redirect URLs, add `https://www.ericwei.me/auth/desktop`. (`http://localhost:3000/auth/desktop` already works.) Then push to deploy: the live site has neither `/auth/desktop` nor the enforced CSP yet. Keep the email template as the default;
+  - **a clean Windows 10/11 machine or VM** for the installer (SmartScreen, WebView2 bootstrapper, antivirus), and OK for a GitHub Actions workflow (`desktop.yml`) to build the installer; the interactive wizard and the uninstaller's "delete app data" choice haven't been clicked through;
   - a contact email to publish on the legal pages;
   - a legal review of privacy/terms (open questions: minimum age, governing law, liability cap, student-data wording, free AI providers possibly keeping prompts);
   - accounts for Resend, uptime monitoring and Google OAuth;
   - a choice of error tracking (Sentry or no-dependency) and analytics (Plausible or PostHog);
   - rotating secrets per `docs/SECURITY.md`;
   - OK for a CSP report endpoint;
-  - **a signed-in check on a preview or production deploy with the nonce CSP**, watching the console for `[Report Only]` violations. That gates `ENFORCE = true`;
   - Skew Protection: Vercel's docs limit it to Pro/Enterprise, and it isn't active on production. If the plan is upgraded later: Project → Settings → Advanced → Skew Protection. Until then the desktop reload fallback (spec §11) applies;
   - a real Safari/WebKit pass on a Mac or iPhone (not done; the Playwright browsers aren't installed);
-  - **drag a file from Explorer into the chat box and onto a course's Materials in the desktop app** (the drop-handler fix is unverified), and click a material to confirm it opens in the browser;
-  - a signed-in sign-out and a throwaway-account delete from inside the shell;
+  - a throwaway-account delete from inside the shell;
   - a Mac to build and run the shell (M5); macOS is configured but untested;
   - approval to push the desktop commits.
 - **Offered, not yet decided:**
@@ -105,6 +114,8 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
   - the plural-"s" expression is repeated 7 times.
 
 ## Known Bugs / Issues
+
+- **Found in M3/M4:** Supabase's email limit is about two links an hour per address, so repeated tests get "Too many links". The app syncs Canvas on page loads, which shares the hourly Sync limit. The installed exe is named `sonnet-desktop.exe`. Installing over leftover files works. Leftover `code-verifier` cookies pile up from each link request (existing web behavior).
 
 - **Web, found in M2 (not WebView2-specific):**
   - React error #418 on every signed-in page of a production build. A hydration mismatch in the `MetalFx` send button (the server renders its fallback, the client renders the canvas). It also reproduces in plain Chromium. Pre-existing; not fixed.
@@ -145,14 +156,18 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Current Priorities
 
-1. **The user's signed-in check of sessions 2–7** on a deploy: export and delete (throwaway account), plus the nonce CSP console check. Then enforce the CSP.
-2. **Desktop: M4 (Windows packaging proof) and M5 (macOS)** can proceed while the CSP is report-only. M3 and M6 wait for the enforced CSP (priority 1).
+1. **Deploy the web changes and set the Supabase redirect** (see Needs the user), then re-check sign-in, an email link from the installed app, and the CSP on Vercel. Then the delete-account check with a throwaway account.
+2. **Desktop: a clean-machine install, a CI workflow for the installer (needs the user's OK), and M5 (macOS).** Then Focus Sense.
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
 6. After 1–2 weeks: read the `ai_usage` costs, set `PRO`, then Stripe. Vercel and Supabase Pro are needed before charging.
 
 ## Testing / Validation Status
+
+- **M3/M4 (Windows):** `npm test` 64/64, `tsc` clean, `eslint` clean on the changed files (the one repo error is the untracked `dash-preview`), `npm run build` passes with the CSP hash check and `/auth/desktop` dynamic, `cargo test` 13/13, clippy clean, `npm run desktop:build` produced the release exe and a 1.46 MiB NSIS installer, and the final release exe loads the live `/login`.
+  - Live: password sign-in, sign-out, sign-in persistence across restarts, a real email link (before the code-only change), forged and malformed `sonnet://` links, the late-link message, signed-in and signed-out CSP sweeps (production build, enforced), real Explorer drops, and the installer lifecycle above. Your dev profile was moved aside and restored; **your localhost session was signed out by the last test**, so sign in again.
+  - **Not done:** a clean VM, sign-up confirmation, Google, macOS, Vercel, a second real email link after the code-only change (rate limit).
 
 - **M2 (Windows):**
   - `npm test` 60/60, `tsc` clean, `eslint` clean on `materials.tsx` (the repo's one lint error is still the untracked `dash-preview`), `npm run build` passes with the CSP hash check, `cargo test` 9/9 and clippy clean, and `npm run desktop:build` produced the release exe and installer.
@@ -214,10 +229,9 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M2 is committed locally and not pushed.
-- **Is the desktop foundation ready for Focus Guardian's native capabilities? Almost.** The web app runs in WebView2 and the shell is stable. Before M6/Focus Guardian: (1) the user's manual file-drop check, (2) the signed-in CSP check on a deploy and `ENFORCE = true` (the bridge beyond `app_info` waits for it), (3) M3 (auth handoff for email links) and M4 (a clean-machine install of the NSIS installer), and (4) a Mac run for the same checks (M5).
-- **Next milestone by dependency:** M4 (Windows packaging proof: install the NSIS build on a clean Windows 10/11 machine, check WebView2 and SmartScreen, measure size and idle use). It doesn't need the CSP.
-- Do not start Focus Guardian, Strict Mode, screen capture or active-window tracking.
+**Wait for the user's word.** M3/M4 is committed locally and not pushed.
+- **Is the desktop foundation ready for Focus Sense? Yes, with two conditions that don't block starting:** it builds only on the desktop shell, and the user should (1) add the Supabase redirect and push so email links work from the installed app, and (2) run the installer once on a clean machine.
+- **Focus Sense first steps** (spec §12, and the user's own scope): native work stays in `src-tauri/`, each new command is path-gated in Rust like `auth_begin`, and the CSP stays enforced. Do not add Accessibility, screen capture, active-window tracking or Strict Mode before the user's go-ahead.
 
 ## Tomorrow / New-Session Startup Prompt
 

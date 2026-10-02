@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { beginDesktopSignIn, inDesktop } from "@/lib/desktop";
 import { cn } from "@/lib/utils";
 import { signIn, signUp } from "./actions";
 
@@ -22,6 +23,8 @@ const G = (
 export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: string | null }) {
   const [state, action, pending] = useActionState(mode === "up" ? signUp : signIn, null);
   const note = state ?? (initial ? { ok: false, message: initial } : null);
+  // Inside the desktop app only (the server renders false, the client corrects it): emailed links go back to the app.
+  const desktop = useSyncExternalStore(() => () => {}, inDesktop, () => false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -56,6 +59,7 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
       </p>
 
       <form action={action} className="flex flex-col gap-2">
+        {desktop && <input type="hidden" name="client" value="desktop" />}
         {mode === "up" && (
           <>
             <label htmlFor="name" className="text-sm font-medium">
@@ -93,12 +97,21 @@ export function LoginForm({ mode, note: initial }: { mode: "in" | "up"; note: st
           name="intent"
           value="password"
           disabled={pending}
+          onClick={mode === "up" ? beginDesktopSignIn : undefined}
           className="mt-3 h-11 rounded-full transition-transform active:scale-[0.97]"
         >
           {pending ? "One sec…" : mode === "up" ? "Create account" : "Sign in"}
         </Button>
         {mode === "in" && (
-          <Button type="submit" name="intent" value="link" variant="ghost" disabled={pending} className="h-11 rounded-full py-3">
+          <Button
+            type="submit"
+            name="intent"
+            value="link"
+            variant="ghost"
+            disabled={pending}
+            onClick={beginDesktopSignIn}
+            className="h-11 rounded-full py-3"
+          >
             Email me a link instead
           </Button>
         )}
