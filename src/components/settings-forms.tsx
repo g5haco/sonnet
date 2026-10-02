@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { deleteAccount, resetAllData, saveName, saveTerm, signOut } from "@/app/actions";
 import { useAssistant } from "@/components/app-shell";
 import { field, FormError, label, Submit, useSubmit } from "@/components/create-forms";
+import { FocusSenseSettings } from "@/components/desktop/focus-sense-settings";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { UsageCard } from "@/components/usage";
@@ -175,7 +176,7 @@ const heading = "text-base font-medium";
 const help = "mt-1 text-sm text-pretty text-muted-foreground";
 
 // One line of the spec sheet: what it is on the left, the control on the right. Stacks on phones.
-function Row({ title, hint, htmlFor, children }: { title: string; hint?: string; htmlFor?: string; children: React.ReactNode }) {
+export function Row({ title, hint, htmlFor, children }: { title: string; hint?: string; htmlFor?: string; children: React.ReactNode }) {
   const Title = htmlFor ? "label" : "h3";
   return (
     <div className="grid gap-x-8 gap-y-3 border-t border-border py-6 sm:grid-cols-[10rem_1fr]">
@@ -294,6 +295,7 @@ export function SettingsWindow({
                         Download my data
                       </a>
                     </Row>
+                    <FocusSenseSettings />
                     <ResetData onDone={onClose} />
                     <DeleteAccount email={account.email} />
                   </>

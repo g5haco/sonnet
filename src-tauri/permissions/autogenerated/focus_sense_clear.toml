@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-focus-sense-clear"
+description = "Enables the focus_sense_clear command without any pre-configured scope."
+commands.allow = ["focus_sense_clear"]
+
+[[permission]]
+identifier = "deny-focus-sense-clear"
+description = "Denies the focus_sense_clear command without any pre-configured scope."
+commands.deny = ["focus_sense_clear"]

@@ -1,11 +1,13 @@
 //! Sonnet desktop shell: one window over the live site. No local server, no second UI.
-//! Native commands: `app_info` and `auth_begin` (the email-link sign-in handoff, see `auth`).
+//! Native commands: `app_info`, `auth_begin` (the email-link sign-in handoff, see `auth`) and the
+//! `focus_sense_*` set (foreground-context sensing during focus sessions, see `focus_sense`).
 
 mod auth;
+mod focus_sense;
 
 use std::{
     net::{TcpStream, ToSocketAddrs},
-    sync::{mpsc, Mutex},
+    sync::{mpsc, Arc, Mutex},
     thread,
     time::{Duration, SystemTime},
 };
@@ -387,7 +389,13 @@ fn add_dev_capability(app: &AppHandle) -> tauri::Result<()> {
             .local(origin == DEV_ORIGIN)
             .remote(origin)
             .permission("allow-app-info")
-            .permission("allow-auth-begin"),
+            .permission("allow-auth-begin")
+            .permission("allow-focus-sense-status")
+            .permission("allow-focus-sense-configure")
+            .permission("allow-focus-sense-start")
+            .permission("allow-focus-sense-stop")
+            .permission("allow-focus-sense-events")
+            .permission("allow-focus-sense-clear"),
     )
 }
 
@@ -432,7 +440,16 @@ pub fn run() {
         })
         .manage(Shell::default())
         .manage(auth::Handoff::default())
-        .invoke_handler(tauri::generate_handler![app_info, auth_begin])
+        .invoke_handler(tauri::generate_handler![
+            app_info,
+            auth_begin,
+            focus_sense::focus_sense_status,
+            focus_sense::focus_sense_configure,
+            focus_sense::focus_sense_start,
+            focus_sense::focus_sense_stop,
+            focus_sense::focus_sense_events,
+            focus_sense::focus_sense_clear
+        ])
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 if window.label() == MAIN {
@@ -463,6 +480,10 @@ pub fn run() {
                     handle_deep_link(&link_handle, &url);
                 }
             });
+            // Focus Sense data lives beside the webview profile. Nothing runs until a focus session asks.
+            let store = Arc::new(focus_sense::store::Store::new(handle.path().app_local_data_dir()?.join("focus-sense")));
+            let _ = store.prune(SystemTime::now());
+            handle.manage(focus_sense::FocusSense::new(store));
             build_tray(handle)?;
             build_main_window(handle)?;
             Ok(())
@@ -470,6 +491,10 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building Sonnet desktop")
         .run(|_app, _event| {
+            // Quitting ends a running monitor cleanly, so its session file gets its stop marker.
+            if let tauri::RunEvent::Exit = _event {
+                _app.state::<focus_sense::FocusSense>().monitor.stop();
+            }
             // The dock icon brings a hidden window back on macOS.
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = _event {
@@ -570,11 +595,16 @@ mod tests {
     }
 
     #[test]
-    fn packaged_capability_names_only_the_two_commands() {
+    fn packaged_capability_names_only_the_apps_own_commands() {
         let cap = include_str!("../capabilities/main.json");
         assert!(cap.contains("\"https://www.ericwei.me\""));
         assert!(cap.contains("\"local\": false"));
         assert!(cap.contains("allow-app-info") && cap.contains("allow-auth-begin"));
+        for c in focus_sense::COMMANDS {
+            assert!(cap.contains(&format!("allow-{}", c.replace('_', "-"))), "{c}");
+        }
+        assert_eq!(cap.matches("\"allow-").count(), 2 + focus_sense::COMMANDS.len(), "no other permission");
+        assert!(!cap.contains("core:") && !cap.contains("fs:") && !cap.contains("shell"));
         assert!(!cap.contains("opener") && !cap.contains("window-state") && !cap.contains("deep-link"));
     }
 }

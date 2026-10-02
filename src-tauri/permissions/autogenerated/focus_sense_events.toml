@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-focus-sense-events"
+description = "Enables the focus_sense_events command without any pre-configured scope."
+commands.allow = ["focus_sense_events"]
+
+[[permission]]
+identifier = "deny-focus-sense-events"
+description = "Denies the focus_sense_events command without any pre-configured scope."
+commands.deny = ["focus_sense_events"]

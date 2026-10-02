@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { logFocus } from "@/app/actions";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { Button } from "@/components/ui/button";
+import { focusSense, focusSessionId } from "@/lib/desktop/focus-sense";
 import { enqueue, flush, type PendingLog } from "@/lib/focus";
 import { cn } from "@/lib/utils";
 
@@ -69,6 +70,7 @@ const mmss = (ms: number) => new Date(Math.max(0, Math.ceil(ms / 1000) * 1000)).
 // opens a floating panel that stays until closed; a session logs when it finishes, or when stopped after a minute.
 export function FocusProvider({ children }: { children: React.ReactNode }) {
   const [run, setRun] = useState<Run | null>(null);
+  const [loaded, setLoaded] = useState(false); // the stored run has been read
   const [open, setOpen] = useState(false);
   const [tick, setTick] = useState(0);
   // Dragged by its header, kept inside the window; the spot is remembered while the app is open.
@@ -124,11 +126,22 @@ export function FocusProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setRun(load()); // eslint-disable-line react-hooks/set-state-in-effect -- storage is client-only
+    setLoaded(true);
     save();
     const retry = () => void save();
     window.addEventListener("online", retry);
     return () => window.removeEventListener("online", retry);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- mount only; save reads refs and storage
+  // Desktop Focus Sense follows the run: start with it, stop without it, on change only. Not before the stored run
+  // has loaded (the first render's null would stop a still-running session). On mount with no run, one stop ends a
+  // monitor orphaned by a reload or sign-out.
+  const sensed = useRef<number | null | undefined>(undefined); // run.start last sent
+  useEffect(() => {
+    const s = run?.start ?? null;
+    if (!loaded || sensed.current === s || !focusSense.available()) return;
+    sensed.current = s;
+    void (run ? focusSense.start(focusSessionId(run.start), run.start + LENGTH * 60_000) : focusSense.stop());
+  }, [run, loaded]);
   useEffect(() => {
     if (!run) return;
     setTick(Date.now()); // eslint-disable-line react-hooks/set-state-in-effect

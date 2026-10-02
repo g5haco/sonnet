@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-focus-sense-start"
+description = "Enables the focus_sense_start command without any pre-configured scope."
+commands.allow = ["focus_sense_start"]
+
+[[permission]]
+identifier = "deny-focus-sense-start"
+description = "Denies the focus_sense_start command without any pre-configured scope."
+commands.deny = ["focus_sense_start"]

@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Updated 2026-10-02 (session 8), code through the M3/M4 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
+> Updated 2026-10-02 (session 9), code through the Focus Sense F1 commit. The code wins over this file. Product truth: `PRODUCT.md`. **Desktop architecture (authoritative): `DESKTOP_ARCHITECTURE_SPEC.md`.** Plans: `docs/ROADMAP.md` (phases 0–9), `docs/COMMERCIAL-ROADMAP.md` (phases 10–16), `docs/PHASE-10-PLAN.md` (current phase). Security: `docs/SECURITY.md`.
 
 ## Project Summary
 
@@ -11,7 +11,7 @@ Direction: commercialization. **Phase 10 (launch readiness) is in progress: step
 - Left: monitoring, analytics, Resend email, Google sign-in, hosting upgrade.
 - Pro can't be bought yet: there's no Stripe and the price is hidden.
 
-Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). Focus Sense has not started.
+Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site; Focus Sense, the user's current name for the first native feature, comes next). The architecture is approved in `DESKTOP_ARCHITECTURE_SPEC.md`. **M0, P1, M1, M2, M3 and M4 (local validation) are done, and the nonce CSP is now enforced.** Left on the desktop foundation: deploy and the one Supabase setting (see Needs the user), a clean-machine install, and M5 (macOS). **Focus Sense F1 (the sensing foundation) is built and tested on Windows, committed, not pushed** (spec: "Focus Sense F1"). Classification, scoring, blocking and the overlay have not started.
 
 ## Current State
 
@@ -21,6 +21,11 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Completed This Session
 
+- **Focus Sense F1, sensing foundation (session 9, Windows; facts in the spec under "Focus Sense F1").** Run as a lead plus three workers (native sensing; storage and web bridge; one review pass).
+  - Rust `src-tauri/src/focus_sense/` (`mod`, `sensor`, `privacy`, `monitor`, `store`): a 1-second foreground-window poll (raw Win32 FFI, **no new crates**) writing a change-only event per session to `<LocalAppData>/me.ericwei.sonnet/focus-sense/sessions/<run.start>.jsonl`. Six path-gated commands, `focus_sense_{status,configure,start,stop,events,clear}`; the capability grants those and nothing else.
+  - Web: `src/lib/desktop/focus-sense.ts` (typed, ordered, null in browsers), a 13-line additive hook in `focus-timer.tsx` (start with a run, stop without, no timer-rule change), and `src/components/desktop/focus-sense-settings.tsx` in Settings → Data (desktop only: opt-in checkbox, never-record list, pause for this session, clear data). `Row` is now exported from `settings-forms.tsx`.
+  - Review fixes: bridge calls queued in order plus one Rust control lock (a quick Start→Stop could leave a monitor running); pause survives a reload; `events` only serves the latest session; session ids digits only (no `COM1`); an unreadable process loses its title (fail closed).
+  - **User-changed decision:** raw activity is now stored on disk and readable by the page (§16 updated).
 - **Ponytail audit and cleanup (session 8, end):** the seven plural-"s" expressions became one `plural()` in `lib/utils.ts`, and the Rust crate now builds only `rlib` (`staticlib` and `cdylib` are mobile-only). tsc, lint, 64 web tests, 13 Rust tests, the web build and the release installer all pass. Nothing else found.
 
 - **M3 + M4 + CSP enforcement (Windows; facts in the spec under M3, M4 and §15).**
@@ -117,6 +122,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Known Bugs / Issues
 
+- **Focus Sense F1 limits** (full list in the spec): polling, not event-driven (§12 item 4 not met); the setting and data are per computer, not per account; UWP apps show as `ApplicationFrameHost.exe`; private windows are caught only by title marker; a hard kill leaves no stop marker; pause is forgotten on app restart; a sign-out mid-session leaves the monitor running until the timer's end plus 2 minutes; turning it on mid-session waits for the next session. The path gate can be passed by a same-origin script that rewrites `history` (spec §7), so the origin plus the CSP is the real boundary.
 - **Found in M3/M4:** Supabase's email limit is about two links an hour per address, so repeated tests get "Too many links". The app syncs Canvas on page loads, which shares the hourly Sync limit. The installed exe is named `sonnet-desktop.exe`. Installing over leftover files works. Leftover `code-verifier` cookies pile up from each link request (existing web behavior).
 
 - **Web, found in M2 (not WebView2-specific):**
@@ -159,7 +165,7 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 ## Current Priorities
 
 1. **Deploy the web changes and set the Supabase redirect** (see Needs the user), then re-check sign-in, an email link from the installed app, and the CSP on Vercel. Then the delete-account check with a throwaway account.
-2. **Desktop: a clean-machine install, a CI workflow for the installer (needs the user's OK), and M5 (macOS).** Then Focus Sense.
+2. **Focus Sense:** push F1 when the user says so (deploys the timer hook and settings rows; inert in browsers), then test it signed in on the live site with the installed app. Next milestone: classification (needs the user's scope). Desktop chores alongside: a clean-machine install, a CI workflow for the installer (needs the user's OK), M5 (macOS).
 3. **Phase 10 step 5: monitoring.** It needs the user's choice of Sentry or no-dependency logging, plus an uptime account.
 4. **Contact email and legal review**, which block charging.
 5. Steps 6–8: analytics, Resend, Google sign-in.
@@ -167,6 +173,11 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Testing / Validation Status
 
+- **Focus Sense F1 (Windows 11, `desktop:dev`, signed out on `/login/dash-preview` and `/login/settings-preview`, driven over the WebView2 debug port):**
+  - `cargo test` 36/36, clippy `-D warnings` clean, `npm test` 70/70, `tsc` clean, eslint clean on tracked and new files, `npm run build` passes with the CSP hash check, `npm run desktop:build` produced the release exe and a 1.49 MiB NSIS installer.
+  - Live: no monitor at startup; all six commands refused on `/login`; malformed, unknown-field, traversal and ended-session inputs refused; opener and event-listen refused. Timer Start armed the monitor with `run.start` as the id; with Sonnet hidden in the tray, switching to Claude, Notepad (excluded → blanked), and two Windows Terminal windows produced one event per change and no duplicates over minutes. Reload kept the same monitor. Stop ended it (stop marker, thread gone). Pause survived a reload. Turning it off stopped it; start while off was refused. Five rapid Start→Stop pairs left nothing running (7 starts, 7 stops in the log). A hard kill and relaunch started nothing until the page with the still-running timer resumed the same session (seq continued). Clear removed every session file and kept the config. In a plain browser the timer works as before, no bridge calls, and Settings shows no Focus Sense rows.
+  - CPU (debug build, shell process): about 31 ms per minute while monitoring, 0 ms idle. Storage: about 250 bytes per event.
+  - **Not tested:** the release exe's sensing against the live site (the live site lacks the new web code until deployed), signed-in pages, an elevated foreground window, Edge InPrivate live (unit-tested only), a clean machine, antivirus, macOS. Test data was cleared and the setting turned back off on this machine.
 - **M3/M4 (Windows):** `npm test` 64/64, `tsc` clean, `eslint` clean on the changed files (the one repo error is the untracked `dash-preview`), `npm run build` passes with the CSP hash check and `/auth/desktop` dynamic, `cargo test` 13/13, clippy clean, `npm run desktop:build` produced the release exe and a 1.46 MiB NSIS installer, and the final release exe loads the live `/login`.
   - Live: password sign-in, sign-out, sign-in persistence across restarts, a real email link (before the code-only change), forged and malformed `sonnet://` links, the late-link message, signed-in and signed-out CSP sweeps (production build, enforced), real Explorer drops, and the installer lifecycle above. Your dev profile was moved aside and restored; **your localhost session was signed out by the last test**, so sign in again.
   - **Not done:** a clean VM, sign-up confirmation, Google, macOS, Vercel, a second real email link after the code-only change (rate limit).
@@ -217,7 +228,8 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 - **Landing:** `app/landing/page.tsx` plus `hero.tsx`, `ai.tsx`, `showcase.tsx`, `features.tsx`, `pricing.tsx`, `kit.tsx`.
 - **Security:** the CSP is built in `lib/csp.ts` (`ENFORCE`, `STATIC`, `THEME_SCRIPT_HASH`) and set in `proxy.ts`, with the build check in `scripts/check-csp-hash.mjs`. The route allowlist and the `/login` redirect are in `proxy.ts`. The full review is in `docs/SECURITY.md`.
 - **Focus timer:** `components/focus-timer.tsx` (`finish`, `save`, the pending queue), `lib/focus.ts` (`enqueue`, `flush`), and `logFocus` in `app/actions.ts`.
-- **Desktop:** `DESKTOP_ARCHITECTURE_SPEC.md` is authoritative. The shell is `src-tauri/` (`src/lib.rs`: the navigation lock `classify`, the offline page and `refresh`, tray and lifecycle, `app_info` and `bridge_path_allowed`; `offline/offline.html`; `capabilities/main.json`; `tauri.conf.json`). Graphify ignores it. There is no web-side desktop code yet (`src/lib/desktop/` starts in M6).
+- **Desktop:** `DESKTOP_ARCHITECTURE_SPEC.md` is authoritative. The shell is `src-tauri/` (`src/lib.rs`: the navigation lock `classify`, the offline page and `refresh`, tray and lifecycle, `app_info` and `bridge_path_allowed`; `offline/offline.html`; `capabilities/main.json`; `tauri.conf.json`). Graphify ignores it. Focus Sense lives in `src-tauri/src/focus_sense/`. Web-side desktop code: `src/lib/desktop/` (`index.ts` auth handoff, `focus-sense.ts` bridge) and `src/components/desktop/`.
+- **Testing the shell signed out:** `/login/*-preview` pages render the app shell (timer included) and pass the bridge gate. Launch with `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222 npm run desktop:dev` and drive the page over CDP; in Git Bash set `MSYS_NO_PATHCONV=1` or `/login/...` arguments get rewritten. Remove any test entry from `sonnet-focus-pending` afterwards, or it logs to the next signed-in account.
 - **Rate limits and AI metering:** `lib/limit.ts` (migrations 0014, 0015, 0017).
 
 ## Important Constraints
@@ -231,9 +243,9 @@ Second track: **a Windows/macOS desktop app** (Tauri 2 shell over the live site;
 
 ## Next Recommended Task
 
-**Wait for the user's word.** M3/M4 and the cleanup are pushed.
-- **Is the desktop foundation ready for Focus Sense? Yes, with two conditions that don't block starting:** it builds only on the desktop shell, and the user should (1) add the Supabase redirect and push so email links work from the installed app, and (2) run the installer once on a clean machine.
-- **Focus Sense first steps** (spec §12, and the user's own scope): native work stays in `src-tauri/`, each new command is path-gated in Rust like `auth_begin`, and the CSP stays enforced. Do not add Accessibility, screen capture, active-window tracking or Strict Mode before the user's go-ahead.
+**Wait for the user's word.** Focus Sense F1 is committed, not pushed.
+- **Ready for classification/scoring?** Yes on Windows: real per-session event data, a stable schema, opt-in, exclusions and bounded storage exist. Before scoring relies on durations, decide how to treat a missing stop marker (hard kill) and pauses (stop/start markers already bracket them).
+- **Next milestone** (user's scope): ON_TASK / DISTRACTING / UNCERTAIN classification over F1 events. Keep native work in `src-tauri/`, path-gate every new command, keep the CSP enforced. Do not add screenshots, OCR, Accessibility, blocking, the overlay or Strict Mode before the user's go-ahead.
 
 ## Tomorrow / New-Session Startup Prompt
 
